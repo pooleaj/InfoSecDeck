@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InfoSecDeck — Cybersecurity Career Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav>
+  <div class="nlogo" onclick="showPage('home')"><div class="ntxt">InfoSecDeck</div></div>
+
+  <div class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
+    <div class="hb-line"></div>
+    <div class="hb-line"></div>
+    <div class="hb-line"></div>
+  </div>
+
+  <div class="nlinks" id="nlinks">
+
+    <!-- Home -->
+    <div class="ncat" id="ncat-home">
+      <button class="ncbtn active" onclick="showPage('home');closeAllDrops()">Home</button>
+    </div>
+
+    <!-- Career -->
+    <div class="ncat" id="ncat-career">
+      <button class="ncbtn" onclick="toggleDrop('career')">Career <span class="ncaret"></span></button>
+      <div class="ndrop" id="ndrop-career">
+        <div class="ndi" onclick="showPage('ladder');closeAllDrops()">
+          <span class="ndi-icon">🪜</span>
+          <div class="ndi-text"><span class="ndi-label">Career Ladder</span><span class="ndi-desc">Six tiers from Help Desk to CISO</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('domains');closeAllDrops()">
+          <span class="ndi-icon">🗂️</span>
+          <div class="ndi-text"><span class="ndi-label">8 Domains</span><span class="ndi-desc">SOC, IAM, Cloud, GRC &amp; more</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('salary');closeAllDrops()">
+          <span class="ndi-icon">💰</span>
+          <div class="ndi-text"><span class="ndi-label">Salary Guide</span><span class="ndi-desc">Compensation data by role &amp; tier</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('interview');closeAllDrops()">
+          <span class="ndi-icon">🎯</span>
+          <div class="ndi-text"><span class="ndi-label">Interview Prep</span><span class="ndi-desc">Domain-specific Q&amp;A and guides</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('pivot');closeAllDrops()">
+          <span class="ndi-icon">🔀</span>
+          <div class="ndi-text"><span class="ndi-label">Career Pivot Advisor</span><span class="ndi-desc">AI-powered domain switching guide</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Learn -->
+    <div class="ncat" id="ncat-learn">
+      <button class="ncbtn" onclick="toggleDrop('learn')">Learn <span class="ncaret"></span></button>
+      <div class="ndrop" id="ndrop-learn">
+        <div class="ndi" onclick="showPage('certs');closeAllDrops()">
+          <span class="ndi-icon">📜</span>
+          <div class="ndi-text"><span class="ndi-label">Certifications</span><span class="ndi-desc">Roadmap grid by domain &amp; tier</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('training');closeAllDrops()">
+          <span class="ndi-icon">🎓</span>
+          <div class="ndi-text"><span class="ndi-label">Training</span><span class="ndi-desc">Certificates, degrees &amp; bootcamps</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('homelab');closeAllDrops()">
+          <span class="ndi-icon">🖥️</span>
+          <div class="ndi-text"><span class="ndi-label">Home Lab Guide</span><span class="ndi-desc">Build your own practice environment</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('glossary');closeAllDrops()">
+          <span class="ndi-icon">📖</span>
+          <div class="ndi-text"><span class="ndi-label">Glossary</span><span class="ndi-desc">Cybersecurity terms &amp; acronyms</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tools -->
+    <div class="ncat" id="ncat-tools">
+      <button class="ncbtn" onclick="toggleDrop('tools')">Tools <span class="ncaret"></span></button>
+      <div class="ndrop" id="ndrop-tools">
+        <div class="ndi" onclick="showPage('roaster');closeAllDrops()">
+          <span class="ndi-icon">🔥</span>
+          <div class="ndi-text"><span class="ndi-label">Resume Roaster</span><span class="ndi-desc">AI-powered resume analysis</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('games');closeAllDrops()">
+          <span class="ndi-icon">🎮</span>
+          <div class="ndi-text"><span class="ndi-label">Security Challenges</span><span class="ndi-desc">CTF, packet detective &amp; more</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intel -->
+    <div class="ncat" id="ncat-intel">
+      <button class="ncbtn" onclick="toggleDrop('intel')">Intel <span class="ncaret"></span></button>
+      <div class="ndrop" id="ndrop-intel">
+        <div class="ndi" onclick="showPage('threats');closeAllDrops()">
+          <span class="ndi-icon">📡</span>
+          <div class="ndi-text"><span class="ndi-label">Threat Landscape</span><span class="ndi-desc">Curated news &amp; advisories</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('jobs');closeAllDrops()">
+          <span class="ndi-icon">💼</span>
+          <div class="ndi-text"><span class="ndi-label">Job Board</span><span class="ndi-desc">Curated listings by domain</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Community -->
+    <div class="ncat" id="ncat-community">
+      <button class="ncbtn" onclick="toggleDrop('community')">Community <span class="ncaret"></span></button>
+      <div class="ndrop" id="ndrop-community">
+        <div class="ndi" onclick="showPage('blog');closeAllDrops()">
+          <span class="ndi-icon">✍️</span>
+          <div class="ndi-text"><span class="ndi-label">Blog</span><span class="ndi-desc">Career insights &amp; site updates</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('reviews');closeAllDrops()">
+          <span class="ndi-icon">💬</span>
+          <div class="ndi-text"><span class="ndi-label">Reviews</span><span class="ndi-desc">Community feedback &amp; ratings</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('about');closeAllDrops()">
+          <span class="ndi-icon">👤</span>
+          <div class="ndi-text"><span class="ndi-label">About</span><span class="ndi-desc">Who built this &amp; why</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- ── HERO ── -->
+  <section class="hp2-hero">
+    <div class="hp2-grid"></div>
+    <div class="hp2-orb hp2-orb1"></div>
+    <div class="hp2-orb hp2-orb2"></div>
+    <div class="hp2-orb hp2-orb3"></div>
+    <div class="hp2-scan"></div>
+
+    <div class="hp2-hero-body">
+      <div class="hp2-kicker a1">
+        <span class="hp2-kicker-dot"></span>
+        Cybersecurity Career Platform
+      </div>
+
+      <h1 class="hp2-h1 a2">
+        Your Roadmap Into<br>
+        <span class="hp2-h1-hl">Cybersecurity.</span>
+      </h1>
+
+      <p class="hp2-lead a3">
+        Break in. Level up. Switch domains.<br>
+        Every guide, salary table, cert path, and tool — in one place.
+      </p>
+
+      <div class="hp2-stats a4">
+        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--em)">4M+</span><span class="hp2-sk">Jobs Unfilled</span></div>
+        <div class="hp2-sdiv"></div>
+        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--lb)">$119K</span><span class="hp2-sk">Median Salary</span></div>
+        <div class="hp2-sdiv"></div>
+        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--bl)">+33%</span><span class="hp2-sk">Job Growth</span></div>
+        <div class="hp2-sdiv"></div>
+        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--am)">$9.8T</span><span class="hp2-sk">Cybercrime Cost</span></div>
+      </div>
+
+      <!-- TOOLKIT directly under stats — no buttons, no gap -->
+      <div class="hp2-tk-label a4">Explore the platform</div>
+
+      <!-- Category tabs -->
+      <div class="hp2-tabs a4">
+        <button class="hp2-tab active" onclick="hp2FilterTab('all',this)">All</button>
+        <button class="hp2-tab" onclick="hp2FilterTab('career',this)">Career</button>
+        <button class="hp2-tab" onclick="hp2FilterTab('learn',this)">Learn</button>
+        <button class="hp2-tab" onclick="hp2FilterTab('tools',this)">AI Tools</button>
+        <button class="hp2-tab" onclick="hp2FilterTab('intel',this)">Intel</button>
+        <button class="hp2-tab" onclick="hp2FilterTab('community',this)">Community</button>
+      </div>
+
+      <!-- Item grid -->
+      <div class="hp2-grid-items a5" id="hp2-items">
+
+        <div class="hp2-item" data-cat="career" onclick="showPage('ladder')">
+          <span class="hp2-item-icon" style="--ic:rgba(16,232,126,.12)">🪜</span>
+          <div class="hp2-item-name">Career Ladder</div>
+          <div class="hp2-item-desc">See every role from Help Desk to CISO — mapped across 6 tiers with real salary ranges and what it takes to level up.</div>
+          <span class="hp2-item-tag" style="color:var(--em)">Career</span>
+        </div>
+
+        <div class="hp2-item" data-cat="career" onclick="showPage('salary')">
+          <span class="hp2-item-icon" style="--ic:rgba(245,200,66,.12)">💰</span>
+          <div class="hp2-item-name">Salary Guide</div>
+          <div class="hp2-item-desc">93 cybersecurity job titles with min, median, and max pay. Filter by domain, tier, or track so you know exactly what to ask for.</div>
+          <span class="hp2-item-tag" style="color:var(--am)">Career</span>
+        </div>
+
+        <div class="hp2-item" data-cat="career" onclick="showPage('domains')">
+          <span class="hp2-item-icon" style="--ic:rgba(192,132,252,.12)">🗂️</span>
+          <div class="hp2-item-name">8 Security Domains</div>
+          <div class="hp2-item-desc">Not sure which specialty is right for you? Explore IAM, SOC, Cloud, AppSec, Offensive, GRC, DFIR, and Security Engineering in depth.</div>
+          <span class="hp2-item-tag" style="color:var(--pu)">Career</span>
+        </div>
+
+        <div class="hp2-item" data-cat="career" onclick="showPage('interview')">
+          <span class="hp2-item-icon" style="--ic:rgba(77,158,255,.12)">🎯</span>
+          <div class="hp2-item-name">Interview Prep</div>
+          <div class="hp2-item-desc">Walk into your next interview ready. 10 role-specific Q&amp;As for 28 job titles — from Junior SOC Analyst to CISO.</div>
+          <span class="hp2-item-tag" style="color:var(--bl)">Career</span>
+        </div>
+
+        <div class="hp2-item hp2-item-ai" data-cat="tools" onclick="showPage('pivot')">
+          <span class="hp2-item-icon" style="--ic:rgba(13,212,200,.12)">🔀</span>
+          <div class="hp2-item-name">Career Pivot Advisor <span class="hp2-ai-chip">AI</span></div>
+          <div class="hp2-item-desc">Already working in tech? Upload your resume and get an AI-powered gap analysis showing exactly what you need to switch into cybersecurity.</div>
+          <span class="hp2-item-tag" style="color:var(--lb)">AI Tool</span>
+        </div>
+
+        <div class="hp2-item hp2-item-ai" data-cat="tools" onclick="showPage('roaster')">
+          <span class="hp2-item-icon" style="--ic:rgba(255,140,66,.12)">🔥</span>
+          <div class="hp2-item-name">Resume Roaster <span class="hp2-ai-chip">AI</span></div>
+          <div class="hp2-item-desc">Get your resume brutally scored by AI. A letter grade, a full breakdown, and specific fixes — so you stop getting ghosted.</div>
+          <span class="hp2-item-tag" style="color:var(--or)">AI Tool</span>
+        </div>
+
+        <div class="hp2-item" data-cat="learn" onclick="showPage('certs')">
+          <span class="hp2-item-icon" style="--ic:rgba(255,140,66,.1)">📜</span>
+          <div class="hp2-item-name">Certifications</div>
+          <div class="hp2-item-desc">A 9-domain × 5-tier interactive roadmap of 100+ certs. See which badges actually open doors and in what order to get them.</div>
+          <span class="hp2-item-tag" style="color:var(--or)">Learn</span>
+        </div>
+
+        <div class="hp2-item" data-cat="learn" onclick="showPage('training')">
+          <span class="hp2-item-icon" style="--ic:rgba(13,212,200,.1)">🎓</span>
+          <div class="hp2-item-name">Training Resources</div>
+          <div class="hp2-item-desc">Degrees vs. bootcamps vs. self-study — broken down honestly. Find the path that fits your timeline and budget.</div>
+          <span class="hp2-item-tag" style="color:var(--lb)">Learn</span>
+        </div>
+
+        <div class="hp2-item" data-cat="learn" onclick="showPage('homelab')">
+          <span class="hp2-item-icon" style="--ic:rgba(77,158,255,.1)">🖥️</span>
+          <div class="hp2-item-name">Home Lab Guide</div>
+          <div class="hp2-item-desc">Build a real security lab from scratch. Hands-on practice is what separates candidates who get hired from those who don't.</div>
+          <span class="hp2-item-tag" style="color:var(--bl)">Learn</span>
+        </div>
+
+        <div class="hp2-item" data-cat="learn" onclick="showPage('glossary')">
+          <span class="hp2-item-icon" style="--ic:rgba(129,140,248,.1)">📖</span>
+          <div class="hp2-item-name">Glossary</div>
+          <div class="hp2-item-desc">113 essential cybersecurity terms explained clearly — no jargon, no fluff. Bookmark it before your next interview.</div>
+          <span class="hp2-item-tag" style="color:#818cf8">Learn</span>
+        </div>
+
+        <div class="hp2-item" data-cat="intel" onclick="showPage('jobs')">
+          <span class="hp2-item-icon" style="--ic:rgba(77,158,255,.1)">💼</span>
+          <div class="hp2-item-name">Job Search Assistant</div>
+          <div class="hp2-item-desc">Answer 5 quick questions and get custom search links across LinkedIn, Indeed, Dice, and more — filtered for your exact target role.</div>
+          <span class="hp2-item-tag" style="color:var(--bl)">Intel</span>
+        </div>
+
+        <div class="hp2-item" data-cat="intel" onclick="showPage('threats')">
+          <span class="hp2-item-icon" style="--ic:rgba(240,93,120,.1)">📡</span>
+          <div class="hp2-item-name">Threat Intel</div>
+          <div class="hp2-item-desc">Stay current with curated feeds from the frontlines. Know what attackers are actually doing so you can speak to it in interviews.</div>
+          <span class="hp2-item-tag" style="color:var(--rd)">Intel</span>
+        </div>
+
+        <div class="hp2-item" data-cat="tools" onclick="showPage('games')">
+          <span class="hp2-item-icon" style="--ic:rgba(16,232,126,.1)">🎮</span>
+          <div class="hp2-item-name">Challenges</div>
+          <div class="hp2-item-desc">CTF puzzles, digital forensics scenarios, and phishing simulations. Practice the skills you'll actually use on the job.</div>
+          <span class="hp2-item-tag" style="color:var(--em)">Tools</span>
+        </div>
+
+        <div class="hp2-item" data-cat="community" onclick="showPage('blog')">
+          <span class="hp2-item-icon" style="--ic:rgba(245,200,66,.1)">✍️</span>
+          <div class="hp2-item-name">Blog</div>
+          <div class="hp2-item-desc">Real talk from a practitioner — career moves, domain deep-dives, and honest advice you won't find on generic job boards.</div>
+          <span class="hp2-item-tag" style="color:var(--am)">Community</span>
+        </div>
+
+        <div class="hp2-item" data-cat="community" onclick="showPage('reviews')">
+          <span class="hp2-item-icon" style="--ic:rgba(192,132,252,.1)">💬</span>
+          <div class="hp2-item-name">Reviews</div>
+          <div class="hp2-item-desc">Tell us what's working, what's missing, and what to build next. This platform is shaped by the people using it.</div>
+          <span class="hp2-item-tag" style="color:var(--pu)">Community</span>
+        </div>
+
+        <div class="hp2-item" data-cat="community" onclick="showPage('about')">
+          <span class="hp2-item-icon" style="--ic:rgba(13,212,200,.08)">👤</span>
+          <div class="hp2-item-name">About</div>
+          <div class="hp2-item-desc">InfoSecDeck was built by a practitioner, for people trying to break in or level up — not to sell you a $4,000 bootcamp.</div>
+          <span class="hp2-item-tag" style="color:var(--lb)">Community</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Scroll cue -->
+    <div class="hp2-scroll-cue a5">
+      <span>Scroll to explore</span>
+      <div class="hp2-scroll-arrow"></div>
+    </div>
+  </section>
+
+  <div class="footer">InfoSecDeck · 2025–2026 · Sources: BLS, Glassdoor, ISC², ISACA</div>
+</div>
+
+<div class="page" id="page-ladder">
+<div class="lw">
+  <div class="ey a1">Career Progression</div>
+  <div class="st a2">The Cybersecurity Career Ladder</div>
+  <p class="ss a3">Six tiers from Help Desk to C-Suite. Hover any job title for a description. At Tier 4, the path splits into Individual Contributor and Management tracks.</p>
+  <div class="pkey a3">
+    <div class="pki"><div class="pkd" style="background:var(--gn)"></div>Entry Level</div>
+    <div class="pki"><div class="pkd" style="background:var(--lb)"></div>Early Career</div>
+    <div class="pki"><div class="pkd" style="background:var(--bl)"></div>Mid-Level</div>
+    <div class="pki"><div class="pkd" style="background:var(--db)"></div>Senior / IC</div>
+    <div class="pki"><div class="pkd" style="background:var(--pu)"></div>Principal / Staff IC</div>
+    <div class="pki"><div class="pkd" style="background:var(--or)"></div>Management</div>
+    <div class="pki"><div class="pkd" style="background:var(--rd)"></div>Executive</div>
+  </div>
+
+  <!-- TIER 1 -->
+  <div class="a1"><div class="tc bg1">
+    <div class="tbar" style="background:var(--gn);"></div>
+    <div class="thead">
+      <div class="thl">
+        <span class="tbadge bd1">Tier 1</span>
+        <span class="tname" style="color:var(--gn);">Entry Level — Foundation</span>
+        <span class="texp">0–2 yrs exp</span>
+      </div>
+      <div class="tsal"><span class="tsall">Avg. U.S. Base</span><span style="color:var(--gn);">$48K – $72K</span></div>
+    </div>
+    <div class="tfocus">General IT knowledge, customer service, and runbook execution. No deep security specialization yet — this is where technical foundations are built.</div>
+    <div class="tjobs">
+      <div class="jc">Help Desk Technician<div class="tip"><div class="tipt">Help Desk Technician</div><div class="tipb">First point of contact for IT issues. Handles password resets, software installs, hardware problems. Most common pipeline into SOC Analyst roles.</div></div></div>
+      <div class="jc">IT Support Specialist<div class="tip"><div class="tipt">IT Support Specialist</div><div class="tipb">Supports employees with hardware and software issues. May handle asset inventory, OS imaging, and basic network troubleshooting.</div></div></div>
+      <div class="jc">Desktop Support Analyst<div class="tip"><div class="tipt">Desktop Support Analyst</div><div class="tipb">On-site or remote support for end-user computing. Configures workstations, manages OS deployments, troubleshoots endpoint issues.</div></div></div>
+      <div class="jc">NOC Technician<div class="tip"><div class="tipt">NOC Technician</div><div class="tipb">Monitors network infrastructure 24/7. Responds to uptime alerts, escalates outages, documents incidents. Strong pipeline to SOC Analyst roles.</div></div></div>
+      <div class="jc">Junior IT Auditor<div class="tip"><div class="tipt">Junior IT Auditor</div><div class="tipb">Assists in reviewing IT controls for compliance. Collects evidence, documents processes. Common entry point into GRC careers for non-technical professionals.</div></div></div>
+      <button class="more-jobs-btn" onclick="showSalaryTierFilter('T1', '')">More roles (T1) → Salary Guide</button>
+    </div>
+  </div></div>
+  <div class="vc a1"><div class="vl" style="background:linear-gradient(180deg,var(--gn),var(--lb));"></div><div class="va" style="border-top:8px solid var(--lb);"></div></div>
+
+  <!-- TIER 2 -->
+  <div class="a2"><div class="tc bg2">
+    <div class="tbar" style="background:var(--lb);"></div>
+    <div class="thead">
+      <div class="thl">
+        <span class="tbadge bd2">Tier 2</span>
+        <span class="tname" style="color:var(--lb);">Early Career — On-Ramp</span>
+        <span class="texp">1–3 yrs exp</span>
+      </div>
+      <div class="tsal"><span class="tsall">Avg. U.S. Base</span><span style="color:var(--lb);">$72K – $100K</span></div>
+    </div>
+    <div class="tfocus">First security-specific roles. The pivot from general IT into cybersecurity. Building foundational skills across multiple domains.</div>
+    <div class="tjobs">
+      <div class="jc">SOC Analyst I<div class="tip"><div class="tipt">SOC Analyst I</div><div class="tipb">Monitors SIEM alerts, triages incidents, escalates confirmed threats. The most common entry point into hands-on security.</div></div></div>
+      <div class="jc">IAM Administrator<div class="tip"><div class="tipt">IAM Administrator</div><div class="tipb">Manages user accounts, group memberships, and access provisioning in Active Directory or Entra ID. High-demand entry IAM role.</div></div></div>
+      <div class="jc">Cybersecurity Analyst I<div class="tip"><div class="tipt">Cybersecurity Analyst I</div><div class="tipb">Broad early-career role supporting security assessments, log reviews, vulnerability scanning, and basic incident response.</div></div></div>
+      <div class="jc">GRC Analyst I<div class="tip"><div class="tipt">GRC Analyst I</div><div class="tipb">Supports compliance assessments, collects audit evidence, assists with policy documentation and risk register maintenance.</div></div></div>
+      <div class="jc">Junior Security Engineer<div class="tip"><div class="tipt">Junior Security Engineer</div><div class="tipb">Assists with firewall rule management, vulnerability scanning, and security tooling maintenance.</div></div></div>
+      <button class="more-jobs-btn" onclick="showSalaryTierFilter('T2', '')">More roles (T2) → Salary Guide</button>
+    </div>
+  </div></div>
+  <div class="vc a2"><div class="vl" style="background:linear-gradient(180deg,var(--lb),var(--bl));"></div><div class="va" style="border-top:8px solid var(--bl);"></div></div>
+
+  <!-- TIER 3 -->
+  <div class="a3"><div class="tc bg3">
+    <div class="tbar" style="background:var(--bl);"></div>
+    <div class="thead">
+      <div class="thl">
+        <span class="tbadge bd3">Tier 3</span>
+        <span class="tname" style="color:#7cb3ff;">Mid-Level — Domain Specialist</span>
+        <span class="texp">3–6 yrs exp</span>
+      </div>
+      <div class="tsal"><span class="tsall">Avg. U.S. Base</span><span style="color:#7cb3ff;">$95K – $170K</span></div>
+    </div>
+    <div class="tfocus">Deep specialization into a single cybersecurity domain. The engine of every security organization. Click a domain for details or browse its jobs.</div>
+    <div class="dcg">
+      <div class="dch3" style="--accent:rgba(34,211,238,.3);--glow:rgba(34,211,238,.12);">
+        <div class="dch3-top">
+          <span class="dch3-icon">🔐</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#22d3ee;">IAM</div>
+            <div class="dch3-sal">$100K–$140K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">IAM Eng · PAM Eng · IGA Analyst · SSO Engineer</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('iam')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('IAM')">💼 Jobs</button>
+        </div>
+      </div>
+
+      <div class="dch3" style="--accent:rgba(249,115,22,.3);--glow:rgba(249,115,22,.1);">
+        <div class="dch3-top">
+          <span class="dch3-icon">🛡️</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#f97316;">SOC / IR</div>
+            <div class="dch3-sal">$100K–$145K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">SOC Analyst II · Incident Responder · Detection Eng · Threat Hunter</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('soc')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('SOC / IR')">💼 Jobs</button>
+        </div>
+      </div>
+
+      <div class="dch3" style="--accent:rgba(168,85,247,.3);--glow:rgba(168,85,247,.1);">
+        <div class="dch3-top">
+          <span class="dch3-icon">⚙️</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#c084fc;">Security Eng.</div>
+            <div class="dch3-sal">$120K–$165K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">Security Eng · Network Sec Eng · Vulnerability Mgmt · PKI Eng</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('eng')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('Security Engineering')">💼 Jobs</button>
+        </div>
+      </div>
+
+      <div class="dch3" style="--accent:rgba(16,232,126,.3);--glow:rgba(16,232,126,.1);">
+        <div class="dch3-top">
+          <span class="dch3-icon">☁️</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#10e87e;">Cloud Security</div>
+            <div class="dch3-sal">$115K–$165K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">Cloud Sec Eng · Cloud IAM Eng · CSPM Analyst · DevSecOps</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('cloud')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('Cloud Security')">💼 Jobs</button>
+        </div>
+      </div>
+
+      <div class="dch3" style="--accent:rgba(244,63,94,.3);--glow:rgba(244,63,94,.1);">
+        <div class="dch3-top">
+          <span class="dch3-icon">🔴</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#f05d78;">Offensive Sec.</div>
+            <div class="dch3-sal">$110K–$160K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">Penetration Tester · Red Team · Vuln Researcher · Bug Bounty</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('offensive')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('Offensive')">💼 Jobs</button>
+        </div>
+      </div>
+
+      <div class="dch3" style="--accent:rgba(245,200,66,.3);--glow:rgba(245,200,66,.1);">
+        <div class="dch3-top">
+          <span class="dch3-icon">📋</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#f5c842;">GRC</div>
+            <div class="dch3-sal">$95K–$145K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">GRC Analyst II · Risk Analyst · Compliance Mgr · Privacy Eng</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('grc')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('GRC')">💼 Jobs</button>
+        </div>
+      </div>
+
+      <div class="dch3" style="--accent:rgba(129,140,248,.3);--glow:rgba(129,140,248,.1);">
+        <div class="dch3-top">
+          <span class="dch3-icon">🔬</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#818cf8;">DFIR</div>
+            <div class="dch3-sal">$105K–$155K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">DFIR Analyst · Malware Analyst · Threat Intel · Forensic Examiner</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('forensics')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('DFIR')">💼 Jobs</button>
+        </div>
+      </div>
+
+      <div class="dch3" style="--accent:rgba(251,146,60,.3);--glow:rgba(251,146,60,.1);">
+        <div class="dch3-top">
+          <span class="dch3-icon">🔧</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#fb923c;">AppSec</div>
+            <div class="dch3-sal">$110K–$158K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">AppSec Eng · DevSecOps · Secure Code Reviewer · Threat Modeler</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('appsec')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('AppSec')">💼 Jobs</button>
+        </div>
+      </div>
+    </div>
+    <button class="more-jobs-btn" onclick="showSalaryTierFilter('T3', '')">More T3 roles → Salary Guide</button>
+  <div class="vc a3"><div class="vl" style="background:linear-gradient(180deg,var(--bl),var(--db));"></div><div class="va" style="border-top:8px solid var(--db);"></div></div>
+
+  <!-- TIER 4 SPLIT -->
+  <div class="sg a4">
+    <div class="tc bg4i">
+      <div class="tbar" style="background:var(--db);"></div>
+      <div class="thead" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div class="thl"><span class="tbadge bd4i">Tier 4 — IC</span><span class="tname" style="color:var(--db);">Senior / Associate Principal</span><span class="texp">6–10 yrs exp</span></div>
+        <div class="tsal" style="text-align:left;"><span class="tsall">Avg. U.S. Base</span><span style="color:var(--db);">$145K – $195K</span></div>
+      </div>
+      <div class="tfocus">Independent ownership, technical leadership within a domain, and mentoring junior staff.</div>
+      <div class="tjobs">
+        <div class="jc">Senior IAM Engineer<div class="tip"><div class="tipt">Senior IAM Engineer</div><div class="tipb">Owns identity infrastructure end-to-end. Leads PAM rollouts, designs Zero Trust access models, mentors junior engineers.</div></div></div>
+        <div class="jc">Senior Cloud Security Engineer<div class="tip"><div class="tipt">Senior Cloud Security Engineer</div><div class="tipb">Leads cloud security posture management, designs multi-account security landing zones. One of the highest-demand senior roles in 2025.</div></div></div>
+        <div class="jc">Senior Detection Engineer<div class="tip"><div class="tipt">Senior Detection Engineer</div><div class="tipb">Builds detection logic, writes Sigma rules and YARA signatures, leads threat hunting. $146K–$219K range in 2025.</div></div></div>
+        <div class="jc">Security Architect<div class="tip"><div class="tipt">Security Architect</div><div class="tipb">Owns enterprise security architecture. Reviews system designs, defines standards, leads security transformation initiatives.</div></div></div>
+        <div class="jc">Senior Penetration Tester<div class="tip"><div class="tipt">Senior Penetration Tester</div><div class="tipb">Leads complex engagements, manages junior testers, authors executive-level reports.</div></div></div>
+        <button class="more-jobs-btn" onclick="showSalaryTierFilter('T4', 'IC')">More IC roles (T4) → Salary Guide</button>
+      </div>
+    </div>
+    <div class="tc bg4m">
+      <div class="tbar" style="background:var(--or);"></div>
+      <div class="thead" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div class="thl"><span class="tbadge bd4m">Tier 4 — Mgmt</span><span class="tname" style="color:var(--or);">Middle Management</span><span class="texp">6–10 yrs exp</span></div>
+        <div class="tsal" style="text-align:left;"><span class="tsall">Avg. U.S. Base</span><span style="color:var(--or);">$145K – $190K</span></div>
+      </div>
+      <div class="tfocus">First people-management role. Team oversight, hiring, performance reviews, project ownership.</div>
+      <div class="tjobs">
+        <div class="jc">SOC Manager<div class="tip"><div class="tipt">SOC Manager</div><div class="tipb">Manages a team of SOC analysts. Owns team metrics (MTTD, MTTR), hiring, and shift scheduling.</div></div></div>
+        <div class="jc">Security Engineering Manager<div class="tip"><div class="tipt">Security Engineering Manager</div><div class="tipb">Manages security engineering team. Owns technical security roadmap, hiring, and team performance.</div></div></div>
+        <div class="jc">Compliance Manager<div class="tip"><div class="tipt">Compliance Manager</div><div class="tipb">Manages compliance program across SOC 2, ISO 27001, PCI DSS. Owns audit readiness and third-party risk.</div></div></div>
+        <div class="jc">AppSec Manager<div class="tip"><div class="tipt">AppSec Manager</div><div class="tipb">Leads application security team. Manages security champions program, tool procurement, and AppSec roadmap.</div></div></div>
+        <div class="jc">Cloud Security Manager<div class="tip"><div class="tipt">Cloud Security Manager</div><div class="tipb">Manages the cloud security team. Owns CSPM operations, architecture reviews, and compliance monitoring.</div></div></div>
+        <button class="more-jobs-btn" onclick="showSalaryTierFilter('T4', 'Management')">More management roles (T4) → Salary Guide</button>
+      </div>
+    </div>
+  </div>
+  <div class="vc a4"><div class="vl" style="background:linear-gradient(180deg,var(--db),var(--pu));"></div><div class="va" style="border-top:8px solid var(--pu);"></div></div>
+
+  <!-- TIER 5 SPLIT -->
+  <div class="sg a4">
+    <div class="tc bg5i">
+      <div class="tbar" style="background:var(--pu);"></div>
+      <div class="thead" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div class="thl"><span class="tbadge bd5i">Tier 5 — IC</span><span class="tname" style="color:var(--pu);">Principal / Staff</span><span class="texp">10–15 yrs exp</span></div>
+        <div class="tsal" style="text-align:left;"><span class="tsall">Avg. U.S. Base</span><span style="color:var(--pu);">$170K – $280K</span></div>
+      </div>
+      <div class="tfocus">Sets technical direction for the entire security organization. Works directly with CISO and C-suite on multi-year strategy.</div>
+      <div class="tjobs">
+        <div class="jc">Principal Security Engineer<div class="tip"><div class="tipt">Principal Security Engineer</div><div class="tipb">Sets technical direction for multiple security domains simultaneously. Works directly with VPs and CISO on multi-year strategy.</div></div></div>
+        <div class="jc">Principal IAM Architect<div class="tip"><div class="tipt">Principal IAM Architect</div><div class="tipb">Designs identity architecture for the entire organization. Leads Zero Trust roadmap execution.</div></div></div>
+        <div class="jc">Principal Cloud Security Architect<div class="tip"><div class="tipt">Principal Cloud Security Architect</div><div class="tipb">Sets cloud security strategy across all providers. $230K–$384K at large tech firms in 2025.</div></div></div>
+        <div class="jc">Staff AppSec Engineer<div class="tip"><div class="tipt">Staff AppSec Engineer</div><div class="tipb">Drives AppSec direction across the engineering organization. Owns secure architecture patterns.</div></div></div>
+        <div class="jc">Distinguished Security Engineer<div class="tip"><div class="tipt">Distinguished Security Engineer</div><div class="tipb">Rare, prestigious IC title. Company-wide technical leadership; external-facing thought leader. Equivalent influence to VP.</div></div></div>
+        <button class="more-jobs-btn" onclick="showSalaryTierFilter('T5', 'IC')">More IC roles (T5) → Salary Guide</button>
+      </div>
+    </div>
+    <div class="tc bg5m">
+      <div class="tbar" style="background:var(--or);"></div>
+      <div class="thead" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div class="thl"><span class="tbadge bd5m">Tier 5 — Mgmt</span><span class="tname" style="color:var(--or);">Director Level</span><span class="texp">10–15 yrs exp</span></div>
+        <div class="tsal" style="text-align:left;"><span class="tsall">Avg. U.S. Base</span><span style="color:var(--or);">$180K – $240K</span></div>
+      </div>
+      <div class="tfocus">Department-level leadership, cross-team strategy, budget ownership, and board reporting support.</div>
+      <div class="tjobs">
+        <div class="jc">Director of Security Engineering<div class="tip"><div class="tipt">Director of Security Engineering</div><div class="tipb">Leads the security engineering department. Owns all technical security tooling, architecture reviews, and engineering team budget.</div></div></div>
+        <div class="jc">Director of Cloud Security<div class="tip"><div class="tipt">Director of Cloud Security</div><div class="tipb">Owns the cloud security program across all providers. One of the most sought-after Director roles in 2025.</div></div></div>
+        <div class="jc">Director of GRC<div class="tip"><div class="tipt">Director of GRC</div><div class="tipb">Leads governance, risk, and compliance function. Oversees all compliance frameworks and enterprise risk reporting.</div></div></div>
+        <div class="jc">Director of SOC<div class="tip"><div class="tipt">Director of SOC</div><div class="tipb">Leads the Security Operations Center organization. Owns team structure, MSSP relationships, and SOC metrics.</div></div></div>
+        <div class="jc">Director of AppSec<div class="tip"><div class="tipt">Director of AppSec</div><div class="tipb">Leads the application security organization. Owns SDL program, AppSec tooling strategy, and developer security culture.</div></div></div>
+        <button class="more-jobs-btn" onclick="showSalaryTierFilter('T5', 'Management')">More management roles (T5) → Salary Guide</button>
+      </div>
+    </div>
+  </div>
+  <div class="vc"><div class="vl" style="background:linear-gradient(180deg,var(--or),var(--rd));"></div><div class="va" style="border-top:8px solid var(--rd);"></div></div>
+
+  <!-- TIER 6 -->
+  <div class="a4"><div class="tc bg6">
+    <div class="tbar" style="background:var(--rd);"></div>
+    <div class="thead">
+      <div class="thl"><span class="tbadge bd6">Tier 6</span><span class="tname" style="color:#fb7185;">C-Suite &amp; VP</span><span class="texp">15+ yrs exp</span></div>
+      <div class="tsal"><span class="tsall">Base (total comp varies widely)</span><span style="color:#fb7185;">$220K – $400K+</span></div>
+    </div>
+    <div class="tfocus">Organizational security vision, board accountability, P&amp;L alignment. Avg. CISO base ~$275K. Fortune 500 avg total comp $700K+. Revenue &gt;$20B: avg $1.1M+ total compensation.</div>
+    <div class="tjobs">
+      <div class="jc">CISO<div class="tip"><div class="tipt">CISO</div><div class="tipb">The top security executive. Reports to CEO, CTO, or CRO. Responsible for all security strategy, budget, and enterprise risk. Avg base $275K; Fortune 500 avg total comp $700K+.</div></div></div>
+      <div class="jc">VP of Security<div class="tip"><div class="tipt">VP of Security</div><div class="tipb">Leads security divisions at large enterprises. Functionally equivalent to CISO at mid-market companies.</div></div></div>
+      <div class="jc">Chief Security Officer (CSO)<div class="tip"><div class="tipt">Chief Security Officer (CSO)</div><div class="tipb">Broader than CISO — may encompass physical security, executive protection, and cyber. Common in defense, financial services, and critical infrastructure.</div></div></div>
+      <div class="jc">Deputy CISO<div class="tip"><div class="tipt">Deputy CISO</div><div class="tipb">Second-in-command. Owns day-to-day security operations while CISO manages board and executive relationships.</div></div></div>
+      <div class="jc">Fractional CISO<div class="tip"><div class="tipt">Fractional CISO</div><div class="tipb">An experienced CISO serving multiple organizations part-time. Growing market driven by SEC cybersecurity disclosure rules.</div></div></div>
+      <button class="more-jobs-btn" onclick="showSalaryTierFilter('T6', '')">More roles (T6) → Salary Guide</button>
+    </div>
+  </div></div>
+</div>
+</div>
+</div>
+<div class="footer">InfoSecDeck · Salary data: BLS (2024), Glassdoor 2025, Motion Recruitment Tech Salary Guide, Levels.fyi</div>
+</div>
+
+<div class="page" id="page-domains">
+<div class="dw">
+  <div class="ey a1">Specializations</div><div class="st a2">The 8 Core Domains</div>
+  <p class="ss a3">Every major cybersecurity specialization — click to explore skills, tools, certifications, and how to break in.</p>
+  <div class="dgrid a3">
+    <div class="dcard" onclick="showDomain('iam')" style="border-color:rgba(34,211,238,.18);"><div class="tbar" style="background:linear-gradient(90deg,#3b82f6,#22d3ee)"></div><div class="dcb"><div class="dci">🔐</div><div class="dcn" style="color:#22d3ee;">Identity &amp; Access Management</div><div class="dct">Who has access to what — and proving it</div><div class="dcm"><span class="dcs">$100K–$140K mid</span><span class="dca">→</span></div></div></div>
+    <div class="dcard" onclick="showDomain('soc')" style="border-color:rgba(249,115,22,.18);"><div class="tbar" style="background:linear-gradient(90deg,#f97316,#f43f5e)"></div><div class="dcb"><div class="dci">🛡️</div><div class="dcn" style="color:#f97316;">Security Operations (SOC)</div><div class="dct">Detect, respond, and contain — 24/7</div><div class="dcm"><span class="dcs">$100K–$145K mid</span><span class="dca">→</span></div></div></div>
+    <div class="dcard" onclick="showDomain('eng')" style="border-color:rgba(168,85,247,.18);"><div class="tbar" style="background:linear-gradient(90deg,#9333ea,#3b82f6)"></div><div class="dcb"><div class="dci">⚙️</div><div class="dcn" style="color:#c084fc;">Security Engineering &amp; Architecture</div><div class="dct">Build the defenses. Design the blueprint.</div><div class="dcm"><span class="dcs">$120K–$165K mid</span><span class="dca">→</span></div></div></div>
+    <div class="dcard" onclick="showDomain('cloud')" style="border-color:rgba(34,211,238,.18);"><div class="tbar" style="background:linear-gradient(90deg,#22d3ee,#9333ea)"></div><div class="dcb"><div class="dci">☁️</div><div class="dcn" style="color:#22d3ee;">Cloud Security</div><div class="dct">Securing infrastructure you don't physically own</div><div class="dcm"><span class="dcs">$125K–$170K · Fastest growing</span><span class="dca">→</span></div></div></div>
+    <div class="dcard" onclick="showDomain('appsec')" style="border-color:rgba(249,115,22,.18);"><div class="tbar" style="background:linear-gradient(90deg,#f97316,#9333ea)"></div><div class="dcb"><div class="dci">🔧</div><div class="dcn" style="color:#fb923c;">AppSec &amp; DevSecOps</div><div class="dct">Secure the code. Shift left.</div><div class="dcm"><span class="dcs">$120K–$160K mid</span><span class="dca">→</span></div></div></div>
+    <div class="dcard" onclick="showDomain('red')" style="border-color:rgba(244,63,94,.18);"><div class="tbar" style="background:linear-gradient(90deg,#f43f5e,#f97316)"></div><div class="dcb"><div class="dci">🔴</div><div class="dcn" style="color:#f87171;">Offensive Security (Red Team)</div><div class="dct">Think like the attacker. Break things legally.</div><div class="dcm"><span class="dcs">$115K–$160K mid</span><span class="dca">→</span></div></div></div>
+    <div class="dcard" onclick="showDomain('grc')" style="border-color:rgba(0,224,122,.18);"><div class="tbar" style="background:linear-gradient(90deg,#00e07a,#3b82f6)"></div><div class="dcb"><div class="dci">📋</div><div class="dcn" style="color:#00e07a;">GRC &amp; Privacy</div><div class="dct">The bridge between security and the business</div><div class="dcm"><span class="dcs">$95K–$135K · Best non-tech entry</span><span class="dca">→</span></div></div></div>
+    <div class="dcard" onclick="showDomain('forensics')" style="border-color:rgba(168,85,247,.18);"><div class="tbar" style="background:linear-gradient(90deg,#a855f7,#f43f5e)"></div><div class="dcb"><div class="dci">🔬</div><div class="dcn" style="color:#a78bfa;">Digital Forensics &amp; Threat Intel</div><div class="dct">Investigate. Attribute. Anticipate.</div><div class="dcm"><span class="dcs">$105K–$155K mid</span><span class="dca">→</span></div></div></div>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · 2025–2026 U.S. Market Data</div>
+</div>
+
+<!-- DOMAIN DETAIL -->
+<div class="page" id="page-domain">
+  <div class="ddw" id="domain-content"></div>
+  <div class="footer">InfoSecDeck · ★ Course and book links may be affiliate links.</div>
+</div>
+
+<!-- ═══════════════════════════ CERTIFICATIONS ═══════════════════════════ -->
+<div class="page" id="page-certs">
+
+<div class="cw">
+  <div class="cert-header a1">
+    <div>
+      <div class="ey" style="justify-content:flex-start;">Certifications &amp; Training</div>
+      <div class="st" style="text-align:left;margin-bottom:6px;">Cert Roadmap by Domain &amp; Career Stage</div>
+      <p style="font-size:.8rem;color:var(--mt);max-width:640px;line-height:1.6;">Hover any badge for details. Click to expand full info. Columns = domains, rows = career stage. <span style="color:var(--lb);">⬡ Vendor-neutral</span> · <span style="color:var(--or);">⬢ Vendor-specific</span></p>
+    </div>
+    <div class="cert-legend">
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(0,224,122,.25);border-color:rgba(0,224,122,.5);"></span>Entry (T1–2)</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(34,211,238,.2);border-color:rgba(34,211,238,.4);"></span>Mid (T2–3)</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.4);"></span>Senior (T3–4)</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(107,159,255,.2);border-color:rgba(107,159,255,.4);"></span>Principal (T4–5)</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(168,85,247,.2);border-color:rgba(168,85,247,.4);"></span>Exec (T5–6)</div>
+      <div class="cl-item" style="margin-top:6px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lb);margin-right:5px;"></span>Vendor-neutral</div>
+      <div class="cl-item"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--or);margin-right:5px;"></span>Vendor-specific</div>
+    </div>
+  </div>
+
+  <div class="cw-scroll-outer">
+  <div class="cw-inner a2">
+    <!-- Column headers -->
+    <div class="cdom-header">
+      <div class="cdom-header-spacer"></div>
+      <div class="cdom-header-cols">
+        <div class="cdom-hcell"><div class="cdom-hicon">🛡️</div><div class="cdom-hname">General</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔐</div><div class="cdom-hname">IAM</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">👁️</div><div class="cdom-hname">SOC / IR</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">⚙️</div><div class="cdom-hname">Sec Eng.</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">☁️</div><div class="cdom-hname">Cloud</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔧</div><div class="cdom-hname">AppSec</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔴</div><div class="cdom-hname">Offensive</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">📋</div><div class="cdom-hname">GRC</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔬</div><div class="cdom-hname">DFIR</div></div>
+      </div>
+    </div>
+
+    <!-- ENTRY ROW -->
+    <div class="ctier-row">
+      <div class="ctier-label">
+        <div class="ctier-name" style="color:var(--gn);">Entry</div>
+        <div class="ctier-exp">T1–2</div>
+        <div class="ctier-sal">0–3 yrs</div>
+      </div>
+      <div class="cdomains">
+        <div class="cdomain-col">
+          <span class="cb tier-entry vn" data-full="CompTIA Security+" data-desc="The industry baseline cert. Vendor-neutral, DoD 8140 approved. Recognized across every domain. Best first cert for most people." onclick="openCert('sec-plus')">Sec+</span>
+          <span class="cb tier-entry vn" data-full="ISC² Certified in Cybersecurity (CC)" data-desc="Free entry cert from ISC². Covers security principles, network security, and incident response. No experience required." onclick="openCert('cc')">CC</span>
+          <span class="cb tier-entry vn" data-full="GIAC Security Essentials (GSEC)" data-desc="Vendor-neutral SANS baseline cert. Broader and more technical than Sec+. Covers real-world security skills." onclick="openCert('gsec')">GSEC</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vs" data-full="Microsoft SC-900: Security, Compliance & Identity Fundamentals" data-desc="Microsoft's entry-level security/identity cert. Ideal starting point for Azure/M365 environments." onclick="openCert('sc900')">SC-900</span>
+          <span class="cb tier-entry vs" data-full="Okta Certified Professional" data-desc="Vendor cert for Okta platform administrators. Highly relevant for IAM roles at Okta-heavy orgs." onclick="openCert('okta-pro')">Okta Pro</span>
+          <span class="cb tier-entry vn" data-full="CIAM (Certified Identity & Access Manager)" data-desc="Identity Management Institute cert covering IAM principles, governance, and architecture." onclick="openCert('ciam')">CIAM</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vn" data-full="Blue Team Labs Level 1 (BTL1)" data-desc="Hands-on defensive security cert from Security Blue Team. Covers SIEM, phishing analysis, threat intel, and DFIR. Highly practical." onclick="openCert('btl1')">BTL1</span>
+          <span class="cb tier-entry vn" data-full="CompTIA Cybersecurity Analyst (Introductory)" data-desc="Pre-CySA entry coverage from CompTIA ecosystem." onclick="openCert('ccd')">CCD</span>
+          <span class="cb tier-entry vs" data-full="Microsoft SC-200: Security Operations Analyst" data-desc="Microsoft's SOC analyst cert. Covers Defender, Sentinel, and M365 security stack." onclick="openCert('sc200')">SC-200</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vn" data-full="CompTIA Network+" data-desc="Networking fundamentals required for security engineering. Covers TCP/IP, DNS, routing, and network troubleshooting." onclick="openCert('net-plus')">Net+</span>
+          <span class="cb tier-entry vn" data-full="CompTIA Linux+" data-desc="Linux administration fundamentals. Required knowledge for most security engineering roles." onclick="openCert('linux-plus')">Linux+</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vs" data-full="AWS Cloud Practitioner (CLF-C02)" data-desc="AWS foundational cert. Required knowledge before AWS security specialty. Cloud concepts, services, pricing." onclick="openCert('aws-ccp')">AWS CCP</span>
+          <span class="cb tier-entry vs" data-full="Azure Fundamentals (AZ-900)" data-desc="Microsoft's cloud fundamentals cert. Required baseline before AZ-500. Covers Azure services, pricing, SLAs." onclick="openCert('az900')">AZ-900</span>
+          <span class="cb tier-entry vn" data-full="CC + Cloud Fundamentals" data-desc="ISC² CC combined with a cloud provider fundamentals cert — the ideal entry combination for cloud security roles." onclick="openCert('cc-csp')">CC-CSP</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vs" data-full="PortSwigger Burp Suite Certified Practitioner (BSCP)" data-desc="Hands-on web application security cert. Covers OWASP Top 10, injection, auth bypass. High practical value." onclick="openCert('bscp')">BSCP</span>
+          <span class="cb tier-entry vn" data-full="GIAC Web Application Penetration Tester (GWAPT)" data-desc="SANS entry web app security cert. Covers SQL injection, XSS, CSRF, and web pentesting methodology." onclick="openCert('gweb')">GWEB</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vs" data-full="INE eJPT (eLearnSecurity Junior Penetration Tester)" data-desc="Affordable entry pentesting cert with practical labs. Real-world network and web pentesting scenarios." onclick="openCert('ejpt')">eJPT</span>
+          <span class="cb tier-entry vn" data-full="CompTIA PenTest+" data-desc="Vendor-neutral entry pentesting cert. DoD 8140 approved. Covers planning, scoping, and basic exploitation." onclick="openCert('pentest-plus')">PenTest+</span>
+          <span class="cb tier-entry vn" data-full="EC-Council CEH (Certified Ethical Hacker)" data-desc="Widely recognized entry offensive cert. More theory-focused than PNPT or OSCP. Popular in corporate procurement." onclick="openCert('ceh')">CEH</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vn" data-full="ITIL 4 Foundation" data-desc="IT service management framework cert. Foundational for GRC and security operations roles in ITSM environments." onclick="openCert('itil4')">ITIL 4</span>
+          <span class="cb tier-entry vn" data-full="ISO 27001 Associate" data-desc="Entry-level ISO 27001 certification for information security management systems. Ideal GRC starting point." onclick="openCert('iso27001-a')">ISO 27001 A</span>
+          <span class="cb tier-entry vn" data-full="IAPP CIPP/US (Certified Information Privacy Professional)" data-desc="The leading U.S. privacy law cert. Essential for GRC roles at companies handling personal data." onclick="openCert('cipp-us')">CIPP/US</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vs" data-full="Cellebrite Certified Operator (CCO)" data-desc="Mobile device forensics entry cert. Cellebrite is the industry standard tool for mobile forensic extraction." onclick="openCert('cco')">CCO</span>
+          <span class="cb tier-entry vn" data-full="Blue Team Labs Level 1 (BTL1)" data-desc="Hands-on cert covering DFIR basics, phishing analysis, SIEM, and threat intel. Practical and affordable." onclick="openCert('btl1')">BTL1</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MID ROW -->
+    <div class="ctier-row">
+      <div class="ctier-label">
+        <div class="ctier-name" style="color:var(--lb);">Mid</div>
+        <div class="ctier-exp">T2–3</div>
+        <div class="ctier-sal">3–6 yrs</div>
+      </div>
+      <div class="cdomains">
+        <div class="cdomain-col">
+          <span class="cb tier-mid vn" data-full="SSCP (Systems Security Certified Practitioner)" data-desc="ISC² cert for security practitioners with hands-on technical focus. 1 yr experience required. Stepping stone to CISSP." onclick="openCert('sscp')">SSCP</span>
+          <span class="cb tier-mid vn" data-full="CompTIA SecurityX (formerly CASP+)" data-desc="Advanced vendor-neutral cert for senior technical practitioners. No multiple choice — performance-based only." onclick="openCert('securityx')">SecurityX</span>
+          <span class="cb tier-mid vn" data-full="GIAC Security Leadership (GSLC)" data-desc="SANS cert bridging technical security and management. For practitioners moving into leadership." onclick="openCert('gslc')">GSLC</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vs" data-full="Microsoft SC-300: Identity & Access Administrator" data-desc="Microsoft's primary IAM cert for Azure AD/Entra ID administration." onclick="openCert('sc300')">SC-300</span>
+          <span class="cb tier-mid vs" data-full="Okta Certified Administrator" data-desc="Advanced Okta platform administration cert. Covers SSO, MFA, lifecycle management, and API access management." onclick="openCert('okta-admin')">Okta Admin</span>
+          <span class="cb tier-mid vs" data-full="CyberArk Defender (Trustee/Defender)" data-desc="Entry PAM cert from CyberArk. Core privileged access management concepts." onclick="openCert('ca-defender')">CA Defender</span>
+          <span class="cb tier-mid vn" data-full="CIDPRO (Certified Identity & Directory Professional)" data-desc="IDPro foundation-level cert covering directory services, federation, and provisioning." onclick="openCert('cidpro')">CIDPRO</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vn" data-full="CompTIA CySA+ (Cybersecurity Analyst+)" data-desc="Vendor-neutral SOC analyst cert. Covers threat detection, behavioral analytics, and incident response. DoD 8140 approved." onclick="openCert('cysa-plus')">CySA+</span>
+          <span class="cb tier-mid vn" data-full="Blue Team Labs Level 2 (BTL2)" data-desc="Advanced hands-on defensive cert. Covers advanced SIEM, malware analysis, threat hunting, and forensics." onclick="openCert('btl2')">BTL2</span>
+          <span class="cb tier-mid vs" data-full="Splunk Core Certified User / Power User" data-desc="Splunk's foundational certs covering search, reports, dashboards, and data onboarding." onclick="openCert('splunk-cu')">Splunk CU</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vn" data-full="GIAC Certified Enterprise Defender (GCED)" data-desc="SANS cert for security engineers. Covers defensive network architecture, endpoint hardening, and security controls." onclick="openCert('gced')">GCED</span>
+          <span class="cb tier-mid vn" data-full="GIAC Network Forensic Analyst (GNFA)" data-desc="SANS cert for network forensics and deep packet analysis. Covers Wireshark, Zeek, and network artifact analysis." onclick="openCert('gnfa')">GNFA</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vs" data-full="Microsoft AZ-500: Azure Security Technologies" data-desc="Microsoft's primary cloud security cert for Azure. Covers identity, platform protection, data security, and monitoring." onclick="openCert('az500')">AZ-500</span>
+          <span class="cb tier-mid vs" data-full="AWS Solutions Architect Associate (SAA-C03)" data-desc="The most valued AWS associate cert. Architectural knowledge required for AWS security specialty." onclick="openCert('aws-saa')">AWS SAA</span>
+          <span class="cb tier-mid vs" data-full="Google Professional Cloud Security Engineer" data-desc="Google's cloud security cert. Covers GCP IAM, network security, data protection, and compliance." onclick="openCert('gcp-sec')">GCP Sec</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vn" data-full="ISC² CSSLP (Certified Secure Software Lifecycle Professional)" data-desc="Security in the SDLC. Covers secure design, implementation, testing, and deployment. For developers turning security." onclick="openCert('csslp')">CSSLP</span>
+          <span class="cb tier-mid vn" data-full="GIAC GWEB (Advanced Web Application Defender)" data-desc="SANS advanced web application security cert. Defense focus: secure code review, WAF, and API security." onclick="openCert('gweb-a')">GWEB-A</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vs" data-full="TCM Security PNPT (Practical Network Penetration Tester)" data-desc="Highly practical, affordable pentesting cert with a real-world report assessment. Great OSCP stepping stone." onclick="openCert('pnpt')">PNPT</span>
+          <span class="cb tier-mid vs" data-full="Certified Red Team Professional (CRTO)" data-desc="RastaMouse's C2-focused red team cert using Cobalt Strike. Covers adversary simulation and post-exploitation." onclick="openCert('crto')">CRTO</span>
+          <span class="cb tier-mid vs" data-full="INE eCPPT (Certified Professional Penetration Tester)" data-desc="Advanced INE pentesting cert. Covers network pentesting, web attacks, and report writing at professional level." onclick="openCert('ecppt')">eCPPT</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vn" data-full="ISACA CISA (Certified Information Systems Auditor)" data-desc="Gold standard for IS audit, control, and assurance. Required for audit and compliance roles." onclick="openCert('cisa')">CISA</span>
+          <span class="cb tier-mid vn" data-full="ISACA CRISC (Certified in Risk & Information Systems Control)" data-desc="ISACA's risk management cert. Covers IT risk identification, assessment, and response." onclick="openCert('crisc')">CRISC</span>
+          <span class="cb tier-mid vn" data-full="IAPP CIPM (Certified Information Privacy Manager)" data-desc="Privacy program management cert from IAPP. Covers data governance, privacy operations, and compliance programs." onclick="openCert('cipm')">CIPM</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vn" data-full="GIAC Certified Forensic Examiner (GCFE)" data-desc="SANS Windows forensics cert. Covers Windows artifact analysis, registry, browser forensics, and timeline analysis." onclick="openCert('gcfe')">GCFE</span>
+          <span class="cb tier-mid vn" data-full="GIAC Certified Forensic Analyst (GCFA)" data-desc="SANS advanced forensics cert. Covers memory forensics, timeline super-analysis, and anti-forensics." onclick="openCert('gcfa')">GCFA</span>
+          <span class="cb tier-mid vn" data-full="Certified Reverse Engineering Analyst (CREA)" data-desc="Foundational malware analysis and reverse engineering cert. Assembly, static/dynamic analysis, and decompilation." onclick="openCert('crea')">CREA</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SENIOR ROW -->
+    <div class="ctier-row">
+      <div class="ctier-label">
+        <div class="ctier-name" style="color:var(--bl);">Senior</div>
+        <div class="ctier-exp">T3–4</div>
+        <div class="ctier-sal">6–10 yrs</div>
+      </div>
+      <div class="cdomains">
+        <div class="cdomain-col">
+          <span class="cb tier-senior vn" data-full="CISSP (Certified Information Systems Security Professional)" data-desc="The gold standard of security certs. Covers 8 CBK domains. 5 yrs experience required. Recognized globally across all domains." onclick="openCert('cissp')">CISSP</span>
+          <span class="cb tier-senior vn" data-full="ISACA CISM (Certified Information Security Manager)" data-desc="Management-focused cert for security managers and future CISOs. Covers governance, risk, incident mgmt. 5 yrs experience required." onclick="openCert('cism')">CISM</span>
+          <span class="cb tier-senior vn" data-full="GIAC Strategic Planning, Policy & Leadership (GSTRT)" data-desc="SANS cert for security managers developing strategy, policy, and program management skills." onclick="openCert('gstrt')">GSTRT</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vs" data-full="CyberArk Sentry" data-desc="Mid-level CyberArk PAM cert. Vault admin, credential rotation, session management." onclick="openCert('ca-sentry')">CA Sentry</span>
+          <span class="cb tier-senior vs" data-full="CyberArk Guardian" data-desc="Advanced CyberArk cert. Defender for Identity, EPM, Cloud Entitlements Manager." onclick="openCert('ca-guardian')">CA Guardian</span>
+          <span class="cb tier-senior vs" data-full="SailPoint Certified Identity Professional" data-desc="SailPoint IIQ/IdentityNow certification for IGA implementation and administration." onclick="openCert('sailpoint')">SailPoint</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vn" data-full="GIAC Certified Incident Handler (GCIH)" data-desc="SANS cert for incident responders. Covers attack techniques, containment, eradication, and recovery." onclick="openCert('gcih')">GCIH</span>
+          <span class="cb tier-senior vn" data-full="GIAC Certified Intrusion Analyst (GCIA)" data-desc="SANS cert for network intrusion analysts. Covers traffic analysis, IDS/IPS, and protocol analysis." onclick="openCert('gcia')">GCIA</span>
+          <span class="cb tier-senior vs" data-full="Splunk Enterprise Security Certified Admin" data-desc="Advanced Splunk cert for Enterprise Security SIEM administration and content development." onclick="openCert('splunk-esa')">Splunk ESA</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vn" data-full="GIAC Industrial Cyber Security Professional (GICSP)" data-desc="SANS cert for ICS/OT/SCADA security. Critical for energy, utilities, and manufacturing security engineering roles." onclick="openCert('gicsp')">GICSP</span>
+          <span class="cb tier-senior vn" data-full="TOGAF 9/10 (Enterprise Architecture Framework)" data-desc="The standard enterprise architecture framework cert. Important for senior security architects." onclick="openCert('togaf')">TOGAF</span>
+          <span class="cb tier-senior vn" data-full="SABSA Practitioner" data-desc="SABSA security architecture methodology. The most rigorous security architecture framework." onclick="openCert('sabsa')">SABSA</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vs" data-full="AWS Certified Security – Specialty (SCS-C02)" data-desc="AWS's advanced security cert. The most sought-after cloud security credential. Covers all AWS security services." onclick="openCert('aws-sec')">AWS Sec</span>
+          <span class="cb tier-senior vn" data-full="CCSP (Certified Cloud Security Professional)" data-desc="ISC² vendor-neutral cloud security cert. Architecture, operations, and governance. Requires 5 yrs experience." onclick="openCert('ccsp')">CCSP</span>
+          <span class="cb tier-senior vn" data-full="CSA CCSK (Certificate of Cloud Security Knowledge)" data-desc="Cloud Security Alliance's foundational cloud security cert. Vendor-neutral. Good stepping stone to CCSP." onclick="openCert('ccsk')">CCSK</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vn" data-full="EC-Council CASE (Certified Application Security Engineer)" data-desc="Application security engineering cert covering threat modeling, SAST, DAST, and secure SDLC integration." onclick="openCert('case')">CASE</span>
+          <span class="cb tier-senior vn" data-full="GIAC Penetration Tester (GPEN)" data-desc="SANS cert for penetration testers. Covers network and web app exploitation techniques." onclick="openCert('gpen')">GPEN</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vs" data-full="OSCP (Offensive Security Certified Professional)" data-desc="The most respected pentesting cert in the industry. 24-hour hands-on exam. "Try Harder" mentality. 5+ years of industry weight." onclick="openCert('oscp')">OSCP</span>
+          <span class="cb tier-senior vn" data-full="GIAC Penetration Tester (GPEN)" data-desc="SANS pentesting cert. Covers network exploitation, password attacks, and web app exploitation." onclick="openCert('gpen')">GPEN</span>
+          <span class="cb tier-senior vn" data-full="GIAC Web Application Penetration Tester (GWAPT)" data-desc="SANS web application pentesting cert. OWASP methodology, injection attacks, and exploitation." onclick="openCert('gwapt')">GWAPT</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vn" data-full="ISO 27001 Lead Auditor" data-desc="ISMS audit leadership cert. Required for leading ISO 27001 certification audits." onclick="openCert('iso-la')">ISO LA</span>
+          <span class="cb tier-senior vn" data-full="ISO 27001 Lead Implementer" data-desc="ISMS implementation leadership cert. For those building ISO 27001-compliant programs." onclick="openCert('iso-li')">ISO LI</span>
+          <span class="cb tier-senior vn" data-full="ISACA CGEIT (Certified in Governance of Enterprise IT)" data-desc="IT governance cert for senior GRC professionals. Covers enterprise IT governance frameworks." onclick="openCert('cgeit')">CGEIT</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vn" data-full="GIAC Cyber Threat Intelligence (GCTI)" data-desc="SANS threat intelligence cert. Covers structured analysis, collection, and dissemination for DFIR and threat intel teams." onclick="openCert('gcti')">GCTI</span>
+          <span class="cb tier-senior vn" data-full="GCFA + Memory Forensics Path" data-desc="Senior DFIR path: GCFA combined with Volatility/memory analysis skills. The standard senior forensics combination." onclick="openCert('gcfa-adv')">GCFE-A</span>
+          <span class="cb tier-senior vs" data-full="Magnet Certified Forensics Examiner (MCFE)" data-desc="Magnet Axiom platform cert. Covers forensic acquisition, analysis, and reporting using Magnet tools." onclick="openCert('mcfe')">MCFE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRINCIPAL ROW -->
+    <div class="ctier-row">
+      <div class="ctier-label">
+        <div class="ctier-name" style="color:var(--db);">Principal</div>
+        <div class="ctier-exp">T4–5</div>
+        <div class="ctier-sal">10–15 yrs</div>
+      </div>
+      <div class="cdomains">
+        <div class="cdomain-col">
+          <span class="cb tier-principal vn" data-full="CISSP-ISSMP (Information Security Management Professional)" data-desc="CISSP concentration for security program managers and CISOs-in-training. Focuses on leadership and program management." onclick="openCert('cissp-issmp')">CISSP-ISSMP</span>
+          <span class="cb tier-principal vn" data-full="CISM + CRISC (combined path)" data-desc="ISACA's dual-cert path: CISM for management + CRISC for risk. The standard executive preparation track in GRC-heavy organizations." onclick="openCert('cism-crisc')">CISM+</span>
+          <span class="cb tier-principal vn" data-full="SABSA Chartered Security Architect Fellow (SCF)" data-desc="The highest SABSA designation. Enterprise security architecture at program level. Highly respected in large organizations." onclick="openCert('sabsa-scf')">SABSA SCF</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vn" data-full="CISSP-ISSAP (Information Security Architecture Professional)" data-desc="CISSP concentration for security architects. Covers IAM architecture, infrastructure, and governance." onclick="openCert('cissp-issap')">CISSP-ISSAP</span>
+          <span class="cb tier-principal vn" data-full="CIAM Advanced (Identity Management Institute)" data-desc="Advanced IAM leadership and architecture cert. Covers enterprise IAM program management." onclick="openCert('ciam-adv')">CIAM-Adv</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vn" data-full="GIAC Defending Advanced Threats (GDAT)" data-desc="SANS advanced cert for senior defenders. Covers APT hunting, endpoint hardening, and advanced detection engineering." onclick="openCert('gdat')">GDAT</span>
+          <span class="cb tier-principal vn" data-full="GIAC Cyber Threat Intelligence (GCTI)" data-desc="SANS cert for threat intel analysts. Covers intelligence frameworks, collection, analysis, and dissemination." onclick="openCert('gcti')">GCTI</span>
+          <span class="cb tier-principal vn" data-full="GIAC Security Operations Manager (GSOM)" data-desc="SANS cert for SOC managers. Covers metrics, team management, process improvement, and executive reporting." onclick="openCert('gsom')">GSOM</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vn" data-full="CISSP-ISSAP (Information Security Architecture Professional)" data-desc="CISSP concentration for security architects. Covers IAM architecture, infrastructure, and governance." onclick="openCert('cissp-issap')">CISSP-ISSAP</span>
+          <span class="cb tier-principal vn" data-full="GIAC Reverse Engineering Malware (GREM)" data-desc="SANS advanced cert for malware analysts and senior security engineers. Covers static and dynamic analysis." onclick="openCert('grem')">GREM</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vs" data-full="AWS Solutions Architect Professional" data-desc="The most advanced AWS architecture cert. Complex, multi-account, enterprise-scale AWS environments." onclick="openCert('aws-pro')">AWS Pro</span>
+          <span class="cb tier-principal vn" data-full="CCSP + Cloud Vendor Specialty" data-desc="The industry-standard senior cloud security combination: CCSP (vendor-neutral) + AWS/Azure specialty cert." onclick="openCert('ccsp-plus')">CCSP+</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vn" data-full="CSSLP + GWEB (Combined Path)" data-desc="Senior AppSec path: CSSLP for SDLC governance + GWEB for technical web security depth." onclick="openCert('csslp-gweb')">CSSLP+</span>
+          <span class="cb tier-principal vn" data-full="OSWE (Offensive Security Web Expert)" data-desc="OffSec's advanced web application security cert. White-box testing, source code review, exploit development." onclick="openCert('oswe')">OSWE</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vs" data-full="OSCE3 (Offensive Security Expert — Triple)" data-desc="OffSec's highest credential combining OSED + OSEP + OSWE. Exploit dev, evasion, and web exploitation. Elite." onclick="openCert('osce3')">OSCE3</span>
+          <span class="cb tier-principal vs" data-full="CRTO II (Certified Red Team Lead)" data-desc="Advanced red team leadership cert. Covers full adversary simulation, C2 infrastructure, and team coordination." onclick="openCert('crto2')">CRTO II</span>
+          <span class="cb tier-principal vs" data-full="OffSec CRTL (Red Team Lead)" data-desc="OffSec's red team leadership cert. Enterprise red team operations, purple teaming, and program management." onclick="openCert('crtl')">CRTL</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vn" data-full="IAPP CIPT (Certified Information Privacy Technologist)" data-desc="Technical privacy cert for GRC architects. Covers privacy by design, PETs, and technical compliance." onclick="openCert('cipt')">CIPT</span>
+          <span class="cb tier-principal vn" data-full="ISC² CGRC (formerly CAP — Certified Authorization Professional)" data-desc="ISC² cert for RMF/ATO processes. Essential for GRC practitioners in government or FedRAMP environments." onclick="openCert('cgrc')">CGRC</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-principal vn" data-full="GIAC Reverse Engineering Malware (GREM)" data-desc="SANS advanced malware analysis cert. Static and dynamic analysis, OLE2, JavaScript deobfuscation." onclick="openCert('grem')">GREM</span>
+          <span class="cb tier-principal vn" data-full="GIAC Defending Advanced Threats (GDAT)" data-desc="Advanced threat detection and hunting cert. For senior DFIR and threat intel professionals." onclick="openCert('gdat')">GDAT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXECUTIVE ROW -->
+    <div class="ctier-row">
+      <div class="ctier-label">
+        <div class="ctier-name" style="color:var(--rd);">Executive</div>
+        <div class="ctier-exp">T5–6</div>
+        <div class="ctier-sal">15+ yrs</div>
+      </div>
+      <div class="cdomains">
+        <div class="cdomain-col">
+          <span class="cb tier-exec vs" data-full="EC-Council CCISO (Certified Chief Information Security Officer)" data-desc="The only cert purpose-built for CISOs and aspiring CISOs. Covers all 5 CISO domains: governance, security mgmt, programs, strategy, and finance." onclick="openCert('cciso')">CCISO</span>
+          <span class="cb tier-exec vn" data-full="NACD Cyber-Risk Oversight (Board-level)" data-desc="National Association of Corporate Directors cert for board members and CISOs presenting to boards. Non-technical strategic cert." onclick="openCert('nacd')">CISO+</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="CAMS (Certified Anti-Money Laundering Specialist) + IAM" data-desc="Relevant for IAM executives in financial services. Regulatory identity verification at enterprise scale." onclick="openCert('cams')">CAMS</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="GIAC Security Expert (GSE)" data-desc="The most prestigious GIAC cert. Written + hands-on lab exam. Fewer than 250 holders worldwide." onclick="openCert('gse')">GSE</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="ISACA CISA (Certified Information Systems Auditor)" data-desc="The gold standard for IS audit, control, and assurance. Relevant for security engineering program oversight." onclick="openCert('cisa')">CISA</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="CSA STAR Certification + CCSP" data-desc="Cloud Security Alliance STAR + CCSP for cloud security program executives overseeing multi-cloud environments." onclick="openCert('csa-star')">CSA Star</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="CSSLP + Software Security Program Leadership" data-desc="Senior AppSec program leadership combining CSSLP with SANS GWEB and SDL governance experience." onclick="openCert('csslp-m')">CSSLP-M</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="GIAC Exploit Researcher & Advanced Penetration Tester (GXPN)" data-desc="SANS most advanced offensive cert. Exploit development, advanced network attacks, cryptographic attacks." onclick="openCert('gxpn')">GXPN</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="IAPP FIP (Fellow of Information Privacy)" data-desc="The highest IAPP designation. For senior privacy executives who have demonstrated significant contributions to the field." onclick="openCert('fip')">FIP</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-exec vn" data-full="GIAC Security Leadership (GSLC)" data-desc="For DFIR program leaders managing team operations, escalation procedures, and executive reporting." onclick="openCert('gslc')">GSLC</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end cw-inner --><!-- end cw-inner -->
+
+  <!-- Cert detail panel -->
+  <div class="cert-detail" id="cert-detail-panel">
+    <div class="cd-close" onclick="closeCert()">✕</div>
+    <div id="cert-detail-inner"></div>
+  </div>
+
+</div><!-- end cw-inner -->
+</div><!-- end cw-scroll-outer -->
+<div class="footer">InfoSecDeck · Cert data sourced from vendor official sites &amp; job posting analysis 2024–2025</div>
+</div>
+
+<div class="page" id="page-training">
+<div class="tw">
+  <div class="ey a1">Education Pathways</div>
+  <div class="st a2">Training Programs & Degrees</div>
+  <p class="ss a3">Top-curated programs at every level — from entry certificates to graduate degrees. Links marked ★ are affiliate links; we may earn a commission at no extra cost to you.</p>
+
+  <div class="ey" style="justify-content:flex-start;margin-bottom:16px;">⭐ Editor's Picks — Highlighted Programs</div>
+  <div class="highlight-grid a3">
+    <!-- Google Cybersecurity Certificate -->
+    <div class="hl-card">
+      <div class="hl-ribbon">Top Pick</div>
+      <div class="hl-top">
+        <div class="hl-cat" style="color:var(--gn);">📜 Entry-Level Certificate</div>
+        <div class="hl-name">Google Cybersecurity Professional Certificate</div>
+        <div class="hl-inst">Google · via Coursera · Self-paced</div>
+        <div class="hl-pills">
+          <span class="hl-pill">8 Courses</span><span class="hl-pill">~6 months</span><span class="hl-pill">No Experience Required</span><span class="hl-pill">Job Guarantee</span>
+        </div>
+        <div class="hl-desc">The best no-experience-required entry point. Covers network security, Linux, Python, SIEM tools, and incident response. Prepares for CompTIA Security+ at no extra cost. Backed by Google's hiring network.</div>
+      </div>
+      <div class="hl-footer">
+        <div class="hl-price">~$50/month · Financial aid available</div>
+        <a class="hl-cta hl-cta-p" href="https://www.coursera.org/google-certificates/cybersecurity-certificate" target="_blank" rel="noopener sponsored">★ Enroll on Coursera</a>
+      </div>
+    </div>
+    <!-- WGU B.S. Cybersecurity -->
+    <div class="hl-card">
+      <div class="hl-ribbon">Top Pick</div>
+      <div class="hl-top">
+        <div class="hl-cat" style="color:var(--bl);">🎓 Bachelor's Degree</div>
+        <div class="hl-name">B.S. Cybersecurity and Information Assurance</div>
+        <div class="hl-inst">Western Governors University (WGU) · Online · NCAE-C Designated</div>
+        <div class="hl-pills">
+          <span class="hl-pill">Accredited</span><span class="hl-pill">Competency-Based</span><span class="hl-pill">~$4,250/term</span><span class="hl-pill">Includes 13 Certs</span>
+        </div>
+        <div class="hl-desc">The #1 recommended online cybersecurity degree. Competency-based — you advance when you're ready, not on a semester schedule. Tuition includes 13 industry certifications (CompTIA, ITIL, AWS) bundled in. NSA/DHS Center of Academic Excellence in Cyber Defense designated.</div>
+      </div>
+      <div class="hl-footer">
+        <div class="hl-price">~$4,250/term flat-rate · Transfer credits accepted</div>
+        <a class="hl-cta hl-cta-p" href="https://www.wgu.edu/online-it-degrees/cybersecurity-information-assurance-bachelors-program.html" target="_blank" rel="noopener sponsored">★ Learn More at WGU</a>
+      </div>
+    </div>
+    <!-- Top Bootcamp Pick -->
+    <div class="hl-card">
+      <div class="hl-ribbon">Top Pick</div>
+      <div class="hl-top">
+        <div class="hl-cat" style="color:var(--or);">🚀 Bootcamp</div>
+        <div class="hl-name">SANS Technology Institute — Cyber Foundations Bootcamp</div>
+        <div class="hl-inst">SANS Institute · Online &amp; In-Person Tracks</div>
+        <div class="hl-pills">
+          <span class="hl-pill">4–6 Months</span><span class="hl-pill">Hands-On Labs</span><span class="hl-pill">GIAC Cert Included</span><span class="hl-pill">Industry Gold Standard</span>
+        </div>
+        <div class="hl-desc">SANS is the most respected name in cybersecurity training. Their bootcamp-style immersion courses bundle hands-on labs with a GIAC certification exam attempt. Unlike coding bootcamps, SANS is specifically built for security — instructors are active practitioners. Courses like SEC401 (Security Essentials) and SEC504 (Hacker Tools &amp; Techniques) are career-launching credentials.</div>
+      </div>
+      <div class="hl-footer">
+        <div class="hl-price">$5,000–$8,000 · GIAC exam included</div>
+        <a class="hl-cta hl-cta-o" href="https://www.sans.org/cyber-security-courses/" target="_blank" rel="noopener sponsored">★ Browse SANS Courses</a>
+      </div>
+    </div>
+    <!-- Georgia Tech OMSCS -->
+    <div class="hl-card">
+      <div class="hl-ribbon">Top Pick</div>
+      <div class="hl-top">
+        <div class="hl-cat" style="color:var(--or);">📚 Master's Degree</div>
+        <div class="hl-name">M.S. Cybersecurity (OMSCS)</div>
+        <div class="hl-inst">Georgia Institute of Technology · via edX / GT Online</div>
+        <div class="hl-pills">
+          <span class="hl-pill">Ranked Top 10</span><span class="hl-pill">~$7,000 Total</span><span class="hl-pill">Accredited</span><span class="hl-pill">Part-time Friendly</span>
+        </div>
+        <div class="hl-desc">The best-value accredited cybersecurity master's in the country. Georgia Tech's online program costs roughly $7,000 total — the same degree as on-campus. Specializations in Information Security, Policy, and Computing Systems. Enormous alumni network.</div>
+      </div>
+      <div class="hl-footer">
+        <div class="hl-price">~$7,000 total · World-class faculty</div>
+        <a class="hl-cta hl-cta-o" href="https://omscs.gatech.edu/specialization-information-security" target="_blank" rel="noopener sponsored">★ Explore OMSCS</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry-Level Certificates -->
+  <div class="prog-section a4">
+    <div class="ey" style="justify-content:flex-start;margin-bottom:16px;">📜 Entry-Level Certificates</div>
+    <div class="prog-grid">
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--gn);">Self-Paced · Online</div>
+        <div class="pc-name">Google Cybersecurity Professional Certificate</div>
+        <div class="pc-inst">Google / Coursera</div>
+        <div class="pc-pills"><span class="pc-pill">~6 months</span><span class="pc-pill">No prereqs</span><span class="pc-pill">Prepares for Security+</span></div>
+        <a class="pc-cta" href="https://www.coursera.org/google-certificates/cybersecurity-certificate" target="_blank" rel="noopener sponsored">★ Enroll →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--gn);">Self-Paced · Online</div>
+        <div class="pc-name">IBM Cybersecurity Analyst Professional Certificate</div>
+        <div class="pc-inst">IBM / Coursera</div>
+        <div class="pc-pills"><span class="pc-pill">~8 months</span><span class="pc-pill">No prereqs</span><span class="pc-pill">SOC focus</span></div>
+        <a class="pc-cta" href="https://www.coursera.org/professional-certificates/ibm-cybersecurity-analyst" target="_blank" rel="noopener sponsored">★ Enroll →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--gn);">Self-Paced · Online</div>
+        <div class="pc-name">CompTIA Security+ (SY0-701) Full Prep</div>
+        <div class="pc-inst">Dion Training / Udemy</div>
+        <div class="pc-pills"><span class="pc-pill">~28 hours</span><span class="pc-pill">Best-selling course</span><span class="pc-pill">DoD 8140</span></div>
+        <a class="pc-cta" href="https://www.udemy.com/course/securityplus/" target="_blank" rel="noopener sponsored">★ Enroll →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--gn);">Self-Paced · Free</div>
+        <div class="pc-name">TryHackMe Pre-Security Path</div>
+        <div class="pc-inst">TryHackMe</div>
+        <div class="pc-pills"><span class="pc-pill">Hands-on labs</span><span class="pc-pill">Browser-based</span><span class="pc-pill">Free tier</span></div>
+        <a class="pc-cta" href="https://tryhackme.com/path/outline/presecurity" target="_blank" rel="noopener">Start Free →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--gn);">Bootcamp · Online</div>
+        <div class="pc-name">ISC² Certified in Cybersecurity (CC)</div>
+        <div class="pc-inst">ISC² · Free Exam Voucher Available</div>
+        <div class="pc-pills"><span class="pc-pill">Free course</span><span class="pc-pill">Entry-level</span><span class="pc-pill">ISC² credential</span></div>
+        <a class="pc-cta" href="https://www.isc2.org/certifications/cc" target="_blank" rel="noopener">Learn More →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--gn);">Self-Paced · Online</div>
+        <div class="pc-name">Microsoft Cybersecurity Analyst Certificate</div>
+        <div class="pc-inst">Microsoft / Coursera</div>
+        <div class="pc-pills"><span class="pc-pill">~6 months</span><span class="pc-pill">Defender focus</span><span class="pc-pill">SC-900 prep</span></div>
+        <a class="pc-cta" href="https://www.coursera.org/professional-certificates/microsoft-cybersecurity-analyst" target="_blank" rel="noopener sponsored">★ Enroll →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bachelor's Degrees -->
+  <div class="prog-section a4">
+    <div class="ey" style="justify-content:flex-start;margin-bottom:16px;">🎓 Bachelor's Degree Programs</div>
+    <div class="prog-grid">
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--bl);">Online · Accredited · NCAE-C</div>
+        <div class="pc-name">B.S. Cybersecurity and Information Assurance</div>
+        <div class="pc-inst">Western Governors University (WGU)</div>
+        <div class="pc-pills"><span class="pc-pill">~$4,250/term</span><span class="pc-pill">13 certs included</span><span class="pc-pill">NSA/DHS designated</span></div>
+        <a class="pc-cta" href="https://www.wgu.edu/online-it-degrees/cybersecurity-information-assurance-bachelors-program.html" target="_blank" rel="noopener sponsored">★ Learn More →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--bl);">Online · Accredited</div>
+        <div class="pc-name">B.S. Cybersecurity</div>
+        <div class="pc-inst">University of Maryland Global Campus (UMGC)</div>
+        <div class="pc-pills"><span class="pc-pill">Transfer-friendly</span><span class="pc-pill">NSA designated</span><span class="pc-pill">Military discount</span></div>
+        <a class="pc-cta" href="https://www.umgc.edu/online-degrees/bachelors/cybersecurity" target="_blank" rel="noopener">Learn More →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--bl);">Online · Accredited</div>
+        <div class="pc-name">B.S. Computer Science — Cybersecurity Track</div>
+        <div class="pc-inst">Southern New Hampshire University (SNHU)</div>
+        <div class="pc-pills"><span class="pc-pill">$330/credit</span><span class="pc-pill">8-week terms</span><span class="pc-pill">Transfer credits</span></div>
+        <a class="pc-cta" href="https://www.snhu.edu/online-degrees/bachelors/bs-in-cybersecurity" target="_blank" rel="noopener">Learn More →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--bl);">Online · Public University</div>
+        <div class="pc-name">B.S. Information Security</div>
+        <div class="pc-inst">Purdue University Global</div>
+        <div class="pc-pills"><span class="pc-pill">Regionally accredited</span><span class="pc-pill">ABET computing</span><span class="pc-pill">VA approved</span></div>
+        <a class="pc-cta" href="https://www.purdueglobal.edu/degree-programs/information-technology/bachelor-science-cyber-security/" target="_blank" rel="noopener">Learn More →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Master's Degrees -->
+  <div class="prog-section a4">
+    <div class="ey" style="justify-content:flex-start;margin-bottom:16px;">📚 Master's Degree Programs</div>
+    <div class="prog-grid">
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Ranked Top 10</div>
+        <div class="pc-name">M.S. Cybersecurity (OMSCS)</div>
+        <div class="pc-inst">Georgia Institute of Technology</div>
+        <div class="pc-pills"><span class="pc-pill">~$7K total</span><span class="pc-pill">GT-accredited</span><span class="pc-pill">Part-time friendly</span></div>
+        <a class="pc-cta" href="https://omscs.gatech.edu/specialization-information-security" target="_blank" rel="noopener">Learn More →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Accredited · NCAE-C</div>
+        <div class="pc-name">M.S. Cybersecurity and Information Assurance</div>
+        <div class="pc-inst">Western Governors University (WGU)</div>
+        <div class="pc-pills"><span class="pc-pill">~$4,755/term</span><span class="pc-pill">Certs included</span><span class="pc-pill">Competency-based</span></div>
+        <a class="pc-cta" href="https://www.wgu.edu/online-it-degrees/cybersecurity-information-assurance-masters-program.html" target="_blank" rel="noopener sponsored">★ Learn More →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Ivy-caliber</div>
+        <div class="pc-name">M.S. Cybersecurity</div>
+        <div class="pc-inst">Johns Hopkins University (EP)</div>
+        <div class="pc-pills"><span class="pc-pill">Part-time</span><span class="pc-pill">NSA designated</span><span class="pc-pill">Policy + technical</span></div>
+        <a class="pc-cta" href="https://ep.jhu.edu/programs/cybersecurity/" target="_blank" rel="noopener">Learn More →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Research-focused</div>
+        <div class="pc-name">Master of Science in Cybersecurity</div>
+        <div class="pc-inst">Carnegie Mellon University (INI)</div>
+        <div class="pc-pills"><span class="pc-pill">Top-ranked</span><span class="pc-pill">Technical depth</span><span class="pc-pill">Research option</span></div>
+        <a class="pc-cta" href="https://www.cmu.edu/ini/academics/mscyber/" target="_blank" rel="noopener">Learn More →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Graduate Certificates -->
+    <!-- Bootcamps -->
+  <div class="prog-section a4">
+    <div class="ey" style="justify-content:flex-start;margin-bottom:16px;">🚀 Bootcamps & Intensive Programs</div>
+    <div class="prog-grid">
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Self-paced · Hands-on Labs</div>
+        <div class="pc-name">TryHackMe Learning Paths</div>
+        <div class="pc-inst">TryHackMe</div>
+        <div class="pc-pills"><span class="pc-pill">Browser-based labs</span><span class="pc-pill">SOC / Pre-Security / Jr Pentester</span><span class="pc-pill">Free + Premium</span></div>
+        <a class="pc-cta" href="https://tryhackme.com/paths" target="_blank" rel="noopener">Explore Paths →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Structured · Offensive focus</div>
+        <div class="pc-name">TCM Security Academy</div>
+        <div class="pc-inst">TCM Security</div>
+        <div class="pc-pills"><span class="pc-pill">Practical courses</span><span class="pc-pill">Ethical Hacking / OSINT / SOC</span><span class="pc-pill">~$30/course</span></div>
+        <a class="pc-cta" href="https://academy.tcm-sec.com/" target="_blank" rel="noopener sponsored">★ Explore →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Subscription · All levels</div>
+        <div class="pc-name">INE Security Learning Paths</div>
+        <div class="pc-inst">INE (formerly eLearnSecurity)</div>
+        <div class="pc-pills"><span class="pc-pill">eJPT / eCPPT / eMAPT paths</span><span class="pc-pill">Video + labs</span><span class="pc-pill">~$49/month</span></div>
+        <a class="pc-cta" href="https://ine.com/learning/categories/cyber-security" target="_blank" rel="noopener sponsored">★ Explore →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Immersive · Career-switcher</div>
+        <div class="pc-name">SANS Cyber Aces / Foundations</div>
+        <div class="pc-inst">SANS Institute</div>
+        <div class="pc-pills"><span class="pc-pill">SANS-quality training</span><span class="pc-pill">Free foundations course</span><span class="pc-pill">Pathway to GIAC</span></div>
+        <a class="pc-cta" href="https://www.sans.org/cyberaces/" target="_blank" rel="noopener">Start Free →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Gamified · Defensive focus</div>
+        <div class="pc-name">Blue Team Labs Online</div>
+        <div class="pc-inst">Security Blue Team</div>
+        <div class="pc-pills"><span class="pc-pill">Defensive / DFIR focus</span><span class="pc-pill">Investigation challenges</span><span class="pc-pill">Free + Premium</span></div>
+        <a class="pc-cta" href="https://blueteamlabs.online/" target="_blank" rel="noopener">Explore →</a>
+      </div>
+      <div class="prog-card">
+        <div class="pc-cat" style="color:var(--or);">Online · Structured Curriculum</div>
+        <div class="pc-name">Hack The Box Academy</div>
+        <div class="pc-inst">Hack The Box</div>
+        <div class="pc-pills"><span class="pc-pill">SOC Analyst path</span><span class="pc-pill">Pentester path</span><span class="pc-pill">Structured modules</span></div>
+        <a class="pc-cta" href="https://academy.hackthebox.com/" target="_blank" rel="noopener">Explore →</a>
+      </div>
+    </div>
+  </div>
+
+<div class="aff-disclaimer">★ Links marked with ★ are affiliate links — InfoSecDeck may earn a small commission if you enroll, at no extra cost to you. All programs are independently selected based on quality, reputation, and value.</div>
+</div>
+
+<div class="footer">InfoSecDeck · Education program data sourced from official institution websites · 2025–2026</div>
+</div>
+
+<div class="page" id="page-games">
+<div class="gw">
+  <div class="ey a1">Interactive Security Challenges</div>
+  <div class="st a2">Test Your Cybersecurity Skills</div>
+  <p class="ss a3">Three mini-games designed to teach real-world security concepts. No experience needed — just curiosity.</p>
+
+  <div class="game-tabs a3">
+    <button class="gtab active" id="gtab-ctf" onclick="switchGame('ctf')">🚩 CTF Challenge</button>
+    <button class="gtab" id="gtab-packet" onclick="switchGame('packet')">🔍 Packet Detective</button>
+    <button class="gtab" id="gtab-phish" onclick="switchGame('phish')">🎣 Phish or Fish?</button>
+  </div>
+
+  <!-- ── CTF GAME ── -->
+  <div class="game-panel active" id="game-ctf">
+    <div class="ctf-levels">
+      <div class="ctf-level active" id="ctf-lvl-0" onclick="loadCTF(0)">
+        <div class="cl-num" style="color:var(--gn);border-color:rgba(0,224,122,.3);">1</div>
+        <div class="cl-info"><div class="cl-name">Recon: Hidden in Plain Sight</div><div class="cl-diff" style="color:var(--gn);">Beginner · Source Code Inspection</div></div>
+        <div class="cl-status" id="ctf-status-0" style="color:var(--dm);">Locked</div>
+      </div>
+      <div class="ctf-level" id="ctf-lvl-1" onclick="loadCTF(1)">
+        <div class="cl-num" style="color:var(--lb);border-color:rgba(34,211,238,.3);">2</div>
+        <div class="cl-info"><div class="cl-name">Crypto: Decode the Message</div><div class="cl-diff" style="color:var(--lb);">Intermediate · Base64 Encoding</div></div>
+        <div class="cl-status" id="ctf-status-1" style="color:var(--dm);">🔒</div>
+      </div>
+      <div class="ctf-level" id="ctf-lvl-2" onclick="loadCTF(2)">
+        <div class="cl-num" style="color:var(--or);border-color:rgba(249,115,22,.3);">3</div>
+        <div class="cl-info"><div class="cl-name">OSINT: Find the Threat Actor</div><div class="cl-diff" style="color:var(--or);">Advanced · Open Source Intelligence</div></div>
+        <div class="cl-status" id="ctf-status-2" style="color:var(--dm);">🔒</div>
+      </div>
+    </div>
+
+    <div class="ctf-terminal" id="ctf-terminal">
+      <div style="position:relative;z-index:1;">
+        <div class="term-line">infosecdeck-ctf:~$ <span class="term-cmd">cat briefing.txt</span></div>
+        <div class="term-out" style="margin-top:8px;">Loading challenge 1...</div>
+        <div class="term-out" id="ctf-briefing" style="margin-top:8px;color:#e2e8f0;line-height:2;"></div>
+      </div>
+    </div>
+
+    <div class="ctf-input-row">
+      <input class="ctf-input" id="ctf-answer" placeholder="Enter the flag: FLAG{...}" onkeydown="if(event.key==='Enter')checkCTF()">
+      <button class="ctf-submit" onclick="checkCTF()">Submit Flag</button>
+    </div>
+    <div class="ctf-result" id="ctf-result"></div>
+
+    <div class="game-learn-links" style="margin-top:20px;">
+      <div class="gll-title">Liked this? Explore further →</div>
+      <div class="gll-links">
+        <a class="gll-link" href="https://app.hackthebox.com/" target="_blank" rel="noopener">🎯 Hack The Box</a>
+        <a class="gll-link" href="https://tryhackme.com/" target="_blank" rel="noopener">🟩 TryHackMe</a>
+        <span class="gll-link" onclick="showDomain('forensics')">🔬 DFIR Domain Guide</span>
+        <span class="gll-link" onclick="showPage('certs')">📜 Cert Roadmap</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PACKET DETECTIVE ── -->
+  <div class="game-panel" id="game-packet">
+    <div class="pd-cases-nav" id="pd-cases-nav"></div>
+    <div id="pd-case-content"></div>
+
+    <div class="game-learn-links" style="margin-top:20px;">
+      <div class="gll-title">Liked this? Explore further →</div>
+      <div class="gll-links">
+        <a class="gll-link" href="https://blueteamlabs.online/" target="_blank" rel="noopener">🔵 Blue Team Labs</a>
+        <span class="gll-link" onclick="showDomain('forensics')">🔬 DFIR Domain Guide</span>
+        <span class="gll-link" onclick="showDomain('soc')">🛡️ SOC Domain Guide</span>
+        <span class="gll-link" onclick="showPage('certs')">📜 GCFE / GCFA Certs</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PHISH OR FISH ── -->
+  <div class="game-panel" id="game-phish">
+    <div id="phish-inner"></div>
+    <div class="game-learn-links" style="margin-top:20px;">
+      <div class="gll-title">Liked this? Explore further →</div>
+      <div class="gll-links">
+        <span class="gll-link" onclick="showDomain('soc')">🛡️ SOC Analyst Path</span>
+        <span class="gll-link" onclick="showDomain('grc')">📋 GRC & Security Awareness</span>
+        <a class="gll-link" href="https://phishingquiz.withgoogle.com/" target="_blank" rel="noopener">🎣 Google Phishing Quiz</a>
+        <span class="gll-link" onclick="showPage('certs')">📜 Security+ Covers Phishing</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="footer">InfoSecDeck · Security Challenges · Educational purposes only</div>
+</div>
+
+<!-- ═══════════════ RESUME ROASTER ═══════════════ -->
+<div class="page" id="page-roaster">
+<div class="roaster-wrap">
+  <div class="roaster-hero a1">
+    <div class="roaster-badge">🔥 AI-Powered · Instant Results · Not Stored</div>
+    <div class="rh1">Get Your Resume <span>Roasted.</span></div>
+    <p class="roaster-sub">Upload your cybersecurity resume, pick your target role, and get a brutally honest AI score with actionable feedback — powered by Claude.</p>
+  </div>
+
+  <div id="roaster-form-section">
+    <div class="upload-card a2">
+      <div class="sec-label">Step 1 — Upload Your Resume</div>
+      <div class="dropzone" id="r-dropzone">
+        <input type="file" class="dz-input" id="r-file-input" accept=".pdf,.doc,.docx">
+        <span class="dz-icon">📄</span>
+        <div class="dz-title">Drop your resume here or click to browse</div>
+        <div class="dz-sub">PDF, DOC, or DOCX — not stored, sent directly to Claude AI</div>
+        <div class="dz-types"><span class="dz-type">PDF</span><span class="dz-type">DOC</span><span class="dz-type">DOCX</span></div>
+      </div>
+      <div class="file-preview" id="r-file-preview">
+        <div style="font-size:1.4rem;" id="r-fp-icon">📄</div>
+        <div style="flex:1;"><div style="font-weight:700;font-size:.85rem;" id="r-fp-name">resume.pdf</div><div style="font-family:var(--fm);font-size:.58rem;color:var(--mt);" id="r-fp-size">0KB · Ready</div></div>
+        <div class="fp-remove" onclick="rClearFile()">✕ Remove</div>
+      </div>
+    </div>
+
+    <div class="upload-card a3">
+      <div class="sec-label">Step 2 — Configure Your Roast</div>
+      <div class="cfg-row">
+        <div class="cfg-grp">
+          <div class="cfg-label">Target Domain</div>
+          <select class="cfg-select" id="r-domain">
+            <option value="">Select domain...</option>
+            <option>Identity & Access Management (IAM)</option>
+            <option>Security Operations (SOC)</option>
+            <option>Security Engineering & Architecture</option>
+            <option>Cloud Security</option>
+            <option>AppSec & DevSecOps</option>
+            <option>Offensive Security / Red Team</option>
+            <option>GRC & Privacy</option>
+            <option>Digital Forensics & Threat Intelligence</option>
+            <option>General Cybersecurity</option>
+          </select>
+        </div>
+        <div class="cfg-grp">
+          <div class="cfg-label">Target Tier</div>
+          <select class="cfg-select" id="r-tier">
+            <option value="">Select tier...</option>
+            <option value="Tier 1 — Entry Level (0–2 years, $48K–$72K)">Tier 1 — Entry Level (0–2 yrs)</option>
+            <option value="Tier 2 — Early Career (1–3 years, $72K–$100K)">Tier 2 — Early Career (1–3 yrs)</option>
+            <option value="Tier 3 — Mid-Level Domain Specialist (3–6 years, $95K–$170K)">Tier 3 — Mid-Level (3–6 yrs)</option>
+            <option value="Tier 4 — Senior / Associate Principal (6–10 years, $145K–$195K)">Tier 4 — Senior (6–10 yrs)</option>
+            <option value="Tier 5 — Principal / Staff / Director (10–15 years, $185K–$280K+)">Tier 5 — Principal / Director (10–15 yrs)</option>
+            <option value="Tier 6 — Executive / CISO / VP (15+ years)">Tier 6 — Executive / CISO (15+ yrs)</option>
+          </select>
+        </div>
+      </div>
+      <div class="cfg-grp" style="margin-bottom:16px;">
+        <div class="cfg-label">Specific Job Title (optional)</div>
+        <input type="text" class="cfg-input" id="r-jobtitle" placeholder="e.g. Senior Cloud Security Engineer, SOC Analyst Tier 2...">
+      </div>
+      <div class="cfg-label" style="margin-bottom:10px;">Roast Intensity</div>
+      <div class="intensity-row" style="margin-bottom:20px;">
+        <label class="int-opt"><input type="radio" name="rintensity" value="balanced" checked style="accent-color:var(--or);"> 🎯 Balanced</label>
+        <label class="int-opt"><input type="radio" name="rintensity" value="brutal" style="accent-color:var(--rd);"> 🔥 Brutal — no sugarcoating</label>
+        <label class="int-opt"><input type="radio" name="rintensity" value="gentle" style="accent-color:var(--lb);"> 💙 Encouraging</label>
+      </div>
+      <div class="r-err" id="r-err"><div class="r-err-title" id="r-err-title">Error</div><div class="r-err-msg" id="r-err-msg"></div></div>
+      <button class="roast-btn" id="r-submit-btn" onclick="rSubmit()">🔥 Roast My Resume</button>
+    </div>
+
+    <div class="r-loading" id="r-loading">
+      <div class="r-ring"></div>
+      <div style="font-size:.95rem;font-weight:700;margin-bottom:6px;">Claude is reading your resume…</div>
+      <div style="font-size:.75rem;color:var(--mt);">Analyzing for your target role and building your full report.</div>
+      <div class="r-step-list">
+        <div class="r-step" id="rs1"><div class="r-step-dot"></div>Parsing resume content</div>
+        <div class="r-step" id="rs2"><div class="r-step-dot"></div>Evaluating target role fit</div>
+        <div class="r-step" id="rs3"><div class="r-step-dot"></div>Scoring 6 dimensions</div>
+        <div class="r-step" id="rs4"><div class="r-step-dot"></div>Writing actionable feedback</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="r-results" id="r-results">
+    <div class="r-score-card">
+      <div class="r-ring-wrap">
+        <svg class="r-ring-svg" viewBox="0 0 130 130">
+          <circle class="r-ring-bg" cx="65" cy="65" r="55"/>
+          <circle class="r-ring-fg" id="r-ring-fg" cx="65" cy="65" r="55" stroke-dasharray="345" stroke-dashoffset="345" transform="rotate(-90 65 65)"/>
+        </svg>
+        <div class="r-ring-num"><div class="r-ring-pct" id="r-pct">—</div><div class="r-ring-lbl">Score</div></div>
+      </div>
+      <div>
+        <div class="r-grade-big" id="r-grade">—</div>
+        <div class="r-verdict" id="r-verdict"></div>
+        <div class="r-summary" id="r-summary"></div>
+        <div class="r-meta-pills" id="r-meta-pills"></div>
+      </div>
+    </div>
+    <div class="r-dims"><div class="sec-label">Score Breakdown</div><div class="r-dims-grid" id="r-dims-grid"></div></div>
+    <div class="r-fb-card"><div class="sec-label">Detailed Feedback</div><div class="r-fb-list" id="r-fb-list"></div></div>
+    <div class="r-actions-card"><div class="sec-label">Priority Action Items</div><div class="r-action-list" id="r-action-list"></div></div>
+    <div class="r-retry-row">
+      <button class="r-retry-btn primary" onclick="rReset()">🔥 Roast Another Resume</button>
+      <button class="r-retry-btn" onclick="showPage('training')">🎓 Browse Training Programs</button>
+      <button class="r-retry-btn" onclick="showPage('certs')">📜 View Cert Roadmap</button>
+    </div>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Powered by Claude AI · Your resume is never stored or used for training<br><span style="opacity:.4;">★ Links may be affiliate links</span></div>
+</div>
+
+<!-- ═══════════════ REVIEWS ═══════════════ -->
+<div class="page" id="page-reviews">
+<div class="rvw">
+  <div class="ey a1">Community</div>
+  <div class="st a2">Reviews & Feedback</div>
+  <p class="ss a3">Tell us what you think. Your feedback directly shapes what gets built next on InfoSecDeck.</p>
+
+  <!-- Rating summary -->
+  <div class="rvw-summary a3" id="rvw-summary">
+    <div>
+      <div class="rvw-big-score" id="rvw-avg-score">—</div>
+      <div class="rvw-big-stars" id="rvw-avg-stars">☆☆☆☆☆</div>
+      <div class="rvw-big-count" id="rvw-avg-count">0 reviews</div>
+    </div>
+    <div style="flex:1;" id="rvw-bar-breakdown"></div>
+  </div>
+
+  <!-- Compose -->
+  <div class="rvw-compose a3">
+    <div class="sec-label">Leave a Review</div>
+    <div style="font-size:.8rem;color:var(--mt);margin-bottom:12px;">How would you rate InfoSecDeck overall?</div>
+    <div class="rvw-stars" id="rvw-star-input">
+      <span class="rvw-star" data-v="1" onclick="setRating(1)">★</span>
+      <span class="rvw-star" data-v="2" onclick="setRating(2)">★</span>
+      <span class="rvw-star" data-v="3" onclick="setRating(3)">★</span>
+      <span class="rvw-star" data-v="4" onclick="setRating(4)">★</span>
+      <span class="rvw-star" data-v="5" onclick="setRating(5)">★</span>
+    </div>
+    <div style="font-size:.72rem;color:var(--mt);margin-bottom:14px;">What's your feedback about?</div>
+    <div class="rvw-cat-row" id="rvw-cat-row">
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Content Quality">Content Quality</span>
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Career Ladder">Career Ladder</span>
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Cert Roadmap">Cert Roadmap</span>
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Resume Roaster">Resume Roaster</span>
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Games / Challenges">Games / Challenges</span>
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Training Programs">Training Programs</span>
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Feature Request">Feature Request</span>
+      <span class="rvw-cat" onclick="toggleCat(this)" data-cat="Bug Report">Bug Report</span>
+    </div>
+    <div class="rvw-name-row">
+      <input class="rvw-input" id="rvw-name" placeholder="Your name (or leave blank to be anonymous)">
+      <input class="rvw-input" id="rvw-role" placeholder="Your role (e.g. SOC Analyst, Student)">
+    </div>
+    <textarea class="rvw-textarea" id="rvw-text" placeholder="Share your thoughts — what's great, what's missing, what should we build next?"></textarea>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:10px;">
+      <span style="font-family:var(--fm);font-size:.55rem;color:var(--dm);">Reviews are stored locally in your browser via localStorage and shared across sessions on this device.</span>
+      <button class="rvw-submit" onclick="submitReview()">Submit Review</button>
+    </div>
+  </div>
+
+  <!-- Reviews list -->
+  <div class="sec-label a3" style="margin-bottom:16px;">Community Reviews</div>
+  <div class="rvw-list a4" id="rvw-list"></div>
+</div>
+<div class="footer">InfoSecDeck · Community Reviews · Thank you for helping us improve</div>
+</div>
+
+<!-- ═══════════════ BLOG ═══════════════ -->
+<div class="page" id="page-blog">
+<div style="padding:52px 28px 100px;max-width:860px;margin:0 auto;">
+  <div class="ey a1">Updates & Insights</div>
+  <div class="st a2">The InfoSecDeck Blog</div>
+  <p class="ss a3">Career advice, certification updates, industry news, and inside looks at how InfoSecDeck is being built. New posts regularly.</p>
+
+  <!-- Featured post -->
+  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:18px;overflow:hidden;margin-bottom:28px;cursor:pointer;" onclick="openPost('welcome')">
+    <div style="padding:2px 0;background:linear-gradient(90deg,var(--bl),var(--pu));"></div>
+    <div style="padding:28px 28px 24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <span style="font-family:var(--fm);font-size:.52rem;text-transform:uppercase;letter-spacing:.14em;padding:3px 9px;border-radius:4px;background:rgba(59,130,246,.1);color:var(--bl);border:1px solid rgba(59,130,246,.2);">📌 Pinned · Site Update</span>
+        <span style="font-family:var(--fm);font-size:.54rem;color:var(--dm);">February 2026</span>
+      </div>
+      <div style="font-size:1.3rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:10px;">Welcome to InfoSecDeck — What We're Building and Why</div>
+      <p style="font-size:.82rem;color:#94a3b8;line-height:1.75;margin-bottom:16px;">InfoSecDeck started as a simple question: why is there no single place online that maps out an entire cybersecurity career — from first job to CISO — with real salary data, honest certification advice, and interactive tools? This is our answer to that question.</p>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <span style="font-family:var(--fm);font-size:.58rem;color:var(--mt);">8 min read</span>
+        <span style="font-family:var(--fm);font-size:.58rem;color:var(--bl);cursor:pointer;">Read More →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog post grid -->
+  <div class="a4" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:40px;" id="blog-grid">
+
+    <div class="blog-card" onclick="openPost('cert-roadmap-2025')">
+      <div class="bc-tag" style="color:var(--gn);">Certifications</div>
+      <div class="bc-title">The 2025 Cybersecurity Cert Roadmap: What's Changed, What's New</div>
+      <div class="bc-preview">CompTIA updated Security+, ISACA revised CISM, and OffSec dropped the OSCP update. Here's what actually changed and what it means for your study plan.</div>
+      <div class="bc-meta"><span>Jan 2026</span><span>6 min read</span></div>
+    </div>
+
+    <div class="blog-card" onclick="openPost('iam-hottest')">
+      <div class="bc-tag" style="color:var(--lb);">Career Paths</div>
+      <div class="bc-title">Why IAM Is the Hottest Cybersecurity Domain You're Probably Ignoring</div>
+      <div class="bc-preview">Everyone wants to be a pentester. Meanwhile, IAM engineers are commanding $160K+ and companies can't hire them fast enough. Here's why.</div>
+      <div class="bc-meta"><span>Jan 2026</span><span>7 min read</span></div>
+    </div>
+
+    <div class="blog-card" onclick="openPost('resume-mistakes')">
+      <div class="bc-tag" style="color:var(--or);">Resume & Job Search</div>
+      <div class="bc-title">The 7 Resume Mistakes That Get Cybersecurity Candidates Rejected</div>
+      <div class="bc-preview">After reviewing hundreds of cybersecurity resumes with our Resume Roaster, these are the most common reasons great candidates get screened out before the phone call.</div>
+      <div class="bc-meta"><span>Feb 2026</span><span>5 min read</span></div>
+    </div>
+
+    <div class="blog-card" onclick="openPost('no-degree')">
+      <div class="bc-tag" style="color:var(--pu);">Career Advice</div>
+      <div class="bc-title">Degree vs. Certs vs. Bootcamp: What Actually Gets You Hired in 2025</div>
+      <div class="bc-preview">We analyzed 1,200 cybersecurity job postings to answer the question everyone is asking. The answer isn't what most bootcamps will tell you.</div>
+      <div class="bc-meta"><span>Feb 2026</span><span>9 min read</span></div>
+    </div>
+
+    <div class="blog-card" onclick="openPost('soc-path')">
+      <div class="bc-tag" style="color:var(--rd);">Career Paths</div>
+      <div class="bc-title">From Zero to SOC Analyst: A 12-Month Roadmap</div>
+      <div class="bc-preview">A month-by-month guide for someone starting from scratch. We cover what to study, what to build in your home lab, and exactly which certs to get — and in what order.</div>
+      <div class="bc-meta"><span>Dec 2025</span><span>12 min read</span></div>
+    </div>
+
+    <div class="blog-card" style="border-style:dashed;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;">
+      <div style="font-size:1.6rem;">✍️</div>
+      <div style="font-weight:700;font-size:.88rem;">More posts coming soon</div>
+      <div style="font-size:.74rem;color:var(--mt);">We publish weekly. Leave a review or suggestion on the Reviews page.</div>
+      <span class="gll-link" onclick="showPage('reviews')" style="margin-top:4px;">💬 Suggest a Topic</span>
+    </div>
+
+  </div>
+
+  <!-- Post modal -->
+  <div id="blog-modal" style="display:none;position:fixed;inset:0;background:rgba(5,8,16,.95);z-index:9999;overflow-y:auto;padding:40px 20px;">
+    <div style="max-width:720px;margin:0 auto;background:var(--sf);border:1px solid var(--bd2);border-radius:20px;padding:36px;position:relative;">
+      <button onclick="closePost()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:8px;color:var(--mt);cursor:pointer;padding:6px 12px;font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;">✕ Close</button>
+      <div id="blog-post-content"></div>
+    </div>
+  </div>
+
+</div>
+<div class="footer">InfoSecDeck · Blog · New posts published regularly · <span style="cursor:pointer;color:var(--bl);" onclick="showPage('reviews')">Suggest a topic →</span></div>
+</div>
+
+
+<!-- ═══════════════ SALARY GUIDE ═══════════════ -->
+<div class="page" id="page-salary">
+<div style="padding:52px 28px 100px;max-width:1100px;margin:0 auto;">
+  <div class="ey a1">Compensation Data</div>
+  <div class="st a2">Cybersecurity Salary Guide</div>
+  <p class="ss a3">Filter by domain, track, tier, or salary range. Data reflects 2024–2025 U.S. market across all experience levels.</p>
+
+  <!-- Filters -->
+  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:20px 24px;margin-bottom:24px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
+    <div style="flex:1;min-width:160px;">
+      <label class="sal-filter-label">Domain</label>
+      <select class="sal-filter" id="sal-domain" onchange="filterSalary()">
+        <option value="">All Domains</option>
+        <option value="IAM">IAM</option>
+        <option value="SOC / IR">SOC / IR</option>
+        <option value="Cloud Security">Cloud Security</option>
+        <option value="Offensive">Offensive Security</option>
+        <option value="GRC">GRC</option>
+        <option value="AppSec">AppSec</option>
+        <option value="DFIR">DFIR</option>
+        <option value="Security Engineering">Security Engineering</option>
+        <option value="Leadership">Leadership / Executive</option>
+      </select>
+    </div>
+    <div style="flex:1;min-width:140px;">
+      <label class="sal-filter-label">Track</label>
+      <select class="sal-filter" id="sal-track" onchange="filterSalary()">
+        <option value="">All Tracks</option>
+        <option value="IC">Individual Contributor</option>
+        <option value="Management">Management</option>
+      </select>
+    </div>
+    <div style="flex:1;min-width:140px;">
+      <label class="sal-filter-label">Tier</label>
+      <select class="sal-filter" id="sal-tier" onchange="filterSalary()">
+        <option value="">All Tiers</option>
+        <option value="T1">T1 — Entry</option>
+        <option value="T2">T2 — Early Career</option>
+        <option value="T3">T3 — Mid Level</option>
+        <option value="T4">T4 — Senior / Manager</option>
+        <option value="T5">T5 — Principal / Director</option>
+        <option value="T6">T6 — Executive</option>
+      </select>
+    </div>
+    <div style="flex:1;min-width:140px;">
+      <label class="sal-filter-label">Min Salary</label>
+      <select class="sal-filter" id="sal-min" onchange="filterSalary()">
+        <option value="0">Any</option>
+        <option value="80000">$80K+</option>
+        <option value="100000">$100K+</option>
+        <option value="130000">$130K+</option>
+        <option value="160000">$160K+</option>
+        <option value="200000">$200K+</option>
+      </select>
+    </div>
+    <div style="flex:1;min-width:140px;">
+      <label class="sal-filter-label">Sort By</label>
+      <select class="sal-filter" id="sal-sort" onchange="filterSalary()">
+        <option value="mid-desc">Avg Salary ↓</option>
+        <option value="mid-asc">Avg Salary ↑</option>
+        <option value="title">Title A–Z</option>
+        <option value="tier">Tier</option>
+      </select>
+    </div>
+    <button onclick="resetSalaryFilters()" style="font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;padding:9px 16px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;white-space:nowrap;">Reset</button>
+  </div>
+
+  <div id="sal-count" style="font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mt);margin-bottom:12px;"></div>
+
+  <!-- Table -->
+  <div style="overflow-x:auto;border:1px solid var(--bd);border-radius:12px;" class="a4">
+    <table id="sal-table" style="width:100%;border-collapse:collapse;min-width:700px;">
+      <thead>
+        <tr style="background:var(--sf2);border-bottom:2px solid var(--bd2);">
+          <th class="sal-th" style="text-align:left;width:30%;">Job Title</th>
+          <th class="sal-th">Domain</th>
+          <th class="sal-th">Track</th>
+          <th class="sal-th">Tier</th>
+          <th class="sal-th">Min</th>
+          <th class="sal-th">Avg</th>
+          <th class="sal-th">Max</th>
+          <th class="sal-th">Range</th>
+        </tr>
+      </thead>
+      <tbody id="sal-tbody"></tbody>
+    </table>
+  </div>
+  <p style="font-size:.65rem;color:var(--dm);margin-top:16px;text-align:center;">Sources: BLS OES 2024 · Glassdoor 2024 · Levels.fyi · Motion Recruitment Cybersecurity Salary Report 2024 · SANS 2024 Cybersecurity Workforce Study. U.S. base salary; total comp at tech firms may be higher.</p>
+</div>
+<div class="footer">InfoSecDeck · Salary Guide · 2024–2025 data · Not financial advice</div>
+</div>
+
+<div class="page" id="page-interview">
+<div style="padding:52px 28px 100px;max-width:1000px;margin:0 auto;">
+  <div class="ey a1">Get Hired</div>
+  <div class="st a2">Interview Prep</div>
+  <p class="ss a3">Pick your target role below — we'll load 10 role-specific questions and answers.</p>
+
+  <!-- TILE MENU -->
+  <div class="iprep-menu a3" id="iprep-menu">
+
+    <div class="iprep-tier-label">🔵 Entry Level — Tier 2</div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'soc1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">SOC Analyst I</div>
+      <div class="iprep-tile-tier">T2 · SOC / IR</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'iam1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">IAM Analyst / Administrator</div>
+      <div class="iprep-tile-tier">T2 · IAM</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'sec-eng1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Junior Security Engineer</div>
+      <div class="iprep-tile-tier">T2 · Security Engineering</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'grc1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">GRC Analyst I</div>
+      <div class="iprep-tile-tier">T2 · GRC</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'cloud1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Cloud Security Analyst</div>
+      <div class="iprep-tile-tier">T2 · Cloud Security</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'appsec1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Junior AppSec Engineer</div>
+      <div class="iprep-tile-tier">T2 · AppSec</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'pt1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Junior Penetration Tester</div>
+      <div class="iprep-tile-tier">T2 · Offensive</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'dfir1')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Junior DFIR Analyst</div>
+      <div class="iprep-tile-tier">T2 · DFIR</div>
+    </div>
+
+    <div class="iprep-tier-label">🟡 Mid-Level — Tier 3</div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'soc2')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">SOC Analyst II</div>
+      <div class="iprep-tile-tier">T3 · SOC / IR</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'iam2')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">IAM Engineer / PAM Engineer</div>
+      <div class="iprep-tile-tier">T3 · IAM</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'cloud2')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Cloud Security Engineer</div>
+      <div class="iprep-tile-tier">T3 · Cloud Security</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'appsec2')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">AppSec Engineer</div>
+      <div class="iprep-tile-tier">T3 · AppSec</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'pt2')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Penetration Tester</div>
+      <div class="iprep-tile-tier">T3 · Offensive</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'grc2')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">GRC Analyst II</div>
+      <div class="iprep-tile-tier">T3 · GRC</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'threat-intel')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Threat Intelligence Analyst</div>
+      <div class="iprep-tile-tier">T3 · SOC / IR</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'dfir2')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">DFIR Analyst</div>
+      <div class="iprep-tile-tier">T3 · DFIR</div>
+    </div>
+
+    <div class="iprep-tier-label">🔴 Senior / Lead — Tier 4 IC</div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'senior-soc')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Senior SOC / Threat Hunter</div>
+      <div class="iprep-tile-tier">T4 IC · SOC / IR</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'senior-eng')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Senior Security Engineer</div>
+      <div class="iprep-tile-tier">T4 IC · Security Engineering</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'senior-iam')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Senior IAM / IAM Architect</div>
+      <div class="iprep-tile-tier">T4 IC · IAM</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'senior-cloud')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Senior Cloud Security Engineer</div>
+      <div class="iprep-tile-tier">T4 IC · Cloud Security</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'senior-pt')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Senior Penetration Tester</div>
+      <div class="iprep-tile-tier">T4 IC · Offensive</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'senior-appsec')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Senior AppSec Engineer</div>
+      <div class="iprep-tile-tier">T4 IC · AppSec</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'senior-grc')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Senior GRC Analyst</div>
+      <div class="iprep-tile-tier">T4 IC · GRC</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'sec-arch')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Security Architect</div>
+      <div class="iprep-tile-tier">T4 IC · Multi-domain</div>
+    </div>
+
+    <div class="iprep-tier-label">🟠 Manager / Director — Tier 4–5 Management</div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'soc-mgr')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">SOC Manager</div>
+      <div class="iprep-tile-tier">T4 Mgmt · SOC / IR</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'sec-mgr')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Security Manager</div>
+      <div class="iprep-tile-tier">T4 Mgmt · Multi-domain</div>
+    </div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'dir-sec')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">Director of Security</div>
+      <div class="iprep-tile-tier">T5 Mgmt · Multi-domain</div>
+    </div>
+
+    <div class="iprep-tier-label">🔴 Executive — Tier 6</div>
+    <div class="iprep-tile" onclick="selectIprepTile(this,'ciso')">
+      <div class="iprep-tile-dot"></div>
+      <div class="iprep-tile-name">CISO / VP of Security</div>
+      <div class="iprep-tile-tier">T6 · Executive</div>
+    </div>
+
+  </div>
+
+  <!-- Q&A Content -->
+  <div id="interview-content" style="display:none;">
+    <div style="text-align:center;padding:60px 0;color:var(--mt);">
+      <div style="font-size:2.5rem;margin-bottom:14px;">🎯</div>
+      <div style="font-family:var(--fm);font-size:.65rem;text-transform:uppercase;letter-spacing:.14em;">Select a role above to load interview questions</div>
+    </div>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Interview Prep · Questions based on real hiring manager feedback and industry patterns</div>
+id="page-homelab">
+<div style="padding:52px 28px 100px;max-width:860px;margin:0 auto;">
+  <div class="ey a1">Hands-On Practice</div>
+  <div class="st a2">Home Lab Guide</div>
+  <p class="ss a3">Build your own cybersecurity practice environment from scratch. No expensive hardware required — everything runs on your existing machine.</p>
+  <div class="a3" style="display:flex;flex-direction:column;gap:20px;">
+    <div style="background:var(--sf);border:1px solid rgba(0,224,122,.2);border-radius:14px;padding:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🖥️</span><div><div style="font-weight:800;font-size:1rem;">Foundation: Virtualization</div><div style="font-size:.74rem;color:var(--mt);">Start here — everything else runs on top of this</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
+        <p><strong style="color:var(--tx);">VMware Workstation Pro</strong> (now free for personal use) or <strong style="color:var(--tx);">VirtualBox</strong> (free, open source) — install on Windows, Mac, or Linux. Minimum 16GB RAM recommended for running 2–3 VMs simultaneously; 8GB works but limits you to 1–2 at a time.</p>
+        <p>Download: <a href="https://www.vmware.com/products/workstation-pro.html" target="_blank" style="color:var(--bl);">VMware Workstation Pro</a> · <a href="https://www.virtualbox.org/" target="_blank" style="color:var(--bl);">VirtualBox</a></p>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid rgba(34,211,238,.2);border-radius:14px;padding:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🛡️</span><div><div style="font-weight:800;font-size:1rem;">Defensive Lab: SIEM + Detection</div><div style="font-size:.74rem;color:var(--mt);">For SOC Analyst, DFIR, and Security Engineer roles</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
+        <p><strong style="color:var(--tx);">Splunk Free (500MB/day)</strong> — Ingest Windows event logs, Sysmon, and firewall logs. Build your first correlation searches and dashboards. This is the most in-demand SIEM tool and hands-on experience is priceless for interviews.</p>
+        <p><strong style="color:var(--tx);">Sysmon</strong> — Microsoft's free system monitor. Deploy it on a Windows VM and feed logs to Splunk. Instant visibility into process creation, network connections, and registry changes.</p>
+        <p><strong style="color:var(--tx);">Security Onion</strong> — All-in-one IDS/NSM/SIEM distro. Includes Zeek, Suricata, and Elasticsearch. Great for network traffic analysis practice.</p>
+        <p><strong style="color:var(--tx);">Wazuh</strong> — Free open-source SIEM and XDR. Good alternative to Splunk with a familiar interface.</p>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid rgba(249,115,22,.2);border-radius:14px;padding:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🔴</span><div><div style="font-weight:800;font-size:1rem;">Offensive Lab: Attack Practice</div><div style="font-size:.74rem;color:var(--mt);">For Penetration Testers and Red Team roles</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
+        <p><strong style="color:var(--tx);">Kali Linux</strong> — The standard offensive security distro. Run as a VM. All major pentesting tools pre-installed: Nmap, Metasploit, Burp Suite, Wireshark, John the Ripper.</p>
+        <p><strong style="color:var(--tx);">Metasploitable 2/3</strong> — Intentionally vulnerable Linux VM. Perfect safe target for Metasploit practice. Never expose to the internet.</p>
+        <p><strong style="color:var(--tx);">DVWA (Damn Vulnerable Web Application)</strong> — Practice SQL injection, XSS, CSRF, file upload vulnerabilities in a controlled environment.</p>
+        <p><strong style="color:var(--tx);">VulnHub</strong> — Free downloadable vulnerable VMs for CTF-style practice. Hundreds of machines, all skill levels.</p>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid rgba(107,159,255,.2);border-radius:14px;padding:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🏢</span><div><div style="font-weight:800;font-size:1rem;">Active Directory Lab</div><div style="font-size:.74rem;color:var(--mt);">Essential for most enterprise security roles</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
+        <p>Build a small AD environment: one Windows Server 2022 VM as Domain Controller + one Windows 10/11 client joined to the domain. Use a free Microsoft Evaluation license (180 days). This environment lets you practice:</p>
+        <ul style="padding-left:18px;margin-top:6px;line-height:2;">
+          <li>GPO configuration and security hardening</li>
+          <li>IAM: user provisioning, group management, OU structure</li>
+          <li>Attack simulation: Pass-the-Hash, Kerberoasting, BloodHound mapping</li>
+          <li>Detection: configuring audit policies and feeding logs to your SIEM</li>
+        </ul>
+        <p>Best guide: <a href="https://github.com/0xBEN/Lab-in-a-Box" target="_blank" style="color:var(--bl);">Lab-in-a-Box by 0xBEN</a> — fully scripted AD lab setup.</p>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid rgba(251,191,36,.2);border-radius:14px;padding:24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">☁️</span><div><div style="font-weight:800;font-size:1rem;">Cloud Lab: AWS / Azure Free Tier</div><div style="font-size:.74rem;color:var(--mt);">For Cloud Security roles</div></div></div>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
+        <p><strong style="color:var(--tx);">AWS Free Tier</strong> — 12 months free with new account. Practice: IAM policy creation, S3 bucket policies, VPC security groups, CloudTrail logging, AWS Config rules, GuardDuty. Don't put anything sensitive or production workloads here.</p>
+        <p><strong style="color:var(--tx);">Microsoft Azure Free Account</strong> — $200 credit + 12 months of free services. Practice: Entra ID (Azure AD), Defender for Cloud, Sentinel SIEM, Key Vault, NSGs.</p>
+        <p><strong style="color:var(--tx);">CloudGoat by Rhino Security</strong> — Intentionally vulnerable AWS environment for attack/defense practice. Great for Cloud Security pentesting prep.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Home Lab Guide · All tools listed are free or have free tiers unless noted</div>
+</div>
+
+<!-- ═══════════════ GLOSSARY ═══════════════ -->
+<div class="page" id="page-glossary">
+<div style="padding:52px 28px 100px;max-width:860px;margin:0 auto;">
+  <div class="ey a1">Reference</div>
+  <div class="st a2">Cybersecurity Glossary</div>
+  <p class="ss a3">Plain-English definitions for the terms and acronyms you'll encounter in job postings, certifications, and on the job. Searchable.</p>
+  <div class="a3" style="margin-bottom:24px;">
+    <input type="text" id="glossary-search" placeholder="Search terms, acronyms, or definitions..." oninput="filterGlossary()" style="width:100%;padding:12px 18px;background:var(--sf);border:1px solid var(--bd2);border-radius:10px;color:var(--tx);font-family:var(--fd);font-size:.88rem;outline:none;transition:border-color .15s;" onfocus="this.style.borderColor='var(--lb)'" onblur="this.style.borderColor='var(--bd2)'">
+  </div>
+  <div id="glossary-list" class="a4" style="display:flex;flex-direction:column;gap:2px;"></div>
+</div>
+<div class="footer">InfoSecDeck · Glossary · 100+ terms · Updated 2025</div>
+</div>
+
+<!-- ═══════════════ THREAT LANDSCAPE ═══════════════ -->
+<div class="page" id="page-threats">
+<div style="padding:52px 28px 100px;max-width:860px;margin:0 auto;">
+  <div class="ey a1">Stay Current</div>
+  <div class="st a2">Threat Landscape</div>
+  <p class="ss a3">Curated links to the sources that matter — no noise, no vendor marketing. The feeds and sites practitioners actually use to stay current.</p>
+  <div class="a3" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
+    <div style="background:var(--sf);border:1px solid rgba(244,63,94,.2);border-radius:14px;padding:22px;">
+      <div style="font-family:var(--fm);font-size:.5rem;text-transform:uppercase;letter-spacing:.16em;color:var(--rd);margin-bottom:10px;">⚡ Real-Time Advisories</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">CISA KEV Catalog</span></a>
+        <a href="https://isc.sans.edu/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">SANS Internet Storm Center</span></a>
+        <a href="https://nvd.nist.gov/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">NIST NVD (CVE Database)</span></a>
+        <a href="https://www.cisa.gov/uscert/ncas/alerts" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">CISA US-CERT Alerts</span></a>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid rgba(59,130,246,.2);border-radius:14px;padding:22px;">
+      <div style="font-family:var(--fm);font-size:.5rem;text-transform:uppercase;letter-spacing:.16em;color:var(--bl);margin-bottom:10px;">📰 News & Analysis</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="https://krebsonsecurity.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">Krebs on Security</span></a>
+        <a href="https://www.darkreading.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">Dark Reading</span></a>
+        <a href="https://therecord.media/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">The Record by Recorded Future</span></a>
+        <a href="https://www.bleepingcomputer.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">Bleeping Computer</span></a>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid rgba(168,85,247,.2);border-radius:14px;padding:22px;">
+      <div style="font-family:var(--fm);font-size:.5rem;text-transform:uppercase;letter-spacing:.16em;color:var(--pu);margin-bottom:10px;">🔬 Threat Intelligence</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="https://attack.mitre.org/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">MITRE ATT&CK Framework</span></a>
+        <a href="https://otx.alienvault.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">AlienVault OTX</span></a>
+        <a href="https://www.virustotal.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">VirusTotal</span></a>
+        <a href="https://www.shodan.io/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">Shodan</span></a>
+      </div>
+    </div>
+    <div style="background:var(--sf);border:1px solid rgba(0,224,122,.2);border-radius:14px;padding:22px;">
+      <div style="font-family:var(--fm);font-size:.5rem;text-transform:uppercase;letter-spacing:.16em;color:var(--gn);margin-bottom:10px;">🎙️ Podcasts & Community</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="https://darknetdiaries.com/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">Darknet Diaries (Podcast)</span></a>
+        <a href="https://www.reddit.com/r/netsec/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">r/netsec</span></a>
+        <a href="https://www.reddit.com/r/cybersecurity/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">r/cybersecurity</span></a>
+        <a href="https://twitter.com/hashtag/infosec" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,.03);text-decoration:none;transition:background .15s;" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='rgba(255,255,255,.03)'"><span style="font-size:.82rem;color:var(--tx);font-weight:600;">#infosec on X</span></a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Threat Landscape · Curated external links · InfoSecDeck is not affiliated with these sources</div>
+</div>
+
+<!-- ═══════════════ JOB BOARD ═══════════════ -->
+<div class="page" id="page-jobs">
+<div style="padding:52px 28px 100px;max-width:820px;margin:0 auto;">
+  <div class="ey a1">Find Work</div>
+  <div class="st a2">Job Search Assistant</div>
+  <p class="ss a3">Answer a few questions and we'll generate custom search links across the top job boards — filtered to your exact domain, title, and experience level.</p>
+
+  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:16px;padding:32px;margin-bottom:24px;" id="job-quiz-form">
+
+    <!-- Q1: Domain -->
+    <div class="pivot-field">
+      <label class="pivot-label">1. Which security domain are you targeting?</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="jb-domain-btns">
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'IAM')">🔐 IAM</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'SOC / IR')">🛡️ SOC / IR</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'Cloud Security')">☁️ Cloud Security</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'AppSec')">🔧 AppSec</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'Offensive')">🔴 Offensive</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'GRC')">📋 GRC</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'DFIR')">🔬 DFIR</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'Security Engineering')">⚙️ Sec Engineering</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'General / Any')">🌐 General / Any</button>
+      </div>
+    </div>
+
+    <!-- Q2: Title -->
+    <div class="pivot-field">
+      <label class="pivot-label">2. Which job titles interest you? <span style="color:var(--mt);font-weight:400;">(select all that apply)</span></label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="jb-title-btns">
+        <div style="font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dm);padding:8px 0;">Select a domain above to see relevant titles</div>
+      </div>
+    </div>
+
+    <!-- Q3: Experience -->
+    <div class="pivot-field">
+      <label class="pivot-label">3. Years of experience</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'entry')">0–2 yrs (Entry)</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'mid')">3–5 yrs (Mid)</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'senior')">6–9 yrs (Senior)</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'principal')">10+ yrs (Principal+)</button>
+      </div>
+    </div>
+
+    <!-- Q4: Work type -->
+    <div class="pivot-field">
+      <label class="pivot-label">4. Work arrangement preference</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'remote')">🏠 Remote</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'hybrid')">🔀 Hybrid</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'onsite')">🏢 On-site</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'any')">Any</button>
+      </div>
+    </div>
+
+    <!-- Q5: Clearance -->
+    <div class="pivot-field">
+      <label class="pivot-label">5. Do you hold or are you eligible for a U.S. security clearance?</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        <button class="jb-choice-btn" onclick="selectJbChoice('clearance',this,'yes')">Yes — Active / Eligible</button>
+        <button class="jb-choice-btn" onclick="selectJbChoice('clearance',this,'no')">No</button>
+      </div>
+    </div>
+
+    <button class="pivot-submit-btn" onclick="generateJobLinks()">Generate My Job Search Links →</button>
+  </div>
+
+  <!-- Results -->
+  <div id="jb-results" style="display:none;" class="a4">
+    <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px;" id="jb-results-title"></div>
+    <div style="font-size:.78rem;color:var(--mt);margin-bottom:24px;" id="jb-results-sub"></div>
+
+    <!-- Stats bar -->
+    <div id="jb-stats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:28px;"></div>
+
+    <!-- Job board links -->
+    <div style="font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--mt);margin-bottom:12px;">Open Your Searches</div>
+    <div id="jb-links" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+    <div style="margin-top:28px;padding:18px;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.15);border-radius:12px;">
+      <div style="font-size:.8rem;color:#94a3b8;line-height:1.8;" id="jb-tips"></div>
+    </div>
+
+    <button onclick="resetJobQuiz()" style="margin-top:20px;font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:10px 20px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;">← Start Over</button>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Job Search Assistant · Links open external job boards · InfoSecDeck does not post or manage listings</div>
+</div>
+
+<div class="page" id="page-about">
+<div style="padding:52px 28px 100px;max-width:700px;margin:0 auto;">
+  <div class="ey a1">The Builder</div>
+  <div class="st a2">About InfoSecDeck</div>
+  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:20px;padding:36px;margin-bottom:24px;">
+    <div style="font-size:1.15rem;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;">[Your Name]</div>
+    <div style="font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:var(--lb);margin-bottom:20px;">[Your Title / Domain / Years of Experience]</div>
+    <p style="font-size:.88rem;color:#94a3b8;line-height:1.85;margin-bottom:16px;">InfoSecDeck was built because I couldn't find a single resource that mapped out the full cybersecurity career landscape — from first job to CISO — with honest salary data, a real certification roadmap, and practical tools that don't try to sell you something.</p>
+    <p style="font-size:.88rem;color:#94a3b8;line-height:1.85;margin-bottom:16px;">I work in [your domain] and have spent [X] years navigating a field that's notoriously hard to break into and even harder to find your bearings in once you're there. This site is the resource I wish had existed when I was starting out.</p>
+    <p style="font-size:.88rem;color:#94a3b8;line-height:1.85;">Everything on InfoSecDeck is independently researched and maintained. No advertisers, no sponsored rankings, no vendor bias — just the information you actually need.</p>
+  </div>
+  <div class="a4" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+    <a href="https://linkedin.com/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;background:rgba(10,102,194,.15);border:1px solid rgba(10,102,194,.3);color:#60a5fa;text-decoration:none;font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;" onmouseover="this.style.background='rgba(10,102,194,.25)'" onmouseout="this.style.background='rgba(10,102,194,.15)'">LinkedIn</a>
+    <span onclick="showPage('reviews')" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);color:var(--lb);font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(34,211,238,.15)'" onmouseout="this.style.background='rgba(34,211,238,.08)'">Leave Feedback</span>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Built by a practitioner, for practitioners</div>
+</div>
+
+
+<!-- ═══════════════ CAREER PIVOT ═══════════════ -->
+<div class="page" id="page-pivot">
+<div style="padding:52px 28px 100px;max-width:820px;margin:0 auto;">
+  <div class="ey a1">Make Your Move</div>
+  <div class="st a2">Career Domain Pivot Advisor</div>
+  <p class="ss a3">Thinking about switching cybersecurity domains? Tell us where you are and where you want to go — we'll map the gap and give you a practical action plan. Add your resume for a personalized assessment.</p>
+
+  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:16px;padding:32px;margin-bottom:24px;">
+    <!-- Q1: Current role -->
+    <div class="pivot-field">
+      <label class="pivot-label">1. What is your current job title?</label>
+      <div class="pivot-combo-wrap">
+        <input type="text" id="pivot-from" class="pivot-input" placeholder="Type or select your current title..." oninput="filterPivotDropdown('from')" onfocus="showPivotDrop('from')" autocomplete="off">
+        <div class="pivot-dropdown" id="pivot-drop-from"></div>
+      </div>
+    </div>
+
+    <!-- Q2: Target role -->
+    <div class="pivot-field">
+      <label class="pivot-label">2. What domain or role do you want to move into?</label>
+      <div class="pivot-combo-wrap">
+        <input type="text" id="pivot-to" class="pivot-input" placeholder="Type or select your target title..." oninput="filterPivotDropdown('to')" onfocus="showPivotDrop('to')" autocomplete="off">
+        <div class="pivot-dropdown" id="pivot-drop-to"></div>
+      </div>
+    </div>
+
+    <!-- Q3: Years of experience -->
+    <div class="pivot-field">
+      <label class="pivot-label">3. How many years of cybersecurity experience do you have?</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="pivot-exp-btns">
+        <button class="pivot-exp-btn" onclick="selectExp(this,'0-2')">0–2 years</button>
+        <button class="pivot-exp-btn" onclick="selectExp(this,'3-5')">3–5 years</button>
+        <button class="pivot-exp-btn" onclick="selectExp(this,'6-9')">6–9 years</button>
+        <button class="pivot-exp-btn" onclick="selectExp(this,'10+')">10+ years</button>
+      </div>
+    </div>
+
+    <!-- Q4: Resume upload (optional) -->
+    <div class="pivot-field">
+      <label class="pivot-label">4. Upload your resume for a personalized assessment <span style="color:var(--mt);font-weight:400;">(optional)</span></label>
+      <div class="pivot-upload-zone" id="pivot-upload-zone" onclick="document.getElementById('pivot-resume').click()">
+        <div id="pivot-upload-label">
+          <div style="font-size:1.5rem;margin-bottom:8px;">📄</div>
+          <div style="font-size:.82rem;color:var(--mt);">Click to upload PDF or Word doc</div>
+          <div style="font-size:.7rem;color:var(--dm);margin-top:4px;">Without a resume, you'll get general guidance. With one, Claude will personalize the advice.</div>
+        </div>
+      </div>
+      <input type="file" id="pivot-resume" accept=".pdf,.doc,.docx" style="display:none;" onchange="handlePivotResume(this)">
+    </div>
+
+    <button class="pivot-submit-btn" id="pivot-submit" onclick="runPivotAdvisor()">Get My Pivot Plan →</button>
+  </div>
+
+  <!-- Results area -->
+  <div id="pivot-results" style="display:none;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));display:flex;align-items:center;justify-content:center;font-size:1.1rem;">🧭</div>
+      <div>
+        <div style="font-weight:800;font-size:1rem;" id="pivot-results-title">Your Pivot Plan</div>
+        <div style="font-size:.74rem;color:var(--mt);" id="pivot-results-sub"></div>
+      </div>
+    </div>
+    <div id="pivot-results-body" style="font-size:.86rem;color:#cbd5e1;line-height:1.9;white-space:pre-wrap;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:24px;"></div>
+  </div>
+
+  <div id="pivot-loading" style="display:none;text-align:center;padding:60px 0;">
+    <div style="width:40px;height:40px;border:3px solid var(--bd);border-top-color:var(--lb);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;"></div>
+    <div style="font-size:.82rem;color:var(--mt);">Analyzing your career trajectory...</div>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Career Pivot Advisor · Powered by Claude AI · Your resume is not stored or used beyond this session</div>
+
+
+<!-- ═══ INTERVIEW MODAL ═══ -->
+<div id="iprep-modal" class="iprep-modal" onclick="if(event.target===this)closeIprepModal()">
+  <div class="iprep-modal-panel">
+    <div class="iprep-modal-head">
+      <div>
+        <div id="iprep-modal-role" class="iprep-modal-role"></div>
+        <div id="iprep-modal-tier" class="iprep-modal-tier"></div>
+      </div>
+      <button class="iprep-modal-close" onclick="closeIprepModal()">✕</button>
+    </div>
+    <div id="iprep-modal-body" class="iprep-modal-body"></div>
+  </div>
+</div>
+
+<!-- ═══ FLOATING QUIZ WIDGET ═══ -->
+<!-- Callout bubble -->
+<div id="quiz-callout" class="quiz-callout">
+  <span class="quiz-callout-dot"></span>
+  Take our questionnaire!
+  <div class="quiz-callout-arrow"></div>
+</div>
+<!-- Sticky button -->
+<button id="quiz-fab" class="quiz-fab" onclick="openQuizModal()" aria-label="What's my Cyber Career?">
+  <span class="quiz-fab-icon">🔍</span>
+  <span class="quiz-fab-text">What's my Cyber Career?</span>
+</button>
+
+<!-- Quiz Modal -->
+<div id="quiz-modal" class="quiz-modal" onclick="if(event.target===this)closeQuizModal()">
+  <div class="quiz-modal-panel">
+    <button class="quiz-modal-close" onclick="closeQuizModal()" aria-label="Close">✕</button>
+    <div class="quiz-modal-eyebrow">
+      <span class="quiz-modal-dot"></span> Domain Discovery Quiz
+    </div>
+    <h2 class="quiz-modal-title">Which Cybersecurity Domain<br>Is Right for You?</h2>
+    <p class="quiz-modal-sub">12 quick questions · We'll match your top 3 specializations</p>
+    <div id="quiz-modal-inner"></div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
