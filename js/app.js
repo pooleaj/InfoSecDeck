@@ -4110,6 +4110,14 @@ function saveSalaryToProfile(){
   if(typeof syncProfileToDB==='function')syncProfileToDB(p);
 }
 
+// Re-sync from DB every time Profile page is opened (fixes stale localStorage on new devices)
+_pageInits.profile=function(){
+  initProfile();
+  if(typeof _syncFromDB==='function'&&typeof _currentUser!=='undefined'&&_currentUser){
+    _syncFromDB();
+  }
+};
+
 // Show salary save button after calcSalary runs
 var _origCalcSalary=calcSalary;
 calcSalary=function(){
