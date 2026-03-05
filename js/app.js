@@ -4019,3 +4019,29 @@ function generateResumeText(t){
   return '[YOUR NAME]\n[City, State | Phone | Email | LinkedIn]\n\nSUMMARY\n['+t.role+'] with expertise in [key skills]. Focused on [core responsibility].\n\nTECHNICAL SKILLS\n• [Skill category 1]: [Tool 1], [Tool 2], [Tool 3]\n• [Skill category 2]: [Tool 4], [Tool 5]\n• Frameworks: [Framework 1], [Framework 2]\n\nEXPERIENCE\n['+t.role+'] | [Company Name] | [City, ST] | [Dates]\n• [Quantified achievement 1]\n• [Quantified achievement 2]\n• [Quantified achievement 3]\n\nCERTIFICATIONS\n• '+t.tips[t.tips.length-1]+'\n\nEDUCATION\n[Degree] — [Institution] — [Year]';
 }
 
+// ─── v12: SUPABASE SYNC PATCHES ──────────────────────────────
+// Patch saveProfile to sync to DB when signed in
+var _origSaveProfile=saveProfile;
+saveProfile=function(){
+  _origSaveProfile();
+  var p=loadProfile();
+  if(typeof syncProfileToDB==='function')syncProfileToDB(p);
+};
+
+// Patch updateStreak to sync to DB when signed in
+var _origUpdateStreak=updateStreak;
+updateStreak=function(won){
+  var sk=_origUpdateStreak(won);
+  if(typeof syncStreakToDB==='function')syncStreakToDB(sk);
+  return sk;
+};
+
+// Patch cycleStatus to sync cert progress to DB when signed in
+var _origCycleStatus=cycleStatus;
+cycleStatus=function(key){
+  _origCycleStatus(key);
+  var prog=getCertProgress();
+  var newStatus=prog[key]||null;
+  if(typeof syncCertProgressToDB==='function')syncCertProgressToDB(key,newStatus);
+};
+

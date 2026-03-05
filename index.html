@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=11">
+<link rel="stylesheet" href="css/styles.css?v=12">
 </head>
 <body>
 <nav>
@@ -2819,7 +2819,7 @@
         <strong>Track your streak &amp; score history</strong>
         <p>Create a free account to save your progress, compete with the community, and unlock advanced challenges.</p>
       </div>
-      <button class="dc-signup-btn" onclick="showPage('profile');closeDCModal()">Create Account &rarr;</button>
+      <button class="dc-signup-btn" onclick="closeDCModal();openAuthModal('signup')">Create Account &rarr;</button>
     </div>
   </div>
 </div>
@@ -2840,12 +2840,16 @@
       <div class="ph-role" id="ph-role-display">Not signed in</div>
       <div class="ph-badges" id="ph-badges"></div>
     </div>
-    <div class="ph-auth-area">
+    <div class="ph-auth-area" id="ph-auth-area">
       <div class="ph-supabase-note">
-        <div class="ph-note-icon">🔐</div>
+        <div class="ph-note-icon">&#128274;</div>
         <div>
-          <strong>Authentication coming soon</strong>
-          <p>We're integrating Supabase for secure login. Create your profile now and it will sync when auth launches.</p>
+          <strong>Sign in to sync your data</strong>
+          <p>Your progress saves locally. Sign in to access it across all devices.</p>
+          <div class="ph-auth-btns">
+            <button class="pss-btn pss-primary" onclick="openAuthModal('signin')">Sign In</button>
+            <button class="pss-btn" onclick="openAuthModal('signup')">Create Account</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2945,8 +2949,12 @@
       </div>
       <p class="pss-desc">Sign in with email, Google, or GitHub. Your cert progress, salary estimates, and challenge scores will sync across devices.</p>
       <div class="pss-buttons">
-        <button class="pss-btn pss-primary" disabled>Sign In with Email <span class="pss-soon">Coming Soon</span></button>
-        <button class="pss-btn" disabled>Continue with Google <span class="pss-soon">Coming Soon</span></button>
+        <button class="pss-btn pss-primary" id="pss-signin-btn" onclick="openAuthModal('signin')">Sign In with Email</button>
+        <button class="pss-btn" id="pss-signup-btn" onclick="openAuthModal('signup')">Create Account</button>
+        <button class="pss-btn pss-signout-btn" id="pss-signout-btn" style="display:none" onclick="doSignOut()">Sign Out</button>
+      </div>
+      <div id="pss-user-info" style="display:none">
+        <p class="pss-logged-in">Signed in as <strong id="pss-user-email"></strong></p>
       </div>
     </div>
   </div>
@@ -2954,6 +2962,58 @@
 </div>
 </div>
 
-<script src="js/app.js?v=11"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/app.js?v=12"></script>
+<script src="js/auth.js?v=12"></script>
+
+<!-- AUTH MODAL -->
+<div id="auth-modal" class="auth-modal" onclick="if(event.target===this)closeAuthModal()">
+  <div class="auth-modal-inner">
+    <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close">&#10005;</button>
+    <div class="auth-modal-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      InfoSecDeck
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="auth-tab-signin" onclick="switchAuthTab('signin')">Sign In</button>
+      <button class="auth-tab" id="auth-tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+
+    <!-- Sign In Panel -->
+    <div id="auth-signin-panel">
+      <div class="auth-error" id="auth-error-in"></div>
+      <div class="auth-field">
+        <label class="auth-label">Email</label>
+        <input type="email" id="auth-email-in" class="auth-input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doSignIn()">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Password</label>
+        <input type="password" id="auth-pass-in" class="auth-input" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" onkeydown="if(event.key==='Enter')doSignIn()">
+      </div>
+      <button class="auth-submit-btn" id="auth-submit-in" onclick="doSignIn()">Sign In</button>
+      <p class="auth-switch">No account? <a onclick="switchAuthTab('signup')">Create one &rarr;</a></p>
+    </div>
+
+    <!-- Sign Up Panel -->
+    <div id="auth-signup-panel" style="display:none">
+      <div class="auth-error" id="auth-error-up"></div>
+      <div class="auth-field">
+        <label class="auth-label">Email</label>
+        <input type="email" id="auth-email-up" class="auth-input" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doSignUp()">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Password</label>
+        <input type="password" id="auth-pass-up" class="auth-input" placeholder="Min. 6 characters" onkeydown="if(event.key==='Enter')doSignUp()">
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Confirm Password</label>
+        <input type="password" id="auth-pass-confirm" class="auth-input" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" onkeydown="if(event.key==='Enter')doSignUp()">
+      </div>
+      <button class="auth-submit-btn" id="auth-submit-up" onclick="doSignUp()">Create Account</button>
+      <p class="auth-switch">Already have an account? <a onclick="switchAuthTab('signin')">Sign in &rarr;</a></p>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
