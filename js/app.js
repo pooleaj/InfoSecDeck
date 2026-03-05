@@ -4045,3 +4045,79 @@ cycleStatus=function(key){
   if(typeof syncCertProgressToDB==='function')syncCertProgressToDB(key,newStatus);
 };
 
+// Full saveProfile override: adds username, removes email field, syncs to DB
+saveProfile=function(){
+  var usernameEl=document.getElementById('pf-username');
+  var username=(usernameEl&&usernameEl.value.trim())||'';
+  if(!username){showToast('Please enter a username.');if(usernameEl)usernameEl.focus();return;}
+  var p={
+    name:(document.getElementById('pf-name')&&document.getElementById('pf-name').value)||'',
+    username:username,
+    currentRole:(document.getElementById('pf-current-role')&&document.getElementById('pf-current-role').value)||'',
+    targetRole:(document.getElementById('pf-target-role')&&document.getElementById('pf-target-role').value)||'',
+    exp:(document.getElementById('pf-exp')&&document.getElementById('pf-exp').value)||'',
+    location:(document.getElementById('pf-location')&&document.getElementById('pf-location').value)||'',
+    bio:(document.getElementById('pf-bio')&&document.getElementById('pf-bio').value)||''
+  };
+  var existing={};try{existing=JSON.parse(localStorage.getItem(_PROFILE_KEY)||'{}');}catch(e){}
+  p.savedSalary=existing.savedSalary||'';
+  try{localStorage.setItem(_PROFILE_KEY,JSON.stringify(p));}catch(e){}
+  updateProfileDisplay(p);
+  showToast('Profile saved! \u2705');
+  if(typeof syncProfileToDB==='function')syncProfileToDB(p);
+};
+
+// Full initProfile override: loads username, saved salary, updates email static display
+initProfile=function(){
+  var p=loadProfile();
+  if(p.username){var el=document.getElementById('pf-username');if(el)el.value=p.username;}
+  if(p.name){var el=document.getElementById('pf-name');if(el)el.value=p.name;}
+  if(p.currentRole){var el=document.getElementById('pf-current-role');if(el)el.value=p.currentRole;}
+  if(p.targetRole){var el=document.getElementById('pf-target-role');if(el)el.value=p.targetRole;}
+  if(p.exp){var el=document.getElementById('pf-exp');if(el)el.value=p.exp;}
+  if(p.location){var el=document.getElementById('pf-location');if(el)el.value=p.location;}
+  if(p.bio){var el=document.getElementById('pf-bio');if(el)el.value=p.bio;}
+  updateProfileDisplay(p);
+  // Streak
+  var sk=loadStreak();
+  var streakEl=document.getElementById('ps-streak');if(streakEl)streakEl.textContent=sk.count;
+  // Cert progress
+  var cp=getCertProgress();
+  var done=Object.values(cp).filter(function(v){return v==='done';}).length;
+  var inprog=Object.values(cp).filter(function(v){return v==='inprog';}).length;
+  var pdone=document.getElementById('ps-certs-done');if(pdone)pdone.textContent=done;
+  var pprog=document.getElementById('ps-certs-prog');if(pprog)pprog.textContent=inprog;
+  var csEl=document.getElementById('profile-cert-summary');
+  if(csEl&&(done>0||inprog>0)){
+    csEl.innerHTML='<div class="pcs-row"><span class="pcs-item pcs-done">\u2705 '+done+' earned</span><span class="pcs-item pcs-prog">\u23F3 '+inprog+' in progress</span></div>'
+      +'<p style="margin:8px 0 0;font-size:.8rem;color:var(--mt);">Click any cert badge on the Certifications page to update status.</p>';
+  }
+  // Saved salary
+  var salEl=document.getElementById('profile-salary-save');
+  if(salEl&&p.savedSalary){
+    salEl.innerHTML='<div class="pss-saved-sal">'+p.savedSalary+'</div>';
+  }
+};
+
+// Save current salary estimate to profile
+function saveSalaryToProfile(){
+  var res=document.getElementById('sc-result');
+  if(!res||res.querySelector('.sc-placeholder')){showToast('Calculate your salary first.');return;}
+  var p=loadProfile();
+  p.savedSalary=res.innerText||res.textContent;
+  try{localStorage.setItem(_PROFILE_KEY,JSON.stringify(p));}catch(e){}
+  showToast('Salary estimate saved to profile! \u2705');
+  if(typeof syncProfileToDB==='function')syncProfileToDB(p);
+}
+
+// Show salary save button after calcSalary runs
+var _origCalcSalary=calcSalary;
+calcSalary=function(){
+  _origCalcSalary();
+  var btn=document.getElementById('sc-save-btn');
+  if(btn&&typeof _currentUser!=='undefined'&&_currentUser){
+    var res=document.getElementById('sc-result');
+    if(res&&!res.querySelector('.sc-placeholder'))btn.style.display='inline-flex';
+  }
+};
+

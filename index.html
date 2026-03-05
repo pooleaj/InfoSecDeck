@@ -216,26 +216,17 @@
         <div class="hsc-headline">Stay Ahead.<br>Stay Informed.</div>
         <p class="hsc-sub">Join cyber professionals leveling up their careers. Get weekly resources, tools, and domain insights — free.</p>
 
-        <!-- Email Form (visual placeholder) -->
+        <!-- Join Free Form -->
         <div class="hsc-form">
-          <input class="hsc-input" type="email" placeholder="your@email.com" autocomplete="off">
-          <button class="hsc-submit-btn" onclick="alert('Email signups coming soon!')">
+          <input class="hsc-input" id="hsc-email" type="email" placeholder="your@email.com" autocomplete="off" onkeydown="if(event.key==='Enter')joinFreeFromCard()">
+          <button class="hsc-submit-btn" onclick="joinFreeFromCard()">
             Join Free
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
 
-        <!-- Divider -->
-        <div class="hsc-divider"><span>or</span></div>
-
-        <!-- Account Button -->
-        <button class="hsc-account-btn" onclick="alert('Accounts coming soon!')">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Create an Account
-        </button>
-
         <!-- Sign-in link -->
-        <p class="hsc-signin-row">Already a member? <span class="hsc-signin-link" onclick="alert('Sign in coming soon!')">Sign in</span></p>
+        <p class="hsc-signin-row">Already a member? <span class="hsc-signin-link" onclick="openAuthModal('signin')">Sign in &rarr;</span></p>
 
         <!-- Social Proof -->
         <div class="hsc-proof">
@@ -1904,6 +1895,7 @@
       <div class="sc-cert-bonuses" id="sc-cert-bonuses"></div>
     </div>
     <div class="sc-result" id="sc-result"><div class="sc-placeholder">Select a role above to calculate your estimated salary range.</div></div>
+    <button class="sc-save-btn" id="sc-save-btn" onclick="saveSalaryToProfile()" style="display:none">Save to My Profile &#8599;</button>
   </div>
 
   <!-- Filters -->
@@ -2855,6 +2847,9 @@
     </div>
   </div>
 
+  <!-- Everything below is only shown when signed in -->
+  <div id="profile-auth-content" style="display:none">
+
   <!-- Stats Row -->
   <div class="profile-stats-row">
     <div class="ps-stat">
@@ -2878,14 +2873,18 @@
   <!-- Profile Form -->
   <div class="profile-section">
     <div class="profile-section-hd">Personal Information</div>
+    <div class="pf-field pf-field-full">
+      <label class="pf-label">Account Email</label>
+      <div class="pf-email-static" id="pf-email-static">—</div>
+    </div>
     <div class="profile-form-grid">
       <div class="pf-field">
-        <label class="pf-label">Full Name</label>
-        <input type="text" id="pf-name" class="pf-input" placeholder="Your name">
+        <label class="pf-label">Username <span class="pf-req">required</span></label>
+        <input type="text" id="pf-username" class="pf-input" placeholder="e.g. cyberdef_alex" maxlength="30" autocomplete="off">
       </div>
       <div class="pf-field">
-        <label class="pf-label">Email</label>
-        <input type="email" id="pf-email" class="pf-input" placeholder="your@email.com">
+        <label class="pf-label">Display Name</label>
+        <input type="text" id="pf-name" class="pf-input" placeholder="First name or nickname">
       </div>
       <div class="pf-field">
         <label class="pf-label">Current Role</label>
@@ -2943,21 +2942,14 @@
   <div class="profile-section profile-supabase-section">
     <div class="profile-section-hd">Account &amp; Authentication</div>
     <div class="pss-inner">
-      <div class="pss-logo">
-        <svg width="28" height="28" viewBox="0 0 109 113" fill="none"><path d="M63.7 110.2c-2.6 3.5-8.3 1.7-8.3-2.7V64.4H28.2c-3.9 0-6-4.5-3.6-7.5L45.3 2.7c2.6-3.5 8.3-1.7 8.3 2.7v43.1h27.2c3.9 0 6 4.5 3.6 7.5L63.7 110.2z" fill="#3ECF8E"/></svg>
-        <span>Supabase Auth</span>
-      </div>
-      <p class="pss-desc">Sign in with email, Google, or GitHub. Your cert progress, salary estimates, and challenge scores will sync across devices.</p>
+      <p class="pss-logged-in">Signed in as <strong id="pss-user-email"></strong></p>
       <div class="pss-buttons">
-        <button class="pss-btn pss-primary" id="pss-signin-btn" onclick="openAuthModal('signin')">Sign In with Email</button>
-        <button class="pss-btn" id="pss-signup-btn" onclick="openAuthModal('signup')">Create Account</button>
-        <button class="pss-btn pss-signout-btn" id="pss-signout-btn" style="display:none" onclick="doSignOut()">Sign Out</button>
-      </div>
-      <div id="pss-user-info" style="display:none">
-        <p class="pss-logged-in">Signed in as <strong id="pss-user-email"></strong></p>
+        <button class="pss-btn pss-signout-btn" onclick="doSignOut()">Sign Out</button>
       </div>
     </div>
   </div>
+
+  </div><!-- /profile-auth-content -->
 
 </div>
 </div>

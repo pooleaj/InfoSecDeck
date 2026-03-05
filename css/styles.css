@@ -1678,7 +1678,9 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
   background: radial-gradient(circle, rgba(0,212,200,.12) 0%, transparent 70%);
   pointer-events: none;
 }
-@media(max-width:960px) { .hero-signup-card { display: none; } }
+@media(max-width:960px) {
+  .hero-signup-card { width:100%; max-width:480px; margin:0 auto; }
+}
 
 .hsc-brand {
   display: flex;
@@ -2861,3 +2863,28 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .pss-logged-in strong{color:var(--tx);}
 .pss-signout-btn{border-color:rgba(255,85,85,.4)!important;color:#ff8080!important;}
 .pss-signout-btn:hover{background:rgba(255,85,85,.08)!important;}
+
+/* Static email display on profile form */
+.pf-email-static{
+  padding:10px 14px;background:var(--bg);border:1px solid var(--br);
+  border-radius:9px;color:var(--mt);font-size:.9rem;
+}
+.pf-field-full{margin-bottom:16px;}
+.pf-req{color:var(--ac);font-size:.72rem;font-weight:600;margin-left:4px;text-transform:uppercase;}
+
+/* Salary save button */
+.sc-save-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:12px;padding:9px 18px;
+  background:none;border:1px solid var(--ac);border-radius:8px;
+  color:var(--ac);font-size:.85rem;font-weight:600;cursor:pointer;
+  transition:all .15s;
+}
+.sc-save-btn:hover{background:var(--ac);color:#fff;}
+
+/* Saved salary display on profile */
+.pss-saved-sal{
+  background:var(--bg);border:1px solid var(--br);border-radius:10px;
+  padding:14px 16px;font-size:.85rem;color:var(--tx);
+  white-space:pre-line;line-height:1.6;
+}

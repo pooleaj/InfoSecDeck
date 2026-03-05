@@ -1,11 +1,11 @@
-/* InfoSecDeck — Supabase Auth (Phase 2) */
+/* InfoSecDeck — Supabase Auth (Phase 2 v2) */
 var SUPA_URL = 'https://eaynqvgeqdnaswwuwbha.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVheW5xdmdlcWRuYXN3d3V3YmhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3NDA3NTAsImV4cCI6MjA4ODMxNjc1MH0.YSh3xe5VOfQiE3AnyLhk5_11WBEe0jxpvEWzednZLMY';
 
 var _sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 var _currentUser = null;
 
-// ─── INIT: restore session on page load ──────────────────────
+// ─── INIT ────────────────────────────────────────────────────
 _sb.auth.getSession().then(function(res) {
   if (res.data && res.data.session) {
     _currentUser = res.data.session.user;
@@ -14,15 +14,27 @@ _sb.auth.getSession().then(function(res) {
   _updateAuthUI();
 });
 
-// Listen for auth state changes (sign in, sign out, token refresh)
 _sb.auth.onAuthStateChange(function(event, session) {
   _currentUser = session ? session.user : null;
   _updateAuthUI();
   if (event === 'SIGNED_IN') {
     _syncFromDB();
-    showToast('Signed in! Welcome back. \u2705');
+    showToast('Signed in! \u2705');
   }
 });
+
+// ─── JOIN CARD (home page) ───────────────────────────────────
+function joinFreeFromCard() {
+  var emailEl = document.getElementById('hsc-email');
+  var email = emailEl ? emailEl.value.trim() : '';
+  openAuthModal('signup');
+  if (email) {
+    setTimeout(function() {
+      var input = document.getElementById('auth-email-up');
+      if (input) input.value = email;
+    }, 150);
+  }
+}
 
 // ─── AUTH MODAL ──────────────────────────────────────────────
 function openAuthModal(tab) {
@@ -117,55 +129,70 @@ function doSignOut() {
 // ─── UI UPDATE ───────────────────────────────────────────────
 function _updateAuthUI() {
   _updateNavBtn();
-  _updateProfileAuthSection();
+  _updateProfilePage();
+  _updateJoinCard();
 }
 
 function _updateNavBtn() {
   var btn = document.getElementById('nav-profile-btn');
   if (!btn) return;
   if (_currentUser) {
-    var initial = _currentUser.email ? _currentUser.email[0].toUpperCase() : '?';
+    var p = loadProfile ? loadProfile() : {};
+    var initial = p.username ? p.username[0].toUpperCase() : (_currentUser.email ? _currentUser.email[0].toUpperCase() : '?');
     btn.innerHTML = '<span class="nav-profile-initial">' + initial + '</span>';
     btn.title = _currentUser.email;
   } else {
     btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
-    btn.title = 'My Profile';
+    btn.title = 'Sign In / My Profile';
   }
 }
 
-function _updateProfileAuthSection() {
-  // Header card auth area
+function _updateProfilePage() {
+  // Header auth area
   var authArea = document.getElementById('ph-auth-area');
   if (authArea) {
     if (_currentUser) {
+      var p = loadProfile ? loadProfile() : {};
+      var displayName = p.username || p.name || _currentUser.email.split('@')[0];
       authArea.innerHTML = '<div class="ph-signed-in"><span class="ph-si-dot"></span><span class="ph-si-text">Signed in as <strong>' + _currentUser.email + '</strong></span></div>';
+      var nameEl = document.getElementById('ph-name-display');
+      var roleEl = document.getElementById('ph-role-display');
+      if (nameEl) nameEl.textContent = p.username ? '@' + p.username : (p.name || 'My Account');
+      if (roleEl) roleEl.textContent = p.currentRole || (p.targetRole ? 'Targeting: ' + p.targetRole : _currentUser.email);
     } else {
-      authArea.innerHTML = '<div class="ph-supabase-note"><div class="ph-note-icon">\uD83D\uDD10</div><div><strong>Sign in to sync your data</strong><p>Your progress saves locally. Sign in to access it across all devices.</p><div class="ph-auth-btns"><button class="pss-btn pss-primary" onclick="openAuthModal(\'signin\')">Sign In</button><button class="pss-btn" onclick="openAuthModal(\'signup\')">Create Account</button></div></div></div>';
+      authArea.innerHTML = '<div class="ph-supabase-note"><div class="ph-note-icon">\uD83D\uDD10</div><div><strong>Sign in to sync your data</strong><p>Your progress saves locally. Sign in to access it across all devices.</p><div class="ph-auth-btns"><button class="pss-btn pss-primary" onclick="openAuthModal(\'signin\')">Sign In</button><button class="pss-btn" onclick="openAuthModal(\'signup\')">Join Free</button></div></div></div>';
     }
   }
-  // Account section buttons
-  var signinBtn = document.getElementById('pss-signin-btn');
-  var signupBtn = document.getElementById('pss-signup-btn');
-  var signoutBtn = document.getElementById('pss-signout-btn');
-  var userInfo = document.getElementById('pss-user-info');
+
+  // Show/hide the gated content block
+  var gatedContent = document.getElementById('profile-auth-content');
+  if (gatedContent) gatedContent.style.display = _currentUser ? 'block' : 'none';
+
+  // Static email display in form
+  var emailStatic = document.getElementById('pf-email-static');
+  if (emailStatic) emailStatic.textContent = _currentUser ? _currentUser.email : '\u2014';
+
+  // Account section email
+  var userEmailEl = document.getElementById('pss-user-email');
+  if (userEmailEl && _currentUser) userEmailEl.textContent = _currentUser.email;
+
+  // Salary save button: only show when logged in
+  var saveSalBtn = document.getElementById('sc-save-btn');
+  if (saveSalBtn) saveSalBtn.style.display = _currentUser ? 'inline-flex' : 'none';
+}
+
+function _updateJoinCard() {
+  // Hide join card when already logged in
+  var card = document.querySelector('.hero-signup-card');
+  if (!card) return;
   if (_currentUser) {
-    if (signinBtn) signinBtn.style.display = 'none';
-    if (signupBtn) signupBtn.style.display = 'none';
-    if (signoutBtn) signoutBtn.style.display = '';
-    if (userInfo) {
-      userInfo.style.display = '';
-      var em = document.getElementById('pss-user-email');
-      if (em) em.textContent = _currentUser.email;
-    }
+    card.style.display = 'none';
   } else {
-    if (signinBtn) signinBtn.style.display = '';
-    if (signupBtn) signupBtn.style.display = '';
-    if (signoutBtn) signoutBtn.style.display = 'none';
-    if (userInfo) userInfo.style.display = 'none';
+    card.style.display = '';
   }
 }
 
-// ─── PATCH showPage to close auth modal on navigation ────────
+// ─── PATCH showPage to close auth modal ──────────────────────
 var _origShowPage = showPage;
 showPage = function(p) {
   var m = document.getElementById('auth-modal');
@@ -173,35 +200,40 @@ showPage = function(p) {
   _origShowPage(p);
 };
 
-// Escape key closes modal
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeAuthModal();
 });
 
-// ─── DB SYNC: pull from Supabase into localStorage ───────────
+// ─── DB SYNC: pull from Supabase → localStorage ──────────────
 function _syncFromDB() {
   if (!_currentUser) return;
 
   // Profile
   _sb.from('profiles').select('*').eq('id', _currentUser.id).maybeSingle().then(function(res) {
+    if (res.error) { console.error('[ISD] Profile sync read error:', res.error); return; }
     if (res.data) {
       var d = res.data;
-      var local = {
-        name: d.name || '',
-        email: _currentUser.email || '',
-        currentRole: d.current_role || '',
-        targetRole: d.target_role || '',
-        exp: d.experience || '',
-        location: d.location || '',
-        bio: d.bio || ''
+      var existing = {};
+      try { existing = JSON.parse(localStorage.getItem('isd_profile') || '{}'); } catch(e) {}
+      var merged = {
+        name: d.name || existing.name || '',
+        username: d.username || existing.username || '',
+        currentRole: d.curr_role || existing.currentRole || '',
+        targetRole: d.target_role || existing.targetRole || '',
+        exp: d.experience || existing.exp || '',
+        location: d.location || existing.location || '',
+        bio: d.bio || existing.bio || '',
+        savedSalary: d.saved_salary || existing.savedSalary || ''
       };
-      try { localStorage.setItem('isd_profile', JSON.stringify(local)); } catch(e) {}
+      try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
       if (typeof initProfile === 'function') initProfile();
+      _updateAuthUI();
     }
   });
 
   // Streak
   _sb.from('challenge_streaks').select('*').eq('id', _currentUser.id).maybeSingle().then(function(res) {
+    if (res.error) { console.error('[ISD] Streak sync read error:', res.error); return; }
     if (res.data) {
       var sk = { count: res.data.streak_count || 0, last: res.data.last_date || null };
       try { localStorage.setItem('isd_streak', JSON.stringify(sk)); } catch(e) {}
@@ -212,6 +244,7 @@ function _syncFromDB() {
 
   // Cert progress
   _sb.from('cert_progress').select('cert_key,status').eq('user_id', _currentUser.id).then(function(res) {
+    if (res.error) { console.error('[ISD] Cert sync read error:', res.error); return; }
     if (res.data && res.data.length) {
       var cp = {};
       res.data.forEach(function(r) { cp[r.cert_key] = r.status; });
@@ -226,12 +259,16 @@ function syncProfileToDB(p) {
   _sb.from('profiles').upsert({
     id: _currentUser.id,
     name: p.name || '',
-    current_role: p.currentRole || '',
+    username: p.username || '',
+    curr_role: p.currentRole || '',
     target_role: p.targetRole || '',
     experience: p.exp || '',
     location: p.location || '',
     bio: p.bio || '',
+    saved_salary: p.savedSalary || '',
     updated_at: new Date().toISOString()
+  }).then(function(res) {
+    if (res.error) console.error('[ISD] Profile sync write error:', res.error);
   });
 }
 
@@ -242,19 +279,23 @@ function syncStreakToDB(sk) {
     streak_count: sk.count || 0,
     last_date: sk.last || null,
     updated_at: new Date().toISOString()
+  }).then(function(res) {
+    if (res.error) console.error('[ISD] Streak sync write error:', res.error);
   });
 }
 
 function syncCertProgressToDB(certKey, status) {
   if (!_currentUser) return;
   if (!status) {
-    _sb.from('cert_progress').delete().eq('user_id', _currentUser.id).eq('cert_key', certKey);
+    _sb.from('cert_progress').delete().eq('user_id', _currentUser.id).eq('cert_key', certKey)
+      .then(function(res) { if (res.error) console.error('[ISD] Cert delete error:', res.error); });
   } else {
     _sb.from('cert_progress').upsert({
       user_id: _currentUser.id,
       cert_key: certKey,
       status: status,
       updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,cert_key' });
+    }, { onConflict: 'user_id,cert_key' })
+      .then(function(res) { if (res.error) console.error('[ISD] Cert upsert error:', res.error); });
   }
 }
