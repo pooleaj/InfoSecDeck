@@ -1,182 +1,263 @@
 /* InfoSecDeck — Application Logic */
 // ══════════════════════ NAVIGATION ══════════════════════
 function showPage(p){
-  // Show/hide quiz FAB only on home page
-  var fab = document.getElementById('quiz-fab');
-  var callout = document.getElementById('quiz-callout');
-  if (fab) fab.style.display = (p === 'home') ? 'flex' : 'none';
-  if (callout && p !== 'home') { callout.classList.remove('visible'); }
-  if(p==='training'){
-    // training is now its own page again - don't redirect
-  }
-  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.page').forEach(function(x){
+    x.classList.remove('active');
+    x.style.display='';
+  });
   document.querySelectorAll('.nl').forEach(function(x){x.classList.remove('active');});
   var pg=document.getElementById('page-'+p);
-  if(pg)pg.classList.add('active');
+  if(pg){
+    pg.classList.add('active');
+    pg.style.display='block';
+  }
   var nav=document.getElementById('nav-'+p);
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
   closeMobileNav();
   closeAllDrops();
   setActiveNav(p);
+  // Close interview modal if open (prevent stuck overflow:hidden)
+  var im=document.getElementById('iprep-modal');
+  if(im&&im.classList.contains('open')){im.classList.remove('open');document.body.style.overflow='';}
+  // Re-init hero animations when returning to home
+  if (p === 'home') { heroRestartTyped(); }
+  // Page-specific init hooks
+  if(typeof _pageInits!=='undefined'&&_pageInits[p]){_pageInits[p]();}
 }
 
-// ══════════════════════ QUIZ ══════════════════════
-var QS=[
-  {q:"When you think about a typical workday, which sounds most appealing?",opts:[
-    {t:"Monitoring dashboards and hunting for threats in real time",s:{soc:3,forensics:1}},
-    {t:"Writing code, automating tasks, and building security tools",s:{appsec:3,eng:2,cloud:1}},
-    {t:"Reviewing documents, assessing vendors, writing policies",s:{grc:3}},
-    {t:"Trying to break into systems to find weaknesses",s:{red:3,appsec:1}}
-  ]},
-  {q:"What kind of problems do you most enjoy solving?",opts:[
-    {t:"Puzzles with a right answer — technical, logic-driven",s:{red:2,forensics:2,eng:1}},
-    {t:"Organizational challenges — policies, processes, people",s:{grc:3,soc:1}},
-    {t:"Engineering challenges — building systems that scale",s:{eng:3,cloud:2,iam:1}},
-    {t:"Analytical challenges — sifting data to find signals",s:{soc:2,forensics:3}}
-  ]},
-  {q:"How do you feel about working shifts (nights/weekends)?",opts:[
-    {t:"Fine with it — I like the variety",s:{soc:2,forensics:1}},
-    {t:"Prefer normal business hours",s:{grc:2,eng:1,iam:1,cloud:1}},
-    {t:"Occasional on-call is fine but not shift work",s:{appsec:1,red:1,eng:1,cloud:1}},
-    {t:"I love being called in when something breaks — the adrenaline",s:{soc:3,forensics:2}}
-  ]},
-  {q:"How comfortable are you with writing code or scripts?",opts:[
-    {t:"Very comfortable — I think in code",s:{appsec:3,eng:2,cloud:2}},
-    {t:"Comfortable with scripting (Python, Bash) but not full software dev",s:{soc:2,forensics:2,cloud:1,eng:1}},
-    {t:"I can read it but prefer not to write it",s:{grc:1,iam:2,soc:1}},
-    {t:"Not my thing — I prefer non-coding roles",s:{grc:3,iam:1}}
-  ]},
-  {q:"Which of these topics genuinely excites you most?",opts:[
-    {t:"Attacker tactics and how breaches actually happen",s:{red:3,soc:2,forensics:2}},
-    {t:"Cloud infrastructure, Kubernetes, serverless architecture",s:{cloud:3,eng:1}},
-    {t:"Regulations, frameworks, audit processes",s:{grc:3}},
-    {t:"How identity and access control works under the hood",s:{iam:3,eng:1}}
-  ]},
-  {q:"What best describes your background or education?",opts:[
-    {t:"Computer science, software engineering, or development",s:{appsec:3,eng:2,cloud:1}},
-    {t:"IT, networking, or systems administration",s:{eng:2,soc:2,cloud:1,iam:1}},
-    {t:"Business, law, accounting, or liberal arts",s:{grc:3,iam:1}},
-    {t:"Self-taught via CTFs, homelab, or online courses",s:{red:3,soc:1,forensics:1}}
-  ]},
-  {q:"How do you feel about writing reports and documentation?",opts:[
-    {t:"I enjoy it — clear writing is a skill I value",s:{grc:3,forensics:2,red:1}},
-    {t:"I can do it but it's not my favorite part",s:{soc:1,eng:1,cloud:1}},
-    {t:"I'd rather let the data speak for itself — minimal writing",s:{appsec:2,eng:2}},
-    {t:"I prefer technical output over prose",s:{red:2,forensics:1,iam:1}}
-  ]},
-  {q:"When a major breach happens in the news, what's your instinct?",opts:[
-    {t:"How did the attacker get in? What was the kill chain?",s:{red:3,forensics:2,soc:1}},
-    {t:"How should the company have been compliant to prevent this?",s:{grc:3}},
-    {t:"What engineering controls would have stopped it?",s:{eng:3,cloud:2}},
-    {t:"How can I detect this in our environment right now?",s:{soc:3,forensics:1}}
-  ]},
-  {q:"What's your tolerance for ambiguity and open-ended problems?",opts:[
-    {t:"I love ambiguous problems — figuring it out is the fun part",s:{red:2,forensics:3,soc:1}},
-    {t:"I prefer structured problems with clear success criteria",s:{grc:2,iam:2}},
-    {t:"Somewhere in between — I like frameworks but room to improvise",s:{eng:2,cloud:2,appsec:1}},
-    {t:"I like building things where done means done",s:{appsec:3,eng:2}}
-  ]},
-  {q:"Which best describes how you prefer to work?",opts:[
-    {t:"Independently — deep focus, long stretches of solo work",s:{forensics:2,red:2,appsec:2}},
-    {t:"Cross-functionally — lots of stakeholder meetings and collaboration",s:{grc:3,iam:1,soc:1}},
-    {t:"In a team of technical peers on shared infrastructure",s:{eng:2,cloud:2,soc:1}},
-    {t:"Flexibly — sometimes solo deep work, sometimes team sprints",s:{appsec:1,cloud:1,forensics:1}}
-  ]},
-  {q:"How do you feel about vendor and compliance frameworks?",opts:[
-    {t:"I find them genuinely useful — structure helps",s:{grc:3,iam:1}},
-    {t:"I know them but they're a means to an end",s:{eng:1,soc:1,cloud:1,forensics:1}},
-    {t:"I prefer building technical controls over paperwork",s:{eng:2,appsec:2,cloud:2}},
-    {t:"Compliance? Give me a shell and a target",s:{red:3}}
-  ]},
-  {q:"Where do you see yourself in 10 years?",opts:[
-    {t:"CISO or VP — leading the whole security function",s:{grc:2,soc:1,eng:1}},
-    {t:"Principal Architect or Security Fellow — deep technical expert",s:{eng:3,cloud:2,iam:2}},
-    {t:"Running red team engagements or a boutique pen test firm",s:{red:3}},
-    {t:"Leading incident response or threat intel at a top firm",s:{forensics:3,soc:2}}
-  ]}
+// ══════════════════════ CAREER QUIZ ══════════════════════
+// Scoring map: QUIZ_SCORES[questionIndex][optionIndex] = {key: points, ...}
+var QUIZ_SCORES=[
+  [{soc:3,de:2,vm:1},{de:3,as:2,cs:2,se:1},{pt:3,rt:2,vm:2},{grc:3,ciso:2,iam:1}],
+  [{ir:3,ti:1,soc:1},{ma:3,rt:2,ir:2,ti:1},{ciso:3,grc:2},{se:3,cs:2,vm:2,iam:1}],
+  [{as:3,de:2,cs:2,ma:1},{soc:2,se:2,ir:1,cs:1},{iam:2,vm:2,grc:1,ti:1},{grc:3,ciso:2,vm:1}],
+  [{pt:3,rt:3,ma:2},{iam:3,sa:1,se:1},{cs:3,sa:2,se:1},{grc:3,ciso:2}],
+  [{soc:3,ir:2},{de:2,se:2,as:1,cs:1,iam:1},{grc:3,ciso:2,ti:1,vm:2},{pt:3,rt:2,ma:1}],
+  [{rt:2,pt:2,ma:2,ir:1},{de:3,soc:2,ti:2},{sa:3,se:2,vm:2},{grc:3,ciso:2}],
+  [{as:3,se:2,cs:1,de:1},{se:2,cs:2,soc:1,iam:1},{grc:3,ciso:3,ti:1},{pt:3,rt:2,ma:2,soc:1}],
+  [{grc:2,ciso:2,ti:3,ir:2},{soc:1,se:1,vm:1},{de:2,as:2,cs:2,ma:1},{pt:2,rt:1,vm:2}],
+  [{ciso:3,grc:1},{sa:3,cs:2,as:1,iam:1},{rt:3,pt:2},{ti:3,ma:3,ir:2}],
+  [{pt:2,rt:2,ma:2,soc:1},{grc:2,iam:2,ciso:1,vm:1},{as:3,de:2,se:2,cs:1},{ti:3,ir:2,soc:2,ma:1}],
+  [{cs:3,sa:2,se:1},{as:2,de:1,se:2},{soc:1,iam:2,ir:1},{grc:2,ciso:2,vm:1}],
+  [{rt:3,ma:2,ti:2},{grc:2,iam:2,vm:2},{as:3,se:2,cs:1},{ir:2,pt:2,de:1}],
+  [{as:3,cs:2,se:1},{soc:2,de:2,ciso:1},{sa:3,grc:2,ti:1,vm:2},{rt:3,ma:3,pt:2}],
+  [{soc:3,de:3,ti:1},{pt:3,rt:3},{cs:3,se:2,as:1},{iam:3,sa:1}],
+  [{soc:2,de:2,se:1,iam:1},{ma:3,pt:2,rt:2},{grc:3,ciso:3},{as:2,cs:2,sa:3,se:2}]
 ];
 
-var qState={cur:0,ans:[],scores:{iam:0,soc:0,eng:0,cloud:0,appsec:0,red:0,grc:0,forensics:0}};
-var DOMAINS_META={
-  iam:{name:'Identity & Access Management',icon:'🔐',id:'iam',why:'Your answers suggest a preference for structured access control problems, cross-functional collaboration, and building reliable systems — all hallmarks of strong IAM engineers.'},
-  soc:{name:'Security Operations (SOC)',icon:'🛡️',id:'soc',why:'You show interest in real-time threat detection, analytical thinking, and the fast-paced nature of incident response — a natural fit for SOC and detection engineering.'},
-  eng:{name:'Security Engineering',icon:'⚙️',id:'eng',why:'Your technical depth, interest in building systems, and architectural thinking align closely with security engineering and architecture roles.'},
-  cloud:{name:'Cloud Security',icon:'☁️',id:'cloud',why:'Your comfort with infrastructure, code, and modern cloud paradigms maps well to cloud security — the fastest-growing and highest-compensated specialization in 2025.'},
-  appsec:{name:'AppSec & DevSecOps',icon:'🔧',id:'appsec',why:'Your development background and interest in secure software align with AppSec — where you can combine coding skills with security expertise.'},
-  red:{name:'Offensive Security',icon:'🔴',id:'red',why:'Your hacker mindset, love of puzzles, and interest in attacker TTPs are strong signals for offensive security and red teaming.'},
-  grc:{name:'GRC & Privacy',icon:'📋',id:'grc',why:'Your comfort with frameworks, writing, and organizational challenges makes GRC a natural fit — and the best entry point for non-technical backgrounds.'},
-  forensics:{name:'Forensics & Threat Intel',icon:'🔬',id:'forensics',why:'Your analytical nature, comfort with ambiguity, and interest in understanding post-breach scenarios points toward DFIR and threat intelligence.'}
+var JT={
+  soc:{title:'SOC Analyst',domain:'Security Operations',domainId:'soc',salary:'$65K – $95K',level:'Entry – Mid',icon:'🛡️',
+    desc:'Monitor networks around the clock, triage security alerts, and investigate incidents using SIEM platforms and threat intelligence feeds.',
+    daily:'Triaging alerts in Splunk or Microsoft Sentinel, investigating phishing emails, documenting incidents, and escalating high-severity events to senior analysts.'},
+  de:{title:'Detection Engineer',domain:'Security Operations',domainId:'soc',salary:'$100K – $145K',level:'Mid – Senior',icon:'🔭',
+    desc:'Build the detection logic that powers the entire SOC — writing SIEM rules, behavioral analytics queries, and threat hunt playbooks.',
+    daily:'Writing and tuning detection rules, reducing alert noise and false positives, building automation pipelines, and collaborating closely with threat intelligence teams.'},
+  ir:{title:'Incident Responder',domain:'Forensics & Threat Intel',domainId:'forensics',salary:'$90K – $135K',level:'Mid – Senior',icon:'🚨',
+    desc:'Lead breach investigations from triage to recovery — performing digital forensics, coordinating eradication, and ensuring the organization learns from every incident.',
+    daily:'Collecting and preserving digital evidence, building full attack timelines, eradicating malware from compromised systems, and writing detailed IR reports for leadership.'},
+  ti:{title:'Threat Intelligence Analyst',domain:'Forensics & Threat Intel',domainId:'forensics',salary:'$85K – $130K',level:'Mid – Senior',icon:'🕵️',
+    desc:'Track threat actors, monitor emerging attack campaigns, and produce actionable intelligence reports that guide the entire security organization\'s defensive decisions.',
+    daily:'OSINT research and APT group tracking, indicator-of-compromise analysis, writing threat reports, and briefing leadership on current and emerging threat actors.'},
+  pt:{title:'Penetration Tester',domain:'Offensive Security',domainId:'red',salary:'$95K – $145K',level:'Mid – Senior',icon:'🔴',
+    desc:'Simulate real-world attacks against organizations to identify vulnerabilities before malicious attackers do — you have explicit authorization to break in.',
+    daily:'Scoping and planning engagements, exploiting systems and web applications, pivoting through internal networks, and writing executive-quality findings reports.'},
+  rt:{title:'Red Team Operator',domain:'Offensive Security',domainId:'red',salary:'$110K – $165K',level:'Senior – Principal',icon:'⚔️',
+    desc:'Run full-scope adversary simulation campaigns that test whether an organization\'s people, processes, and technology can detect and respond to a real attacker.',
+    daily:'Planning and executing multi-week covert operations, building custom C2 infrastructure, running social engineering scenarios, and briefing C-suite stakeholders.'},
+  cs:{title:'Cloud Security Engineer',domain:'Cloud Security',domainId:'cloud',salary:'$110K – $165K',level:'Mid – Senior',icon:'☁️',
+    desc:'Secure cloud environments across AWS, Azure, or GCP — from IAM policies and network architecture to runtime threat detection and incident response in the cloud.',
+    daily:'Reviewing cloud misconfigurations with CSPM tools, hardening Kubernetes clusters, building automated security guardrails, and supporting DevOps teams on secure architecture.'},
+  se:{title:'Security Engineer',domain:'Security Engineering',domainId:'eng',salary:'$100K – $155K',level:'Mid – Senior',icon:'⚙️',
+    desc:'Build and operate the security infrastructure the entire organization relies on — firewalls, logging pipelines, identity systems, endpoint protection, and detection platforms.',
+    daily:'Deploying and configuring security tools, automating security workflows using Python and Terraform, integrating new systems, and providing technical support to other security teams.'},
+  sa:{title:'Security Architect',domain:'Security Engineering',domainId:'eng',salary:'$130K – $195K',level:'Senior – Principal',icon:'🏗️',
+    desc:'Design the overall security strategy and technical framework for enterprise environments — from zero-trust architecture and cloud security to control frameworks and standards.',
+    daily:'Leading architecture reviews and threat modeling sessions, designing zero-trust network frameworks, advising engineering teams on security design, and presenting to leadership.'},
+  as:{title:'AppSec / DevSecOps Engineer',domain:'AppSec & DevSecOps',domainId:'appsec',salary:'$105K – $155K',level:'Mid – Senior',icon:'🔧',
+    desc:'Embed security directly into the software development lifecycle — finding vulnerabilities in code and pipelines before they ever ship to production.',
+    daily:'Reviewing pull requests for security issues, running SAST and DAST scans, building CI/CD security gates, writing secure coding guidelines, and training development teams.'},
+  iam:{title:'IAM Engineer',domain:'Identity & Access Management',domainId:'iam',salary:'$95K – $150K',level:'Mid – Senior',icon:'🔐',
+    desc:'Own the entire identity infrastructure — SSO, MFA, privileged access management, and the lifecycle of every human and machine identity in the organization.',
+    daily:'Configuring Okta and Entra ID, managing CyberArk or BeyondTrust PAM platforms, building automated provisioning workflows, conducting access reviews, and auditing entitlements.'},
+  grc:{title:'GRC Analyst',domain:'GRC & Compliance',domainId:'grc',salary:'$70K – $110K',level:'Entry – Mid',icon:'📋',
+    desc:'Keep the organization compliant, accountable, and risk-aware — managing governance programs, writing security policies, and leading internal and external audits.',
+    daily:'Conducting risk assessments against NIST and ISO 27001, writing and maintaining security policies, managing audit evidence requests, and tracking compliance metrics on dashboards.'},
+  ciso:{title:'Security Manager / CISO Track',domain:'Leadership & Strategy',domainId:'grc',salary:'$130K – $220K+',level:'Senior – Executive',icon:'👔',
+    desc:'Lead entire security programs — owning strategy, managing security teams, controlling budgets, and communicating risk clearly to board members and executive leadership.',
+    daily:'Leading and growing the security team, building the annual security roadmap, presenting to the board, managing vendor relationships, and owning the overall security program budget.'},
+  ma:{title:'Malware Analyst',domain:'Forensics & Threat Intel',domainId:'forensics',salary:'$95K – $155K',level:'Senior – Principal',icon:'🦠',
+    desc:'Reverse-engineer malicious software at the assembly and code level to understand attacker capabilities, extract indicators of compromise, and build stronger defenses.',
+    daily:'Disassembling malware samples using Ghidra and IDA Pro, running sandbox analyses, writing YARA and Sigma detection rules, and publishing technical research for the community.'},
+  vm:{title:'Vulnerability Management Analyst',domain:'Security Operations',domainId:'soc',salary:'$80K – $120K',level:'Mid-Level',icon:'🔍',
+    desc:'Systematically find, prioritize, and drive remediation of vulnerabilities across the entire enterprise before attackers can discover and exploit them.',
+    daily:'Running Tenable or Qualys scans across the environment, risk-scoring CVEs using CVSS and EPSS, coordinating patch campaigns with engineering teams, and reporting metrics to leadership.'}
 };
 
-function renderQuiz(containerId){
-  var inner=document.getElementById(containerId||'quiz-inner');
-  if(!inner) return;
-  if(qState.cur>=QS.length){renderResults();return;}
-  var q=QS[qState.cur];
-  var pct=Math.round((qState.cur/QS.length)*100);
-  var optHtml=q.opts.map(function(o,i){
-    var sel=qState.ans[qState.cur]===i?'selected':'';
-    var letters=['A','B','C','D'];
-    return '<div class="qopt '+sel+'" onclick="selectOpt('+i+')"><div class="qopt-letter">'+letters[i]+'</div><div class="qopt-text">'+o.t+'</div></div>';
-  }).join('');
-  var canNext=qState.ans[qState.cur]!==undefined;
-  inner.innerHTML='<div class="qprogbar"><div class="qprogfill" style="width:'+pct+'%"></div></div>'
-    +'<div class="qnum">Question '+(qState.cur+1)+' of '+QS.length+'</div>'
-    +'<div class="qqtext">'+q.q+'</div>'
-    +'<div class="qopts">'+optHtml+'</div>'
-    +'<div class="qnav">'
-    +(qState.cur>0?'<button class="qbtn qbtn-back" onclick="prevQ()">← Back</button>':'<div></div>')
-    +'<span class="qcount">'+(qState.cur+1)+' / '+QS.length+'</span>'
-    +'<button class="qbtn qbtn-next" onclick="nextQ()" '+(canNext?'':'disabled')+'>'+(qState.cur===QS.length-1?'See Results →':'Next →')+'</button>'
-    +'</div>';
+// ── quiz state ──
+var qz={cur:0,ans:[]};
+
+function quizInit(){
+  qz={cur:0,ans:[]};
+  // reset all selected options
+  document.querySelectorAll('#home-quiz .qopt').forEach(function(el){el.classList.remove('selected');});
+  // hide results, show nav
+  var res=document.getElementById('quiz-results');
+  if(res)res.style.display='none';
+  var nav=document.getElementById('qnav');
+  if(nav)nav.style.display='flex';
+  quizShow(0);
 }
 
-function selectOpt(i){
-  var prev=qState.ans[qState.cur];
-  if(prev!==undefined){
-    var prevScore=QS[qState.cur].opts[prev].s;
-    for(var k in prevScore)qState.scores[k]-=prevScore[k];
+function openHomeQuiz(){
+  // If not on home page, navigate there first
+  if(!document.getElementById('page-home').classList.contains('active')){showPage('home');}
+  var s=document.getElementById('home-quiz');
+  var btn=document.getElementById('quiz-toggle-btn');
+  var wrap=btn?btn.closest('.hero-quiz-wrap'):null;
+  if(!s)return;
+  var isOpen=s.dataset.open==='1';
+  if(isOpen){
+    // Fade OUT
+    s.style.opacity='0';
+    s.dataset.open='0';
+    s.classList.remove('quiz-visible');
+    if(btn){var ar=btn.querySelector('.quiz-arrow');if(ar)ar.textContent='\u25BC';btn.classList.remove('quiz-open');}
+    if(wrap)wrap.classList.remove('quiz-open');
+    setTimeout(function(){s.style.display='none';s.style.opacity='';},340);
+  } else {
+    // Fade IN
+    s.dataset.open='1';
+    s.style.opacity='0';
+    s.style.display='block';
+    s.classList.add('quiz-visible');
+    if(btn){var ar=btn.querySelector('.quiz-arrow');if(ar)ar.textContent='\u25B2';btn.classList.add('quiz-open');}
+    if(wrap)wrap.classList.add('quiz-open');
+    quizInit();
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      s.style.opacity='1';
+      // Measure connector gap before scrolling (layout gap is fixed)
+      if(wrap&&btn){
+        var btnRect=btn.getBoundingClientRect();
+        var quizRect=s.getBoundingClientRect();
+        var gap=quizRect.top-btnRect.bottom-2;
+        wrap.style.setProperty('--connector-h',Math.max(24,Math.round(gap))+'px');
+      }
+      // Scroll so the top of the quiz card is visible (with nav offset) — slight delay for smooth feel
+      setTimeout(function(){
+        var rect=s.getBoundingClientRect();
+        var target=window.pageYOffset+rect.top-68;
+        window.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+      },80);
+    });});
   }
-  qState.ans[qState.cur]=i;
-  var s=QS[qState.cur].opts[i].s;
-  for(var k in s)qState.scores[k]+=s[k];
-  renderQuiz();
 }
 
-function nextQ(){if(qState.ans[qState.cur]===undefined)return;qState.cur++;renderQuiz();}
-function prevQ(){if(qState.cur>0){qState.cur--;renderQuiz();}}
+function quizShow(n){
+  var total=15;
+  // hide all questions
+  for(var i=0;i<total;i++){
+    var el=document.getElementById('qq-'+i);
+    if(el)el.style.display='none';
+  }
+  // show current
+  var cur=document.getElementById('qq-'+n);
+  if(cur)cur.style.display='block';
+  // progress
+  var pct=Math.round((n/total)*100);
+  var bar=document.getElementById('qprog');
+  if(bar)bar.style.width=pct+'%';
+  var num=document.getElementById('qnum');
+  if(num)num.textContent='Question '+(n+1)+' of '+total;
+  var cnt=document.getElementById('qcount');
+  if(cnt)cnt.textContent=(n+1)+' / '+total;
+  // back button
+  var back=document.getElementById('qbtn-back');
+  if(back)back.style.visibility=n>0?'visible':'hidden';
+  // next button
+  var next=document.getElementById('qbtn-next');
+  if(next){
+    next.disabled=qz.ans[n]===undefined;
+    next.textContent=n===total-1?'See Results \u2192':'Next \u2192';
+  }
+}
 
-function renderResults(){
-  var sorted=Object.keys(qState.scores).sort(function(a,b){return qState.scores[b]-qState.scores[a];});
-  var top3=sorted.slice(0,3);
-  var max=qState.scores[sorted[0]]||1;
-  var ranks=['🥇','🥈','🥉'];
-  var rankColors=['rgba(251,191,36,.15)','rgba(148,163,184,.1)','rgba(180,120,60,.1)'];
-  var rankBorderColors=['rgba(251,191,36,.3)','rgba(148,163,184,.2)','rgba(180,120,60,.2)'];
-  var rankTextColors=['var(--am)','#94a3b8','#b4783c'];
-  var cards=top3.map(function(id,i){
-    var m=DOMAINS_META[id];
-    var pct=Math.round((qState.scores[id]/max)*100);
-    return '<div class="qr-card" onclick="showDomain(\''+id+'\')" style="border-color:'+rankBorderColors[i]+';background:'+rankColors[i]+';">'
-      +'<div class="qr-rank" style="background:'+rankColors[i]+';border:1px solid '+rankBorderColors[i]+';color:'+rankTextColors[i]+';">'+ranks[i]+'</div>'
-      +'<div class="qr-icon">'+m.icon+'</div>'
-      +'<div class="qr-info"><div class="qr-name">'+m.name+'</div><div class="qr-why">'+m.why+'</div></div>'
-      +'<div style="text-align:right;flex-shrink:0;"><div class="qr-match" style="color:'+rankTextColors[i]+';">'+pct+'% match</div><div style="font-size:1.2rem;color:var(--dm);margin-top:4px;">→</div></div>'
-      +'</div>';
+function quizPick(q,o){
+  qz.ans[q]=o;
+  var qEl=document.getElementById('qq-'+q);
+  if(qEl){
+    qEl.querySelectorAll('.qopt').forEach(function(el){el.classList.remove('selected');});
+    var opts=qEl.querySelectorAll('.qopt');
+    if(opts[o])opts[o].classList.add('selected');
+  }
+  var next=document.getElementById('qbtn-next');
+  if(next)next.disabled=false;
+}
+
+function quizNext(){
+  if(qz.ans[qz.cur]===undefined)return;
+  if(qz.cur===14){quizShowResults();return;}
+  qz.cur++;
+  quizShow(qz.cur);
+}
+
+function quizBack(){
+  if(qz.cur>0){qz.cur--;quizShow(qz.cur);}
+}
+
+function quizShowResults(){
+  var sc={soc:0,de:0,ir:0,ti:0,pt:0,rt:0,cs:0,se:0,sa:0,as:0,iam:0,grc:0,ciso:0,ma:0,vm:0};
+  for(var i=0;i<15;i++){
+    if(qz.ans[i]===undefined)continue;
+    var s=QUIZ_SCORES[i][qz.ans[i]];
+    for(var k in s)sc[k]=(sc[k]||0)+s[k];
+  }
+  var sorted=Object.keys(sc).sort(function(a,b){return sc[b]-sc[a];});
+  var top5=sorted.slice(0,5);
+  var max=sc[sorted[0]]||1;
+  var medalColors=['rgba(251,191,36,.16)','rgba(148,163,184,.1)','rgba(180,120,60,.1)','rgba(255,255,255,.04)','rgba(255,255,255,.03)'];
+  var borderColors=['rgba(251,191,36,.38)','rgba(148,163,184,.22)','rgba(180,120,60,.22)','rgba(255,255,255,.08)','rgba(255,255,255,.07)'];
+  var accentColors=['#fbbf24','#94a3b8','#b4783c','#6b7280','#6b7280'];
+  var barColors=['linear-gradient(90deg,#fbbf24,#f59e0b)','linear-gradient(90deg,#94a3b8,#64748b)','linear-gradient(90deg,#c2773c,#92400e)','linear-gradient(90deg,var(--bl),var(--pu))','linear-gradient(90deg,var(--bl),var(--pu))'];
+  var medals=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4th','5th'];
+  var cards=top5.map(function(id,i){
+    var jt=JT[id];
+    if(!jt)return '';
+    var pct=Math.round((sc[id]/max)*100);
+    var rankLabel=i<3?medals[i]:(i+1)+'th';
+    return '<div class="qj-card" style="border-color:'+borderColors[i]+';background:'+medalColors[i]+';">'
+      +'<div class="qjc-head">'
+      +'<div class="qjc-rank" style="background:'+medalColors[i]+';border-color:'+borderColors[i]+';color:'+accentColors[i]+';">'+rankLabel+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div class="qjc-title">'+jt.icon+' '+jt.title+'</div>'
+      +'<div class="qjc-meta"><span class="qjc-domain-tag">'+jt.domain+'</span><span class="qjc-sep"> &middot; </span><span class="qjc-level">'+jt.level+'</span></div>'
+      +'</div>'
+      +'<div class="qjc-pct" style="color:'+accentColors[i]+';">'+pct+'%<span class="qjc-pct-lbl">match</span></div>'
+      +'</div>'
+      +'<div class="qjc-bar-wrap"><div class="qjc-bar-fill" style="width:'+pct+'%;background:'+barColors[i]+';"></div></div>'
+      +'<div class="qjc-desc">'+jt.desc+'</div>'
+      +'<div class="qjc-daily"><span class="qjc-daily-lbl">Daily: </span>'+jt.daily+'</div>'
+      +'<div class="qjc-footer">'
+      +'<div class="qjc-salary">'+jt.salary+'</div>'
+      +'<div class="qjc-actions">'
+      +'<button class="qjc-btn-primary" style="border-color:'+borderColors[i]+';color:'+accentColors[i]+'" onclick="showPage(\'domains\')">Explore Domain &rarr;</button>'
+      +'</div></div></div>';
   }).join('');
-  document.getElementById('quiz-inner').innerHTML='<div class="qresult">'
-    +'<div style="font-size:2rem;margin-bottom:12px;">🎯</div>'
-    +'<div class="qr-title">Your Top 3 Cybersecurity Domains</div>'
-    +'<div class="qr-sub">Based on your answers, these specializations best match your interests and working style.<br>Click any result to explore that domain in detail.</div>'
-    +'<div class="qr-cards">'+cards+'</div>'
-    +'<button class="qretry" onclick="retryQuiz()">↺ Retake Quiz</button>'
-    +'</div>';
-}
-
-function retryQuiz(){
-  qState={cur:0,ans:[],scores:{iam:0,soc:0,eng:0,cloud:0,appsec:0,red:0,grc:0,forensics:0}};
-  renderQuiz('quiz-inner');
+  // hide questions and nav, show results
+  for(var i=0;i<15;i++){var el=document.getElementById('qq-'+i);if(el)el.style.display='none';}
+  var nav=document.getElementById('qnav');
+  if(nav)nav.style.display='none';
+  var res=document.getElementById('quiz-results');
+  if(res){
+    res.innerHTML='<div style="text-align:center;margin-bottom:20px;"><div style="font-size:2rem;margin-bottom:8px;">\uD83C\uDFAF</div>'
+      +'<div class="qr-title">Your Top 5 Cybersecurity Roles</div>'
+      +'<div class="qr-sub">Based on your answers, here are the roles that best fit your strengths and working style.</div></div>'
+      +'<div class="qj-cards">'+cards+'</div>'
+      +'<div style="text-align:center;margin-top:28px;">'
+      +'<button class="qretry" onclick="quizInit()">&#x21BA; Retake Quiz</button>'
+      +'</div>';
+    res.style.display='block';
+  }
 }
 
 // ══════════════════════ CERT DATA ══════════════════════
@@ -250,7 +331,76 @@ var CERTS={
   'togaf':{name:'TOGAF 9/10 Enterprise Architecture',issuer:'The Open Group · ~$550 (combined exam)',tier:'Principal (Tier 4–5)',tierClass:'principal',domains:['Security Eng.'],tags:['Vendor-Neutral','Architecture','Enterprise','Framework'],desc:'Enterprise architecture framework widely used alongside SABSA for large-scale security architecture. Covers architecture development methodology, governance, and content framework. Expected at Principal Security Architect level.',links:[{t:'rlc',l:'https://www.udemy.com/course/togaf-training/',tx:'★ TOGAF Course on Udemy'}]},
   'osce3':{name:'OSCE3 – Offensive Security Expert',issuer:'Offensive Security · Requires OSED + OSEP + OSWE',tier:'Principal (Tier 4–5)',tierClass:'principal',domains:['Offensive'],tags:['Vendor-Neutral','OffSec','Expert','Advanced'],desc:'OffSec triple expert designation: requires passing OSED (exploit dev), OSEP (advanced evasion), and OSWE (advanced web attacks). Extremely advanced. Reserved for the most elite offensive security professionals.',links:[{t:'rlf',l:'https://www.offsec.com/courses/exp-401/',tx:'OffSec Expert Track →'}]},
   'crto2':{name:'CRTO II – Certified Red Team Lead',issuer:'Zero-Point Security · ~$499 · Follows CRTO',tier:'Principal (Tier 4–5)',tierClass:'principal',domains:['Offensive'],tags:['Vendor-Specific','Red Team','Advanced C2','Zero-Point'],desc:'Advanced red team operations cert following CRTO. Covers advanced C2 tradecraft, bypassing modern defenses, cross-forest AD attacks, and red team program leadership. Report-based exam.',links:[{t:'rlf',l:'https://training.zeropointsecurity.co.uk/courses/red-team-ops-ii',tx:'Zero-Point Security →'}]},
-  'gwapt':{name:'GIAC Web Application Penetration Tester (GWAPT)',issuer:'GIAC/SANS · Exam ~$979',tier:'Mid-Senior (Tier 2–4)',tierClass:'mid',domains:['AppSec','Offensive'],tags:['Vendor-Neutral','GIAC','SANS','Web App'],desc:'SANS-backed web application penetration testing credential. Covers SQL injection, XSS, authentication attacks, and web app recon. Highly respected for AppSec and offensive security practitioners.',links:[{t:'rlf',l:'https://www.giac.org/certifications/web-application-penetration-tester-gwapt/',tx:'GIAC GWAPT Info →'}]}};
+  'gwapt':{name:'GIAC Web Application Penetration Tester (GWAPT)',issuer:'GIAC/SANS · Exam ~$979',tier:'Mid-Senior (Tier 2–4)',tierClass:'mid',domains:['AppSec','Offensive'],tags:['Vendor-Neutral','GIAC','SANS','Web App'],desc:'SANS-backed web application penetration testing credential. Covers SQL injection, XSS, authentication attacks, and web app recon. Highly respected for AppSec and offensive security practitioners.',links:[{t:'rlf',l:'https://www.giac.org/certifications/web-application-penetration-tester-gwapt/',tx:'GIAC GWAPT Info →'}]},
+  // ── New entries ──
+  'gsec':{name:'GIAC Security Essentials (GSEC)',issuer:'GIAC/SANS · Exam ~$979 · Requires SANS course',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['All Domains'],tags:['Vendor-Neutral','GIAC','SANS','Hands-on'],desc:'SANS-backed entry credential covering practical security skills including networking, cryptography, Linux, Windows security, and incident response. More technical and hands-on than Security+. Open-book exam format.',links:[{t:'rlc',l:'https://www.sans.org/cyber-security-courses/security-essentials-network-endpoint-cloud/',tx:'📚 SANS SEC401 (GSEC prep)'},{t:'rlf',l:'https://www.giac.org/certifications/security-essentials-gsec/',tx:'🔗 GIAC Official Info'}]},
+  'ccd':{name:'CompTIA CCD – Cybersecurity Certified Defense',issuer:'CompTIA · Entry-level · ~$350',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['SOC'],tags:['Vendor-Neutral','CompTIA','Blue Team'],desc:'Entry-level CompTIA credential covering core defensive security skills: threat triage, log monitoring, basic malware analysis, and incident escalation. Designed as the first blue-team cert on the CompTIA pathway.',links:[{t:'rlf',l:'https://www.comptia.org/',tx:'🔗 CompTIA Official'}]},
+  'sc200':{name:'SC-200 – Microsoft Security Operations Analyst',issuer:'Microsoft · Exam SC-200 · ~$165',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['SOC'],tags:['Vendor-Specific','Microsoft','Sentinel','Defender'],desc:'Microsoft\'s SOC analyst certification. Covers Microsoft Defender XDR, Microsoft Sentinel, and Microsoft Defender for Cloud. Practical skills for managing security in Microsoft-heavy environments. Strong pairing with CySA+.',links:[{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/security-operations-analyst/',tx:'🎥 Microsoft Learn (Free)'},{t:'rlc',l:'https://www.udemy.com/course/sc-200-microsoft-security-operations-analyst/',tx:'📚 Udemy – SC-200 Prep'}]},
+  'a-plus':{name:'CompTIA A+',issuer:'CompTIA · Exam Core 1 & Core 2 · ~$254 each',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['All Domains'],tags:['Vendor-Neutral','CompTIA','IT Fundamentals'],desc:'The foundational IT cert covering hardware, operating systems, networking basics, troubleshooting, and IT support. The standard starting point for career changers entering IT/security from non-technical backgrounds. Two separate exams required.',links:[{t:'rlc',l:'https://www.udemy.com/course/comptia-a-core-1-220-1101-and-core-2-220-1102/',tx:'📚 Udemy – Professor Messer A+'},{t:'rlf',l:'https://www.professormesser.com/free-a-plus-training/220-1101/220-1101-video/220-1101-training-course/',tx:'🎥 Prof. Messer (Free)'}]},
+  'cc-csp':{name:'ISC² CC + Cloud Practitioner Bundle',issuer:'ISC² (CC) + AWS/Azure · Entry combination',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['Cloud'],tags:['Vendor-Neutral','Entry Combo','Cloud'],desc:'Strategic entry combination for cloud security careers: ISC² Certified in Cybersecurity (CC, free) paired with either AWS Cloud Practitioner or AZ-900. Together they signal cloud security intent to hiring managers without requiring deep experience.',links:[{t:'rlf',l:'https://www.isc2.org/certifications/cc',tx:'🔗 ISC² CC (Free)'},{t:'rlf',l:'https://aws.amazon.com/training/digital/aws-cloud-practitioner-essentials/',tx:'🎥 AWS CCP Free Training'}]},
+  'ewapt':{name:'INE eWAPT – Web Application Penetration Tester',issuer:'INE Security / eLearnSecurity · ~$400',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['Offensive','AppSec'],tags:['Vendor-Specific','INE','Practical','Web App'],desc:'Fully practical web application penetration testing cert from INE Security. Covers OWASP Top 10, SQL injection, XSS, SSRF, and modern web exploitation. Lab-based exam — no multiple choice. A strong entry offensive credential.',links:[{t:'rlc',l:'https://ine.com/certifications/ewaptv2-certification/',tx:'📚 INE eWAPT Official'}]},
+  'iso27001-a':{name:'ISO 27001 Foundation / Associate',issuer:'PECB / BSI · ~$350–$600',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['GRC'],tags:['Vendor-Neutral','ISO 27001','GRC','Foundation'],desc:'Entry-level ISO 27001 credential. Covers the core concepts of an Information Security Management System (ISMS) based on ISO/IEC 27001. Ideal first step for GRC professionals before pursuing Lead Implementer or Lead Auditor.',links:[{t:'rlf',l:'https://pecb.com/en/education-and-certification-for-individuals/iso-iec-27001',tx:'🔗 PECB ISO 27001 Info'}]},
+  'ace':{name:'AccessData Certified Examiner (ACE)',issuer:'Exterro (formerly AccessData) · FTK-based',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['DFIR'],tags:['Vendor-Specific','Digital Forensics','FTK','AccessData'],desc:'Entry digital forensics certification for the FTK (Forensic Toolkit) platform. Covers forensic acquisition, file system analysis, email analysis, and basic artifact review. Widely recognized in law enforcement and corporate DFIR contexts.',links:[{t:'rlf',l:'https://www.exterro.com/forensics-training/',tx:'🔗 Exterro/FTK Training'}]},
+  'gslc':{name:'GIAC Security Leadership (GSLC)',issuer:'GIAC/SANS · ~$979',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['GRC'],tags:['Vendor-Neutral','GIAC','SANS','Leadership'],desc:'SANS cert bridging technical security expertise and people management. Covers technical security controls, project management, security operations, and team leadership. Valuable for practitioners transitioning into security management.',links:[{t:'rlc',l:'https://www.giac.org/certifications/security-leadership-gslc/',tx:'🔗 GIAC GSLC Info'}]},
+  'sc100':{name:'SC-100 – Microsoft Cybersecurity Architect',issuer:'Microsoft · Exam SC-100 · ~$165 · Expert-level',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['Security Eng.','Cloud'],tags:['Vendor-Specific','Microsoft','Expert-Level','Architecture'],desc:'Microsoft\'s expert-level security architecture credential. Requires prior SC-200, AZ-500, or SC-300. Covers Zero Trust strategy, governance, risk compliance, security operations architecture, and identity architecture across Azure and hybrid environments.',links:[{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/cybersecurity-architect-expert/',tx:'🎥 Microsoft Learn (Free)'},{t:'rlc',l:'https://www.udemy.com/course/sc-100-microsoft-cybersecurity-architect/',tx:'📚 Udemy – SC-100 Course'}]},
+  'gced':{name:'GIAC Certified Enterprise Defender (GCED)',issuer:'GIAC/SANS · ~$979',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['Security Eng.'],tags:['Vendor-Neutral','GIAC','SANS','Enterprise'],desc:'SANS cert for security engineers and defenders. Covers network defense, endpoint security, hardening techniques, and defensive security architecture. Practical focus on building and maintaining enterprise defenses.',links:[{t:'rlc',l:'https://www.giac.org/certifications/certified-enterprise-defender-gced/',tx:'🔗 GIAC GCED Info'}]},
+  'gnfa':{name:'GIAC Network Forensic Analyst (GNFA)',issuer:'GIAC/SANS · ~$979',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['DFIR'],tags:['Vendor-Neutral','GIAC','SANS','Network Forensics'],desc:'SANS cert covering network traffic analysis, deep packet inspection, and network artifact forensics. Uses Wireshark, Zeek/Bro, and NetworkMiner. Valuable for incident response and threat hunting roles requiring network evidence analysis.',links:[{t:'rlc',l:'https://www.giac.org/certifications/network-forensic-analyst-gnfa/',tx:'🔗 GIAC GNFA Info'}]},
+  'ghas':{name:'GitHub Advanced Security (GHAS)',issuer:'GitHub · Exam · ~$200',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AppSec'],tags:['Vendor-Specific','GitHub','DevSecOps','CI/CD'],desc:'GitHub\'s DevSecOps certification covering code scanning (CodeQL), secret scanning, dependency review, and supply chain security in CI/CD pipelines. Essential for AppSec engineers working in GitHub Enterprise environments.',links:[{t:'rlf',l:'https://education.github.com/experiences/github_advanced_security',tx:'🔗 GitHub Advanced Security'},{t:'rlf',l:'https://resources.github.com/security/advanced-security/',tx:'🎥 GitHub Security Docs (Free)'}]},
+  'ecppt':{name:'INE eCPPT – Certified Professional Penetration Tester',issuer:'INE Security · ~$400 · Practical exam',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['Offensive'],tags:['Vendor-Specific','INE','Practical','Network Pentesting'],desc:'INE\'s advanced penetration testing credential. Covers full network penetration testing methodology, web application attacks, privilege escalation, lateral movement, and professional report writing. Strong stepping stone to OSCP.',links:[{t:'rlc',l:'https://ine.com/certifications/ecppt-certification/',tx:'📚 INE eCPPT Official'}]},
+  'crea':{name:'CREA – Certified Reverse Engineering Analyst',issuer:'Mile2 / Various providers · Entry-level',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['DFIR'],tags:['Vendor-Neutral','Reverse Engineering','Malware Analysis'],desc:'Foundational reverse engineering credential. Covers assembly language basics, static and dynamic malware analysis, and use of disassembly tools. Good entry point before pursuing GREM for those entering the malware analysis track.',links:[{t:'rlf',l:'https://www.mile2.com/certified-reverse-engineering-analyst-crea/',tx:'🔗 CREA Cert Info'}]},
+  'gstrt':{name:'GIAC Strategic Planning, Policy & Leadership (GSTRT)',issuer:'GIAC/SANS · ~$979',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['GRC'],tags:['Vendor-Neutral','GIAC','SANS','Leadership','Policy'],desc:'SANS cert covering security strategy, policy development, security program management, and leadership skills. Valuable for security managers, directors, and GRC professionals developing organizational security programs.',links:[{t:'rlc',l:'https://www.giac.org/certifications/strategic-planning-policy-leadership-gstrt/',tx:'🔗 GIAC GSTRT Info'}]},
+  'sailpoint':{name:'SailPoint Certified Identity Professional',issuer:'SailPoint · Vendor certification · Tiered',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['IAM'],tags:['Vendor-Specific','SailPoint','IGA','Identity Governance'],desc:'SailPoint IIQ/IdentityNow platform certification for Identity Governance and Administration (IGA) implementation and administration. SailPoint is the market leader in enterprise IGA solutions. Strong demand in large enterprises.',links:[{t:'rlf',l:'https://university.sailpoint.com/',tx:'🔗 SailPoint University'}]},
+  'gicsp':{name:'GIAC Industrial Cyber Security Professional (GICSP)',issuer:'GIAC/SANS · ~$979',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['Security Eng.'],tags:['Vendor-Neutral','GIAC','SANS','ICS','OT Security'],desc:'SANS cert specifically for ICS/OT/SCADA security professionals. Covers industrial protocols, ICS architecture, cyber-physical security, and defense strategies for energy, utilities, and manufacturing environments. High demand in critical infrastructure sectors.',links:[{t:'rlc',l:'https://www.giac.org/certifications/industrial-cyber-security-professional-gicsp/',tx:'🔗 GIAC GICSP Info'}]},
+  'ccsk':{name:'CCSK – Certificate of Cloud Security Knowledge',issuer:'Cloud Security Alliance · ~$395 · Self-paced',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['Cloud'],tags:['Vendor-Neutral','CSA','Cloud Security','Foundation'],desc:'Cloud Security Alliance\'s foundational vendor-neutral cloud security certification. Covers the CSA Cloud Controls Matrix, security architecture, identity management, and data security. Good stepping stone to CCSP. Open-book 90-question exam.',links:[{t:'rlf',l:'https://cloudsecurityalliance.org/education/ccsk/',tx:'🔗 CSA CCSK Official'}]},
+  'case':{name:'EC-Council CASE – Certified Application Security Engineer',issuer:'EC-Council · Java or .NET track · ~$400',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['AppSec'],tags:['Vendor-Neutral','EC-Council','Application Security','SDLC'],desc:'Application security engineering cert covering threat modeling, secure code review, SAST/DAST, secure SDLC, and penetration testing fundamentals for Java or .NET environments. Complements PNPT or eWAPT for AppSec roles.',links:[{t:'rlf',l:'https://www.eccouncil.org/train-certify/certified-application-security-engineer-case/',tx:'🔗 EC-Council CASE Info'}]},
+  'iso-li':{name:'ISO 27001 Lead Implementer',issuer:'PECB / BSI · ~$1,500–$2,000',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['GRC'],tags:['Vendor-Neutral','ISO 27001','Implementation','Compliance'],desc:'Validates expertise in designing, implementing, and managing an ISO/IEC 27001 ISMS. Distinct from Lead Auditor. Required for senior GRC consulting, Head of Compliance, and Information Security Manager roles at global enterprises.',links:[{t:'rlc',l:'https://www.udemy.com/course/iso-27001-lead-implementer-preparation-course/',tx:'📚 Udemy – ISO 27001 Lead Impl.'}]},
+  'cgeit':{name:'ISACA CGEIT – Certified in Governance of Enterprise IT',issuer:'ISACA · ~$575 members · 5yr exp required',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['GRC'],tags:['Vendor-Neutral','ISACA','IT Governance','Enterprise'],desc:'ISACA\'s IT governance credential. Covers governance frameworks, strategic alignment, value delivery, and risk management from an enterprise IT perspective. Valued for GRC Director, VP of Security, and CISO-track professionals.',links:[{t:'rlf',l:'https://www.isaca.org/credentialing/cgeit',tx:'🔗 ISACA CGEIT Info'}]},
+  'gcfa-adv':{name:'GCFA + Memory Forensics Specialization',issuer:'GIAC/SANS · GCFA + FOR508',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['DFIR'],tags:['Vendor-Neutral','GIAC','SANS','Memory Forensics','Advanced'],desc:'Senior DFIR specialization path combining GCFA certification with deep Volatility/memory forensics expertise. Covers enterprise-scale incident response, timeline analysis, anti-forensics, and advanced persistent threat investigations.',links:[{t:'rlc',l:'https://www.sans.org/cyber-security-courses/advanced-incident-response-threat-hunting-training/',tx:'📚 SANS FOR508 (GCFA prep)'},{t:'rlf',l:'https://github.com/volatilityfoundation/volatility3',tx:'🆓 Volatility3 (Free)'}]},
+  'mcfe':{name:'Magnet Forensics MCFE – Certified Forensics Examiner',issuer:'Magnet Forensics · Vendor certification',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['DFIR'],tags:['Vendor-Specific','Magnet Forensics','Digital Forensics','Investigation'],desc:'Magnet Forensics Axiom platform certification. Covers forensic acquisition, artifact analysis, mobile device forensics, and report generation using Magnet tools. Valued in enterprise DFIR, law enforcement, and e-discovery roles.',links:[{t:'rlf',l:'https://www.magnetforensics.com/training/',tx:'🔗 Magnet Forensics Training'}]},
+  'osed':{name:'OSED – OffSec Exploit Developer',issuer:'Offensive Security · EXP-301 · ~$1,499 · 48hr exam',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['Offensive'],tags:['Vendor-Neutral','OffSec','Exploit Dev','Windows'],desc:'OffSec\'s Windows exploit development certification. Covers buffer overflows, SEH exploitation, heap sprays, egghunters, and format string attacks. One of three certs required for OSCE3. Extremely demanding hands-on exam.',links:[{t:'rlf',l:'https://www.offsec.com/courses/exp-301/',tx:'🔗 OffSec OSED Official'}]},
+  'cissp-issmp':{name:'CISSP-ISSMP – Information Security Management Professional',issuer:'ISC² · Requires active CISSP',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['GRC'],tags:['Vendor-Neutral','ISC²','CISSP Concentration','Management'],desc:'CISSP concentration for security program managers and CISO-track professionals. Focuses on leadership, project management, risk management, and aligning security programs with business objectives. Renewed with CISSP CPE credits.',links:[{t:'rlf',l:'https://www.isc2.org/Certifications/CISSP-Concentrations',tx:'🔗 ISC² Official Info'}]},
+  'cism-crisc':{name:'CISM + CRISC – Management & Risk Dual Path',issuer:'ISACA · Combined credential path',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['GRC'],tags:['Vendor-Neutral','ISACA','Management','Risk Management'],desc:'ISACA\'s premier dual-credential path: CISM for security management combined with CRISC for risk management. The standard executive preparation track in GRC-heavy organizations. Positions holders for CISO, Director of Risk, and VP of Security roles.',links:[{t:'rlf',l:'https://www.isaca.org/credentialing/cism',tx:'🔗 ISACA CISM Info'},{t:'rlf',l:'https://www.isaca.org/credentialing/crisc',tx:'🔗 ISACA CRISC Info'}]},
+  'ciam-adv':{name:'CIAM Advanced – Identity Management Leadership',issuer:'Identity Management Institute · Advanced level',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['IAM'],tags:['Vendor-Neutral','IAM','Leadership','Enterprise'],desc:'Advanced IAM leadership and architecture certification from the Identity Management Institute. Covers enterprise IAM program management, Zero Trust identity strategy, advanced IGA governance, and executive reporting for identity programs.',links:[{t:'rlf',l:'https://www.identitymanagementinstitute.org/',tx:'🔗 IMI Official'}]},
+  'gsom':{name:'GIAC Security Operations Manager (GSOM)',issuer:'GIAC/SANS · ~$979',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['SOC'],tags:['Vendor-Neutral','GIAC','SANS','SOC Management'],desc:'SANS credential for SOC managers and leaders. Covers metrics and measurement, SOC team management, process improvement, tool selection, and executive-level reporting. Designed for those managing security operations teams.',links:[{t:'rlc',l:'https://www.giac.org/certifications/security-operations-manager-gsom/',tx:'🔗 GIAC GSOM Info'}]},
+  'aws-pro':{name:'AWS Solutions Architect Professional',issuer:'Amazon Web Services · Exam SAP-C02 · ~$300',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['Cloud'],tags:['Vendor-Specific','AWS','Advanced Architecture'],desc:'The most advanced AWS architecture certification. Covers complex, multi-account, enterprise-scale architectures including security, migration, and cost optimization. Requires SAA-C03 and 2+ years of hands-on AWS experience.',links:[{t:'rlc',l:'https://www.udemy.com/course/aws-solutions-architect-professional/',tx:'📚 Udemy – AWS Pro Arch'},{t:'rlf',l:'https://aws.amazon.com/certification/certified-solutions-architect-professional/',tx:'🔗 AWS Official'}]},
+  'ccsp-plus':{name:'CCSP + Cloud Security Specialty',issuer:'ISC² + AWS/Azure/Google · Combined path',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['Cloud'],tags:['Vendor-Neutral','ISC²','Cloud Security','Combined'],desc:'The industry-standard senior cloud security combination: CCSP (vendor-neutral, ISC²) paired with a cloud provider specialty cert (AWS SCS-C02, AZ-500, or GCP Security). Together they signal both architectural breadth and vendor depth.',links:[{t:'rlf',l:'https://www.isc2.org/Certifications/CCSP',tx:'🔗 ISC² CCSP Info'}]},
+  'csslp-gweb':{name:'CSSLP + GWEB – Senior AppSec Path',issuer:'ISC² (CSSLP) + GIAC (GWEB) · Combined',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['AppSec'],tags:['Vendor-Neutral','Combined Path','SDLC Governance','Web Security'],desc:'Senior AppSec specialization combining CSSLP (ISC² SDLC governance) with GWEB (SANS/GIAC web application security). Together they provide both the program management and technical depth expected at Staff AppSec Engineer or Principal roles.',links:[{t:'rlf',l:'https://www.isc2.org/Certifications/CSSLP',tx:'🔗 ISC² CSSLP Info'},{t:'rlf',l:'https://www.giac.org/certifications/web-application-defender-gweb/',tx:'🔗 GIAC GWEB Info'}]},
+  'oswe':{name:'OSWE – OffSec Web Expert',issuer:'Offensive Security · WEB-300 · ~$1,499 · 48hr exam',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['AppSec','Offensive'],tags:['Vendor-Neutral','OffSec','White-box','Web Exploitation'],desc:'OffSec\'s advanced web application security certification. White-box testing approach — you have source code access. Covers custom exploit development, authentication bypasses, and chaining web vulnerabilities. One of three certs for OSCE3.',links:[{t:'rlf',l:'https://www.offsec.com/courses/web-300/',tx:'🔗 OffSec OSWE Official'}]},
+  'crtl':{name:'CRTL – OffSec Red Team Lead',issuer:'Offensive Security · RTL-100 · Lab-based',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['Offensive'],tags:['Vendor-Neutral','OffSec','Red Team','Leadership'],desc:'OffSec\'s red team leadership certification. Covers enterprise red team operations, purple teaming methodology, C2 infrastructure management, and red team program development. For experienced red teamers moving into leadership roles.',links:[{t:'rlf',l:'https://www.offsec.com/courses/rtl-100/',tx:'🔗 OffSec CRTL Official'}]},
+  'cipt':{name:'IAPP CIPT – Certified Information Privacy Technologist',issuer:'IAPP · Exam ~$550',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['GRC'],tags:['Vendor-Neutral','Privacy','IAPP','Technical Privacy'],desc:'IAPP\'s technical privacy credential. Covers Privacy by Design (PbD), privacy-enhancing technologies (PETs), data architecture, and technical compliance implementation. Designed for GRC architects, security engineers, and technical privacy professionals.',links:[{t:'rlf',l:'https://iapp.org/certify/cipt/',tx:'🔗 IAPP CIPT Info'}]},
+  'cgrc':{name:'ISC² CGRC – Certified in Governance, Risk & Compliance',issuer:'ISC² · Exam ~$599 · Formerly CAP',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['GRC'],tags:['Vendor-Neutral','ISC²','RMF','FedRAMP'],desc:'ISC² credential (formerly the Certified Authorization Professional/CAP) for Risk Management Framework (RMF) and ATO processes. Essential for GRC practitioners in federal government, defense contractors, and FedRAMP-compliant environments.',links:[{t:'rlf',l:'https://www.isc2.org/Certifications/CGRC',tx:'🔗 ISC² CGRC Info'}]},
+  'nacd':{name:'NACD Cyber-Risk Oversight Certificate',issuer:'National Association of Corporate Directors · ~$1,000',tier:'Executive (Tier 5–6)',tierClass:'tier-exec',domains:['GRC'],tags:['Executive','Board-Level','Governance','Risk Oversight'],desc:'Non-technical strategic certification for CISOs who present to boards and for board members overseeing cyber risk. Covers board-level cyber risk governance, regulatory expectations, and communicating security risk in business terms.',links:[{t:'rlf',l:'https://www.nacdonline.org/education-and-research/courses/cybersecurity/',tx:'🔗 NACD Cybersecurity Program'}]},
+  'cams':{name:'CAMS – Certified Anti-Money Laundering Specialist',issuer:'ACAMS · ~$1,195 · 3–5yr exp preferred',tier:'Executive (Tier 5–6)',tierClass:'tier-exec',domains:['GRC'],tags:['Executive','Financial Services','AML','Compliance'],desc:'The gold standard AML/financial crimes compliance credential. Relevant for IAM and GRC executives in banking and financial services — especially where regulatory identity verification, KYC/AML programs, and transaction monitoring intersect with security.',links:[{t:'rlf',l:'https://www.acams.org/en/certifications/cams',tx:'🔗 ACAMS CAMS Info'}]},
+  'gse':{name:'GIAC Security Expert (GSE)',issuer:'GIAC/SANS · Written + Hands-on Lab · Invitation-controlled',tier:'Principal (Tier 4–5)',tierClass:'tier-principal',domains:['All Domains'],tags:['Vendor-Neutral','GIAC','Elite','Fewer than 300 Holders'],desc:'The most prestigious GIAC certification. Requires passing a written exam AND a grueling hands-on lab exam. Fewer than 300 holders worldwide. Demonstrates mastery across multiple security domains. One of the most difficult credentials in the industry to earn.',links:[{t:'rlf',l:'https://www.giac.org/certifications/security-expert-gse/',tx:'🔗 GIAC GSE Official'}]},
+  'csa-star':{name:'CSA STAR + CCSP – Cloud Program Leadership',issuer:'Cloud Security Alliance + ISC²',tier:'Executive (Tier 5–6)',tierClass:'tier-exec',domains:['Cloud'],tags:['Executive','Cloud Security','Program Leadership'],desc:'Cloud security program leadership combination: CSA STAR certification (organizational cloud assurance) awareness combined with CCSP (personal vendor-neutral cloud security expertise). For cloud security program executives overseeing multi-cloud compliance.',links:[{t:'rlf',l:'https://cloudsecurityalliance.org/star/',tx:'🔗 CSA STAR Program'}]},
+  'csslp-m':{name:'CSSLP + Software Security Program Leadership',issuer:'ISC² CSSLP + SANS GWEB/MGT · Senior track',tier:'Executive (Tier 5–6)',tierClass:'tier-exec',domains:['AppSec'],tags:['Executive','AppSec Program','SDLC Governance'],desc:'Senior AppSec program leadership track combining CSSLP (ISC² SDLC governance), GWEB (SANS web security), and SANS security management courses. For principals and executives running software security programs at scale.',links:[{t:'rlf',l:'https://www.isc2.org/Certifications/CSSLP',tx:'🔗 ISC² CSSLP Info'}]},
+  'gxpn':{name:'GIAC Exploit Researcher & Advanced Penetration Tester (GXPN)',issuer:'GIAC/SANS · ~$979 · SEC660 prep course',tier:'Executive (Tier 5–6)',tierClass:'tier-exec',domains:['Offensive'],tags:['Vendor-Neutral','GIAC','SANS','Elite','Exploit Dev'],desc:'SANS\'s most advanced offensive credential. Covers exploit development, kernel and user-mode exploits, advanced network attacks, cryptographic attacks, and fuzzing. Prep course is SANS SEC660. One of the most technically demanding offensive certs.',links:[{t:'rlc',l:'https://www.sans.org/cyber-security-courses/advanced-penetration-testing-exploits-ethical-hacking/',tx:'📚 SANS SEC660 (GXPN prep)'}]},
+  'fip':{name:'IAPP FIP – Fellow of Information Privacy',issuer:'IAPP · Application-based · ~$695',tier:'Executive (Tier 5–6)',tierClass:'tier-exec',domains:['GRC'],tags:['Vendor-Neutral','IAPP','Privacy','Fellowship'],desc:'The highest designation awarded by the IAPP. Recognizes senior privacy executives who have demonstrated significant contributions to the privacy field. Application-based process requiring active privacy management certification and demonstrated experience.',links:[{t:'rlf',l:'https://iapp.org/certify/fip/',tx:'🔗 IAPP FIP Program'}]},
+  'cimp':{name:'CIMP – Certified Identity Management Professional',issuer:'Identity Management Institute · ~$395',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['IAM'],tags:['Vendor-Neutral','IAM','Identity Management','IMI'],desc:'Mid-level IAM credential from the Identity Management Institute. Covers identity lifecycle management, provisioning/deprovisioning, role management, and compliance. Specifically designed for IAM practitioners in governance-heavy environments.',links:[{t:'rlf',l:'https://www.identitymanagementinstitute.org/cimp/',tx:'🔗 IMI CIMP Info'}]},
+  'cige':{name:'CIGE – Certified Identity Governance Expert',issuer:'Identity Management Institute · ~$495',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['IAM'],tags:['Vendor-Neutral','IAM','IGA','Governance'],desc:'Advanced IAM governance credential from IMI. Covers identity governance and administration (IGA), access certification, separation of duties (SoD), and policy enforcement. Designed for senior IAM engineers moving into governance leadership roles.',links:[{t:'rlf',l:'https://www.identitymanagementinstitute.org/cige/',tx:'🔗 IMI CIGE Info'}]},
+  'sc401':{name:'SC-401 – Microsoft Information Protection Administrator',issuer:'Microsoft · Exam SC-401 · ~$165',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['GRC','Cloud'],tags:['Vendor-Specific','Microsoft','Data Protection','Purview'],desc:'Microsoft\'s data protection and compliance administrator cert. Covers Microsoft Purview, sensitivity labels, data loss prevention (DLP), insider risk management, and information barriers. Essential for GRC roles in Microsoft 365 environments.',links:[{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/information-protection-administrator/',tx:'🎥 Microsoft Learn (Free)'}]},
+  'ccna-sec':{name:'Cisco CCNA Security / CyberOps',issuer:'Cisco · CyberOps Associate · ~$330',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['SOC','Security Eng.'],tags:['Vendor-Specific','Cisco','Networking','SOC'],desc:'Cisco\'s entry-level security certification for network security and SOC roles. CyberOps Associate covers monitoring, detection, analysis, and response workflows in a SOC environment. Strong for candidates in Cisco-heavy network environments.',links:[{t:'rlf',l:'https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/associate/ccna-cyberops.html',tx:'🔗 Cisco CyberOps Associate'}]},
+  'ccnp-sec':{name:'Cisco CCNP Security',issuer:'Cisco · Professional level · ~$400 core + $300 concentration',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['Security Eng.'],tags:['Vendor-Specific','Cisco','Network Security','Professional'],desc:'Cisco\'s professional-level network security certification. Core exam covers security architecture, network security, content security, endpoint protection, and secure network access. Concentration exams available in SISE (ISE), SVPN, SNCF, and SAUTO.',links:[{t:'rlf',l:'https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/professional/ccnp-security.html',tx:'🔗 Cisco CCNP Security'}]},
+  'cks':{name:'CKS – Certified Kubernetes Security Specialist',issuer:'CNCF / Linux Foundation · ~$395 · Hands-on exam',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['Cloud'],tags:['Vendor-Neutral','CNCF','Kubernetes','Container Security'],desc:'Linux Foundation\'s hands-on Kubernetes security certification. Covers cluster hardening, system hardening, minimizing microservice vulnerabilities, supply chain security, and runtime security with Falco. Requires active CKA (Kubernetes Administrator) cert.',links:[{t:'rlf',l:'https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/',tx:'🔗 CNCF CKS Official'}]},
+  'sc300':{name:'SC-300 – Identity & Access Administrator',issuer:'Microsoft · Exam SC-300 · ~$165',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['IAM'],tags:['IAM Track','Microsoft','Entra ID'],desc:'Most in-demand IAM cert. Covers SSO, conditional access, PIM, identity governance, and entitlement management in Entra ID. Essential for IAM Engineer roles in Microsoft environments.',links:[{t:'rlc',l:'https://www.udemy.com/course/sc-300-microsoft-identity-and-access-administrator/',tx:'📚 Udemy – SC-300 Course'},{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/identity-and-access-administrator/',tx:'🎥 Microsoft Learn (Free)'}]}
+};
+
+// ── CERTS Aliases (HTML badge IDs → canonical CERTS key) ──
+CERTS['cc']=CERTS['isc2-cc'];
+CERTS['itil4']=CERTS['itil'];
+CERTS['cipp-us']=CERTS['cipp'];
+CERTS['cco']=CERTS['cellebrite'];
+CERTS['securityx']=CERTS['casp'];
+CERTS['ca-defender']=CERTS['cyberark-def'];
+CERTS['ca-sentry']=CERTS['cyberark-sen'];
+CERTS['ca-guardian']=CERTS['cyberark-guard'];
+CERTS['cysa-plus']=CERTS['cysa'];
+CERTS['splunk-cu']=CERTS['splunk-core'];
+CERTS['splunk-esa']=CERTS['splunk-es'];
+CERTS['iso-la']=CERTS['iso27001-la'];
+CERTS['iso-li']=CERTS['iso27001'];
+CERTS['gweb-a']=CERTS['gweb'];
+CERTS['sabsa-scf']=CERTS['sabsa'];
 
 // Tier→Ladder mapping
 var TIER_TO_LADDER={
@@ -286,7 +436,11 @@ function openCert(id){
     +'<div class="rlinks">'+links+'</div>'
     +'<p class="affn" style="margin-top:10px;">★ Course and book links may be affiliate links.</p>';
   panel.classList.add('open');
-  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  setTimeout(function(){
+    var rect=panel.getBoundingClientRect();
+    var target=window.pageYOffset+rect.top-80;
+    window.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+  },60);
 }
 
 function closeCert(){document.getElementById('cert-detail-panel').classList.remove('open');}
@@ -1218,11 +1372,12 @@ document.addEventListener('click', function(e) {
 function setActiveNav(pageId) {
   var pageToNav = {
     home:'home', ladder:'career', domains:'career', domain:'career',
-    salary:'career', interview:'career', pivot:'career',
+    salary:'career', interview:'career', pivot:'career', quiz:'career',
     certs:'learn', training:'learn', homelab:'learn', glossary:'learn',
-    roaster:'tools', games:'tools',
-    threats:'intel', jobs:'intel',
-    blog:'community', reviews:'community', about:'community'
+    roaster:'tools', games:'tools', tools:'tools', resume:'tools',
+    threats:'intel', jobs:'intel', calendar:'intel',
+    blog:'community', reviews:'community', about:'community', stories:'community',
+    profile:'home'
   };
   var cat = pageToNav[pageId] || 'home';
   document.querySelectorAll('.ncbtn').forEach(function(b){ b.classList.remove('active'); });
@@ -1260,6 +1415,31 @@ document.addEventListener('click', function(e){
   }
 });
 
+
+// ══════════ HOME LAB GUIDE ══════════
+function toggleLabGuide(id){
+  var guide=document.getElementById(id);
+  if(!guide)return;
+  var toggleEl=document.getElementById(id+'-toggle');
+  var cardEl=guide.previousElementSibling;// search up for lab-card
+  // find parent lab-card by traversing up
+  var parent=guide;
+  // toggle visibility
+  var isOpen=guide.style.display!=='none'&&guide.style.display!=='';
+  if(isOpen){
+    guide.style.display='none';
+    if(toggleEl)toggleEl.innerHTML='View Guide <span>&#9660;</span>';
+    // find the corresponding card and remove open class
+    var card=document.querySelector('[onclick="toggleLabGuide(\''+id+'\')"]');
+    if(card)card.classList.remove('open');
+  } else {
+    guide.style.display='block';
+    if(toggleEl)toggleEl.innerHTML='Close Guide <span>&#9650;</span>';
+    var card=document.querySelector('[onclick="toggleLabGuide(\''+id+'\')"]');
+    if(card)card.classList.add('open');
+    setTimeout(function(){guide.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
+  }
+}
 
 // ══════════ GLOSSARY ══════════
 var GLOSSARY = [
@@ -1419,18 +1599,6 @@ function showInterview(domain) {
 document.addEventListener('DOMContentLoaded',function(){
   renderGlossary(GLOSSARY);
   filterSalary();
-  // Show FAB on home (default active page)
-  var fabEl = document.getElementById('quiz-fab');
-  if (fabEl) fabEl.style.display = 'flex';
-  // Trigger callout after delay
-  setTimeout(function() {
-    var calloutEl = document.getElementById('quiz-callout');
-    var homeEl = document.getElementById('page-home');
-    if (calloutEl && homeEl && homeEl.classList.contains('active')) {
-      calloutEl.classList.add('visible');
-      setTimeout(function() { calloutEl.classList.remove('visible'); }, 6000);
-    }
-  }, 2500);
 });
 
 // ══════════ CAREER PIVOT ADVISOR ══════════
@@ -2386,133 +2554,6 @@ function closeIprepModal() {
   document.body.style.overflow = '';
 }
 
-// ═══ FLOATING QUIZ WIDGET ═══
-// Modal quiz has its own separate state
-var mqState = null;
-function mqReset() {
-  mqState = {cur:0, ans:[], scores:{iam:0,soc:0,eng:0,cloud:0,appsec:0,red:0,grc:0,forensics:0}};
-}
-function openQuizModal() {
-  var modal = document.getElementById('quiz-modal');
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-  var callout = document.getElementById('quiz-callout');
-  if (callout) { callout.classList.remove('visible'); callout.classList.add('dismissed'); }
-  // Always start fresh
-  mqReset();
-  renderModalQuiz();
-}
-function renderModalQuiz() {
-  var inner = document.getElementById('quiz-modal-inner');
-  if (!inner) return;
-  if (!mqState) { mqReset(); }
-  if (!QS || !QS.length) return;
-  if (mqState.cur >= QS.length) { renderModalResults(); return; }
-  var q = QS[mqState.cur];
-  var pct = Math.round((mqState.cur / QS.length) * 100);
-  var optHtml = q.opts.map(function(o, i) {
-    var sel = mqState.ans[mqState.cur] === i ? 'selected' : '';
-    var letters = ['A','B','C','D'];
-    return '<div class="qopt ' + sel + '" onclick="mqSelectOpt(' + i + ')"><div class="qopt-letter">' + letters[i] + '</div><div class="qopt-text">' + o.t + '</div></div>';
-  }).join('');
-  var canNext = mqState.ans[mqState.cur] !== undefined;
-  inner.innerHTML = '<div class="qprogbar"><div class="qprogfill" style="width:' + pct + '%"></div></div>'
-    + '<div class="qnum">Question ' + (mqState.cur + 1) + ' of ' + QS.length + '</div>'
-    + '<div class="qqtext">' + q.q + '</div>'
-    + '<div class="qopts">' + optHtml + '</div>'
-    + '<div class="qnav">'
-    + (mqState.cur > 0 ? '<button class="qbtn qbtn-back" onclick="mqBack()">← Back</button>' : '<div></div>')
-    + '<button class="qbtn qbtn-next" onclick="mqNext()" ' + (canNext ? '' : 'disabled') + '>'
-    + (mqState.cur < QS.length - 1 ? 'Next →' : 'See Results →') + '</button>'
-    + '</div>';
-}
-function mqSelectOpt(i) {
-  var prev = mqState.ans[mqState.cur];
-  if (prev !== undefined) {
-    var prevScore = QS[mqState.cur].opts[prev].s;
-    for (var k in prevScore) mqState.scores[k] -= prevScore[k];
-  }
-  mqState.ans[mqState.cur] = i;
-  var score = QS[mqState.cur].opts[i].s;
-  for (var k in score) mqState.scores[k] += score[k];
-  renderModalQuiz();
-}
-function mqNext() {
-  if (mqState.ans[mqState.cur] === undefined) return;
-  mqState.cur++;
-  renderModalQuiz();
-}
-function mqBack() {
-  if (mqState.cur > 0) { mqState.cur--; renderModalQuiz(); }
-}
-function renderModalResults() {
-  var inner = document.getElementById('quiz-modal-inner');
-  if (!inner) return;
-  var sorted = Object.keys(mqState.scores).sort(function(a,b){ return mqState.scores[b]-mqState.scores[a]; });
-  var top3 = sorted.slice(0,3);
-  var html = '<div style="text-align:center;margin-bottom:24px;"><div style="font-size:1.5rem;margin-bottom:8px;">&#127919;</div><div style="font-weight:800;font-size:1.1rem;margin-bottom:4px;">Your Top Matches</div><div style="font-size:.8rem;color:var(--mt);">Based on your answers</div></div>';
-  var medals = ['&#127945;','&#129352;','&#129353;'];
-  top3.forEach(function(k, i) {
-    var meta = DOMAINS_META[k];
-    if (!meta) return;
-    html += '<div class="quiz-result-card" data-domain="' + k + '" style="cursor:pointer;background:var(--sf2);border:1px solid var(--bd2);border-radius:12px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;">'
-      + '<span style="font-size:1.6rem;">' + medals[i] + '</span>'
-      + '<div style="flex:1;">'
-      + '<div style="font-weight:700;font-size:.9rem;">' + meta.icon + ' ' + meta.name + '</div>'
-      + '<div style="font-size:.72rem;color:var(--mt);margin-top:3px;">' + (meta.why || 'Strong match based on your profile') + '</div>'
-      + '</div>'
-      + '<span style="color:var(--lb);font-size:.8rem;">View &#8594;</span>'
-      + '</div>';
-  });
-  html += '<button onclick="mqReset();renderModalQuiz();" style="width:100%;margin-top:8px;padding:11px;border-radius:10px;border:1px solid var(--bd2);background:transparent;color:var(--mt);font-family:var(--fd);font-size:.8rem;cursor:pointer;">Retake Quiz</button>';
-  inner.innerHTML = html;
-  // Wire up click handlers after render
-  inner.querySelectorAll('.quiz-result-card').forEach(function(card) {
-    card.addEventListener('click', function() {
-      closeQuizModal();
-      showDomain(card.dataset.domain);
-    });
-  });
-}
-function closeQuizModal() {
-  var modal = document.getElementById('quiz-modal');
-  modal.classList.remove('open');
-  document.body.style.overflow = '';
-}
-// Auto-show callout after 2.5s on home page, dismiss after clicking fab
-(function() {
-  var shown = false;
-  function tryShowCallout() {
-    if (shown) return;
-    var callout = document.getElementById('quiz-callout');
-    if (!callout) return;
-    // Only show if user is on home page
-    if (!document.getElementById('page-home') || !document.getElementById('page-home').classList.contains('active')) return;
-    shown = true;
-    callout.classList.add('visible');
-    // Auto-dismiss after 6s
-    setTimeout(function() {
-      callout.classList.remove('visible');
-      callout.classList.add('dismissed');
-    }, 6000);
-  }
-  // Show on page load
-  setTimeout(tryShowCallout, 2500);
-  // Re-show callout when user navigates back to home
-  // Use MutationObserver to watch for page-home becoming active
-  var homeEl = document.getElementById('page-home');
-  if (homeEl && window.MutationObserver) {
-    var obs = new MutationObserver(function(mutations) {
-      mutations.forEach(function(m) {
-        if (m.attributeName === 'class' && homeEl.classList.contains('active')) {
-          shown = false;
-          setTimeout(tryShowCallout, 1500);
-        }
-      });
-    });
-    obs.observe(homeEl, { attributes: true });
-  }
-})();
 
 function filterHpTab(cat, btn) {
   // Update active tab
@@ -2570,6 +2611,113 @@ function hp2FilterTab(cat, btn) {
   });
 }
 
+// ══════════════════════════════════════════
+// HERO — PARTICLE CANVAS + TYPEWRITER
+// ══════════════════════════════════════════
+
+(function() {
+  var _animFrame = null;
+
+  // ── Particle canvas ──────────────────────
+  function initHeroCanvas() {
+    var canvas = document.getElementById('hero-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var N = 60;
+    var pts = [];
+    for (var i = 0; i < N; i++) {
+      pts.push({
+        x:  Math.random() * canvas.width,
+        y:  Math.random() * canvas.height,
+        vx: (Math.random() - .5) * .28,
+        vy: (Math.random() - .5) * .28,
+        r:  Math.random() * 1.4 + .5
+      });
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var a = 0; a < N; a++) {
+        for (var b = a + 1; b < N; b++) {
+          var dx = pts[a].x - pts[b].x;
+          var dy = pts[a].y - pts[b].y;
+          var d  = Math.sqrt(dx * dx + dy * dy);
+          if (d < 130) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(0,212,200,' + (.1 * (1 - d / 130)).toFixed(3) + ')';
+            ctx.lineWidth = .5;
+            ctx.moveTo(pts[a].x, pts[a].y);
+            ctx.lineTo(pts[b].x, pts[b].y);
+            ctx.stroke();
+          }
+        }
+      }
+      for (var i = 0; i < N; i++) {
+        var p = pts[i];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,212,200,.38)';
+        ctx.fill();
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+      }
+      _animFrame = requestAnimationFrame(draw);
+    }
+    if (_animFrame) cancelAnimationFrame(_animFrame);
+    draw();
+  }
+
+  // ── Typewriter ───────────────────────────
+  var _typedTimer = null;
+  var _typedWi = 0;
+  var _typedWords = [
+    'Cybersecurity.',
+    'Offensive Sec.',
+    'Cloud Security.',
+    'Threat Intel.',
+    'Identity & Access.',
+    'Incident Response.'
+  ];
+
+  function initHeroTyped() {
+    var el = document.getElementById('hero-typed');
+    if (!el) return;
+    if (_typedTimer) clearTimeout(_typedTimer);
+    var wi = _typedWi, ci = _typedWords[wi].length, del = false;
+
+    function tick() {
+      var word = _typedWords[wi];
+      if (!del) {
+        el.textContent = word.slice(0, ++ci);
+        if (ci === word.length) { del = true; _typedTimer = setTimeout(tick, 2200); return; }
+      } else {
+        el.textContent = word.slice(0, --ci);
+        if (ci === 0) { del = false; wi = (wi + 1) % _typedWords.length; _typedWi = wi; }
+      }
+      _typedTimer = setTimeout(tick, del ? 38 : 78);
+    }
+    _typedTimer = setTimeout(tick, 1600);
+  }
+
+  // Expose restart for showPage hook
+  window.heroRestartTyped = initHeroTyped;
+
+  // Boot on DOM ready
+  document.addEventListener('DOMContentLoaded', function() {
+    initHeroCanvas();
+    initHeroTyped();
+  });
+})();
+
 // Init reveal on page load and whenever home becomes active
 document.addEventListener('DOMContentLoaded', function() {
   hp2InitReveal();
@@ -2588,3 +2736,1286 @@ document.addEventListener('DOMContentLoaded', function() {
     mo.observe(homeEl, { attributes: true });
   }
 })();
+
+// ══════════════════════════════════════════
+// TOOLKIT CARDS — Scroll-reveal via IntersectionObserver
+// ══════════════════════════════════════════
+(function() {
+  function initScrollReveal() {
+    var cards = document.querySelectorAll('.tk-card');
+    if (!cards.length) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          var card = entry.target;
+          // Stagger by column position (0, 1, 2)
+          var col = parseInt(card.dataset.tkCol || 0);
+          card.style.transitionDelay = (col * 0.1) + 's';
+          card.classList.add('tk-visible');
+          // After reveal, reset delay so hover transition is instant
+          card.addEventListener('transitionend', function onEnd() {
+            card.style.transitionDelay = '0s';
+            card.removeEventListener('transitionend', onEnd);
+          }, { once: true });
+          observer.unobserve(card);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    cards.forEach(function(card, i) {
+      card.dataset.tkCol = i % 3;
+      observer.observe(card);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initScrollReveal);
+})();
+
+
+// ══════════════════════ FEATURES v10 ══════════════════════
+// ─── F1: WHAT'S NEW ───────────────────────────────────────
+var WHATS_NEW=[
+  {date:'Mar 2026',icon:'🗺️',text:'Career Roadmap — visual path explorer',page:'roadmap'},
+  {date:'Mar 2026',icon:'🛠️',text:'Tool Encyclopedia — 80+ security tools catalogued',page:'tools'},
+  {date:'Mar 2026',icon:'📅',text:'CTF & Conference Calendar — upcoming events',page:'calendar'},
+  {date:'Mar 2026',icon:'📄',text:'Resume Templates — role-specific templates & tips',page:'resume'},
+  {date:'Mar 2026',icon:'🏆',text:'Wall of Wins — community success stories',page:'stories'},
+  {date:'Feb 2026',icon:'🧪',text:'Cert Comparison Tool — compare any two certs side by side',page:'certs'},
+  {date:'Feb 2026',icon:'💰',text:'Salary Calculator — personalized salary estimates',page:'salary'},
+];
+function renderWhatsNew(){
+  var c=document.getElementById('wn-items');
+  if(!c)return;
+  c.innerHTML=WHATS_NEW.map(function(n){
+    return '<div class="wn-item" onclick="showPage(\''+n.page+'\')">'
+      +'<span class="wn-icon">'+n.icon+'</span>'
+      +'<div class="wn-body"><span class="wn-text">'+n.text+'</span></div>'
+      +'<span class="wn-date">'+n.date+'</span>'
+      +'</div>';
+  }).join('');
+}
+
+// ─── F2: DAILY CHALLENGE ─────────────────────────────────
+var DC_BANK=[
+  {q:'What does the CIA triad stand for?',opts:['Confidentiality, Integrity, Availability','Control, Identity, Access','Cyber, Information, Architecture','Compliance, Infrastructure, Access'],correct:0,explain:'CIA triad: Confidentiality (authorized access only), Integrity (data accurate/unaltered), Availability (systems accessible when needed). The foundation of all information security.',cat:'Fundamentals',diff:'Easy'},
+  {q:'Which port does HTTPS use by default?',opts:['Port 80','Port 8080','Port 443','Port 8443'],correct:2,explain:'HTTPS uses TCP port 443. HTTP uses port 80. 8080 and 8443 are common dev/alternate ports. The S in HTTPS is provided by TLS running on port 443.',cat:'Networking',diff:'Easy'},
+  {q:'What is a zero-day vulnerability?',opts:['A flaw unknown to the vendor, actively exploited before a patch exists','A bug discovered and patched the same day','A flaw only affecting unpatched systems','A DoS attack crashing systems instantly'],correct:0,explain:'A zero-day is unknown to the vendor (zero days to fix it) and actively exploited before any patch exists. Highly valued on criminal markets and by nation-states.',cat:'Fundamentals',diff:'Easy'},
+  {q:'Which symmetric encryption algorithm is the current U.S. government standard?',opts:['DES','3DES','AES-256','RC4'],correct:2,explain:'AES-256 is the NIST-approved standard for symmetric encryption. DES and 3DES are legacy. RC4 is deprecated and broken.',cat:'Cryptography',diff:'Easy'},
+  {q:'Which attack secretly relays and alters communications between two parties?',opts:['Replay attack','Man-in-the-Middle (MITM)','SQL injection','Rainbow table attack'],correct:1,explain:'MITM attackers position themselves between two parties, intercepting and potentially modifying traffic. Mitigated by certificate pinning, HSTS, and mutual TLS.',cat:'Attacks',diff:'Easy'},
+  {q:'What does SIEM stand for?',opts:['Security Information and Event Management','Secure Infrastructure and Endpoint Monitoring','System Integrity Evaluation Matrix','Security Incident and Error Management'],correct:0,explain:'SIEM aggregates and correlates security logs to detect threats. Examples: Splunk, Microsoft Sentinel, IBM QRadar.',cat:'Tools',diff:'Easy'},
+  {q:'Which protocol does DNS primarily use for standard queries?',opts:['TCP port 53','UDP port 53','TCP port 443','UDP port 8080'],correct:1,explain:'DNS primarily uses UDP port 53 for standard queries. TCP port 53 handles zone transfers and large responses. DNS = UDP 53.',cat:'Networking',diff:'Easy'},
+  {q:'What is the MITRE ATT&CK framework?',opts:['A certification exam for ethical hackers','A knowledge base of adversary TTPs based on real-world observations','A healthcare compliance framework','An open-source SIEM platform'],correct:1,explain:'MITRE ATT&CK documents adversary Tactics, Techniques, and Procedures observed in real attacks. Used for detection engineering, red team planning, and security gap analysis.',cat:'Frameworks',diff:'Easy'},
+  {q:'What does phishing specifically refer to?',opts:['Any social engineering attack','Deceptive emails tricking users into revealing credentials or installing malware','Scanning for open ports','Brute force password cracking'],correct:1,explain:'Phishing uses fake emails mimicking legitimate sources. Spear phishing targets specific people. Whaling targets executives. Vishing uses voice calls. Smishing uses SMS.',cat:'Attacks',diff:'Easy'},
+  {q:'What is lateral movement in a cyberattack?',opts:['Moving stolen data to external servers','Port scanning the internet for targets','After initial access, moving to other systems within the same network','Escalating from user to admin permissions'],correct:2,explain:'Lateral movement expands attacker presence post-compromise. Techniques: pass-the-hash, Kerberoasting, RDP, WMI. Detected via UEBA and network segmentation.',cat:'Attacks',diff:'Medium'},
+  {q:'Which of these is NOT a type of malware?',opts:['Ransomware','Rootkit','Firewall','Trojan'],correct:2,explain:'Firewalls are defensive tools. Ransomware encrypts files for ransom, rootkits provide hidden persistent access, Trojans disguise as legitimate software.',cat:'Fundamentals',diff:'Easy'},
+  {q:'What is the purpose of penetration testing?',opts:['Install security software on endpoints','Simulate attacks to find vulnerabilities before real attackers do','Monitor employee internet usage','Automate patch management'],correct:1,explain:'Pen testing is authorized simulated attacks discovering security weaknesses. Scopes: network, web app, social engineering, red team. Required by PCI DSS, HIPAA, SOC 2.',cat:'Offensive',diff:'Easy'},
+  {q:'What does XSS stand for in web security?',opts:['Extended Security Shell','Cross-Site Scripting','External System Scanning','Cross-Service Synchronization'],correct:1,explain:'XSS injects malicious scripts into trusted web pages. Stored XSS persists in the DB. Reflected XSS is URL-based. Mitigated by output encoding and CSP headers.',cat:'Attacks',diff:'Easy'},
+  {q:'What does the principle of least privilege state?',opts:['Users should have maximum access for efficiency','Users/systems should have only the minimum access needed for their function','Privileged accounts should never be audited','Only admins should have network access'],correct:1,explain:'Least privilege limits blast radius: a compromised account with minimal access causes minimal damage. Applied to users, service accounts, APIs, and cloud IAM roles.',cat:'Fundamentals',diff:'Easy'},
+  {q:'What is a honeypot in cybersecurity?',opts:['A database of stolen passwords','A secure vault for encryption keys','A decoy system designed to attract and trap attackers','A tool for monitoring encrypted traffic'],correct:2,explain:'Honeypots mimic real systems to attract attackers. When engaged, defenders gain intelligence on attack tools and techniques without risking real systems.',cat:'Defense',diff:'Medium'},
+  {q:'Which hashing algorithm should be avoided due to collision vulnerabilities?',opts:['SHA-256','SHA-3','MD5','BLAKE2'],correct:2,explain:'MD5 is cryptographically broken — collisions are feasible in seconds. Never use MD5 for security. SHA-256 and SHA-3 are current standards.',cat:'Cryptography',diff:'Medium'},
+  {q:'What does the cloud shared responsibility model mean?',opts:['All security is the cloud provider\'s responsibility','Security is split: provider (infrastructure), customer (data/config)','Customers are fully responsible for all cloud security','Security is shared equally with third-party auditors'],correct:1,explain:'AWS/Azure/GCP secure the infrastructure ("security OF the cloud"). Customers secure data, config, IAM, and apps ("security IN the cloud"). Split varies: IaaS, PaaS, SaaS.',cat:'Cloud',diff:'Medium'},
+  {q:'What is multi-factor authentication (MFA)?',opts:['Multiple passwords for the same account','Biometrics as the only auth factor','Requiring 2+ different verification factor types to authenticate','Enforcing password rotation every 30 days'],correct:2,explain:'MFA factors: something you know (password), something you have (TOTP/token), something you are (biometric). Requiring 2+ factor TYPES dramatically reduces account takeover.',cat:'Identity',diff:'Easy'},
+  {q:'What is a buffer overflow attack?',opts:['Filling server storage with junk files','Sending more data to a buffer than it can hold, overwriting adjacent memory','Intercepting traffic to fill network buffers','Overloading a web server with HTTP requests'],correct:1,explain:'Buffer overflows overflow allocated memory, potentially overwriting return addresses to execute attacker code. Mitigated by ASLR, stack canaries, and DEP/NX.',cat:'Attacks',diff:'Medium'},
+  {q:'What does "defense in depth" mean?',opts:['Using only the strongest possible firewall','Focusing security exclusively on the perimeter','Layering multiple security controls so no single failure exposes the system','Having deep cybersecurity knowledge'],correct:2,explain:'Defense in depth applies controls at perimeter, network, endpoint, application, and data layers. If one layer fails, others contain the damage. Also called the Swiss cheese model.',cat:'Fundamentals',diff:'Easy'},
+  {q:'What is the primary difference between authentication and authorization?',opts:['They are the same thing','Authentication verifies identity; authorization determines what you can access','Authorization verifies identity; authentication determines access','Authentication is for humans; authorization is for systems'],correct:1,explain:'Authentication: "Who are you?" (verify identity). Authorization: "What can you do?" (permission check post-auth). Often called AuthN and AuthZ.',cat:'Identity',diff:'Easy'},
+  {q:'What does a WAF primarily protect against?',opts:['DDoS attacks at the network layer','Physical server theft','Application-layer attacks like SQLi, XSS, and CSRF','Ransomware via email'],correct:2,explain:'WAFs operate at Layer 7 (HTTP) to inspect web traffic and block OWASP Top 10 attacks. Examples: AWS WAF, Cloudflare WAF. They complement secure coding, not replace it.',cat:'Defense',diff:'Medium'},
+  {q:'What does EDR stand for?',opts:['Endpoint Detection and Response','Enterprise Data Repository','Encrypted Data Routing','Event-Driven Response'],correct:0,explain:'EDR continuously monitors endpoints, detects threats via behavioral analytics, and enables response. Key vendors: CrowdStrike, SentinelOne, Microsoft Defender.',cat:'Tools',diff:'Easy'},
+  {q:'What is a supply chain attack?',opts:['Attacking physical supply trucks carrying hardware','Compromising a trusted vendor/software to attack downstream targets','Stealing credentials from supply chain employees','Intercepting packages to install hardware implants'],correct:1,explain:'Supply chain attacks compromise trusted software (e.g., SolarWinds SUNBURST, XZ Utils). High ROI for attackers — compromise one trusted source, reach thousands of organizations.',cat:'Attacks',diff:'Medium'},
+  {q:'What is the purpose of a DMZ in network architecture?',opts:['A physical isolation room for servers','A network zone between internet and internal network for public-facing services','A zone where all traffic is decrypted','A backup network for incidents'],correct:1,explain:'The DMZ hosts public-facing servers (web, email, DNS) between external and internal networks. Even if a DMZ server is compromised, the internal network requires crossing another boundary.',cat:'Networking',diff:'Medium'},
+  {q:'Which compliance framework applies to credit card payment processing?',opts:['HIPAA','SOX','PCI DSS','GDPR'],correct:2,explain:'PCI DSS is mandatory for any entity processing cardholder data. 12 requirements cover network security, encryption, access control, monitoring, and VM.',cat:'Compliance',diff:'Easy'},
+  {q:'What does incident response involve?',opts:['Developing new security products after a breach','The structured process of identifying, containing, eradicating, and recovering from a security incident','Only technical malware analysis','Notifying all users about policy changes'],correct:1,explain:'IR lifecycle (NIST SP 800-61): Preparation, Detection/Analysis, Containment, Eradication, Recovery, Post-Incident Activity. Preparation is the most valuable phase.',cat:'IR',diff:'Easy'},
+  {q:'What does social engineering exploit?',opts:['Weak network perimeters','Human psychology rather than technical vulnerabilities','Social media app vulnerabilities','Cryptographic algorithm weaknesses'],correct:1,explain:'Social engineering manipulates people: phishing (email), vishing (voice), smishing (SMS), pretexting, baiting, tailgating. "The human is the weakest link."',cat:'Attacks',diff:'Easy'},
+  {q:'What does CVE stand for?',opts:['Common Vulnerability Exposure','Critical Vulnerability Event','Common Vulnerabilities and Exposures','Cybersecurity Vulnerability Entry'],correct:2,explain:'CVE is a MITRE-maintained list of publicly known vulnerabilities. Each CVE (e.g., CVE-2021-44228 = Log4Shell) has a unique ID used across security tools and advisories.',cat:'Fundamentals',diff:'Easy'},
+  {q:'What is privilege escalation?',opts:['Requesting IT to increase your clearance','An attacker gaining higher permissions than initially granted','Adding users to an AD admin group','Encrypting admin credentials'],correct:1,explain:'Privilege escalation: local (user → admin) or domain-level. Techniques: misconfigured sudo, SUID binaries, unquoted service paths, Kerberoasting.',cat:'Attacks',diff:'Medium'},
+  {q:'What is OSINT?',opts:['Open Source Intelligence — collecting from publicly available sources','Offensive Security Intelligence Network','Organizational Security Information Technology','Open System Internet Tools'],correct:0,explain:'OSINT collects from public sources: social media, WHOIS, Shodan, LinkedIn, GitHub. Used by attackers for recon and by defenders for threat intelligence.',cat:'Fundamentals',diff:'Easy'},
+  {q:'What is threat hunting?',opts:['Waiting for automated alerts','Searching LinkedIn for security talent','Proactively searching for threats that evade automated detection','Developing public threat reports'],correct:2,explain:'Threat hunting hypothesizes adversaries may already be present and proactively searches for IOCs and TTPs that automated tools miss. Driven by threat intel hypotheses.',cat:'Defense',diff:'Medium'},
+  {q:'What is data exfiltration?',opts:['Permanently deleting sensitive data','Unauthorized transfer of data out of the organization\'s control','Encrypting data before it leaves the network','Moving data between internal departments'],correct:1,explain:'Exfiltration is the end goal of many attacks. Methods: HTTPS to cloud, DNS tunneling, ICMP covert channels. DLP tools and network monitoring detect unusual outbound flows.',cat:'Attacks',diff:'Medium'},
+  {q:'What is a false positive in security monitoring?',opts:['An alert identifying a real threat','Benign activity incorrectly flagged as malicious','A vulnerability not affecting the current version','A blocked attack that was harmless'],correct:1,explain:'False positives cause analyst fatigue, leading to real threats being missed. SOC teams tune rules to optimize the false positive/negative balance.',cat:'SOC',diff:'Medium'},
+  {q:'What does PKI enable?',opts:['Password management across the org','Secure issuance/management of digital certificates for encryption and auth','Monitoring of public internet traffic','Physical key management'],correct:1,explain:'PKI uses asymmetric key pairs and digital certificates issued by CAs. Powers TLS/HTTPS, code signing, email encryption (S/MIME), and certificate-based authentication.',cat:'Cryptography',diff:'Medium'},
+  {q:'What is a botnet?',opts:['Security bots for automated patching','A legitimate high-speed connection type','A collection of infected devices controlled remotely for malicious purposes','A network monitoring tool'],correct:2,explain:'Botnets are compromised devices controlled via C2 infrastructure. Used for DDoS, spam, credential stuffing, and crypto mining. Takedowns require law enforcement coordination.',cat:'Attacks',diff:'Medium'},
+  {q:'What is the purpose of network segmentation?',opts:['Dividing the internet geographically','Physically separating servers','Dividing a network into subnetworks to limit lateral movement','Assigning bandwidth limits to users'],correct:2,explain:'Network segmentation contains breaches by preventing free lateral movement. Zero Trust extends this: "never trust, always verify" even within the network.',cat:'Defense',diff:'Medium'},
+  {q:'What does DLP stand for?',opts:['Deep Learning Protocol','Dynamic Link Prevention','Data Loss Prevention','Distributed Logging Platform'],correct:2,explain:'DLP monitors and controls data transfers to prevent sensitive data from leaving the organization — protecting against exfiltration and accidental leakage.',cat:'Defense',diff:'Easy'},
+  {q:'What does TLS provide?',opts:['Firewall functionality for web apps','Encryption, authentication, and integrity for data in transit','Endpoint detection and response','Network traffic monitoring'],correct:1,explain:'TLS (successor to SSL) encrypts data in transit, authenticates server identity via certificates, and ensures data integrity. TLS 1.3 is the current recommended version.',cat:'Cryptography',diff:'Medium'},
+  {q:'What is an insider threat?',opts:['A threat from within the internal network','An attack using internet-facing vulnerabilities','A threat from employees, contractors, or trusted parties with authorized access','A threat exploiting unpatched internal vulnerabilities'],correct:2,explain:'Insiders are dangerous because they already have legitimate access, bypassing perimeter controls. Types: malicious, negligent, and compromised (credentials stolen).',cat:'Fundamentals',diff:'Easy'},
+  {q:'What does system hardening mean?',opts:['Making hardware physically harder to break','Encrypting all data on a system','Reducing attack surface by disabling unnecessary features and applying secure configs','Increasing server CPU performance'],correct:2,explain:'Hardening: disable unused services/ports, remove default accounts, enforce least privilege, apply CIS Benchmarks or DISA STIGs, enable logging. Reduces exploitable attack surface.',cat:'Defense',diff:'Easy'},
+  {q:'What does CSPM stand for in cloud security?',opts:['Cloud Security Posture Management — monitors for misconfigurations','Customer Service Protection Module','Certified Security Professional Manager','Cloud Service Provider Monitoring'],correct:0,explain:'CSPM tools (Wiz, Prisma Cloud, AWS Security Hub) continuously assess cloud infrastructure for misconfigurations and compliance violations. Misconfiguration is the #1 cause of cloud breaches.',cat:'Cloud',diff:'Hard'},
+  {q:'What are the 5 functions of the NIST Cybersecurity Framework?',opts:['Plan, Do, Check, Act','Identify, Protect, Detect, Respond, Recover','Prevent, Detect, Correct, Compensate','Classify, Control, Monitor, Report'],correct:1,explain:'NIST CSF 5 functions: Identify (assets/risks), Protect (safeguards), Detect (threats), Respond (incidents), Recover (restoration). CSF 2.0 added Govern as a 6th function.',cat:'Frameworks',diff:'Medium'},
+  {q:'What is credential stuffing?',opts:['Testing all possible password combinations (brute force)','Using stolen credentials from other breaches to attempt logins at multiple services','Adding fake credentials to detect unauthorized access','Storing credentials in multiple encrypted locations'],correct:1,explain:'Credential stuffing exploits password reuse. Attackers use leaked credential pairs across many sites. Mitigated by MFA, breach monitoring (HaveIBeenPwned), and unique passwords.',cat:'Attacks',diff:'Medium'},
+  {q:'What is the difference between IDS and IPS?',opts:['They are identical technology','IDS detects passively; IPS detects AND actively blocks threats','IDS blocks traffic; IPS only logs it','IDS works at network layer; IPS at application layer'],correct:1,explain:'IDS monitors and alerts but takes no action. IPS sits inline and actively blocks detected threats. IPS adds latency; IDS provides visibility without interference.',cat:'Defense',diff:'Medium'},
+  {q:'What is threat intelligence?',opts:['AI predictions about future attacks','Evidence-based knowledge about existing/emerging threats used to inform security decisions','Security clearance classification','Monitoring competitors for cyber threats'],correct:1,explain:'TI = actionable info about threat actors, TTPs, and IOCs. Strategic TI informs long-term decisions; operational TI informs campaigns; tactical TI provides IOCs for blocking rules.',cat:'Defense',diff:'Medium'},
+  {q:'What is a rootkit?',opts:['A collection of admin tools','Malware hiding itself and other malicious code deep in the OS, often at kernel level','A legitimate root-level backup utility','A penetration testing framework'],correct:1,explain:'Rootkits hide processes, files, and connections — often at kernel or firmware level. Detection requires offline scanning, integrity checking, or memory forensics. Very difficult to remove.',cat:'Malware',diff:'Hard'},
+  {q:'What is Kerberoasting?',opts:['A firewall evasion technique','An attack targeting Kerberos service accounts to crack their password hashes offline','A method to bypass MFA','A cloud IAM privilege escalation technique'],correct:1,explain:'Kerberoasting: in AD, any authenticated user can request Kerberos service tickets for SPNs. The ticket is encrypted with the service account password hash — attackers take it offline for cracking.',cat:'Attacks',diff:'Hard'},
+  {q:'What does SOC 2 attest to?',opts:['Physical security of data centers','A vendor\'s security, availability, processing integrity, confidentiality, and privacy controls','Developer secure coding practices','Network perimeter security configurations'],correct:1,explain:'SOC 2 audits a service provider\'s controls around the Trust Service Criteria. Commonly required in B2B contracts for SaaS vendors to prove security posture.',cat:'Compliance',diff:'Medium'},
+  {q:'What is DMARC and what does it protect against?',opts:['A database encryption standard','An email authentication protocol protecting against domain spoofing and phishing','A network scanning protocol','A cloud security configuration tool'],correct:1,explain:'DMARC builds on SPF and DKIM. It tells receiving mail servers what to do with email that fails authentication — reject, quarantine, or report. Prevents domain spoofing.',cat:'Networking',diff:'Hard'},
+  {q:'What is a Golden Ticket attack in Active Directory?',opts:['Using a stolen SSL cert to impersonate a trusted website','Forging a Kerberos TGT using the KRBTGT hash for unlimited AD access','Purchasing domain credentials on the dark web','An attack targeting financial sector organizations'],correct:1,explain:'Golden Ticket: attackers who obtain the KRBTGT hash (via DCSync from a compromised DC) can forge TGTs for ANY account with any privileges. A devastating persistence mechanism.',cat:'Attacks',diff:'Hard'},
+];
+var _dcState=null;
+function getDailyIdx(){return Math.floor(Date.now()/86400000)%DC_BANK.length;}
+function loadDCState(){try{var s=localStorage.getItem('isd_dc');return s?JSON.parse(s):null;}catch(e){return null;}}
+function saveDCState(obj){try{localStorage.setItem('isd_dc',JSON.stringify(obj));}catch(e){}}
+function loadStreak(){try{var s=localStorage.getItem('isd_streak');return s?JSON.parse(s):{count:0,last:null};}catch(e){return{count:0,last:null};}}
+function saveStreak(obj){try{localStorage.setItem('isd_streak',JSON.stringify(obj));}catch(e){}}
+function updateStreak(won){
+  var sk=loadStreak();
+  var today=new Date().toDateString();
+  var yesterday=new Date(Date.now()-86400000).toDateString();
+  if(sk.last===today){return sk;}
+  if(sk.last===yesterday){sk.count+=1;}else{sk.count=won?1:0;}
+  sk.last=today;
+  saveStreak(sk);
+  return sk;
+}
+function renderDailyChallenge(){
+  var body=document.getElementById('dc-body');
+  if(!body)return;
+  var idx=getDailyIdx();
+  var q=DC_BANK[idx];
+  var state=loadDCState();
+  var today=new Date().toDateString();
+  var sk=loadStreak();
+  var streakEl=document.getElementById('dc-streak');
+  if(streakEl)streakEl.textContent=(sk.count>0?'🔥 '+sk.count+' day streak':'Start your streak today!');
+  if(state&&state.date===today){
+    var correct=state.correct;
+    body.innerHTML='<div class="dc-result dc-result-'+(correct?'win':'loss')+'">'
+      +'<div class="dc-result-icon">'+(correct?'✅':'❌')+'</div>'
+      +'<div class="dc-result-hd">'+(correct?'Correct!':'Not quite...')+'</div>'
+      +'<div class="dc-result-ans">Answer: <strong>'+q.opts[q.correct]+'</strong></div>'
+      +'<div class="dc-explanation">'+q.explain+'</div>'
+      +'<div class="dc-next-label">Come back tomorrow for the next challenge!</div>'
+      +'</div>';
+    return;
+  }
+  body.innerHTML='<div class="dc-q-wrap">'
+    +'<div class="dc-category"><span class="dc-cat-tag">'+q.cat+'</span><span class="dc-diff diff-'+q.diff.toLowerCase()+'">'+q.diff+'</span></div>'
+    +'<div class="dc-question">'+q.q+'</div>'
+    +'<div class="dc-opts">'
+    +q.opts.map(function(o,i){return '<div class="dc-opt" onclick="submitDailyAnswer('+i+')"><span class="dc-opt-letter">'+['A','B','C','D'][i]+'</span><span class="dc-opt-text">'+o+'</span></div>';}).join('')
+    +'</div></div>';
+}
+function submitDailyAnswer(i){
+  var idx=getDailyIdx();
+  var q=DC_BANK[idx];
+  var correct=(i===q.correct);
+  var today=new Date().toDateString();
+  saveDCState({date:today,answered:true,correct:correct,chosen:i});
+  updateStreak(correct);
+  var opts=document.querySelectorAll('#dc-body .dc-opt');
+  opts.forEach(function(el,j){
+    el.classList.add(j===q.correct?'dc-opt-correct':(j===i&&!correct?'dc-opt-wrong':'dc-opt-neutral'));
+    el.style.pointerEvents='none';
+  });
+  setTimeout(function(){renderDailyChallenge();},900);
+}
+
+// ─── F3: GLOBAL SEARCH ───────────────────────────────────
+var _searchIndex=null;
+function buildSearchIndex(){
+  if(_searchIndex)return;
+  _searchIndex=[];
+  var pages=[
+    {label:'Home',sub:'Main page',page:'home'},{label:'Career Ladder',sub:'Six tiers from Help Desk to CISO',page:'ladder'},
+    {label:'8 Domains',sub:'SOC, IAM, Cloud, GRC & more',page:'domains'},{label:'Salary Guide',sub:'Compensation data by role & tier',page:'salary'},
+    {label:'Interview Prep',sub:'Domain-specific Q&A guides',page:'interview'},{label:'Career Pivot Advisor',sub:'AI-powered domain switching guide',page:'pivot'},
+    {label:'Certifications',sub:'Roadmap grid by domain & tier',page:'certs'},{label:'Training',sub:'Certificates, degrees & bootcamps',page:'training'},
+    {label:'Home Lab Guide',sub:'Build your own practice environment',page:'homelab'},{label:'Glossary',sub:'Cybersecurity terms & acronyms',page:'glossary'},
+    {label:'Resume Roaster',sub:'AI-powered resume analysis',page:'roaster'},{label:'Security Challenges',sub:'CTF, packet detective & more',page:'games'},
+    {label:'Threat Landscape',sub:'Curated news & advisories',page:'threats'},{label:'Job Board',sub:'Curated listings by domain',page:'jobs'},
+    {label:'Blog',sub:'Career insights & site updates',page:'blog'},{label:'Reviews',sub:'Community feedback & ratings',page:'reviews'},
+    {label:'About',sub:'Who built this & why',page:'about'},{label:'Career Quiz',sub:'Find your cybersecurity role',page:'home'},
+    {label:'Career Roadmap',sub:'Visual career path explorer',page:'roadmap'},{label:'Tool Encyclopedia',sub:'80+ security tools catalogued',page:'tools'},
+    {label:'CTF & Conference Calendar',sub:'Upcoming security events',page:'calendar'},{label:'Resume Templates',sub:'Role-specific resume guides',page:'resume'},
+    {label:'Wall of Wins',sub:'Community success stories',page:'stories'},
+  ];
+  pages.forEach(function(p){_searchIndex.push({type:'page',label:p.label,sub:p.sub,_page:p.page});});
+  if(typeof JT!=='undefined'){Object.keys(JT).forEach(function(k){var j=JT[k];_searchIndex.push({type:'role',label:j.title,sub:j.domain+' · '+j.salary,_page:'quiz'});});}
+  if(typeof D!=='undefined'){Object.keys(D).forEach(function(k){var d=D[k];_searchIndex.push({type:'domain',label:d.name,sub:'Domain: '+d.tag,_page:'domains'});});}
+  if(typeof CERTS!=='undefined'){var seen={};Object.keys(CERTS).forEach(function(k){var c=CERTS[k];if(!c||seen[c.name])return;seen[c.name]=1;_searchIndex.push({type:'cert',label:c.name,sub:(c.vendor||'')+(c.tier?' · '+c.tier:''),_page:'certs'});});}
+  if(typeof SAL_DATA!=='undefined'){var seenS={};SAL_DATA.forEach(function(s){if(seenS[s.title])return;seenS[s.title]=1;_searchIndex.push({type:'salary',label:s.title,sub:'$'+s.min+'K–$'+s.max+'K · '+s.domain,_page:'salary'});});}
+  if(typeof TOOLS!=='undefined'){TOOLS.forEach(function(t){_searchIndex.push({type:'tool',label:t.name,sub:t.vendor+' · '+t.cat,_page:'tools'});});}
+}
+function openSearch(){
+  buildSearchIndex();
+  var o=document.getElementById('search-overlay');
+  if(!o)return;
+  o.classList.add('search-open');
+  var inp=document.getElementById('search-input');
+  if(inp){inp.value='';inp.focus();}
+  document.getElementById('search-results').innerHTML='<div class="sr-hint">Type to search roles, certs, tools, pages...</div>';
+  document.body.style.overflow='hidden';
+}
+function closeSearchDirect(){
+  var o=document.getElementById('search-overlay');
+  if(o){o.classList.remove('search-open');document.body.style.overflow='';}
+}
+function runSearch(q){
+  q=(q||'').trim().toLowerCase();
+  var res=document.getElementById('search-results');
+  if(!res)return;
+  if(!q){res.innerHTML='<div class="sr-hint">Type to search roles, certs, tools, pages...</div>';return;}
+  buildSearchIndex();
+  var matches=_searchIndex.filter(function(it){
+    return (it.label.toLowerCase().indexOf(q)>-1)||(it.sub&&it.sub.toLowerCase().indexOf(q)>-1);
+  }).slice(0,24);
+  if(!matches.length){res.innerHTML='<div class="sr-no-results">No results for "'+q+'"</div>';return;}
+  var groups={page:[],role:[],domain:[],cert:[],salary:[],tool:[]};
+  matches.forEach(function(m){if(groups[m.type])groups[m.type].push(m);});
+  var typeLabels={page:'Pages',role:'Roles',domain:'Domains',cert:'Certifications',salary:'Salary Data',tool:'Tools'};
+  var html='';
+  Object.keys(groups).forEach(function(t){
+    if(!groups[t].length)return;
+    html+='<div class="sr-group"><div class="sr-group-label">'+typeLabels[t]+'</div>';
+    groups[t].forEach(function(m){
+      var esc=m.label.replace(/'/g,'&#39;');
+      html+='<div class="sr-item" onclick="searchGo(\''+esc+'\',\''+m.type+'\')">'
+        +'<span class="sr-dot sr-dot-'+m.type+'"></span>'
+        +'<div class="sr-item-body"><span class="sr-label">'+m.label+'</span><span class="sr-sub">'+m.sub+'</span></div></div>';
+    });
+    html+='</div>';
+  });
+  res.innerHTML=html;
+}
+function searchGo(label,type){
+  buildSearchIndex();
+  var match=_searchIndex.find(function(it){return it.label===label&&it.type===type;});
+  if(match)showPage(match._page);
+  closeSearchDirect();
+}
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openSearch();return;}
+  if(e.key==='Escape'){closeSearchDirect();}
+});
+
+// ─── F4: CERT PROGRESS TRACKER ───────────────────────────
+function getCertProgress(){try{var s=localStorage.getItem('isd_cert_prog');return s?JSON.parse(s):{};}catch(e){return{};}}
+function saveCertProgress(obj){try{localStorage.setItem('isd_cert_prog',JSON.stringify(obj));}catch(e){}}
+function cycleStatus(key){
+  var prog=getCertProgress();
+  var cur=prog[key]||'none';
+  var next={none:'planned',planned:'inprog',inprog:'done',done:'none'};
+  if(next[cur]==='none'){delete prog[key];}else{prog[key]=next[cur];}
+  saveCertProgress(prog);
+  var newStatus=next[cur]==='none'?null:next[cur];
+  document.querySelectorAll('.cb[data-cert-key="'+key+'"]').forEach(function(b){
+    b.classList.remove('cb-planned','cb-inprog','cb-done');
+    if(newStatus)b.classList.add('cb-'+newStatus);
+  });
+  updateCPTSummary();
+}
+function initCertTracker(){
+  var prog=getCertProgress();
+  document.querySelectorAll('.cb').forEach(function(b){
+    var key=b.getAttribute('data-cert-key');
+    if(!key){var m=(b.getAttribute('onclick')||'').match(/openCert\(['"]([^'"]+)['"]\)/);if(m)b.setAttribute('data-cert-key',m[1]);}
+  });
+  document.querySelectorAll('.cb[data-cert-key]').forEach(function(b){
+    var key=b.getAttribute('data-cert-key');
+    b.classList.remove('cb-planned','cb-inprog','cb-done');
+    if(prog[key])b.classList.add('cb-'+prog[key]);
+    if(!b.dataset.cptBound){
+      b.dataset.cptBound='1';
+      b.addEventListener('contextmenu',function(e){e.preventDefault();cycleStatus(key);});
+    }
+  });
+  updateCPTSummary();
+}
+function updateCPTSummary(){
+  var prog=getCertProgress();
+  var counts={done:0,inprog:0,planned:0};
+  Object.values(prog).forEach(function(v){if(counts[v]!==undefined)counts[v]++;});
+  var d=document.getElementById('cpt-done');var i=document.getElementById('cpt-inprog');var p=document.getElementById('cpt-planned');
+  if(d)d.textContent='✅ '+counts.done+' earned';
+  if(i)i.textContent='⏳ '+counts.inprog+' in progress';
+  if(p)p.textContent='📌 '+counts.planned+' planned';
+}
+function resetCertProgress(){
+  if(!confirm('Reset all cert progress? This cannot be undone.'))return;
+  localStorage.removeItem('isd_cert_prog');
+  document.querySelectorAll('.cb').forEach(function(b){b.classList.remove('cb-planned','cb-inprog','cb-done');});
+  updateCPTSummary();
+}
+
+// ─── F5: CERT COMPARISON TOOL ────────────────────────────
+function openCertCompare(){
+  var m=document.getElementById('cert-compare-modal');
+  if(!m)return;
+  m.classList.add('ccm-open');
+  document.body.style.overflow='hidden';
+  renderCertCompareSelectors();
+}
+function closeCertCompare(){
+  var m=document.getElementById('cert-compare-modal');
+  if(m){m.classList.remove('ccm-open');document.body.style.overflow='';}
+}
+function renderCertCompareSelectors(){
+  var sel=document.getElementById('ccm-selectors');
+  if(!sel||typeof CERTS==='undefined')return;
+  var seen={};var list=[];
+  Object.keys(CERTS).forEach(function(k){var c=CERTS[k];if(!c||!c.name||seen[c.name])return;seen[c.name]=1;list.push({key:k,name:c.name});});
+  list.sort(function(a,b){return a.name.localeCompare(b.name);});
+  var opts=list.map(function(l){return '<option value="'+l.key+'">'+l.name+'</option>';}).join('');
+  sel.innerHTML='<div class="ccm-sel-row"><div class="ccm-sel-label">Cert A</div>'
+    +'<select id="ccm-a" onchange="renderCertComparison()" class="ccm-select">'+opts+'</select></div>'
+    +'<div class="ccm-vs">VS</div>'
+    +'<div class="ccm-sel-row"><div class="ccm-sel-label">Cert B</div>'
+    +'<select id="ccm-b" onchange="renderCertComparison()" class="ccm-select">'+opts+'</select></div>';
+  var keys=list.map(function(l){return l.key;});
+  var sa=document.getElementById('ccm-a'),sb=document.getElementById('ccm-b');
+  if(sa&&keys[0])sa.value=keys[0];
+  if(sb&&keys[1])sb.value=keys[1];
+  renderCertComparison();
+}
+function renderCertComparison(){
+  var sa=document.getElementById('ccm-a'),sb=document.getElementById('ccm-b');
+  var t=document.getElementById('ccm-table');
+  if(!sa||!sb||!t||typeof CERTS==='undefined')return;
+  var ca=CERTS[sa.value],cb=CERTS[sb.value];
+  if(!ca||!cb){t.innerHTML='<div class="ccm-msg">Select two certifications above.</div>';return;}
+  var rows=[
+    {label:'Vendor',a:ca.vendor||'—',b:cb.vendor||'—'},
+    {label:'Domain',a:ca.domain||'—',b:cb.domain||'—'},
+    {label:'Tier',a:ca.tier||'—',b:cb.tier||'—'},
+    {label:'Difficulty',a:ca.diff||'—',b:cb.diff||'—'},
+    {label:'Salary Range',a:ca.sal||'—',b:cb.sal||'—'},
+    {label:'Tags',a:(ca.tags||[]).join(', ')||'—',b:(cb.tags||[]).join(', ')||'—'},
+  ];
+  var html='<div class="ccm-row ccm-row-hd"><div class="ccm-row-label"></div>'
+    +'<div class="ccm-col ccm-col-hd">'+ca.name+'</div><div class="ccm-col ccm-col-hd">'+cb.name+'</div></div>';
+  rows.forEach(function(r){
+    var diff=r.a!==r.b&&r.a!=='—'&&r.b!=='—';
+    html+='<div class="ccm-row'+(diff?' ccm-diff':'')+'"><div class="ccm-row-label">'+r.label+'</div>'
+      +'<div class="ccm-col">'+r.a+'</div><div class="ccm-col">'+r.b+'</div></div>';
+  });
+  t.innerHTML=html;
+}
+
+// ─── F6: SALARY CALCULATOR ───────────────────────────────
+var LOC_MULT={remote:1.0,sf:1.28,nyc:1.22,dc:1.16,boston:1.14,seattle:1.18,austin:1.09,chicago:1.05,midwest:0.90,southeast:0.87,southwest:0.92};
+var CERT_BONUSES={cissp:0.13,cism:0.10,cisa:0.09,ccsp:0.10,oscp:0.12,gpen:0.08,gcih:0.07,gcia:0.07,aws_sec:0.09,azure_sec:0.08,cloud_security:0.08};
+var EXP_MULT={entry:0.82,mid:1.0,senior:1.18,lead:1.35};
+function initSalaryCalc(){
+  var roleEl=document.getElementById('sc-role');
+  if(!roleEl||roleEl.dataset.init)return;
+  roleEl.dataset.init='1';
+  if(typeof JT!=='undefined'){
+    Object.keys(JT).sort(function(a,b){return JT[a].title.localeCompare(JT[b].title);}).forEach(function(k){
+      var o=document.createElement('option');o.value=k;o.textContent=JT[k].title;roleEl.appendChild(o);
+    });
+  }
+  var locEl=document.getElementById('sc-loc');
+  if(locEl){
+    var locs=[['remote','Remote / National Avg'],['sf','San Francisco Bay Area (+28%)'],['nyc','New York City (+22%)'],['seattle','Seattle (+18%)'],['dc','Washington D.C. (+16%)'],['boston','Boston (+14%)'],['austin','Austin (+9%)'],['chicago','Chicago (+5%)'],['southwest','Southwest (-8%)'],['midwest','Midwest (-10%)'],['southeast','Southeast (-13%)']];
+    locs.forEach(function(l){var o=document.createElement('option');o.value=l[0];o.textContent=l[1];locEl.appendChild(o);});
+  }
+  var cbEl=document.getElementById('sc-cert-bonuses');
+  if(cbEl){
+    var pc=[['cissp','CISSP (+13%)'],['oscp','OSCP (+12%)'],['ccsp','CCSP (+10%)'],['cism','CISM (+10%)'],['aws_sec','AWS Security Specialty (+9%)'],['cisa','CISA (+9%)'],['azure_sec','Azure Security (+8%)'],['cloud_security','Cloud Security (+8%)'],['gpen','GPEN (+8%)'],['gcih','GCIH (+7%)']];
+    cbEl.innerHTML=pc.map(function(c){return '<label class="sc-cert-cb"><input type="checkbox" value="'+c[0]+'" onchange="calcSalary()"> '+c[1]+'</label>';}).join('');
+  }
+  calcSalary();
+}
+function calcSalary(){
+  var roleKey=document.getElementById('sc-role')&&document.getElementById('sc-role').value;
+  var expKey=(document.getElementById('sc-exp')&&document.getElementById('sc-exp').value)||'mid';
+  var locKey=(document.getElementById('sc-loc')&&document.getElementById('sc-loc').value)||'remote';
+  var res=document.getElementById('sc-result');
+  if(!res||!roleKey||typeof JT==='undefined')return;
+  var jt=JT[roleKey];if(!jt)return;
+  var baseMin=65,baseMax=120;
+  if(typeof SAL_DATA!=='undefined'){
+    var matches=SAL_DATA.filter(function(s){return s.title.toLowerCase().indexOf(jt.title.toLowerCase().split(' ')[0])>-1;});
+    if(matches.length){baseMin=matches[0].min||baseMin;baseMax=matches[0].max||baseMax;}
+  }
+  var expM=EXP_MULT[expKey]||1.0;
+  var locM=LOC_MULT[locKey]||1.0;
+  var certBonus=0;
+  document.querySelectorAll('#sc-cert-bonuses input:checked').forEach(function(cb){certBonus+=(CERT_BONUSES[cb.value]||0);});
+  var totalM=expM*locM*(1+certBonus);
+  var adjMin=Math.round(baseMin*totalM/5)*5;
+  var adjMax=Math.round(baseMax*totalM/5)*5;
+  var adjMid=Math.round((adjMin+adjMax)/2/5)*5;
+  res.innerHTML='<div class="sc-result-role">'+jt.icon+' '+jt.title+'</div>'
+    +'<div class="sc-range-wrap">'
+    +'<div class="sc-range-labels"><span>$'+adjMin+'K</span><span class="sc-mid-label">~$'+adjMid+'K median</span><span>$'+adjMax+'K</span></div>'
+    +'<div class="sc-range-bar"><div class="sc-range-fill"></div></div></div>'
+    +'<div class="sc-tip">'+jt.domain+' · '+(certBonus>0?'Cert bonuses: +'+Math.round(certBonus*100)+'%. ':'')+
+    (locKey!=='remote'?'Adjusted for local market.':'National remote average.')+'</div>';
+}
+
+// ─── F7: CAREER ROADMAP ──────────────────────────────────
+var ROADMAP_NODES=[
+  {id:'itsupp',title:'IT Support / Help Desk',domain:'entry',tier:1,icon:'🖥️',jtKey:null,x:48,y:88},
+  {id:'soc1',title:'SOC Analyst I',domain:'soc',tier:2,icon:'🛡️',jtKey:'soc',x:18,y:74},
+  {id:'grcana',title:'GRC Analyst',domain:'grc',tier:2,icon:'📋',jtKey:'grc',x:72,y:74},
+  {id:'iamadm',title:'IAM Administrator',domain:'iam',tier:2,icon:'🔑',jtKey:'iam',x:90,y:74},
+  {id:'ir',title:'Incident Responder',domain:'forensics',tier:3,icon:'🚨',jtKey:'ir',x:22,y:60},
+  {id:'vm',title:'Vuln Management Analyst',domain:'soc',tier:3,icon:'🔍',jtKey:'vm',x:37,y:60},
+  {id:'ti',title:'Threat Intel Analyst',domain:'forensics',tier:3,icon:'🕵️',jtKey:'ti',x:8,y:60},
+  {id:'pt',title:'Penetration Tester',domain:'red',tier:3,icon:'⚔️',jtKey:'pt',x:56,y:60},
+  {id:'as',title:'AppSec / DevSecOps',domain:'appsec',tier:3,icon:'🛡',jtKey:'as',x:68,y:60},
+  {id:'iameng',title:'IAM Engineer',domain:'iam',tier:3,icon:'🔐',jtKey:'iam',x:84,y:60},
+  {id:'ma',title:'Malware Analyst',domain:'forensics',tier:4,icon:'🦠',jtKey:'ma',x:10,y:46},
+  {id:'de',title:'Detection Engineer',domain:'soc',tier:4,icon:'⚡',jtKey:'de',x:25,y:46},
+  {id:'rt',title:'Red Team Operator',domain:'red',tier:4,icon:'🎯',jtKey:'rt',x:52,y:46},
+  {id:'cs',title:'Cloud Security Engineer',domain:'cloud',tier:4,icon:'☁️',jtKey:'cs',x:65,y:46},
+  {id:'grcmgr',title:'GRC Manager',domain:'grc',tier:4,icon:'📊',jtKey:'grc',x:80,y:46},
+  {id:'se',title:'Security Engineer',domain:'eng',tier:4,icon:'⚙️',jtKey:'se',x:38,y:32},
+  {id:'sa',title:'Security Architect',domain:'eng',tier:5,icon:'🏗️',jtKey:'sa',x:35,y:18},
+  {id:'cloudarch',title:'Cloud Security Architect',domain:'cloud',tier:5,icon:'🌩️',jtKey:'cs',x:62,y:18},
+  {id:'iamarch',title:'IAM Architect',domain:'iam',tier:5,icon:'🗝️',jtKey:'iam',x:82,y:18},
+  {id:'ciso',title:'Security Manager / CISO',domain:'leadership',tier:6,icon:'👔',jtKey:'ciso',x:50,y:5},
+];
+var ROADMAP_EDGES=[
+  {from:'itsupp',to:'soc1'},{from:'itsupp',to:'grcana'},{from:'itsupp',to:'iamadm'},
+  {from:'soc1',to:'ir'},{from:'soc1',to:'vm'},{from:'soc1',to:'ti'},
+  {from:'ir',to:'ma'},{from:'ma',to:'ti'},{from:'vm',to:'de'},{from:'soc1',to:'de'},
+  {from:'ti',to:'de'},{from:'de',to:'se'},{from:'pt',to:'rt'},{from:'rt',to:'se'},
+  {from:'as',to:'se'},{from:'cs',to:'cloudarch'},{from:'iamadm',to:'iameng'},
+  {from:'iameng',to:'iamarch'},{from:'grcana',to:'grcmgr'},{from:'grcmgr',to:'ciso'},
+  {from:'se',to:'sa'},{from:'sa',to:'ciso'},{from:'cloudarch',to:'ciso'},
+  {from:'iamarch',to:'sa'},{from:'vm',to:'cs'},
+];
+var DOMAIN_COLORS={soc:'#00d4c8',forensics:'#c084fc',red:'#f05d78',cloud:'#4d9eff',eng:'#10e87e',appsec:'#f5c842',iam:'#ff8c42',grc:'#818cf8',leadership:'#e2e8f0',entry:'#475569'};
+var _rmFilter='all';
+function renderRoadmap(){
+  var canvas=document.getElementById('rm-canvas');
+  if(!canvas)return;
+  var filters=document.getElementById('rm-filters');
+  if(filters&&!filters.dataset.init){
+    filters.dataset.init='1';
+    var cats=[['all','All Paths'],['soc','Security Ops'],['forensics','Forensics & TI'],['red','Offensive'],['cloud','Cloud'],['eng','Security Eng'],['appsec','AppSec'],['iam','IAM'],['grc','GRC']];
+    filters.innerHTML=cats.map(function(c){return '<button class="rm-filter-chip'+(c[0]==='all'?' rm-chip-active':'')+'" data-domain="'+c[0]+'" onclick="filterRoadmap(\''+c[0]+'\')">'+c[1]+'</button>';}).join('');
+  }
+  var w=canvas.offsetWidth||800;
+  var h=Math.max(560,Math.round(w*0.68));
+  canvas.style.height=h+'px';
+  canvas.innerHTML='';
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width','100%');svg.setAttribute('height','100%');
+  svg.style.cssText='position:absolute;top:0;left:0;pointer-events:none;overflow:visible;';
+  canvas.appendChild(svg);
+  var nodeMap={};
+  ROADMAP_NODES.forEach(function(n){nodeMap[n.id]={x:(n.x/100)*w,y:(n.y/100)*h};});
+  ROADMAP_EDGES.forEach(function(e){
+    var a=nodeMap[e.from],b=nodeMap[e.to];
+    if(!a||!b)return;
+    if(_rmFilter!=='all'){
+      var fn=ROADMAP_NODES.find(function(n){return n.id===e.from;});
+      var tn=ROADMAP_NODES.find(function(n){return n.id===e.to;});
+      if(fn&&fn.domain!==_rmFilter&&tn&&tn.domain!==_rmFilter&&fn.domain!=='entry')return;
+    }
+    var line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',a.x);line.setAttribute('y1',a.y);
+    line.setAttribute('x2',b.x);line.setAttribute('y2',b.y);
+    line.setAttribute('stroke','rgba(255,255,255,0.1)');line.setAttribute('stroke-width','1.5');
+    svg.appendChild(line);
+  });
+  ROADMAP_NODES.forEach(function(n){
+    if(_rmFilter!=='all'&&n.domain!==_rmFilter&&n.domain!=='entry')return;
+    var pos=nodeMap[n.id];
+    var col=DOMAIN_COLORS[n.domain]||'#64748b';
+    var el=document.createElement('div');
+    el.className='rm-node';
+    el.style.cssText='left:'+Math.round(pos.x)+'px;top:'+Math.round(pos.y)+'px;border-color:'+col+';';
+    el.setAttribute('data-node-id',n.id);
+    el.innerHTML='<span class="rm-node-icon">'+n.icon+'</span><span class="rm-node-title" style="color:'+col+'">'+n.title+'</span>';
+    el.onclick=function(){clickRoadmapNode(n.id);};
+    canvas.appendChild(el);
+  });
+}
+function clickRoadmapNode(id){
+  var n=ROADMAP_NODES.find(function(x){return x.id===id;});
+  if(!n)return;
+  var panel=document.getElementById('rm-info-panel');
+  if(!panel)return;
+  var jt=n.jtKey&&typeof JT!=='undefined'?JT[n.jtKey]:null;
+  var col=DOMAIN_COLORS[n.domain]||'#64748b';
+  panel.style.borderColor=col;
+  panel.innerHTML='<div class="rm-info-header"><span class="rm-info-icon">'+n.icon+'</span>'
+    +'<div><div class="rm-info-title" style="color:'+col+'">'+n.title+'</div></div>'
+    +'<button class="rm-info-close" onclick="document.getElementById(\'rm-info-panel\').style.display=\'none\'">✕</button></div>'
+    +(jt?'<div class="rm-info-meta">'+jt.domain+' · '+jt.level+'</div>'
+    +'<div class="rm-info-salary">💰 '+jt.salary+'</div>'
+    +'<p class="rm-info-desc">'+jt.desc+'</p>'
+    +'<div class="rm-info-daily"><strong>Daily:</strong> '+jt.daily+'</div>'
+    +'<div class="rm-info-actions"><button class="rm-info-btn" onclick="showPage(\'salary\')">Salary Data</button><button class="rm-info-btn" onclick="showPage(\'certs\')">Cert Roadmap</button></div>'
+    :'<p class="rm-info-desc">Entry-level IT role — strong pipeline into SOC, GRC, and IAM positions.</p>');
+  panel.style.display='block';
+  document.querySelectorAll('.rm-node').forEach(function(el){el.classList.remove('rm-node-active');});
+  var sel=document.querySelector('.rm-node[data-node-id="'+id+'"]');
+  if(sel)sel.classList.add('rm-node-active');
+}
+function filterRoadmap(domain){
+  _rmFilter=domain;
+  document.querySelectorAll('.rm-filter-chip').forEach(function(el){el.classList.toggle('rm-chip-active',el.dataset.domain===domain);});
+  renderRoadmap();
+}
+
+// ─── F8: TOOL ENCYCLOPEDIA ───────────────────────────────
+var TOOLS=[
+  {name:'Splunk Enterprise',vendor:'Splunk',cat:'SIEM',desc:'Industry-leading SIEM for log aggregation, correlation, and alerting at enterprise scale.',tier:'paid',tags:['siem','logs','dashboards'],domains:['soc','eng']},
+  {name:'Microsoft Sentinel',vendor:'Microsoft',cat:'SIEM',desc:'Cloud-native SIEM on Azure with built-in AI/ML threat detection and Microsoft ecosystem integration.',tier:'paid',tags:['siem','azure','cloud'],domains:['soc','cloud']},
+  {name:'IBM QRadar',vendor:'IBM',cat:'SIEM',desc:'Enterprise SIEM with advanced correlation engine, behavioral analytics, and network flow analysis.',tier:'paid',tags:['siem','enterprise'],domains:['soc']},
+  {name:'Elastic SIEM',vendor:'Elastic',cat:'SIEM',desc:'Open-source-foundation SIEM built on the Elastic Stack. Highly flexible with strong community support.',tier:'freemium',tags:['siem','open-source','elastic'],domains:['soc','eng']},
+  {name:'LogRhythm SIEM',vendor:'LogRhythm',cat:'SIEM',desc:'Integrated SIEM, UEBA, and SOAR platform with automated threat detection and response workflows.',tier:'paid',tags:['siem','ueba','soar'],domains:['soc']},
+  {name:'Exabeam',vendor:'Exabeam',cat:'SIEM',desc:'UEBA-driven SIEM with behavior-based threat detection using machine learning baselines.',tier:'paid',tags:['siem','ueba','ml'],domains:['soc']},
+  {name:'Chronicle SIEM',vendor:'Google',cat:'SIEM',desc:'Google Cloud-native SIEM with massive scale telemetry ingestion and YARA-L detection rules.',tier:'paid',tags:['siem','cloud','google'],domains:['soc']},
+  {name:'CrowdStrike Falcon',vendor:'CrowdStrike',cat:'EDR',desc:'Cloud-native EDR with AI-powered threat detection, threat hunting, and Falcon OverWatch MDR service.',tier:'paid',tags:['edr','cloud','ai'],domains:['soc','eng']},
+  {name:'SentinelOne',vendor:'SentinelOne',cat:'EDR',desc:'Autonomous AI-powered EDR with rollback capability and built-in SOAR response automation.',tier:'paid',tags:['edr','ai','autonomous'],domains:['soc','eng']},
+  {name:'Carbon Black',vendor:'VMware',cat:'EDR',desc:'Behavioral EDR leveraging unfiltered endpoint telemetry for investigation and threat hunting.',tier:'paid',tags:['edr','behavioral'],domains:['soc']},
+  {name:'Microsoft Defender for Endpoint',vendor:'Microsoft',cat:'EDR',desc:'Enterprise EDR deeply integrated with Microsoft 365 and Azure. Included in M365 E5 licensing.',tier:'paid',tags:['edr','microsoft','integrated'],domains:['soc','cloud']},
+  {name:'Cortex XDR',vendor:'Palo Alto Networks',cat:'EDR',desc:'XDR platform correlating endpoint, network, and cloud data for unified threat detection.',tier:'paid',tags:['edr','xdr'],domains:['soc','cloud']},
+  {name:'Tenable Nessus',vendor:'Tenable',cat:'Vulnerability Scanner',desc:'World\'s most widely deployed vulnerability scanner with comprehensive CVE plugin library.',tier:'freemium',tags:['vuln','scanner','cve'],domains:['eng','soc']},
+  {name:'Qualys VMDR',vendor:'Qualys',cat:'Vulnerability Scanner',desc:'Cloud-based VM with asset discovery, risk prioritization, and patch orchestration.',tier:'paid',tags:['vuln','cloud'],domains:['eng','soc']},
+  {name:'OpenVAS / Greenbone',vendor:'Greenbone',cat:'Vulnerability Scanner',desc:'Open-source vulnerability scanner with large NVT feed. Foundation of many enterprise VM programs.',tier:'open-source',tags:['vuln','open-source','free'],domains:['eng','soc']},
+  {name:'Rapid7 InsightVM',vendor:'Rapid7',cat:'Vulnerability Scanner',desc:'Risk-based VM with live dashboards, remediation workflow, and InsightIDR integration.',tier:'paid',tags:['vuln','risk-based'],domains:['eng','soc']},
+  {name:'Trivy',vendor:'Aqua Security',cat:'Vulnerability Scanner',desc:'Fast open-source scanner for container images, filesystems, and IaC. Essential for DevSecOps.',tier:'open-source',tags:['containers','iac','devsecops'],domains:['appsec','cloud']},
+  {name:'Nikto',vendor:'Open Source',cat:'Vulnerability Scanner',desc:'Open-source web server scanner checking for dangerous files, outdated software, and misconfigurations.',tier:'open-source',tags:['web','scanner','open-source'],domains:['appsec','red']},
+  {name:'Metasploit Framework',vendor:'Rapid7',cat:'Pentest',desc:'World\'s most used penetration testing framework with 2,000+ exploit modules and payloads.',tier:'freemium',tags:['exploit','pentest','framework'],domains:['red','soc']},
+  {name:'Burp Suite',vendor:'PortSwigger',cat:'Pentest',desc:'Leading web application security testing platform with intercepting proxy, scanner, and extensions.',tier:'freemium',tags:['web','proxy','appsec'],domains:['appsec','red']},
+  {name:'Nmap',vendor:'Open Source',cat:'Pentest',desc:'Network discovery and security auditing — detects open ports, services, OS, and firewall rules.',tier:'open-source',tags:['network','scan','discovery'],domains:['red','soc','eng']},
+  {name:'BloodHound',vendor:'SpecterOps',cat:'Pentest',desc:'Active Directory attack path mapping using graph theory. Essential for pentest and defense.',tier:'open-source',tags:['ad','attack-path','graph'],domains:['red','iam']},
+  {name:'Cobalt Strike',vendor:'HelpSystems',cat:'Pentest',desc:'Advanced adversary simulation and red team platform. Widely used for authorized red team operations.',tier:'paid',tags:['c2','red-team'],domains:['red']},
+  {name:'Impacket',vendor:'SecureAuth',cat:'Pentest',desc:'Python library for working with network protocols — essential for AD attacks (pass-the-hash, Kerberoasting).',tier:'open-source',tags:['python','ad','protocol'],domains:['red']},
+  {name:'Hashcat',vendor:'Open Source',cat:'Pentest',desc:'World\'s fastest GPU-based password recovery tool supporting 300+ hash types.',tier:'open-source',tags:['password','cracking','gpu'],domains:['red']},
+  {name:'ffuf',vendor:'Open Source',cat:'Pentest',desc:'Fast web fuzzer for directory/endpoint discovery, parameter fuzzing, and vhost enumeration.',tier:'open-source',tags:['fuzzing','web','recon'],domains:['red','appsec']},
+  {name:'Autopsy',vendor:'Basis Technology',cat:'Forensics',desc:'Open-source digital forensics platform for disk image analysis, file recovery, and timeline analysis.',tier:'free',tags:['forensics','disk','timeline'],domains:['forensics']},
+  {name:'Volatility',vendor:'Volatility Foundation',cat:'Forensics',desc:'Advanced memory forensics framework for analyzing RAM dumps and extracting process artifacts.',tier:'open-source',tags:['memory','forensics','malware'],domains:['forensics','soc']},
+  {name:'FTK Imager',vendor:'AccessData',cat:'Forensics',desc:'Forensic disk imaging tool creating exact sector-by-sector copies while preserving evidence integrity.',tier:'free',tags:['forensics','imaging','disk'],domains:['forensics']},
+  {name:'Cellebrite UFED',vendor:'Cellebrite',cat:'Forensics',desc:'Industry-standard mobile device forensics platform used by law enforcement worldwide.',tier:'paid',tags:['mobile','forensics'],domains:['forensics']},
+  {name:'x64dbg',vendor:'Open Source',cat:'Forensics',desc:'Open-source x64/x32 Windows debugger for malware analysis and reverse engineering.',tier:'open-source',tags:['debugger','reversing','windows'],domains:['forensics']},
+  {name:'MISP',vendor:'CIRCL',cat:'Threat Intel',desc:'Open-source threat intelligence platform for sharing IOCs and threat data across organizations.',tier:'open-source',tags:['ti','ioc','sharing'],domains:['soc','forensics']},
+  {name:'OpenCTI',vendor:'Filigran',cat:'Threat Intel',desc:'Open-source cyber threat intelligence platform with STIX/TAXII support and rich visualization.',tier:'open-source',tags:['ti','stix','graph'],domains:['soc','forensics']},
+  {name:'VirusTotal',vendor:'Google',cat:'Threat Intel',desc:'Free file/URL/hash analysis aggregating results from 70+ antivirus engines and security tools.',tier:'freemium',tags:['ti','ioc','malware'],domains:['soc','forensics']},
+  {name:'Shodan',vendor:'Shodan',cat:'Threat Intel',desc:'Internet-facing device search engine. Essential for external attack surface discovery and OSINT.',tier:'freemium',tags:['osint','recon','iot'],domains:['soc','red']},
+  {name:'AlienVault OTX',vendor:'AT&T Cybersecurity',cat:'Threat Intel',desc:'Community-powered threat intel platform with real-time IOC feeds and pulse subscriptions.',tier:'free',tags:['ti','ioc','community'],domains:['soc']},
+  {name:'Wiz',vendor:'Wiz',cat:'Cloud Security',desc:'CNAPP providing agentless cloud security posture management and workload protection.',tier:'paid',tags:['cloud','cnapp','cspm'],domains:['cloud']},
+  {name:'Prisma Cloud',vendor:'Palo Alto Networks',cat:'Cloud Security',desc:'Comprehensive CNAPP with CSPM, CWPP, IAM security for multi-cloud environments.',tier:'paid',tags:['cloud','cnapp','multicloud'],domains:['cloud']},
+  {name:'AWS Security Hub',vendor:'Amazon',cat:'Cloud Security',desc:'Unified AWS security posture view aggregating findings from GuardDuty, Inspector, and Macie.',tier:'paid',tags:['aws','cloud','posture'],domains:['cloud']},
+  {name:'Prowler',vendor:'Open Source',cat:'Cloud Security',desc:'Open-source AWS, Azure, and GCP security assessment tool checking against CIS Benchmarks.',tier:'open-source',tags:['cloud','cis','audit'],domains:['cloud','grc']},
+  {name:'ScoutSuite',vendor:'NCC Group',cat:'Cloud Security',desc:'Multi-cloud security auditing tool assessing configurations against security best practices.',tier:'open-source',tags:['cloud','audit','multicloud'],domains:['cloud']},
+  {name:'CyberArk PAM',vendor:'CyberArk',cat:'IAM',desc:'Leading PAM platform for securing, rotating, and auditing privileged credentials.',tier:'paid',tags:['pam','privileged','credentials'],domains:['iam']},
+  {name:'Okta',vendor:'Okta',cat:'IAM',desc:'Cloud-based identity platform providing SSO, MFA, and lifecycle management for enterprise apps.',tier:'paid',tags:['sso','mfa','identity'],domains:['iam']},
+  {name:'SailPoint IdentityIQ',vendor:'SailPoint',cat:'IAM',desc:'Enterprise identity governance for access certification, provisioning, and separation of duties.',tier:'paid',tags:['iga','governance','provisioning'],domains:['iam']},
+  {name:'HashiCorp Vault',vendor:'HashiCorp',cat:'IAM',desc:'Secrets management platform for securely storing and accessing API keys, passwords, and certs.',tier:'freemium',tags:['secrets','vault','infrastructure'],domains:['iam','cloud','appsec']},
+  {name:'BeyondTrust',vendor:'BeyondTrust',cat:'IAM',desc:'PAM and privileged remote access platform focusing on least privilege enforcement.',tier:'paid',tags:['pam','least-privilege','remote'],domains:['iam']},
+  {name:'Wireshark',vendor:'Open Source',cat:'Network Analysis',desc:'World\'s most popular network protocol analyzer for capturing and browsing network traffic.',tier:'open-source',tags:['network','pcap','protocol'],domains:['soc','forensics','eng']},
+  {name:'Zeek (Bro)',vendor:'Open Source',cat:'Network Analysis',desc:'Powerful network analysis framework generating structured logs of network behavior.',tier:'open-source',tags:['ndr','logs','network'],domains:['soc','eng']},
+  {name:'Suricata',vendor:'OISF',cat:'Network Analysis',desc:'High-performance open-source IDS/IPS/NSM engine with multi-threading and protocol analysis.',tier:'open-source',tags:['ids','ips','nids'],domains:['soc','eng']},
+  {name:'Snort',vendor:'Cisco',cat:'Network Analysis',desc:'Original open-source IDS/IPS with extensive community rule sets (ET Open, VRT).',tier:'open-source',tags:['ids','ips','snort'],domains:['soc','eng']},
+  {name:'OWASP ZAP',vendor:'OWASP',cat:'AppSec',desc:'Free open-source DAST tool for finding vulnerabilities in web apps. Great for CI/CD integration.',tier:'open-source',tags:['dast','web','owasp'],domains:['appsec']},
+  {name:'Snyk',vendor:'Snyk',cat:'AppSec',desc:'Developer-first platform for finding vulnerabilities in code, dependencies, containers, and IaC.',tier:'freemium',tags:['sca','iac','devsecops'],domains:['appsec','cloud']},
+  {name:'SonarQube',vendor:'SonarSource',cat:'AppSec',desc:'SAST platform with code quality and security vulnerability detection for CI/CD pipelines.',tier:'freemium',tags:['sast','code-quality','ci-cd'],domains:['appsec']},
+  {name:'Semgrep',vendor:'Semgrep',cat:'AppSec',desc:'Fast open-source static analysis supporting 30+ languages with customizable security rules.',tier:'freemium',tags:['sast','open-source','rules'],domains:['appsec']},
+  {name:'Checkmarx',vendor:'Checkmarx',cat:'AppSec',desc:'Enterprise SAST/SCA platform with deep code analysis and developer IDE integration.',tier:'paid',tags:['sast','sca','enterprise'],domains:['appsec']},
+  {name:'ServiceNow GRC',vendor:'ServiceNow',cat:'GRC',desc:'Enterprise GRC for risk management, policy management, and compliance automation at scale.',tier:'paid',tags:['grc','risk','compliance'],domains:['grc']},
+  {name:'RSA Archer',vendor:'RSA',cat:'GRC',desc:'Comprehensive GRC platform for risk management, compliance tracking, and business continuity.',tier:'paid',tags:['grc','risk','archer'],domains:['grc']},
+  {name:'Drata',vendor:'Drata',cat:'GRC',desc:'Automated compliance platform for SOC 2, ISO 27001, HIPAA, and GDPR with continuous monitoring.',tier:'paid',tags:['compliance','automation','soc2'],domains:['grc']},
+  {name:'Vanta',vendor:'Vanta',cat:'GRC',desc:'Automated security and compliance platform streamlining SOC 2, HIPAA, ISO 27001 certification.',tier:'paid',tags:['compliance','automation'],domains:['grc']},
+  {name:'Ghidra',vendor:'NSA',cat:'Malware Analysis',desc:'Free and open-source reverse engineering tool from NSA with powerful binary analysis and decompiler.',tier:'open-source',tags:['reversing','re','nsa'],domains:['forensics']},
+  {name:'IDA Pro',vendor:'Hex-Rays',cat:'Malware Analysis',desc:'Industry-standard disassembler and debugger for professional reverse engineering and malware analysis.',tier:'paid',tags:['reversing','disassembler','professional'],domains:['forensics']},
+  {name:'Cuckoo Sandbox',vendor:'Open Source',cat:'Malware Analysis',desc:'Automated malware analysis system executing samples in an isolated environment and reporting behavior.',tier:'open-source',tags:['sandbox','dynamic','behavior'],domains:['forensics']},
+  {name:'ANY.RUN',vendor:'ANY.RUN',cat:'Malware Analysis',desc:'Interactive online malware sandbox with real-time process monitoring and network traffic analysis.',tier:'freemium',tags:['sandbox','online','interactive'],domains:['forensics','soc']},
+  {name:'REMnux',vendor:'SANS',cat:'Malware Analysis',desc:'Linux distribution purpose-built for reverse-engineering and analyzing malware samples.',tier:'free',tags:['linux','distro','reversing'],domains:['forensics']},
+  {name:'Radare2',vendor:'Open Source',cat:'Malware Analysis',desc:'Advanced CLI reverse engineering framework for binary analysis, patching, and debugging.',tier:'open-source',tags:['reversing','cli','binary'],domains:['forensics']},
+];
+var _toolFilter='';var _toolCat='All';
+function initTools(){
+  var catSel=document.getElementById('tf-cat');
+  if(catSel&&!catSel.dataset.init){
+    catSel.dataset.init='1';
+    var cats=['All','SIEM','EDR','Vulnerability Scanner','Pentest','Forensics','Threat Intel','Cloud Security','IAM','Network Analysis','AppSec','GRC','Malware Analysis'];
+    cats.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
+  }
+  renderTools('',_toolCat);
+}
+function filterTools(){
+  var q=(document.getElementById('tf-search')&&document.getElementById('tf-search').value)||'';
+  var cat=(document.getElementById('tf-cat')&&document.getElementById('tf-cat').value)||'All';
+  _toolFilter=q;_toolCat=cat;
+  renderTools(q,cat);
+}
+function renderTools(q,cat){
+  var grid=document.getElementById('tools-grid');
+  if(!grid)return;
+  q=(q||'').toLowerCase();cat=cat||'All';
+  var filtered=TOOLS.filter(function(t){
+    var matchCat=(cat==='All'||t.cat===cat);
+    var matchQ=!q||(t.name.toLowerCase().indexOf(q)>-1)||(t.desc.toLowerCase().indexOf(q)>-1)||(t.vendor.toLowerCase().indexOf(q)>-1)||((t.tags||[]).some(function(tg){return tg.indexOf(q)>-1;}));
+    return matchCat&&matchQ;
+  });
+  var tierColors={paid:'#f05d78',freemium:'#f5c842',free:'#10e87e','open-source':'#4d9eff'};
+  grid.innerHTML=filtered.length?filtered.map(function(t){
+    return '<div class="tool-card">'
+      +'<div class="tc-head"><span class="tc-name">'+t.name+'</span><span class="tc-tier-badge" style="background:'+tierColors[t.tier]+'22;color:'+tierColors[t.tier]+'">'+t.tier+'</span></div>'
+      +'<div class="tc-vendor">'+t.vendor+' &middot; <span class="tc-cat-tag">'+t.cat+'</span></div>'
+      +'<div class="tc-desc">'+t.desc+'</div>'
+      +'<div class="tc-tags">'+(t.tags||[]).slice(0,4).map(function(tg){return '<span class="tc-tag">'+tg+'</span>';}).join('')+'</div>'
+      +'</div>';
+  }).join(''):'<div class="tools-no-results">No tools match your search.</div>';
+  var cnt=document.getElementById('tools-count');
+  if(cnt)cnt.textContent=filtered.length+' tool'+(filtered.length!==1?'s':'');
+}
+
+// ─── F9: CTF & CONFERENCE CALENDAR ──────────────────────
+var EVENTS=[
+  {name:'picoCTF 2025',type:'ctf',date:'2025-03-07',url:'https://picoctf.org',cost:'free',virtual:true,desc:'Beginner-friendly CTF from Carnegie Mellon University. Perfect for newcomers learning the fundamentals.',diff:'Beginner'},
+  {name:'BSides Austin 2025',type:'conference',date:'2025-03-21',url:'https://bsidesaustin.com',cost:'free',virtual:false,desc:'Community-run security conference in Austin with talks, workshops, and CTF challenges.',diff:null},
+  {name:'BSides San Francisco 2025',type:'conference',date:'2025-04-26',url:'https://bsidessf.org',cost:'free',virtual:false,desc:'Long-running BSides event with diverse security research presentations.',diff:null},
+  {name:'RSA Conference 2025',type:'conference',date:'2025-04-28',url:'https://www.rsaconference.com',cost:'paid',virtual:false,desc:'World\'s largest cybersecurity conference — 500+ sessions, keynotes, Expo Hall, and networking events.',diff:null},
+  {name:'ISACA North America CACS',type:'conference',date:'2025-05-04',url:'https://www.isaca.org',cost:'paid',virtual:false,desc:'ISACA flagship North America conference covering GRC, audit, risk, and governance topics.',diff:null},
+  {name:'NahamCon 2025',type:'conference',date:'2025-06-06',url:'https://www.nahamcon.com',cost:'free',virtual:true,desc:'Free online hacking conference with CTF competition, workshops, and industry speakers.',diff:null},
+  {name:'NahamCon CTF 2025',type:'ctf',date:'2025-06-06',url:'https://ctf.nahamcon.com',cost:'free',virtual:true,desc:'Beginner to intermediate CTF running alongside NahamCon. Great for building practical skills.',diff:'Beginner'},
+  {name:'Google CTF 2025',type:'ctf',date:'2025-07-12',url:'https://capturetheflag.withgoogle.com',cost:'free',virtual:true,desc:'Google\'s annual CTF with high-quality challenges across web, crypto, pwn, and reversing.',diff:'Advanced'},
+  {name:'Black Hat USA 2025',type:'conference',date:'2025-08-02',url:'https://www.blackhat.com',cost:'paid',virtual:false,desc:'Premier technical security conference with in-depth trainings, briefings, and Arsenal tool demos.',diff:null},
+  {name:'BSides Las Vegas 2025',type:'conference',date:'2025-08-05',url:'https://bsideslv.org',cost:'free',virtual:false,desc:'Community-driven conference running alongside DEF CON. Two days of talks and networking.',diff:null},
+  {name:'DEF CON 33',type:'conference',date:'2025-08-07',url:'https://defcon.org',cost:'paid',virtual:false,desc:'The world\'s largest hacker convention — villages, CTF, talks, and everything in between.',diff:null},
+  {name:'DEF CON CTF 2025',type:'ctf',date:'2025-08-07',url:'https://defcon.org',cost:'free',virtual:false,desc:'The most prestigious CTF in the world. Attack/Defense format for elite teams. Finals at DEF CON.',diff:'Expert'},
+  {name:'BlueTeamCon 2025',type:'conference',date:'2025-08-29',url:'https://blueteamcon.com',cost:'paid',virtual:false,desc:'Defensive security-focused conference in Chicago covering blue team tools, tactics, and careers.',diff:null},
+  {name:'GrrCON 2025',type:'conference',date:'2025-10-09',url:'https://grrcon.com',cost:'paid',virtual:false,desc:'Midwest information security and hacking event held annually in Grand Rapids, MI.',diff:null},
+  {name:'ISC2 Security Congress 2025',type:'conference',date:'2025-10-13',url:'https://www.isc2.org',cost:'paid',virtual:false,desc:'ISC2\'s annual congress covering CISSP domains, member networking, and CPE opportunities.',diff:null},
+  {name:'ToorCon San Diego 2025',type:'conference',date:'2025-10-17',url:'https://toorcon.net',cost:'paid',virtual:false,desc:'San Diego\'s premier hacker conference with technical talks, workshops, and CTF challenges.',diff:null},
+  {name:'Wild West Hackin\' Fest 2025',type:'conference',date:'2025-10-22',url:'https://wildwesthackinfest.com',cost:'paid',virtual:true,desc:'Community security conference with in-person (Deadwood, SD) and virtual attendance options.',diff:null},
+  {name:'SecTor 2025',type:'conference',date:'2025-10-21',url:'https://www.sector.ca',cost:'paid',virtual:false,desc:'Canada\'s premier cybersecurity conference in Toronto with technical and strategic security tracks.',diff:null},
+  {name:'HackTheBox University CTF 2025',type:'ctf',date:'2025-11-14',url:'https://ctf.hackthebox.com',cost:'free',virtual:true,desc:'Annual HTB CTF open to all skill levels with team format covering all security domains.',diff:'Intermediate'},
+  {name:'SANS Cyber Defense Forum',type:'conference',date:'2025-12-08',url:'https://www.sans.org',cost:'paid',virtual:true,desc:'SANS annual virtual summit covering defensive security techniques, threat hunting, and detection.',diff:null},
+  {name:'SANS Holiday Hack / KringleCon',type:'ctf',date:'2025-12-01',url:'https://www.sans.org/mlp/holiday-hack-challenge/',cost:'free',virtual:true,desc:'Annual SANS holiday CTF with a fun narrative storyline. Great for all skill levels.',diff:'Beginner'},
+  {name:'SANS Webcasts (Ongoing)',type:'webinar',date:'2025-03-01',url:'https://www.sans.org/webcasts/',cost:'free',virtual:true,desc:'Regular free webcasts from SANS instructors covering current threats, tools, and techniques.',diff:null},
+  {name:'ISC2 CPE Webinars (Ongoing)',type:'webinar',date:'2025-03-01',url:'https://www.isc2.org/professional-development/webinars',cost:'free',virtual:true,desc:'Free CPE-eligible webinars for ISC2 members covering all CISSP and associate domains.',diff:null},
+  {name:'CISA Events (Ongoing)',type:'webinar',date:'2025-03-01',url:'https://www.cisa.gov/events',cost:'free',virtual:true,desc:'Free government webinars on threat advisories, critical infrastructure security, and IR.',diff:null},
+  {name:'CTFtime — All Competitions',type:'ctf',date:'2025-03-01',url:'https://ctftime.org',cost:'free',virtual:true,desc:'Aggregator for all ongoing and upcoming CTF competitions worldwide. Check here for the full schedule.',diff:'All Levels'},
+];
+var _calFilter='all';var _calFreeOnly=false;
+function initCalendar(){
+  var filters=document.getElementById('cal-filters');
+  if(filters&&!filters.dataset.init){
+    filters.dataset.init='1';
+    var types=[['all','All Events'],['conference','Conferences'],['ctf','CTFs'],['webinar','Webinars']];
+    filters.innerHTML=types.map(function(t){return '<button class="cal-filter-chip'+(t[0]==='all'?' cal-chip-active':'')+'" data-type="'+t[0]+'" onclick="setCalFilter(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')
+      +'<button class="cal-filter-chip" id="cal-free-btn" onclick="toggleCalFree()">Free Only</button>';
+  }
+  renderCalendar(_calFilter,_calFreeOnly);
+}
+function setCalFilter(type){
+  _calFilter=type;
+  document.querySelectorAll('.cal-filter-chip').forEach(function(el){if(el.id!=='cal-free-btn')el.classList.toggle('cal-chip-active',el.dataset.type===type);});
+  renderCalendar(_calFilter,_calFreeOnly);
+}
+function toggleCalFree(){
+  _calFreeOnly=!_calFreeOnly;
+  var btn=document.getElementById('cal-free-btn');
+  if(btn)btn.classList.toggle('cal-chip-active',_calFreeOnly);
+  renderCalendar(_calFilter,_calFreeOnly);
+}
+function renderCalendar(typeFilter,freeOnly){
+  var list=document.getElementById('cal-list');
+  if(!list)return;
+  var filtered=EVENTS.filter(function(e){
+    var matchType=(typeFilter==='all'||e.type===typeFilter);
+    var matchFree=!freeOnly||(e.cost==='free');
+    return matchType&&matchFree;
+  }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  if(!filtered.length){list.innerHTML='<div class="cal-empty">No events match your filters.</div>';return;}
+  var groups={};
+  filtered.forEach(function(e){
+    var d=new Date(e.date+'T12:00:00');
+    var key=d.getFullYear()+'-'+(d.getMonth()+1);
+    var label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    if(!groups[key])groups[key]={label:label,events:[]};
+    groups[key].events.push(e);
+  });
+  var typeColors={conference:'#4d9eff',ctf:'#f05d78',webinar:'#10e87e',training:'#f5c842'};
+  var html='';
+  Object.keys(groups).sort().forEach(function(k){
+    var g=groups[k];
+    html+='<div class="cal-month-group"><div class="cal-month-label">'+g.label+'</div>';
+    g.events.forEach(function(e){
+      var d=new Date(e.date+'T12:00:00');
+      var day=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      html+='<div class="cal-event">'
+        +'<div class="ce-date">'+day+'</div>'
+        +'<div class="ce-body">'
+        +'<div class="ce-title-row"><span class="ce-title">'+e.name+'</span>'
+        +'<span class="ce-type-badge" style="background:'+typeColors[e.type]+'22;color:'+typeColors[e.type]+'">'+e.type+'</span>'
+        +(e.cost==='free'?'<span class="ce-free-tag">FREE</span>':'')
+        +(e.virtual?'<span class="ce-virtual-tag">VIRTUAL</span>':'')
+        +'</div>'
+        +'<div class="ce-desc">'+e.desc+'</div>'
+        +(e.diff?'<div class="ce-diff">Difficulty: <strong>'+e.diff+'</strong></div>':'')
+        +'</div>'
+        +'<a class="ce-link" href="'+e.url+'" target="_blank" rel="noopener">Visit &rarr;</a>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  list.innerHTML=html;
+}
+
+// ─── F10: RESUME TEMPLATES ───────────────────────────────
+var RESUME_TEMPLATES=[
+  {id:'soc',role:'SOC Analyst',level:'Entry – Mid',icon:'🛡️',color:'#00d4c8',
+    tips:['Lead with monitoring/detection skills: Splunk, SIEM platforms, alert triage','Include threat intelligence tools: VirusTotal, MISP, OTX','Quantify: "Triaged 150+ alerts/day," "Reduced MTTR by 30%"','Highlight shift flexibility and on-call experience','Relevant certs: CompTIA Security+, CySA+, Splunk Core Certified, BTL1'],googleDocUrl:'https://docs.google.com/'},
+  {id:'pentest',role:'Penetration Tester',level:'Mid – Senior',icon:'⚔️',color:'#f05d78',
+    tips:['List tools by name: Metasploit, Burp Suite, Nmap, BloodHound, Impacket','Include bug bounty rankings and CTF results (HackTheBox, TryHackMe)','Highlight any CVEs found or responsible disclosures','Emphasize report writing — clients pay for clear risk communication','OSCP is the gold standard cert; also add CEH, eJPT, PNPT, GPEN'],googleDocUrl:'https://docs.google.com/'},
+  {id:'cloud-sec',role:'Cloud Security Engineer',level:'Mid – Senior',icon:'☁️',color:'#4d9eff',
+    tips:['Specify platforms: AWS, Azure, GCP — avoid generic "cloud security"','List IaC tools: Terraform, CloudFormation, Pulumi — engineers must code','Include CSPM tools: Wiz, Prisma Cloud, Prowler, ScoutSuite','Quantify: "Secured 200+ cloud accounts," "Reduced critical findings 40%"','Certs: AWS Security Specialty, AZ-500, CCSP, GCSA'],googleDocUrl:'https://docs.google.com/'},
+  {id:'security-eng',role:'Security Engineer',level:'Mid – Senior',icon:'⚙️',color:'#10e87e',
+    tips:['Show Python/Go/Bash coding ability — security engineers must code','Highlight tool builds: SIEM detection rules, automated IR playbooks','Reference frameworks used: MITRE ATT&CK, NIST, CIS Benchmarks','Include scale: "Protected 10,000-seat enterprise," "Managed 50TB/day log pipeline"','Certs: CISSP, Security+, GCED, GCIH — breadth matters here'],googleDocUrl:'https://docs.google.com/'},
+  {id:'grc',role:'GRC Analyst',level:'Entry – Senior',icon:'📋',color:'#818cf8',
+    tips:['Lead with frameworks: NIST CSF, ISO 27001, SOC 2, PCI DSS, HIPAA — be specific','Highlight audit outcomes: "Managed SOC 2 Type II audit, zero exceptions"','Include risk register management and risk scoring methodology','Show business fluency — GRC requires translating risk for executives','Certs: CISA, CISM, CRISC, CompTIA Security+ are highly valued'],googleDocUrl:'https://docs.google.com/'},
+  {id:'iam',role:'IAM Engineer',level:'Mid – Senior',icon:'🔑',color:'#ff8c42',
+    tips:['Specify platforms: CyberArk, SailPoint, Okta, Ping, Azure AD/Entra ID','Include PAM, SSO, MFA, and directory service experience','Show lifecycle management scale: "Provisioned 5,000+ accounts across 15 systems"','Highlight compliance support: SOX, SOC 2 AC controls, certifications','Differentiator certs: CIMP, SailPoint, CyberArk, CIAM'],googleDocUrl:'https://docs.google.com/'},
+  {id:'sa',role:'Security Architect',level:'Senior – Principal',icon:'🏗️',color:'#c084fc',
+    tips:['Show breadth across multiple security domains','Include enterprise architecture: SABSA, TOGAF, NIST frameworks','Quantify impact: "Designed zero trust architecture for 15,000-seat org"','Highlight cross-team leadership and executive communication','Certs: CISSP-ISSAP, SABSA, TOGAF alongside technical certs'],googleDocUrl:'https://docs.google.com/'},
+  {id:'ciso',role:'CISO / Security Manager',level:'Director – Executive',icon:'👔',color:'#f5c842',
+    tips:['Lead with business outcomes — use board-level language, not technical jargon','Include budget ownership: "Managed $3.2M security budget"','Show compliance outcomes: "Led SOC 2 Type II, ISO 27001 certifications"','Highlight team building, vendor management, and M&A security work','Certs: CISM, CISSP, CCISO, executive education programs'],googleDocUrl:'https://docs.google.com/'},
+];
+function renderResumeTemplates(){
+  var grid=document.getElementById('resume-grid');
+  if(!grid)return;
+  grid.innerHTML=RESUME_TEMPLATES.map(function(t){
+    return '<div class="rt-card" onclick="openResumeTemplate(\''+t.id+'\')" style="--rt-color:'+t.color+'">'
+      +'<div class="rt-icon">'+t.icon+'</div>'
+      +'<div class="rt-role">'+t.role+'</div>'
+      +'<div class="rt-level">'+t.level+'</div>'
+      +'<div class="rt-footer"><span class="rt-btn">View Tips &rarr;</span></div>'
+      +'</div>';
+  }).join('');
+}
+function openResumeTemplate(id){
+  var t=RESUME_TEMPLATES.find(function(x){return x.id===id;});
+  if(!t)return;
+  var panel=document.getElementById('resume-detail');
+  if(!panel)return;
+  panel.innerHTML='<button class="rd-close" onclick="var d=document.getElementById(\'resume-detail\');var g=document.getElementById(\'resume-grid\');if(d)d.style.display=\'none\';if(g)g.style.display=\'\';">&larr; Back to Templates</button>'
+    +'<div class="rd-header" style="border-color:'+t.color+'">'
+    +'<span class="rd-icon">'+t.icon+'</span>'
+    +'<div><div class="rd-role" style="color:'+t.color+'">'+t.role+'</div><div class="rd-level">'+t.level+'</div></div>'
+    +'</div>'
+    +'<h3 class="rd-tips-hd">Resume Tips for '+t.role+'</h3>'
+    +'<ul class="rd-tips-list">'+t.tips.map(function(tip){return '<li>'+tip+'</li>';}).join('')+'</ul>'
+    +'<div class="rd-cta">'
+    +'<a href="'+t.googleDocUrl+'" target="_blank" class="rd-template-btn">Open Template in Google Docs &nearr;</a>'
+    +'<p class="rd-note">Click "File &rarr; Make a copy" to get your own editable version. (Placeholder link — add your own Google Doc template URL.)</p>'
+    +'</div>';
+  panel.style.display='block';
+  document.getElementById('resume-grid').style.display='none';
+}
+
+// ─── F11: WALL OF WINS ────────────────────────────────────
+var FEATURED_STORIES=[
+  {name:'Marcus T.',role:'SOC Analyst II',prev:'Retail Store Manager',domain:'soc',duration:'14 months',quote:'I had zero tech background. Started with CompTIA A+ and Security+, then grinded TryHackMe every night. Got my first SOC role at month 11.',tip:'Consistency beats intensity. 1 hour every day beats 8 hours on weekends.',date:'Jan 2026',icon:'🛡️',color:'#00d4c8'},
+  {name:'Priya M.',role:'Cloud Security Engineer',prev:'Network Engineer',domain:'cloud',duration:'8 months',quote:'The AWS Security Specialty cert was a game changer. Every interview asked about cloud security architecture — I had all the answers.',tip:'If you\'re already in networking, cloud security is a natural next step. Get the AWS Security Specialty.',date:'Dec 2025',icon:'☁️',color:'#4d9eff'},
+  {name:'James R.',role:'Penetration Tester',prev:'IT Help Desk',domain:'red',duration:'18 months',quote:'OSCP was brutal but worth every painful moment. The day I passed, three companies reached out within a week.',tip:'OSCP is the minimum bar for serious pentest roles. Don\'t skip it.',date:'Feb 2026',icon:'⚔️',color:'#f05d78'},
+  {name:'Aisha K.',role:'GRC Analyst',prev:'Paralegal',domain:'grc',duration:'6 months',quote:'My legal background translated perfectly. Risk assessment, policy writing, contract review — I already had those skills. CISA study solidified the rest.',tip:'Non-tech backgrounds aren\'t a weakness in GRC. Lean into your transferable skills.',date:'Nov 2025',icon:'📋',color:'#818cf8'},
+  {name:'Tyler B.',role:'IAM Engineer',prev:'Systems Administrator',domain:'iam',duration:'10 months',quote:'Moved from managing Active Directory to building CyberArk implementations. The jump in salary was $35K.',tip:'If you manage AD/Entra ID, you\'re already halfway to IAM Engineering. Get CyberArk or SailPoint certified.',date:'Jan 2026',icon:'🔑',color:'#ff8c42'},
+  {name:'Sarah L.',role:'Security Architect',prev:'Security Engineer',domain:'eng',duration:'3 years',quote:'The path from engineer to architect is about developing business fluency. I started presenting risk in dollars, not CVE scores. That changed everything.',tip:'Learn to speak executive language. Risk in dollars, not technical jargon.',date:'Oct 2025',icon:'🏗️',color:'#c084fc'},
+];
+function getStories(){
+  try{var s=localStorage.getItem('isd_stories');var sub=s?JSON.parse(s):[];return sub.concat(FEATURED_STORIES);}catch(e){return FEATURED_STORIES;}
+}
+function renderStories(){
+  var grid=document.getElementById('stories-grid');
+  if(!grid)return;
+  var stories=getStories();
+  grid.innerHTML=stories.map(function(s){
+    var initials=s.name.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2);
+    return '<div class="story-card">'
+      +'<div class="sc-av" style="background:'+s.color+'22;color:'+s.color+'">'+initials+'</div>'
+      +'<div class="sc-body">'
+      +'<div class="sc-name">'+s.name+'</div>'
+      +'<div class="sc-role"><span class="sc-role-icon">'+s.icon+'</span>'+s.role+'</div>'
+      +'<div class="sc-prev">&larr; '+s.prev+'</div>'
+      +'<div class="sc-quote">"'+s.quote+'"</div>'
+      +'<div class="sc-tip"><strong>Tip:</strong> '+s.tip+'</div>'
+      +'<div class="sc-meta">'+s.duration+(s.date?' &middot; '+s.date:'')+'</div>'
+      +'</div></div>';
+  }).join('');
+}
+function submitStory(){
+  var name=document.getElementById('ssf-name')&&document.getElementById('ssf-name').value.trim()||'';
+  var role=document.getElementById('ssf-role')&&document.getElementById('ssf-role').value.trim()||'';
+  var prev=document.getElementById('ssf-prev')&&document.getElementById('ssf-prev').value.trim()||'';
+  var dur=document.getElementById('ssf-dur')&&document.getElementById('ssf-dur').value.trim()||'';
+  var quote=document.getElementById('ssf-quote')&&document.getElementById('ssf-quote').value.trim()||'';
+  var tip=document.getElementById('ssf-tip')&&document.getElementById('ssf-tip').value.trim()||'';
+  if(!name||!role||!quote){showToast('Please fill in Name, New Role, and Your Story.');return;}
+  var story={name:name,role:role,prev:prev||'Previous Career',domain:'soc',duration:dur,quote:quote,tip:tip,date:new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'}),icon:'⭐',color:'#f5c842'};
+  try{var existing=localStorage.getItem('isd_stories');var arr=existing?JSON.parse(existing):[];arr.unshift(story);localStorage.setItem('isd_stories',JSON.stringify(arr));}catch(e){}
+  ['ssf-name','ssf-role','ssf-prev','ssf-dur','ssf-quote','ssf-tip'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  renderStories();
+  showToast('Your story has been added! Thank you for inspiring others. 🏆');
+  var g=document.getElementById('stories-grid');if(g)g.scrollIntoView({behavior:'smooth'});
+}
+function showToast(msg){
+  var t=document.getElementById('isd-toast');
+  if(!t){t=document.createElement('div');t.id='isd-toast';t.className='isd-toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('toast-show');
+  setTimeout(function(){t.classList.remove('toast-show');},3500);
+}
+
+// ─── PAGE INIT HOOKS ─────────────────────────────────────
+var _pageInits={
+  certs:function(){initCertTracker();},
+  salary:function(){initSalaryCalc();},
+  tools:function(){initTools();},
+  calendar:function(){initCalendar();},
+  resume:function(){var g=document.getElementById('resume-grid');var d=document.getElementById('resume-detail');if(d)d.style.display='none';if(g){g.style.display='';renderResumeTemplates();}},
+  stories:function(){renderStories();},
+  profile:function(){initProfile();},
+};
+
+// Trigger DC float on first load
+document.addEventListener('DOMContentLoaded', function(){
+  if(typeof initDCFloat==='function')initDCFloat();
+});
+
+// ══════════════════════ v11 UPDATES ══════════════════════
+
+// ─── DAILY CHALLENGE MODAL ───────────────────────────────
+function initDCFloat(){
+  var sk=loadStreak();
+  var floatBtn=document.getElementById('dc-float-btn');
+  var floatStreak=document.getElementById('dc-float-streak');
+  if(floatStreak&&sk.count>0){floatStreak.textContent='🔥'+sk.count;}
+  if(floatBtn){floatBtn.style.display='flex';}
+}
+function openDCModal(){
+  var m=document.getElementById('dc-modal');
+  if(!m)return;
+  m.classList.add('dc-modal-open');
+  document.body.style.overflow='hidden';
+  renderDCModal();
+}
+function closeDCModal(){
+  var m=document.getElementById('dc-modal');
+  if(m){m.classList.remove('dc-modal-open');document.body.style.overflow='';}
+}
+function renderDCModal(){
+  var body=document.getElementById('dc-modal-body');
+  var streakEl=document.getElementById('dc-modal-streak');
+  var signupEl=document.getElementById('dc-modal-signup');
+  if(!body)return;
+  var idx=getDailyIdx();
+  var q=DC_BANK[idx];
+  var state=loadDCState();
+  var today=new Date().toDateString();
+  var sk=loadStreak();
+  if(streakEl)streakEl.textContent=(sk.count>0?'🔥 '+sk.count+' day streak':'Start your streak today!');
+  var diffColors={Easy:'#10e87e',Medium:'#f5c842',Hard:'#f05d78'};
+  if(state&&state.date===today){
+    // Already answered today
+    if(signupEl)signupEl.style.display='flex';
+    var chosen=state.chosen;
+    body.innerHTML='<div class="dcm-q">'+q.q+'</div>'
+      +'<div class="dcm-opts">'+q.opts.map(function(o,i){
+        var cls='dcm-opt';
+        if(i===q.correct)cls+=' dcm-opt-correct';
+        else if(i===chosen&&chosen!==q.correct)cls+=' dcm-opt-wrong';
+        else cls+=' dcm-opt-neutral';
+        return '<div class="'+cls+'">'+o+'</div>';
+      }).join('')+'</div>'
+      +'<div class="dcm-result '+(state.won?'dcm-result-win':'dcm-result-lose')+'">'+(state.won?'✅ Correct!':'❌ Not quite.')+'</div>'
+      +'<div class="dcm-explain">'+q.explain+'</div>'
+      +'<div class="dcm-meta"><span class="dcm-cat">'+q.cat+'</span>'
+      +'<span class="dcm-diff" style="color:'+(diffColors[q.diff]||'#94a3b8')+'">'+q.diff+'</span></div>'
+      +'<div class="dcm-done-msg">Come back tomorrow for a new challenge!</div>';
+    return;
+  }
+  if(signupEl)signupEl.style.display='none';
+  body.innerHTML='<div class="dcm-q">'+q.q+'</div>'
+    +'<div class="dcm-opts">'+q.opts.map(function(o,i){
+      return '<div class="dcm-opt" onclick="submitDCModalAnswer('+i+')">'+o+'</div>';
+    }).join('')+'</div>'
+    +'<div class="dcm-meta"><span class="dcm-cat">'+q.cat+'</span>'
+    +'<span class="dcm-diff" style="color:'+(diffColors[q.diff]||'#94a3b8')+'">'+q.diff+'</span></div>';
+}
+function submitDCModalAnswer(chosen){
+  var idx=getDailyIdx();
+  var q=DC_BANK[idx];
+  var won=(chosen===q.correct);
+  var today=new Date().toDateString();
+  saveDCState({date:today,chosen:chosen,won:won});
+  var sk=updateStreak(won);
+  // Update float button streak
+  var floatStreak=document.getElementById('dc-float-streak');
+  if(floatStreak&&sk.count>0){floatStreak.textContent='🔥'+sk.count;}
+  var streakEl=document.getElementById('dc-modal-streak');
+  if(streakEl)streakEl.textContent=(sk.count>0?'🔥 '+sk.count+' day streak':'Keep going!');
+  renderDCModal();
+}
+
+// ─── PROFILE PAGE ────────────────────────────────────────
+var _PROFILE_KEY='isd_profile';
+function loadProfile(){try{var s=localStorage.getItem(_PROFILE_KEY);return s?JSON.parse(s):{};}catch(e){return {};}}
+function saveProfile(){
+  var p={
+    name:(document.getElementById('pf-name')&&document.getElementById('pf-name').value)||'',
+    email:(document.getElementById('pf-email')&&document.getElementById('pf-email').value)||'',
+    currentRole:(document.getElementById('pf-current-role')&&document.getElementById('pf-current-role').value)||'',
+    targetRole:(document.getElementById('pf-target-role')&&document.getElementById('pf-target-role').value)||'',
+    exp:(document.getElementById('pf-exp')&&document.getElementById('pf-exp').value)||'',
+    location:(document.getElementById('pf-location')&&document.getElementById('pf-location').value)||'',
+    bio:(document.getElementById('pf-bio')&&document.getElementById('pf-bio').value)||''
+  };
+  try{localStorage.setItem(_PROFILE_KEY,JSON.stringify(p));}catch(e){}
+  updateProfileDisplay(p);
+  showToast('Profile saved! ✅');
+}
+function updateProfileDisplay(p){
+  if(!p)p=loadProfile();
+  var nameEl=document.getElementById('ph-name-display');
+  var roleEl=document.getElementById('ph-role-display');
+  if(nameEl)nameEl.textContent=p.name||'Guest User';
+  if(roleEl)roleEl.textContent=p.currentRole||(p.targetRole?'Targeting: '+p.targetRole:'Not signed in');
+}
+function initProfile(){
+  var p=loadProfile();
+  if(p.name){var el=document.getElementById('pf-name');if(el)el.value=p.name;}
+  if(p.email){var el=document.getElementById('pf-email');if(el)el.value=p.email;}
+  if(p.currentRole){var el=document.getElementById('pf-current-role');if(el)el.value=p.currentRole;}
+  if(p.targetRole){var el=document.getElementById('pf-target-role');if(el)el.value=p.targetRole;}
+  if(p.exp){var el=document.getElementById('pf-exp');if(el)el.value=p.exp;}
+  if(p.location){var el=document.getElementById('pf-location');if(el)el.value=p.location;}
+  if(p.bio){var el=document.getElementById('pf-bio');if(el)el.value=p.bio;}
+  updateProfileDisplay(p);
+  // Load streak
+  var sk=loadStreak();
+  var streakEl=document.getElementById('ps-streak');if(streakEl)streakEl.textContent=sk.count;
+  // Load cert progress
+  var cp=getCertProgress();
+  var done=Object.values(cp).filter(function(v){return v==='done';}).length;
+  var inprog=Object.values(cp).filter(function(v){return v==='inprog';}).length;
+  var pdone=document.getElementById('ps-certs-done');if(pdone)pdone.textContent=done;
+  var pprog=document.getElementById('ps-certs-prog');if(pprog)pprog.textContent=inprog;
+  // Cert summary
+  var csEl=document.getElementById('profile-cert-summary');
+  if(csEl&&(done>0||inprog>0)){
+    csEl.innerHTML='<div class="pcs-row"><span class="pcs-item pcs-done">✅ '+done+' earned</span><span class="pcs-item pcs-prog">⏳ '+inprog+' in progress</span></div>'
+      +'<p style="margin:8px 0 0;font-size:.8rem;color:var(--mt);">Right-click any cert badge on the Certifications page to update status.</p>';
+  }
+}
+
+// ─── SALARY CALC FIX (commas, accurate market data) ──────
+var CALC_BASE_SAL={
+  soc:{min:70000,max:95000},
+  de:{min:110000,max:150000},
+  ir:{min:100000,max:140000},
+  ti:{min:95000,max:130000},
+  ma:{min:100000,max:142000},
+  pt:{min:115000,max:160000},
+  rt:{min:130000,max:185000},
+  as:{min:120000,max:165000},
+  iam:{min:110000,max:155000},
+  vm:{min:90000,max:125000},
+  grc:{min:80000,max:115000},
+  se:{min:120000,max:170000},
+  sa:{min:150000,max:210000},
+  cs:{min:125000,max:175000},
+  ciso:{min:200000,max:380000},
+  risk:{min:110000,max:150000}
+};
+function fmtSal(n){
+  return '$'+Math.round(n).toLocaleString('en-US');
+}
+// Override calcSalary with corrected version
+function calcSalary(){
+  var roleKey=document.getElementById('sc-role')&&document.getElementById('sc-role').value;
+  var expKey=(document.getElementById('sc-exp')&&document.getElementById('sc-exp').value)||'mid';
+  var locKey=(document.getElementById('sc-loc')&&document.getElementById('sc-loc').value)||'remote';
+  var res=document.getElementById('sc-result');
+  if(!res||!roleKey||typeof JT==='undefined')return;
+  var jt=JT[roleKey];if(!jt)return;
+  var base=CALC_BASE_SAL[roleKey]||{min:80000,max:120000};
+  var baseMin=base.min,baseMax=base.max;
+  var expM=EXP_MULT[expKey]||1.0;
+  var locM=LOC_MULT[locKey]||1.0;
+  var certBonus=0;
+  document.querySelectorAll('#sc-cert-bonuses input:checked').forEach(function(cb){certBonus+=(CERT_BONUSES[cb.value]||0);});
+  var totalM=expM*locM*(1+certBonus);
+  var adjMin=Math.round(baseMin*totalM/1000)*1000;
+  var adjMax=Math.round(baseMax*totalM/1000)*1000;
+  var adjMid=Math.round((adjMin+adjMax)/2/1000)*1000;
+  res.innerHTML='<div class="sc-result-role">'+jt.icon+' '+jt.title+'</div>'
+    +'<div class="sc-range-wrap">'
+    +'<div class="sc-range-labels"><span>'+fmtSal(adjMin)+'</span><span class="sc-mid-label">~'+fmtSal(adjMid)+' median</span><span>'+fmtSal(adjMax)+'</span></div>'
+    +'<div class="sc-range-bar"><div class="sc-range-fill"></div></div></div>'
+    +'<div class="sc-tip">'+jt.domain+' · '+(certBonus>0?'Cert bonuses: +'+Math.round(certBonus*100)+'%. ':'')+
+    (locKey!=='remote'?'Adjusted for local market. ':'National remote average. ')+'Private sector rates.</div>';
+}
+
+// Update cert bonuses with top-paying certs + Master's degree
+CERT_BONUSES={
+  cissp:0.15,
+  cism:0.12,
+  aws_sec:0.15,
+  ccsp:0.12,
+  oscp:0.14,
+  cisa:0.10,
+  crisc:0.11,
+  azure_sec:0.10,
+  gcp_sec:0.10,
+  gpen:0.09,
+  gcih:0.08,
+  gcfa:0.09,
+  gcfe:0.08,
+  masters:0.12,
+  phd:0.08
+};
+// Rebuild the cert bonus checkboxes with new list
+function initSalaryCalc(){
+  var roleEl=document.getElementById('sc-role');
+  if(!roleEl||roleEl.dataset.init)return;
+  roleEl.dataset.init='1';
+  if(typeof JT!=='undefined'){
+    Object.keys(JT).sort(function(a,b){return JT[a].title.localeCompare(JT[b].title);}).forEach(function(k){
+      var o=document.createElement('option');o.value=k;o.textContent=JT[k].title;roleEl.appendChild(o);
+    });
+  }
+  var locEl=document.getElementById('sc-loc');
+  if(locEl){
+    var locs=[['remote','Remote / National Avg'],['sf','San Francisco Bay Area (+28%)'],['nyc','New York City (+22%)'],['seattle','Seattle (+18%)'],['dc','Washington D.C. (+16%)'],['boston','Boston (+14%)'],['austin','Austin (+9%)'],['chicago','Chicago (+5%)'],['southwest','Southwest (-8%)'],['midwest','Midwest (-10%)'],['southeast','Southeast (-13%)']];
+    locs.forEach(function(l){var o=document.createElement('option');o.value=l[0];o.textContent=l[1];locEl.appendChild(o);});
+  }
+  var cbEl=document.getElementById('sc-cert-bonuses');
+  if(cbEl){
+    var pc=[['cissp','CISSP (+15%)'],['cism','CISM (+12%)'],['aws_sec','AWS Security Specialty (+15%)'],['ccsp','CCSP (+12%)'],['oscp','OSCP (+14%)'],['cisa','CISA (+10%)'],['crisc','CRISC (+11%)'],['azure_sec','AZ-500 Azure Security (+10%)'],['gcp_sec','GCP Security Engineer (+10%)'],['gpen','GPEN (+9%)'],['gcih','GCIH (+8%)'],['gcfa','GCFA (+9%)'],['masters','Master\'s Degree (+12%)'],['phd','Ph.D. (+8%)']];
+    cbEl.innerHTML=pc.map(function(c){return '<label class="sc-cert-cb"><input type="checkbox" value="'+c[0]+'" onchange="calcSalary()"> '+c[1]+'</label>';}).join('');
+  }
+  calcSalary();
+}
+// Also update exp multipliers for correct labels
+EXP_MULT={entry:0.78,mid:1.0,senior:1.22,lead:1.45};
+
+// ─── CERT COMPARISON FIX ─────────────────────────────────
+function renderCertComparison(){
+  var sa=document.getElementById('ccm-a'),sb=document.getElementById('ccm-b');
+  var t=document.getElementById('ccm-table');
+  if(!sa||!sb||!t||typeof CERTS==='undefined')return;
+  var ca=CERTS[sa.value],cb=CERTS[sb.value];
+  if(!ca||!cb){t.innerHTML='<div class="ccm-msg">Select two certifications above.</div>';return;}
+  function parsePrice(s){var m=(s||'').match(/\$([\d,]+)/);return m?'$'+m[1]:'N/A';}
+  function parseExpiry(s){if(!s)return'N/A';if(s.toLowerCase().indexOf('3 yr')>-1||s.toLowerCase().indexOf('3-yr')>-1)return'3 years';if(s.toLowerCase().indexOf('2 yr')>-1)return'2 years';if(s.toLowerCase().indexOf('5 yr')>-1)return'5 years';if(s.toLowerCase().indexOf('no exp')>-1||s.toLowerCase().indexOf('does not exp')>-1)return'Does not expire';return'See issuer';}
+  function getDomains(c){return (c.domains||[]).join(', ')||'—';}
+  function getTags(c){return (c.tags||[]).slice(0,4).join(', ')||'—';}
+  var rows=[
+    {label:'Tier / Level',a:ca.tier||'—',b:cb.tier||'—'},
+    {label:'Issuing Body',a:(ca.issuer||'—').split('·')[0].trim(),b:(cb.issuer||'—').split('·')[0].trim()},
+    {label:'Exam Cost',a:parsePrice(ca.issuer),b:parsePrice(cb.issuer)},
+    {label:'Security Domains',a:getDomains(ca),b:getDomains(cb)},
+    {label:'Key Tags / Focus',a:getTags(ca),b:getTags(cb)},
+    {label:'Validity',a:parseExpiry(ca.issuer+' '+(ca.desc||'')),b:parseExpiry(cb.issuer+' '+(cb.desc||''))},
+    {label:'Best For',a:(ca.desc||'—').substring(0,90)+'…',b:(cb.desc||'—').substring(0,90)+'…'},
+  ];
+  var html='<div class="ccm-row ccm-row-hd"><div class="ccm-row-label"></div>'
+    +'<div class="ccm-col ccm-col-hd">'+ca.name+'</div><div class="ccm-col ccm-col-hd">'+cb.name+'</div></div>';
+  rows.forEach(function(r){
+    var diff=r.a!==r.b&&r.a!=='—'&&r.b!=='—'&&r.a!=='N/A'&&r.b!=='N/A';
+    html+='<div class="ccm-row'+(diff?' ccm-diff':'')+'"><div class="ccm-row-label">'+r.label+'</div>'
+      +'<div class="ccm-col">'+r.a+'</div><div class="ccm-col">'+r.b+'</div></div>';
+  });
+  // Learning resources
+  var aLinks=(ca.links||[]).slice(0,2).map(function(l){return '<a href="'+l.l+'" target="_blank" class="ccm-link">'+l.tx.replace(/^[^ ]+ /,'')+'</a>';}).join(' ');
+  var bLinks=(cb.links||[]).slice(0,2).map(function(l){return '<a href="'+l.l+'" target="_blank" class="ccm-link">'+l.tx.replace(/^[^ ]+ /,'')+'</a>';}).join(' ');
+  html+='<div class="ccm-row"><div class="ccm-row-label">Study Resources</div><div class="ccm-col">'+aLinks+'</div><div class="ccm-col">'+bLinks+'</div></div>';
+  t.innerHTML=html;
+}
+
+// ─── CALENDAR: FILTER PAST EVENTS + 2026 EVENTS ──────────
+// Replace EVENTS with updated 2026 data
+var EVENTS=[
+  // Ongoing / recurring webinars (always show)
+  {name:'CTFtime — All Competitions',type:'ctf',date:'2026-03-10',url:'https://ctftime.org',cost:'free',virtual:true,desc:'Aggregator for all ongoing and upcoming CTF competitions worldwide. Check here for the full live schedule.',diff:'All Levels'},
+  {name:'SANS Webcasts (Ongoing)',type:'webinar',date:'2026-03-15',url:'https://www.sans.org/webcasts/',cost:'free',virtual:true,desc:'Regular free webcasts from SANS instructors covering current threats, tools, and techniques.',diff:null},
+  {name:'ISC2 CPE Webinars (Ongoing)',type:'webinar',date:'2026-03-15',url:'https://www.isc2.org/professional-development/webinars',cost:'free',virtual:true,desc:'Free CPE-eligible webinars for ISC2 members covering all CISSP and associate domains.',diff:null},
+  {name:'CISA Events (Ongoing)',type:'webinar',date:'2026-03-20',url:'https://www.cisa.gov/events',cost:'free',virtual:true,desc:'Free government webinars on threat advisories, critical infrastructure security, and IR.',diff:null},
+  // 2026 events
+  {name:'picoCTF 2026',type:'ctf',date:'2026-03-21',url:'https://picoctf.org',cost:'free',virtual:true,desc:'Beginner-friendly CTF from Carnegie Mellon University. Perfect for newcomers learning the fundamentals.',diff:'Beginner'},
+  {name:'BSides Austin 2026',type:'conference',date:'2026-04-03',url:'https://bsidesaustin.com',cost:'free',virtual:false,desc:'Community-run security conference in Austin with talks, workshops, and CTF challenges.',diff:null},
+  {name:'BSides San Francisco 2026',type:'conference',date:'2026-04-25',url:'https://bsidessf.org',cost:'free',virtual:false,desc:'Long-running BSides event with diverse security research presentations and community networking.',diff:null},
+  {name:'RSA Conference 2026',type:'conference',date:'2026-04-27',url:'https://www.rsaconference.com',cost:'paid',virtual:false,desc:'World\'s largest cybersecurity conference — 500+ sessions, keynotes, Expo Hall, and networking events. San Francisco.',diff:null},
+  {name:'ISACA North America CACS 2026',type:'conference',date:'2026-05-03',url:'https://www.isaca.org',cost:'paid',virtual:false,desc:'ISACA flagship North America conference covering GRC, audit, risk, and governance topics.',diff:null},
+  {name:'NahamCon 2026',type:'conference',date:'2026-06-05',url:'https://www.nahamcon.com',cost:'free',virtual:true,desc:'Free online hacking conference with CTF competition, workshops, and industry speakers.',diff:null},
+  {name:'NahamCon CTF 2026',type:'ctf',date:'2026-06-05',url:'https://ctf.nahamcon.com',cost:'free',virtual:true,desc:'Beginner to intermediate CTF running alongside NahamCon. Great for building practical skills.',diff:'Beginner'},
+  {name:'Google CTF 2026',type:'ctf',date:'2026-07-11',url:'https://capturetheflag.withgoogle.com',cost:'free',virtual:true,desc:'Google\'s annual CTF with high-quality challenges across web, crypto, pwn, and reversing.',diff:'Advanced'},
+  {name:'Black Hat USA 2026',type:'conference',date:'2026-08-01',url:'https://www.blackhat.com',cost:'paid',virtual:false,desc:'Premier technical security conference with in-depth trainings, briefings, and Arsenal tool demos. Las Vegas.',diff:null},
+  {name:'BSides Las Vegas 2026',type:'conference',date:'2026-08-04',url:'https://bsideslv.org',cost:'free',virtual:false,desc:'Community-driven conference running alongside DEF CON. Two days of talks and networking.',diff:null},
+  {name:'DEF CON 34',type:'conference',date:'2026-08-06',url:'https://defcon.org',cost:'paid',virtual:false,desc:'The world\'s largest hacker convention — villages, CTF, talks, and everything in between. Las Vegas.',diff:null},
+  {name:'DEF CON CTF 2026',type:'ctf',date:'2026-08-06',url:'https://defcon.org',cost:'free',virtual:false,desc:'The most prestigious CTF in the world. Attack/Defense format for elite teams. Finals at DEF CON.',diff:'Expert'},
+  {name:'BlueTeamCon 2026',type:'conference',date:'2026-08-28',url:'https://blueteamcon.com',cost:'paid',virtual:false,desc:'Defensive security-focused conference in Chicago covering blue team tools, tactics, and careers.',diff:null},
+  {name:'GrrCON 2026',type:'conference',date:'2026-10-08',url:'https://grrcon.com',cost:'paid',virtual:false,desc:'Midwest information security and hacking event held annually in Grand Rapids, MI.',diff:null},
+  {name:'ISC2 Security Congress 2026',type:'conference',date:'2026-10-12',url:'https://www.isc2.org',cost:'paid',virtual:false,desc:'ISC2\'s annual congress covering CISSP domains, member networking, and CPE opportunities.',diff:null},
+  {name:'ToorCon San Diego 2026',type:'conference',date:'2026-10-16',url:'https://toorcon.net',cost:'paid',virtual:false,desc:'San Diego\'s premier hacker conference with technical talks, workshops, and CTF challenges.',diff:null},
+  {name:'SecTor 2026',type:'conference',date:'2026-10-20',url:'https://www.sector.ca',cost:'paid',virtual:false,desc:'Canada\'s premier cybersecurity conference in Toronto with technical and strategic security tracks.',diff:null},
+  {name:'Wild West Hackin\' Fest 2026',type:'conference',date:'2026-10-21',url:'https://wildwesthackinfest.com',cost:'paid',virtual:true,desc:'Community security conference with in-person (Deadwood, SD) and virtual attendance options.',diff:null},
+  {name:'HackTheBox University CTF 2026',type:'ctf',date:'2026-11-13',url:'https://ctf.hackthebox.com',cost:'free',virtual:true,desc:'Annual HTB CTF open to all skill levels with team format covering all security domains.',diff:'Intermediate'},
+  {name:'SANS Holiday Hack / KringleCon 2026',type:'ctf',date:'2026-12-01',url:'https://www.sans.org/mlp/holiday-hack-challenge/',cost:'free',virtual:true,desc:'Annual SANS holiday CTF with a fun narrative storyline. Great for all skill levels.',diff:'Beginner'},
+  {name:'SANS Cyber Defense Forum 2026',type:'conference',date:'2026-12-07',url:'https://www.sans.org',cost:'paid',virtual:true,desc:'SANS annual virtual summit covering defensive security techniques, threat hunting, and detection.',diff:null},
+];
+// Patch renderCalendar to filter past events and only show ≤1 year out
+function renderCalendar(typeFilter,freeOnly){
+  var list=document.getElementById('cal-list');
+  if(!list)return;
+  var now=new Date();
+  var oneYearOut=new Date(now.getTime()+365*24*3600*1000);
+  var filtered=EVENTS.filter(function(e){
+    var d=new Date(e.date+'T12:00:00');
+    if(d<now)return false; // hide past events
+    if(d>oneYearOut)return false; // hide >1 year out
+    var matchType=(typeFilter==='all'||e.type===typeFilter);
+    var matchFree=!freeOnly||(e.cost==='free');
+    return matchType&&matchFree;
+  }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  if(!filtered.length){list.innerHTML='<div class="cal-empty">No upcoming events match your filters.</div>';return;}
+  var groups={};
+  filtered.forEach(function(e){
+    var d=new Date(e.date+'T12:00:00');
+    var key=d.getFullYear()+'-'+(d.getMonth()+1);
+    var label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    if(!groups[key])groups[key]={label:label,events:[]};
+    groups[key].events.push(e);
+  });
+  var typeColors={conference:'#4d9eff',ctf:'#f05d78',webinar:'#10e87e',training:'#f5c842'};
+  var html='';
+  Object.keys(groups).sort().forEach(function(k){
+    var g=groups[k];
+    html+='<div class="cal-month-group"><div class="cal-month-label">'+g.label+'</div>';
+    g.events.forEach(function(e){
+      var d=new Date(e.date+'T12:00:00');
+      var day=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      html+='<div class="cal-event">'
+        +'<div class="ce-date">'+day+'</div>'
+        +'<div class="ce-body">'
+        +'<div class="ce-title-row"><span class="ce-title">'+e.name+'</span>'
+        +'<span class="ce-type-badge" style="background:'+typeColors[e.type]+'22;color:'+typeColors[e.type]+'">'+e.type+'</span>'
+        +(e.cost==='free'?'<span class="ce-free-tag">FREE</span>':'')
+        +(e.virtual?'<span class="ce-virtual-tag">VIRTUAL</span>':'')
+        +'</div>'
+        +'<div class="ce-desc">'+e.desc+'</div>'
+        +(e.diff?'<div class="ce-diff">Difficulty: <strong>'+e.diff+'</strong></div>':'')
+        +'</div>'
+        +'<a class="ce-link" href="'+e.url+'" target="_blank" rel="noopener">Visit &rarr;</a>'
+        +'</div>';
+    });
+    html+='</div>';
+  });
+  list.innerHTML=html;
+}
+
+// ─── TOOL URLS (add url field to existing TOOLS) ─────────
+(function(){
+var TOOL_URLS={
+  'Splunk Enterprise':'https://www.splunk.com/en_us/products/splunk-enterprise.html',
+  'Microsoft Sentinel':'https://azure.microsoft.com/en-us/products/microsoft-sentinel',
+  'IBM QRadar':'https://www.ibm.com/products/qradar-siem',
+  'Elastic SIEM':'https://www.elastic.co/security/siem',
+  'LogRhythm SIEM':'https://logrhythm.com/',
+  'Exabeam':'https://www.exabeam.com/',
+  'Chronicle SIEM':'https://cloud.google.com/chronicle',
+  'CrowdStrike Falcon':'https://www.crowdstrike.com/products/endpoint-security/falcon-platform/',
+  'SentinelOne':'https://www.sentinelone.com/',
+  'Carbon Black':'https://www.vmware.com/products/carbon-black-cloud-endpoint.html',
+  'Microsoft Defender for Endpoint':'https://www.microsoft.com/en-us/security/business/endpoint-security/microsoft-defender-endpoint',
+  'Cortex XDR':'https://www.paloaltonetworks.com/cortex/cortex-xdr',
+  'Tenable Nessus':'https://www.tenable.com/products/nessus',
+  'Qualys VMDR':'https://www.qualys.com/apps/vulnerability-management-detection-response/',
+  'OpenVAS / Greenbone':'https://www.greenbone.net/en/vulnerability-management/',
+  'Rapid7 InsightVM':'https://www.rapid7.com/products/insightvm/',
+  'Trivy':'https://trivy.dev/',
+  'Nikto':'https://cirt.net/Nikto2',
+  'Metasploit Framework':'https://www.metasploit.com/',
+  'Burp Suite':'https://portswigger.net/burp',
+  'Nmap':'https://nmap.org/',
+  'BloodHound':'https://bloodhoundad.com/',
+  'Cobalt Strike':'https://www.cobaltstrike.com/',
+  'Impacket':'https://github.com/fortra/impacket',
+  'Hashcat':'https://hashcat.net/hashcat/',
+  'ffuf':'https://github.com/ffuf/ffuf',
+  'Autopsy':'https://www.autopsy.com/',
+  'Volatility':'https://volatilityfoundation.org/',
+  'FTK Imager':'https://www.exterro.com/ftk-product-suite/ftk-imager',
+  'Cellebrite UFED':'https://cellebrite.com/en/ufed/',
+  'x64dbg':'https://x64dbg.com/',
+  'MISP':'https://www.misp-project.org/',
+  'OpenCTI':'https://www.filigran.io/opencti/',
+  'VirusTotal':'https://www.virustotal.com/',
+  'Shodan':'https://www.shodan.io/',
+  'AlienVault OTX':'https://otx.alienvault.com/',
+  'Wiz':'https://www.wiz.io/',
+  'Prisma Cloud':'https://www.paloaltonetworks.com/prisma/cloud',
+  'AWS Security Hub':'https://aws.amazon.com/security-hub/',
+  'Prowler':'https://github.com/prowler-cloud/prowler',
+  'REMnux':'https://remnux.org/',
+  'Radare2':'https://rada.re/n/'
+};
+if(typeof TOOLS!=='undefined'){
+  TOOLS.forEach(function(t){if(!t.url&&TOOL_URLS[t.name])t.url=TOOL_URLS[t.name];});
+}
+})();
+
+// Patch renderTools to make cards clickable
+function renderTools(q,cat){
+  var grid=document.getElementById('tools-grid');
+  if(!grid)return;
+  q=(q||'').toLowerCase();cat=cat||'All';
+  var filtered=TOOLS.filter(function(t){
+    var matchCat=(cat==='All'||t.cat===cat);
+    var matchQ=!q||(t.name.toLowerCase().indexOf(q)>-1)||(t.desc.toLowerCase().indexOf(q)>-1)||(t.vendor.toLowerCase().indexOf(q)>-1)||((t.tags||[]).some(function(tg){return tg.indexOf(q)>-1;}));
+    return matchCat&&matchQ;
+  });
+  var tierColors={paid:'#f05d78',freemium:'#f5c842',free:'#10e87e','open-source':'#4d9eff'};
+  grid.innerHTML=filtered.length?filtered.map(function(t){
+    var clickHandler=t.url?'onclick="window.open(\''+t.url+'\',\'_blank\')"':'' ;
+    var linkInd=t.url?'<span class="tc-ext-link">↗</span>':'';
+    return '<div class="tool-card tool-card-link" '+clickHandler+' '+(t.url?'title="Visit '+t.name+' website"':'')+' style="'+(t.url?'cursor:pointer;':'')+'">'
+      +'<div class="tc-head"><span class="tc-name">'+t.name+linkInd+'</span><span class="tc-tier-badge" style="background:'+tierColors[t.tier]+'22;color:'+tierColors[t.tier]+'">'+t.tier+'</span></div>'
+      +'<div class="tc-vendor">'+t.vendor+' &middot; <span class="tc-cat-tag">'+t.cat+'</span></div>'
+      +'<div class="tc-desc">'+t.desc+'</div>'
+      +'<div class="tc-tags">'+(t.tags||[]).slice(0,4).map(function(tg){return '<span class="tc-tag">'+tg+'</span>';}).join('')+'</div>'
+      +'</div>';
+  }).join(''):'<div class="tools-no-results">No tools match your search.</div>';
+  var cnt=document.getElementById('tools-count');
+  if(cnt)cnt.textContent=filtered.length+' tool'+(filtered.length!==1?'s':'');
+}
+
+// ─── RESUME TEMPLATE FIX (generate text template) ────────
+function openResumeTemplate(id){
+  var t=RESUME_TEMPLATES.find(function(x){return x.id===id;});
+  if(!t)return;
+  var panel=document.getElementById('resume-detail');
+  if(!panel)return;
+  var templateText=generateResumeText(t);
+  panel.innerHTML='<button class="rd-close" onclick="var d=document.getElementById(\'resume-detail\');var g=document.getElementById(\'resume-grid\');if(d)d.style.display=\'none\';if(g)g.style.display=\'\';">&larr; Back to Templates</button>'
+    +'<div class="rd-header" style="border-color:'+t.color+'">'
+    +'<span class="rd-icon">'+t.icon+'</span>'
+    +'<div><div class="rd-role" style="color:'+t.color+'">'+t.role+'</div><div class="rd-level">'+t.level+'</div></div>'
+    +'</div>'
+    +'<h3 class="rd-tips-hd">Resume Tips for '+t.role+'</h3>'
+    +'<ul class="rd-tips-list">'+t.tips.map(function(tip){return '<li>'+tip+'</li>';}).join('')+'</ul>'
+    +'<h3 class="rd-tips-hd" style="margin-top:32px;">Resume Template</h3>'
+    +'<p style="font-size:.82rem;color:var(--mt);margin-bottom:12px;">Copy the template below, paste into Google Docs or Word, then customize with your details.</p>'
+    +'<div class="rd-template-box">'
+    +'<button class="rd-copy-btn" onclick="copyResumeTemplate(\''+id+'\')">📋 Copy Template</button>'
+    +'<pre id="rt-text-'+id+'" class="rd-template-text">'+templateText+'</pre>'
+    +'</div>'
+    +'<a href="https://docs.google.com/document/create" target="_blank" class="rd-template-btn" style="margin-top:16px;display:inline-block;">Open Blank Google Doc ↗</a>';
+  panel.style.display='block';
+  document.getElementById('resume-grid').style.display='none';
+}
+function copyResumeTemplate(id){
+  var el=document.getElementById('rt-text-'+id);
+  if(!el)return;
+  try{navigator.clipboard.writeText(el.textContent).then(function(){showToast('Template copied! Paste into Google Docs or Word.');});}
+  catch(e){el.select&&el.select();showToast('Select all text in the box and copy manually.');}
+}
+function generateResumeText(t){
+  var templates={
+    soc:'[YOUR NAME]\n[City, State | Phone | Email | LinkedIn | GitHub]\n\nSUMMARY\nDetail-oriented Security Operations professional with hands-on experience in threat detection, SIEM analysis, and incident triage. Proficient in Splunk, Microsoft Sentinel, and threat intelligence platforms.\n\nTECHNICAL SKILLS\n• SIEM Platforms: Splunk, Microsoft Sentinel, IBM QRadar\n• Tools: Wireshark, VirusTotal, MISP, CrowdStrike Falcon\n• Languages: Python (basic scripting), KQL, SPL\n• Frameworks: MITRE ATT&CK, NIST CSF\n\nEXPERIENCE\n[Job Title] | [Company Name] | [City, ST] | [Month Year – Present]\n• Triaged [X]+ security alerts daily using [SIEM Platform]\n• Investigated [X] phishing incidents, reducing MTTD by [X]%\n• [Quantified achievement with tool/metric]\n\nCERTIFICATIONS\n• CompTIA Security+ (SY0-701)\n• [CompTIA CySA+ | Splunk Core Certified | BTL1]\n\nEDUCATION\n[Degree, if applicable] — [Institution] — [Year]',
+    pentest:'[YOUR NAME]\n[City, State | Phone | Email | LinkedIn | HackTheBox Profile]\n\nSUMMARY\nResults-driven penetration tester with expertise in network, web application, and Active Directory security assessments. OSCP certified. Strong report writing and clear risk communication skills.\n\nTECHNICAL SKILLS\n• Pentest Tools: Metasploit, Burp Suite, Nmap, BloodHound, Impacket, Cobalt Strike\n• Web: OWASP Top 10, SQLi, XSS, SSRF, XXE, IDOR\n• AD Attacks: Kerberoasting, Pass-the-Hash, DCSync, LDAP enumeration\n• Languages: Python, Bash, PowerShell\n\nEXPERIENCE\n[Penetration Tester | Company] | [Month Year – Present]\n• Conducted [X] external/internal pentests per quarter for clients across [industries]\n• Discovered and responsibly disclosed [X] critical vulnerabilities\n• Wrote executive and technical reports for C-suite and engineering audiences\n\nBUG BOUNTY & CTF\n• HackTheBox: [Rank / Points] | TryHackMe: Top [X]%\n• Responsible disclosures: [CVE-XXXX-XXXXX if applicable]\n\nCERTIFICATIONS\n• OSCP (Offensive Security Certified Professional)\n• [PNPT | eJPT | CEH | GPEN]',
+    'cloud-sec':'[YOUR NAME]\n[City, State | Phone | Email | LinkedIn | AWS/Azure Badge URL]\n\nSUMMARY\nCloud Security Engineer with [X] years securing AWS/Azure/GCP environments at scale. Expertise in CSPM, IaC security, container security, and cloud-native incident response.\n\nTECHNICAL SKILLS\n• Platforms: AWS, Microsoft Azure, Google Cloud Platform\n• CSPM/CNAPP: Wiz, Prisma Cloud, AWS Security Hub, Prowler\n• IaC: Terraform, CloudFormation, Pulumi\n• Containers: Docker, Kubernetes, EKS, AKS\n• Languages: Python, Go, Bash\n\nEXPERIENCE\n[Cloud Security Engineer | Company] | [Month Year – Present]\n• Secured [X]+ cloud accounts across AWS/Azure using CSPM tooling\n• Reduced critical cloud security findings by [X]% through automated remediation\n• Built IaC security scanning pipeline using Trivy + OPA/Rego in CI/CD\n\nCERTIFICATIONS\n• AWS Security Specialty (SCS-C02)\n• [AZ-500 | CCSP | GCSA | GCP Professional Security Engineer]'
+  };
+  if(templates[t.id])return templates[t.id];
+  return '[YOUR NAME]\n[City, State | Phone | Email | LinkedIn]\n\nSUMMARY\n['+t.role+'] with expertise in [key skills]. Focused on [core responsibility].\n\nTECHNICAL SKILLS\n• [Skill category 1]: [Tool 1], [Tool 2], [Tool 3]\n• [Skill category 2]: [Tool 4], [Tool 5]\n• Frameworks: [Framework 1], [Framework 2]\n\nEXPERIENCE\n['+t.role+'] | [Company Name] | [City, ST] | [Dates]\n• [Quantified achievement 1]\n• [Quantified achievement 2]\n• [Quantified achievement 3]\n\nCERTIFICATIONS\n• '+t.tips[t.tips.length-1]+'\n\nEDUCATION\n[Degree] — [Institution] — [Year]';
+}
+

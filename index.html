@@ -4,12 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=11">
 </head>
 <body>
 <nav>
-  <div class="nlogo" onclick="showPage('home')"><div class="ntxt">InfoSecDeck</div></div>
+  <div class="nlogo" onclick="showPage('home')">
+    <svg class="nlogo-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="9" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9V7a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>
+    <div class="ntxt"><span class="ntxt-main">InfoSec</span><span class="ntxt-accent">Deck</span></div>
+  </div>
 
   <div class="hamburger" id="hamburger" onclick="toggleMobileNav()" aria-label="Menu">
     <div class="hb-line"></div>
@@ -86,6 +89,14 @@
           <span class="ndi-icon">🎮</span>
           <div class="ndi-text"><span class="ndi-label">Security Challenges</span><span class="ndi-desc">CTF, packet detective &amp; more</span></div>
         </div>
+        <div class="ndi" onclick="showPage('tools');closeAllDrops()">
+          <span class="ndi-icon">🛠️</span>
+          <div class="ndi-text"><span class="ndi-label">Tool Encyclopedia</span><span class="ndi-desc">80+ security tools catalogued</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('resume');closeAllDrops()">
+          <span class="ndi-icon">📄</span>
+          <div class="ndi-text"><span class="ndi-label">Resume Templates</span><span class="ndi-desc">Role-specific templates &amp; tips</span></div>
+        </div>
       </div>
     </div>
 
@@ -100,6 +111,10 @@
         <div class="ndi" onclick="showPage('jobs');closeAllDrops()">
           <span class="ndi-icon">💼</span>
           <div class="ndi-text"><span class="ndi-label">Job Board</span><span class="ndi-desc">Curated listings by domain</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('calendar');closeAllDrops()">
+          <span class="ndi-icon">📅</span>
+          <div class="ndi-text"><span class="ndi-label">CTF &amp; Conf Calendar</span><span class="ndi-desc">Upcoming events &amp; competitions</span></div>
         </div>
       </div>
     </div>
@@ -120,8 +135,23 @@
           <span class="ndi-icon">👤</span>
           <div class="ndi-text"><span class="ndi-label">About</span><span class="ndi-desc">Who built this &amp; why</span></div>
         </div>
+        <div class="ndi" onclick="showPage('stories');closeAllDrops()">
+          <span class="ndi-icon">🏆</span>
+          <div class="ndi-text"><span class="ndi-label">Wall of Wins</span><span class="ndi-desc">Community success stories</span></div>
+        </div>
       </div>
     </div>
+
+    <!-- Search hint -->
+    <button class="search-hint-btn" onclick="openSearch()" title="Search (Ctrl+K)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      Search
+    </button>
+
+    <!-- Profile icon -->
+    <button class="nav-profile-btn" onclick="showPage('profile')" title="My Profile" id="nav-profile-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </button>
 
   </div>
 </nav>
@@ -130,178 +160,463 @@
 <div class="page active" id="page-home">
 
   <!-- ── HERO ── -->
-  <section class="hp2-hero">
+  <section class="hero-section">
+    <canvas id="hero-canvas" class="hero-canvas"></canvas>
     <div class="hp2-grid"></div>
     <div class="hp2-orb hp2-orb1"></div>
     <div class="hp2-orb hp2-orb2"></div>
-    <div class="hp2-orb hp2-orb3"></div>
     <div class="hp2-scan"></div>
 
-    <div class="hp2-hero-body">
-      <div class="hp2-kicker a1">
-        <span class="hp2-kicker-dot"></span>
-        Cybersecurity Career Platform
+    <div class="hero-inner">
+
+      <!-- Left: Headline + stats + CTAs -->
+      <div class="hero-left">
+        <h1 class="hero-h1">
+          Break Into<br>
+          <span class="hero-typed-line"><span id="hero-typed">Cybersecurity.</span><span class="hero-cursor"></span></span>
+        </h1>
+
+        <p class="hero-lead">
+          Every guide, salary table, cert path, and AI tool you need.
+          Built by a practitioner — for people serious about this field.
+        </p>
+
+        <div class="hero-stats">
+          <div class="hero-stat"><span class="hero-stat-n" style="color:#00d4c8">4M+</span><span class="hero-stat-l">Jobs Unfilled</span></div>
+          <div class="hero-stat-sep"></div>
+          <div class="hero-stat"><span class="hero-stat-n" style="color:#10e87e">$119K</span><span class="hero-stat-l">Median Salary</span></div>
+          <div class="hero-stat-sep"></div>
+          <div class="hero-stat"><span class="hero-stat-n" style="color:#4d9eff">+33%</span><span class="hero-stat-l">Job Growth</span></div>
+          <div class="hero-stat-sep"></div>
+          <div class="hero-stat"><span class="hero-stat-n" style="color:#f5c842">$9.8T</span><span class="hero-stat-l">Cybercrime Cost</span></div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="hero-btn-primary" onclick="document.getElementById('platform-section').scrollIntoView({behavior:'smooth'})">
+            Explore the Platform
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <div class="hero-quiz-wrap">
+            <button id="quiz-toggle-btn" class="hero-btn-ghost hero-btn-quiz" onclick="openHomeQuiz()">What&#39;s my Cyber Career? <span class="quiz-arrow">&#9660;</span></button>
+          </div>
+        </div>
       </div>
 
-      <h1 class="hp2-h1 a2">
-        Your Roadmap Into<br>
-        <span class="hp2-h1-hl">Cybersecurity.</span>
-      </h1>
+      <!-- Right: Marketing / Signup Card (future-proof) -->
+      <div class="hero-signup-card">
 
-      <p class="hp2-lead a3">
-        Break in. Level up. Switch domains.<br>
-        Every guide, salary table, cert path, and tool — in one place.
-      </p>
-
-      <div class="hp2-stats a4">
-        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--em)">4M+</span><span class="hp2-sk">Jobs Unfilled</span></div>
-        <div class="hp2-sdiv"></div>
-        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--lb)">$119K</span><span class="hp2-sk">Median Salary</span></div>
-        <div class="hp2-sdiv"></div>
-        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--bl)">+33%</span><span class="hp2-sk">Job Growth</span></div>
-        <div class="hp2-sdiv"></div>
-        <div class="hp2-stat"><span class="hp2-sv" style="color:var(--am)">$9.8T</span><span class="hp2-sk">Cybercrime Cost</span></div>
-      </div>
-
-      <!-- TOOLKIT directly under stats — no buttons, no gap -->
-      <div class="hp2-tk-label a4">Explore the platform</div>
-
-      <!-- Category tabs -->
-      <div class="hp2-tabs a4">
-        <button class="hp2-tab active" onclick="hp2FilterTab('all',this)">All</button>
-        <button class="hp2-tab" onclick="hp2FilterTab('career',this)">Career</button>
-        <button class="hp2-tab" onclick="hp2FilterTab('learn',this)">Learn</button>
-        <button class="hp2-tab" onclick="hp2FilterTab('tools',this)">AI Tools</button>
-        <button class="hp2-tab" onclick="hp2FilterTab('intel',this)">Intel</button>
-        <button class="hp2-tab" onclick="hp2FilterTab('community',this)">Community</button>
-      </div>
-
-      <!-- Item grid -->
-      <div class="hp2-grid-items a5" id="hp2-items">
-
-        <div class="hp2-item" data-cat="career" onclick="showPage('ladder')">
-          <span class="hp2-item-icon" style="--ic:rgba(16,232,126,.12)">🪜</span>
-          <div class="hp2-item-name">Career Ladder</div>
-          <div class="hp2-item-desc">See every role from Help Desk to CISO — mapped across 6 tiers with real salary ranges and what it takes to level up.</div>
-          <span class="hp2-item-tag" style="color:var(--em)">Career</span>
+        <!-- Brand Header -->
+        <div class="hsc-brand">
+          <svg class="hsc-lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4c8" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span class="hsc-brand-name">InfoSec<span class="hsc-brand-accent">Deck</span></span>
+          <span class="hsc-brand-tag">Community</span>
         </div>
 
-        <div class="hp2-item" data-cat="career" onclick="showPage('salary')">
-          <span class="hp2-item-icon" style="--ic:rgba(245,200,66,.12)">💰</span>
-          <div class="hp2-item-name">Salary Guide</div>
-          <div class="hp2-item-desc">93 cybersecurity job titles with min, median, and max pay. Filter by domain, tier, or track so you know exactly what to ask for.</div>
-          <span class="hp2-item-tag" style="color:var(--am)">Career</span>
+        <!-- Headline -->
+        <div class="hsc-headline">Stay Ahead.<br>Stay Informed.</div>
+        <p class="hsc-sub">Join cyber professionals leveling up their careers. Get weekly resources, tools, and domain insights — free.</p>
+
+        <!-- Email Form (visual placeholder) -->
+        <div class="hsc-form">
+          <input class="hsc-input" type="email" placeholder="your@email.com" autocomplete="off">
+          <button class="hsc-submit-btn" onclick="alert('Email signups coming soon!')">
+            Join Free
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
         </div>
 
-        <div class="hp2-item" data-cat="career" onclick="showPage('domains')">
-          <span class="hp2-item-icon" style="--ic:rgba(192,132,252,.12)">🗂️</span>
-          <div class="hp2-item-name">8 Security Domains</div>
-          <div class="hp2-item-desc">Not sure which specialty is right for you? Explore IAM, SOC, Cloud, AppSec, Offensive, GRC, DFIR, and Security Engineering in depth.</div>
-          <span class="hp2-item-tag" style="color:var(--pu)">Career</span>
-        </div>
+        <!-- Divider -->
+        <div class="hsc-divider"><span>or</span></div>
 
-        <div class="hp2-item" data-cat="career" onclick="showPage('interview')">
-          <span class="hp2-item-icon" style="--ic:rgba(77,158,255,.12)">🎯</span>
-          <div class="hp2-item-name">Interview Prep</div>
-          <div class="hp2-item-desc">Walk into your next interview ready. 10 role-specific Q&amp;As for 28 job titles — from Junior SOC Analyst to CISO.</div>
-          <span class="hp2-item-tag" style="color:var(--bl)">Career</span>
-        </div>
+        <!-- Account Button -->
+        <button class="hsc-account-btn" onclick="alert('Accounts coming soon!')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Create an Account
+        </button>
 
-        <div class="hp2-item hp2-item-ai" data-cat="tools" onclick="showPage('pivot')">
-          <span class="hp2-item-icon" style="--ic:rgba(13,212,200,.12)">🔀</span>
-          <div class="hp2-item-name">Career Pivot Advisor <span class="hp2-ai-chip">AI</span></div>
-          <div class="hp2-item-desc">Already working in tech? Upload your resume and get an AI-powered gap analysis showing exactly what you need to switch into cybersecurity.</div>
-          <span class="hp2-item-tag" style="color:var(--lb)">AI Tool</span>
-        </div>
+        <!-- Sign-in link -->
+        <p class="hsc-signin-row">Already a member? <span class="hsc-signin-link" onclick="alert('Sign in coming soon!')">Sign in</span></p>
 
-        <div class="hp2-item hp2-item-ai" data-cat="tools" onclick="showPage('roaster')">
-          <span class="hp2-item-icon" style="--ic:rgba(255,140,66,.12)">🔥</span>
-          <div class="hp2-item-name">Resume Roaster <span class="hp2-ai-chip">AI</span></div>
-          <div class="hp2-item-desc">Get your resume brutally scored by AI. A letter grade, a full breakdown, and specific fixes — so you stop getting ghosted.</div>
-          <span class="hp2-item-tag" style="color:var(--or)">AI Tool</span>
-        </div>
-
-        <div class="hp2-item" data-cat="learn" onclick="showPage('certs')">
-          <span class="hp2-item-icon" style="--ic:rgba(255,140,66,.1)">📜</span>
-          <div class="hp2-item-name">Certifications</div>
-          <div class="hp2-item-desc">A 9-domain × 5-tier interactive roadmap of 100+ certs. See which badges actually open doors and in what order to get them.</div>
-          <span class="hp2-item-tag" style="color:var(--or)">Learn</span>
-        </div>
-
-        <div class="hp2-item" data-cat="learn" onclick="showPage('training')">
-          <span class="hp2-item-icon" style="--ic:rgba(13,212,200,.1)">🎓</span>
-          <div class="hp2-item-name">Training Resources</div>
-          <div class="hp2-item-desc">Degrees vs. bootcamps vs. self-study — broken down honestly. Find the path that fits your timeline and budget.</div>
-          <span class="hp2-item-tag" style="color:var(--lb)">Learn</span>
-        </div>
-
-        <div class="hp2-item" data-cat="learn" onclick="showPage('homelab')">
-          <span class="hp2-item-icon" style="--ic:rgba(77,158,255,.1)">🖥️</span>
-          <div class="hp2-item-name">Home Lab Guide</div>
-          <div class="hp2-item-desc">Build a real security lab from scratch. Hands-on practice is what separates candidates who get hired from those who don't.</div>
-          <span class="hp2-item-tag" style="color:var(--bl)">Learn</span>
-        </div>
-
-        <div class="hp2-item" data-cat="learn" onclick="showPage('glossary')">
-          <span class="hp2-item-icon" style="--ic:rgba(129,140,248,.1)">📖</span>
-          <div class="hp2-item-name">Glossary</div>
-          <div class="hp2-item-desc">113 essential cybersecurity terms explained clearly — no jargon, no fluff. Bookmark it before your next interview.</div>
-          <span class="hp2-item-tag" style="color:#818cf8">Learn</span>
-        </div>
-
-        <div class="hp2-item" data-cat="intel" onclick="showPage('jobs')">
-          <span class="hp2-item-icon" style="--ic:rgba(77,158,255,.1)">💼</span>
-          <div class="hp2-item-name">Job Search Assistant</div>
-          <div class="hp2-item-desc">Answer 5 quick questions and get custom search links across LinkedIn, Indeed, Dice, and more — filtered for your exact target role.</div>
-          <span class="hp2-item-tag" style="color:var(--bl)">Intel</span>
-        </div>
-
-        <div class="hp2-item" data-cat="intel" onclick="showPage('threats')">
-          <span class="hp2-item-icon" style="--ic:rgba(240,93,120,.1)">📡</span>
-          <div class="hp2-item-name">Threat Intel</div>
-          <div class="hp2-item-desc">Stay current with curated feeds from the frontlines. Know what attackers are actually doing so you can speak to it in interviews.</div>
-          <span class="hp2-item-tag" style="color:var(--rd)">Intel</span>
-        </div>
-
-        <div class="hp2-item" data-cat="tools" onclick="showPage('games')">
-          <span class="hp2-item-icon" style="--ic:rgba(16,232,126,.1)">🎮</span>
-          <div class="hp2-item-name">Challenges</div>
-          <div class="hp2-item-desc">CTF puzzles, digital forensics scenarios, and phishing simulations. Practice the skills you'll actually use on the job.</div>
-          <span class="hp2-item-tag" style="color:var(--em)">Tools</span>
-        </div>
-
-        <div class="hp2-item" data-cat="community" onclick="showPage('blog')">
-          <span class="hp2-item-icon" style="--ic:rgba(245,200,66,.1)">✍️</span>
-          <div class="hp2-item-name">Blog</div>
-          <div class="hp2-item-desc">Real talk from a practitioner — career moves, domain deep-dives, and honest advice you won't find on generic job boards.</div>
-          <span class="hp2-item-tag" style="color:var(--am)">Community</span>
-        </div>
-
-        <div class="hp2-item" data-cat="community" onclick="showPage('reviews')">
-          <span class="hp2-item-icon" style="--ic:rgba(192,132,252,.1)">💬</span>
-          <div class="hp2-item-name">Reviews</div>
-          <div class="hp2-item-desc">Tell us what's working, what's missing, and what to build next. This platform is shaped by the people using it.</div>
-          <span class="hp2-item-tag" style="color:var(--pu)">Community</span>
-        </div>
-
-        <div class="hp2-item" data-cat="community" onclick="showPage('about')">
-          <span class="hp2-item-icon" style="--ic:rgba(13,212,200,.08)">👤</span>
-          <div class="hp2-item-name">About</div>
-          <div class="hp2-item-desc">InfoSecDeck was built by a practitioner, for people trying to break in or level up — not to sell you a $4,000 bootcamp.</div>
-          <span class="hp2-item-tag" style="color:var(--lb)">Community</span>
+        <!-- Social Proof -->
+        <div class="hsc-proof">
+          <div class="hsc-avatars">
+            <div class="hsc-av" style="background:linear-gradient(135deg,#10e87e,#00d4c8)">A</div>
+            <div class="hsc-av" style="background:linear-gradient(135deg,#4d9eff,#c084fc)">B</div>
+            <div class="hsc-av" style="background:linear-gradient(135deg,#f5c842,#ff8c42)">C</div>
+            <div class="hsc-av" style="background:linear-gradient(135deg,#f05d78,#c084fc)">D</div>
+          </div>
+          <span class="hsc-proof-txt">2,400+ professionals enrolled</span>
         </div>
 
       </div>
-    </div>
 
-    <!-- Scroll cue -->
-    <div class="hp2-scroll-cue a5">
-      <span>Scroll to explore</span>
-      <div class="hp2-scroll-arrow"></div>
     </div>
   </section>
 
-  <div class="footer">InfoSecDeck · 2025–2026 · Sources: BLS, Glassdoor, ISC², ISACA</div>
+  <!-- ── INLINE CAREER QUIZ ── -->
+  <div id="home-quiz" style="display:none;max-width:820px;margin:0 auto;padding:0 28px 24px;box-sizing:border-box;">
+    <div class="quiz-page-card">
+      <div class="quiz-card-header">
+        <div class="quiz-card-header-title">Which Cybersecurity Role Is Right for You?</div>
+        <div class="quiz-card-header-sub">Answer 15 questions and we'll match you to your top 5 cybersecurity roles based on your interests and working style.</div>
+      </div>
+      <div class="qprogbar"><div class="qprogfill" id="qprog" style="width:0%"></div></div>
+      <div class="qnum" id="qnum">Question 1 of 15</div>
+
+      <!-- Q0 -->
+      <div class="quiz-question" id="qq-0">
+        <div class="qqtext">When you picture your ideal day in cybersecurity, which sounds most like you?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(0,0)"><div class="qopt-letter">A</div><div class="qopt-text">Monitoring dashboards, triaging security alerts, and hunting for malicious activity in real time</div></div>
+          <div class="qopt" onclick="quizPick(0,1)"><div class="qopt-letter">B</div><div class="qopt-text">Writing code to automate security tasks, build detection logic, or create internal security tooling</div></div>
+          <div class="qopt" onclick="quizPick(0,2)"><div class="qopt-letter">C</div><div class="qopt-text">Testing systems and applications to find vulnerabilities before real attackers do</div></div>
+          <div class="qopt" onclick="quizPick(0,3)"><div class="qopt-letter">D</div><div class="qopt-text">Reviewing policies, assessing organizational risk, and collaborating with stakeholders</div></div>
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="quiz-question" id="qq-1" style="display:none">
+        <div class="qqtext">A major breach just hit your company. Where do you instinctively jump in?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(1,0)"><div class="qopt-letter">A</div><div class="qopt-text">Lead the investigation — collect digital evidence and reconstruct the full attack timeline</div></div>
+          <div class="qopt" onclick="quizPick(1,1)"><div class="qopt-letter">B</div><div class="qopt-text">Dig into the malware or exploit — understand how it worked at a technical level</div></div>
+          <div class="qopt" onclick="quizPick(1,2)"><div class="qopt-letter">C</div><div class="qopt-text">Coordinate containment, manage communications, and brief executive leadership</div></div>
+          <div class="qopt" onclick="quizPick(1,3)"><div class="qopt-letter">D</div><div class="qopt-text">Patch what was exploited and immediately harden every affected system</div></div>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-question" id="qq-2" style="display:none">
+        <div class="qqtext">How comfortable are you with writing code or scripts?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(2,0)"><div class="qopt-letter">A</div><div class="qopt-text">Very comfortable — I think in code and regularly build custom tools from scratch</div></div>
+          <div class="qopt" onclick="quizPick(2,1)"><div class="qopt-letter">B</div><div class="qopt-text">Comfortable writing Python or Bash to automate tasks and solve problems</div></div>
+          <div class="qopt" onclick="quizPick(2,2)"><div class="qopt-letter">C</div><div class="qopt-text">I can read code but prefer not to write it as a daily activity</div></div>
+          <div class="qopt" onclick="quizPick(2,3)"><div class="qopt-letter">D</div><div class="qopt-text">Not my thing — I focus on process, risk management, or people over technical coding</div></div>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-question" id="qq-3" style="display:none">
+        <div class="qqtext">Which of these topics genuinely excites you most right now?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(3,0)"><div class="qopt-letter">A</div><div class="qopt-text">How attackers break into systems — exploits, TTPs, kill chains, and adversary tradecraft</div></div>
+          <div class="qopt" onclick="quizPick(3,1)"><div class="qopt-letter">B</div><div class="qopt-text">Identity and access control — who has access to what, why, and how it can be abused</div></div>
+          <div class="qopt" onclick="quizPick(3,2)"><div class="qopt-letter">C</div><div class="qopt-text">Cloud infrastructure security — how AWS, Azure, and GCP security architecture works</div></div>
+          <div class="qopt" onclick="quizPick(3,3)"><div class="qopt-letter">D</div><div class="qopt-text">Risk, compliance, and governance frameworks — NIST, ISO 27001, SOC 2, regulatory requirements</div></div>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quiz-question" id="qq-4" style="display:none">
+        <div class="qqtext">How do you feel about working shifts, nights, or being on-call for security incidents?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(4,0)"><div class="qopt-letter">A</div><div class="qopt-text">Completely fine — I thrive when something breaks at 2am and need fast response</div></div>
+          <div class="qopt" onclick="quizPick(4,1)"><div class="qopt-letter">B</div><div class="qopt-text">Occasional on-call is acceptable, but I prefer consistent and predictable hours</div></div>
+          <div class="qopt" onclick="quizPick(4,2)"><div class="qopt-letter">C</div><div class="qopt-text">I want predictable business hours with no shift work or on-call rotations</div></div>
+          <div class="qopt" onclick="quizPick(4,3)"><div class="qopt-letter">D</div><div class="qopt-text">I prefer project-based work on my own schedule — more like a consulting model</div></div>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="quiz-question" id="qq-5" style="display:none">
+        <div class="qqtext">When a major data breach hits the news, what is your first instinct?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(5,0)"><div class="qopt-letter">A</div><div class="qopt-text">How did they get in? Walk me through every step of the attack path and lateral movement</div></div>
+          <div class="qopt" onclick="quizPick(5,1)"><div class="qopt-letter">B</div><div class="qopt-text">How do I detect this exact attack pattern in our own environment right now?</div></div>
+          <div class="qopt" onclick="quizPick(5,2)"><div class="qopt-letter">C</div><div class="qopt-text">Which security control failed, and how do we redesign our architecture to prevent this?</div></div>
+          <div class="qopt" onclick="quizPick(5,3)"><div class="qopt-letter">D</div><div class="qopt-text">What regulatory exposure does this create and how should the company communicate it?</div></div>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="quiz-question" id="qq-6" style="display:none">
+        <div class="qqtext">What best describes your background or strongest current skill area?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(6,0)"><div class="qopt-letter">A</div><div class="qopt-text">Software development, computer science, or application programming</div></div>
+          <div class="qopt" onclick="quizPick(6,1)"><div class="qopt-letter">B</div><div class="qopt-text">IT, networking, systems administration, or infrastructure operations</div></div>
+          <div class="qopt" onclick="quizPick(6,2)"><div class="qopt-letter">C</div><div class="qopt-text">Business, law, accounting, project management, or liberal arts</div></div>
+          <div class="qopt" onclick="quizPick(6,3)"><div class="qopt-letter">D</div><div class="qopt-text">Self-taught through CTFs, bug bounty programs, homelab, or security courses</div></div>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="quiz-question" id="qq-7" style="display:none">
+        <div class="qqtext">How do you feel about writing detailed reports and documentation?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(7,0)"><div class="qopt-letter">A</div><div class="qopt-text">I genuinely enjoy it — clear writing and communication is as important as technical skill</div></div>
+          <div class="qopt" onclick="quizPick(7,1)"><div class="qopt-letter">B</div><div class="qopt-text">I can write reports when required but prefer to spend time on technical work</div></div>
+          <div class="qopt" onclick="quizPick(7,2)"><div class="qopt-letter">C</div><div class="qopt-text">I prefer technical outputs like dashboards, code, and configurations over prose</div></div>
+          <div class="qopt" onclick="quizPick(7,3)"><div class="qopt-letter">D</div><div class="qopt-text">I only enjoy writing findings reports at the end of an engagement or investigation</div></div>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="quiz-question" id="qq-8" style="display:none">
+        <div class="qqtext">In 10 years, where do you picture yourself in your cybersecurity career?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(8,0)"><div class="qopt-letter">A</div><div class="qopt-text">CISO, VP, or Director of Security — owning the entire security organization</div></div>
+          <div class="qopt" onclick="quizPick(8,1)"><div class="qopt-letter">B</div><div class="qopt-text">Principal Architect or Security Fellow — the deepest technical expert in any room</div></div>
+          <div class="qopt" onclick="quizPick(8,2)"><div class="qopt-letter">C</div><div class="qopt-text">Running a red team practice or owning a boutique penetration testing firm</div></div>
+          <div class="qopt" onclick="quizPick(8,3)"><div class="qopt-letter">D</div><div class="qopt-text">Leading a world-class threat intelligence or DFIR capability at a top firm</div></div>
+        </div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="quiz-question" id="qq-9" style="display:none">
+        <div class="qqtext">How do you prefer to build and grow your security skills?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(9,0)"><div class="qopt-letter">A</div><div class="qopt-text">Hands-on homelab, CTF competitions, or bug bounty — learning by doing</div></div>
+          <div class="qopt" onclick="quizPick(9,1)"><div class="qopt-letter">B</div><div class="qopt-text">Structured courses, certifications, and formal training with clear progression paths</div></div>
+          <div class="qopt" onclick="quizPick(9,2)"><div class="qopt-letter">C</div><div class="qopt-text">Contributing to open source tools or building automation from scratch</div></div>
+          <div class="qopt" onclick="quizPick(9,3)"><div class="qopt-letter">D</div><div class="qopt-text">Reading threat reports, studying real incidents, and following security researchers</div></div>
+        </div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="quiz-question" id="qq-10" style="display:none">
+        <div class="qqtext">How do you feel about working with cloud platforms like AWS, Azure, or GCP?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(10,0)"><div class="qopt-letter">A</div><div class="qopt-text">I love cloud — I understand security architecture and best practices across major providers</div></div>
+          <div class="qopt" onclick="quizPick(10,1)"><div class="qopt-letter">B</div><div class="qopt-text">I work with cloud platforms regularly but it is not my primary focus</div></div>
+          <div class="qopt" onclick="quizPick(10,2)"><div class="qopt-letter">C</div><div class="qopt-text">I am more focused on on-prem environments, identity systems, or traditional infrastructure</div></div>
+          <div class="qopt" onclick="quizPick(10,3)"><div class="qopt-letter">D</div><div class="qopt-text">Cloud vs on-prem is secondary to me — I focus on governance, policy, and risk</div></div>
+        </div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="quiz-question" id="qq-11" style="display:none">
+        <div class="qqtext">What is your tolerance for open-ended, ambiguous problems without clear answers?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(11,0)"><div class="qopt-letter">A</div><div class="qopt-text">I love ambiguity — creativity and improvisation are exactly where I do my best work</div></div>
+          <div class="qopt" onclick="quizPick(11,1)"><div class="qopt-letter">B</div><div class="qopt-text">I prefer well-structured problems with clear success criteria and measurable outcomes</div></div>
+          <div class="qopt" onclick="quizPick(11,2)"><div class="qopt-letter">C</div><div class="qopt-text">I like building things where done actually means done — shipping tools or features</div></div>
+          <div class="qopt" onclick="quizPick(11,3)"><div class="qopt-letter">D</div><div class="qopt-text">Some ambiguity is fine as long as I have a repeatable methodology or framework to follow</div></div>
+        </div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="quiz-question" id="qq-12" style="display:none">
+        <div class="qqtext">How do you prefer to work and collaborate with the rest of the organization?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(12,0)"><div class="qopt-letter">A</div><div class="qopt-text">Deeply embedded within developer or DevOps teams — integrated into the engineering lifecycle</div></div>
+          <div class="qopt" onclick="quizPick(12,1)"><div class="qopt-letter">B</div><div class="qopt-text">Running or managing a centralized security operations or SOC function</div></div>
+          <div class="qopt" onclick="quizPick(12,2)"><div class="qopt-letter">C</div><div class="qopt-text">Advisory or consulting role — I assess risk, review designs, and make recommendations</div></div>
+          <div class="qopt" onclick="quizPick(12,3)"><div class="qopt-letter">D</div><div class="qopt-text">Independent operator — I need deep focus, minimal meetings, and space to work solo</div></div>
+        </div>
+      </div>
+
+      <!-- Q13 -->
+      <div class="quiz-question" id="qq-13" style="display:none">
+        <div class="qqtext">Which set of security tools would you most enjoy working with every day?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(13,0)"><div class="qopt-letter">A</div><div class="qopt-text">Splunk, Elastic, CrowdStrike, Microsoft Sentinel — detection, monitoring, and response platforms</div></div>
+          <div class="qopt" onclick="quizPick(13,1)"><div class="qopt-letter">B</div><div class="qopt-text">Burp Suite, Metasploit, Cobalt Strike, Nmap — offensive security and exploitation tooling</div></div>
+          <div class="qopt" onclick="quizPick(13,2)"><div class="qopt-letter">C</div><div class="qopt-text">Terraform, AWS Security Hub, Prisma Cloud, Kubernetes — cloud infrastructure security</div></div>
+          <div class="qopt" onclick="quizPick(13,3)"><div class="qopt-letter">D</div><div class="qopt-text">Okta, CyberArk, SailPoint, Microsoft Entra ID — identity, PAM, and access governance</div></div>
+        </div>
+      </div>
+
+      <!-- Q14 -->
+      <div class="quiz-question" id="qq-14" style="display:none">
+        <div class="qqtext">What motivates you most when you think about your cybersecurity career?</div>
+        <div class="qopts">
+          <div class="qopt" onclick="quizPick(14,0)"><div class="qopt-letter">A</div><div class="qopt-text">Protecting real people and organizations — knowing attackers failed because of my work</div></div>
+          <div class="qopt" onclick="quizPick(14,1)"><div class="qopt-letter">B</div><div class="qopt-text">The intellectual challenge of solving deeply hard technical problems most people never see</div></div>
+          <div class="qopt" onclick="quizPick(14,2)"><div class="qopt-letter">C</div><div class="qopt-text">Making complex organizations measurably safer through smart governance and risk programs</div></div>
+          <div class="qopt" onclick="quizPick(14,3)"><div class="qopt-letter">D</div><div class="qopt-text">Building systems, tools, and security architectures that scale and last for years</div></div>
+        </div>
+      </div>
+
+      <!-- Nav buttons -->
+      <div class="qnav" id="qnav" style="display:flex">
+        <button class="qbtn qbtn-back" id="qbtn-back" onclick="quizBack()" style="visibility:hidden">&#8592; Back</button>
+        <span class="qcount" id="qcount">1 / 15</span>
+        <button class="qbtn qbtn-next" id="qbtn-next" onclick="quizNext()" disabled>Next &#8594;</button>
+      </div>
+
+      <!-- Results populated by JS -->
+      <div id="quiz-results" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── EDITORIAL ARTICLE SECTION ── -->
+  <div class="editorial-section" id="platform-section">
+    <div class="editorial-inner">
+
+      <!-- Article Header -->
+      <div class="ed-article-header">
+        <div class="ed-eyebrow">The Definitive Resource</div>
+        <h2 class="ed-headline">Why Cybersecurity Is the Career Move of the Decade&nbsp;&mdash; And Every Tool You Need to Make It</h2>
+        <div class="ed-rule"></div>
+      </div>
+
+      <!-- Opening Drop -->
+      <p class="ed-drop-cap">The numbers don't lie. Over <strong>4 million cybersecurity positions</strong> sit unfilled globally right now &mdash; and that gap isn't closing, it's widening. As ransomware groups, nation-state actors, and opportunistic hackers grow more sophisticated, organizations are desperate for talent. The result? A field where median compensation exceeds <span class="ed-link" onclick="showPage('salary')">$119,000 per year</span>, job growth outpaces nearly every other tech discipline at 33%, and practitioners at the senior level routinely clear $200K+. The cybercrime economy is projected to cost the world $9.8 trillion in 2025 alone. The people defending against it have never been more in demand &mdash; or better compensated.</p>
+
+      <!-- Salary Feature Row -->
+      <div class="ed-feature-row">
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">The Salary Reality No One Talks About</h3>
+          <p>Browse job postings and you'll find vague ranges like &ldquo;$80K&ndash;$130K.&rdquo; What those listings don't tell you is that a SOC Analyst in San Francisco with an AWS Security Specialty certification is clearing $145,000. A Senior IAM Engineer with a CISSP in New York? Closer to $190,000. Location, certifications, and specialization create a multiplier effect most candidates don't understand until they're already in the room negotiating.</p>
+          <p>InfoSecDeck's <strong>Salary Guide</strong> covers 93 job titles with real private-sector compensation ranges &mdash; not government labor statistics, which consistently undercount what the private market pays. Use the built-in <strong>Salary Calculator</strong> to model your exact earning potential based on role, location, experience tier, and the certifications you hold or plan to earn.</p>
+        </div>
+        <div class="ed-inline-card" onclick="showPage('salary')">
+          <div class="eic-icon" style="color:#f5c842"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="40" y1="4" x2="40" y2="76"/><path d="M56 16H32a12 12 0 0 0 0 24h16a12 12 0 0 1 0 24H20"/><circle cx="40" cy="40" r="35" stroke-width="1" opacity=".2"/></svg></div>
+          <div class="eic-label" style="color:#f5c842">Career</div>
+          <div class="eic-title">Salary Guide</div>
+          <div class="eic-stat">93 roles &middot; Private-sector data</div>
+          <div class="eic-cta">Explore &rarr;</div>
+        </div>
+      </div>
+
+      <!-- Pull Quote -->
+      <div class="ed-pullquote">
+        <div class="ed-pq-bar"></div>
+        <div class="ed-pq-text">&ldquo;In cybersecurity, the right certification at the right career stage doesn't just open doors&nbsp;&mdash; it changes what salary range you're negotiating in.&rdquo;</div>
+      </div>
+
+      <!-- Paths Section -->
+      <div class="ed-feature-row ed-row-flip">
+        <div class="ed-cards-stack">
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('ladder')">
+            <div class="eic-icon eic-sm" style="color:#10e87e"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4,72 4,56 20,56 20,40 36,40 36,24 52,24 52,8 76,8"/><polyline points="60,4 76,8 72,24"/></svg></div>
+            <div class="eic-title">Career Ladder</div>
+            <div class="eic-stat" style="color:#10e87e">6 Tiers &middot; Help Desk to CISO</div>
+            <div class="eic-cta">Explore &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('domains')">
+            <div class="eic-icon eic-sm" style="color:#c084fc"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M40 74s28-14 28-35V16L40 6 12 16v23c0 21 28 35 28 35z"/><circle cx="40" cy="40" r="12"/></svg></div>
+            <div class="eic-title">8 Security Domains</div>
+            <div class="eic-stat" style="color:#c084fc">SOC &middot; IAM &middot; Cloud &middot; GRC &amp; more</div>
+            <div class="eic-cta">Explore &rarr;</div>
+          </div>
+        </div>
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">There Isn't One Cybersecurity Career. There Are Eight.</h3>
+          <p>Most people think &ldquo;hacker&rdquo; when they hear cybersecurity. But the field spans eight distinct disciplines: Security Operations, Identity &amp; Access Management, Cloud Security, Application Security, Governance Risk &amp; Compliance, Offensive Security, Digital Forensics &amp; Incident Response, and Security Engineering. Each has its own tools, career trajectory, and compensation ceiling &mdash; and the right path for you depends on where your interests and existing skills intersect.</p>
+          <p>The <strong>Career Ladder</strong> maps every role across 6 tiers from Help Desk to CISO &mdash; with real salary bands, required skills, and adjacent paths. The <strong>8 Domains Explorer</strong> breaks down each specialty in depth so you can find your fit before you spend money on a certification that won't serve your actual goal.</p>
+        </div>
+      </div>
+
+      <!-- Certs Full-Width -->
+      <div class="ed-full-break">
+        <div class="ed-break-content">
+          <div class="ed-break-text">
+            <h3 class="ed-section-h">Certifications: The Fastest Shortcut That Isn't Actually a Shortcut</h3>
+            <p>Hiring managers use certifications as an HR filter before your resume reaches a human. A Security+ clears the first ATS screening. A CISSP signals you're ready for senior leadership. An OSCP tells every red team hiring manager that you can actually hack &mdash; not just study how to. But the order you pursue certs matters enormously. The wrong sequence wastes both time and money.</p>
+            <p>InfoSecDeck's <strong>Certifications page</strong> maps 100+ certs across a 9-domain &times; 5-tier interactive grid. Right-click any badge to track your progress, compare two certs side-by-side with a detailed breakdown, and access direct links to the best study resources &mdash; including free ones. Stop guessing what to get next.</p>
+          </div>
+          <div class="ed-break-card" onclick="showPage('certs')">
+            <div class="eic-icon" style="color:#ff8c42"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="30" r="20"/><path d="M28 48L18 74l22-10 22 10-10-26"/><circle cx="40" cy="30" r="10" opacity=".4"/></svg></div>
+            <div class="eic-label" style="color:#ff8c42">Learn</div>
+            <div class="eic-title">Certifications</div>
+            <div class="eic-stat">100+ certs &middot; Track progress</div>
+            <div class="eic-cta">View Roadmap &rarr;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Tools -->
+      <div class="ed-feature-row">
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">Your Resume Is Getting Ghosted. Here's the Fix.</h3>
+          <p>The average cybersecurity resume is screened by ATS software before a human ever reads it. Then, if it survives, a hiring manager spends 7 seconds deciding whether to continue. Most candidates write resumes that describe what they did &mdash; not what they delivered. The result: qualified people filtered out before they can prove themselves in a room.</p>
+          <p>The <strong>Resume Roaster</strong> uses Claude AI to score your resume with brutal honesty: a letter grade, domain-specific analysis, and a prioritized list of fixes so you stop getting ghosted. Already in IT and considering a pivot? The <strong>Career Pivot Advisor</strong> takes your existing resume and produces an AI-generated gap analysis showing exactly which skills and certifications you need to cross into cybersecurity.</p>
+        </div>
+        <div class="ed-cards-stack">
+          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('roaster')">
+            <div class="eic-badge-ai">AI</div>
+            <div class="eic-icon eic-sm" style="color:#ff8c42"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M48 6H20a6 6 0 0 0-6 6v56a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6V24z"/><polyline points="48 6 48 24 66 24"/><line x1="28" y1="40" x2="52" y2="40"/><line x1="28" y1="50" x2="52" y2="50"/></svg></div>
+            <div class="eic-title">Resume Roaster</div>
+            <div class="eic-stat" style="color:#ff8c42">AI-powered &middot; Letter grade</div>
+            <div class="eic-cta">Roast My Resume &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('pivot')">
+            <div class="eic-badge-ai">AI</div>
+            <div class="eic-icon eic-sm" style="color:#00d4c8"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="54 10 72 10 72 28"/><line x1="8" y1="70" x2="72" y2="10"/><polyline points="54 70 72 70 72 52"/></svg></div>
+            <div class="eic-title">Career Pivot Advisor</div>
+            <div class="eic-stat" style="color:#00d4c8">AI-powered &middot; Gap analysis</div>
+            <div class="eic-cta">Analyze My Gap &rarr;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Practice -->
+      <div class="ed-feature-row ed-row-flip">
+        <div class="ed-cards-stack">
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('homelab')">
+            <div class="eic-icon eic-sm" style="color:#4d9eff"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="8" width="72" height="48" rx="5"/><line x1="26" y1="70" x2="54" y2="70"/><line x1="40" y1="56" x2="40" y2="70"/><line x1="16" y1="36" x2="26" y2="28" opacity=".6"/><polyline points="26,28 34,36 44,24" opacity=".6"/></svg></div>
+            <div class="eic-title">Home Lab Guide</div>
+            <div class="eic-stat" style="color:#4d9eff">Build your practice environment</div>
+            <div class="eic-cta">Explore &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('games')">
+            <div class="eic-icon eic-sm" style="color:#10e87e"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 50s4-4 14-4 16 6 28 6 14-4 14-4V10s-4 4-14 4-16-6-28-6-14 4-14 4z"/><line x1="12" y1="74" x2="12" y2="50"/></svg></div>
+            <div class="eic-title">Security Challenges</div>
+            <div class="eic-stat" style="color:#10e87e">CTF &middot; Forensics &middot; Phishing sim</div>
+            <div class="eic-cta">Start Playing &rarr;</div>
+          </div>
+        </div>
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">The Candidates Who Get Hired Have Proof of Work</h3>
+          <p>Certifications open doors. But what closes offers is demonstrable, hands-on experience. In a field where everyone claims to know Splunk, the candidate who built a detection rule that caught a real pass-the-hash attack in their home lab wins. The candidate who can walk through their CTF methodology during a technical screen wins. Credentials tell them you studied. Labs and challenges show them you can execute.</p>
+          <p>The <strong>Home Lab Guide</strong> walks you through building a realistic security environment from scratch: virtualization, SIEM deployment, and simulated attacks. The <strong>Security Challenges</strong> section delivers CTF puzzles, packet forensics scenarios, and phishing simulations that mirror exactly what you'll encounter in a real interview technical screen.</p>
+        </div>
+      </div>
+
+      <!-- Three Small Cards: Intel & Tools -->
+      <div class="ed-three-cards">
+        <div class="ed-inline-card ed-card-sm" onclick="showPage('threats')">
+          <div class="eic-icon eic-sm" style="color:#f05d78"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="40" r="6"/><circle cx="40" cy="40" r="16" opacity=".6"/><circle cx="40" cy="40" r="28" opacity=".35"/><circle cx="40" cy="40" r="38" opacity=".15"/></svg></div>
+          <div class="eic-title">Threat Intel Feed</div>
+          <div class="eic-stat" style="color:#f05d78">Curated frontline coverage</div>
+          <div class="eic-cta">View Intel &rarr;</div>
+        </div>
+        <div class="ed-inline-card ed-card-sm" onclick="showPage('tools')">
+          <div class="eic-icon eic-sm" style="color:#4d9eff"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="20" width="64" height="46" rx="6"/><path d="M8 34h64"/><path d="M24 10v24M40 10v24M56 10v24" stroke-linecap="round" opacity=".5"/></svg></div>
+          <div class="eic-title">Tool Encyclopedia</div>
+          <div class="eic-stat" style="color:#4d9eff">80+ security tools catalogued</div>
+          <div class="eic-cta">Browse Tools &rarr;</div>
+        </div>
+        <div class="ed-inline-card ed-card-sm" onclick="showPage('calendar')">
+          <div class="eic-icon eic-sm" style="color:#818cf8"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="14" width="68" height="60" rx="6"/><path d="M6 30h68"/><line x1="26" y1="6" x2="26" y2="22"/><line x1="54" y1="6" x2="54" y2="22"/><rect x="18" y="42" width="14" height="10" rx="2" opacity=".4"/><rect x="36" y="42" width="14" height="10" rx="2" opacity=".4"/></svg></div>
+          <div class="eic-title">CTF &amp; Conf Calendar</div>
+          <div class="eic-stat" style="color:#818cf8">Upcoming 2026 events</div>
+          <div class="eic-cta">View Calendar &rarr;</div>
+        </div>
+      </div>
+
+      <!-- Closing -->
+      <div class="ed-closing">
+        <div class="ed-closing-text">
+          <h3 class="ed-section-h">You're Not Doing This Alone</h3>
+          <p>Thousands of practitioners have used InfoSecDeck to make the transition from retail manager to SOC analyst, from paralegal to GRC analyst, from network engineer to cloud security architect. Their stories &mdash; real timelines, real certs, real salary jumps &mdash; live in the <strong class="ed-link" onclick="showPage('stories')">Wall of Wins</strong>. Career insights and field updates hit the <strong class="ed-link" onclick="showPage('blog')">Blog</strong> regularly. The <strong class="ed-link" onclick="showPage('interview')">Interview Prep</strong> section gives you 10 role-specific Q&amp;As for 28 job titles. And if you're still figuring out where you fit, the <strong class="ed-link" onclick="openHomeQuiz()">Career Quiz</strong> takes 4 minutes and gives you a personalized path recommendation across 15 specialty tracks.</p>
+        </div>
+        <div class="ed-closing-cards">
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('stories')">
+            <div class="eic-title">🏆 Wall of Wins</div>
+            <div class="eic-stat">Community success stories</div>
+            <div class="eic-cta">Read Stories &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('interview')">
+            <div class="eic-title">🎯 Interview Prep</div>
+            <div class="eic-stat">28 roles &middot; 10 Q&amp;As each</div>
+            <div class="eic-cta">Prepare Now &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm" onclick="openHomeQuiz()">
+            <div class="eic-title">🧭 Career Quiz</div>
+            <div class="eic-stat">Find your perfect domain</div>
+            <div class="eic-cta">Take Quiz &rarr;</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div class="footer">InfoSecDeck &middot; 2025&ndash;2026 &middot; Sources: BLS, Glassdoor, ISC&sup2;, ISACA</div>
 </div>
 
 <div class="page" id="page-ladder">
@@ -627,19 +942,24 @@
 
 <div class="cw">
   <div class="cert-header a1">
-    <div>
-      <div class="ey" style="justify-content:flex-start;">Certifications &amp; Training</div>
-      <div class="st" style="text-align:left;margin-bottom:6px;">Cert Roadmap by Domain &amp; Career Stage</div>
-      <p style="font-size:.8rem;color:var(--mt);max-width:640px;line-height:1.6;">Hover any badge for details. Click to expand full info. Columns = domains, rows = career stage. <span style="color:var(--lb);">⬡ Vendor-neutral</span> · <span style="color:var(--or);">⬢ Vendor-specific</span></p>
+    <div class="ey">Certifications &amp; Training</div>
+    <div class="st" style="margin-bottom:6px;">Cert Roadmap by Domain &amp; Career Stage</div>
+    <p style="font-size:.78rem;color:var(--mt);line-height:1.6;">Hover any badge for details. Click to expand full info. Right-click a badge to track your progress. Columns = domains &middot; rows = career stage.</p>
+    <div class="cpt-summary" id="cpt-summary">
+      <span id="cpt-done">✅ 0 earned</span>
+      <span id="cpt-inprog">⏳ 0 in progress</span>
+      <span id="cpt-planned">📌 0 planned</span>
+      <button class="cpt-reset-btn" onclick="resetCertProgress()">Reset</button>
+      <button class="cpt-compare-btn" onclick="openCertCompare()">⚖️ Compare Certs</button>
     </div>
-    <div class="cert-legend">
-      <div class="cl-item"><span class="cl-dot" style="background:rgba(0,224,122,.25);border-color:rgba(0,224,122,.5);"></span>Entry (T1–2)</div>
-      <div class="cl-item"><span class="cl-dot" style="background:rgba(34,211,238,.2);border-color:rgba(34,211,238,.4);"></span>Mid (T2–3)</div>
-      <div class="cl-item"><span class="cl-dot" style="background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.4);"></span>Senior (T3–4)</div>
-      <div class="cl-item"><span class="cl-dot" style="background:rgba(107,159,255,.2);border-color:rgba(107,159,255,.4);"></span>Principal (T4–5)</div>
-      <div class="cl-item"><span class="cl-dot" style="background:rgba(168,85,247,.2);border-color:rgba(168,85,247,.4);"></span>Exec (T5–6)</div>
-      <div class="cl-item" style="margin-top:6px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lb);margin-right:5px;"></span>Vendor-neutral</div>
-      <div class="cl-item"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--or);margin-right:5px;"></span>Vendor-specific</div>
+    <div class="cert-legend" style="justify-content:center;">
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(0,224,122,.25);border-color:rgba(0,224,122,.5);"></span>Entry</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(34,211,238,.2);border-color:rgba(34,211,238,.4);"></span>Mid</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.4);"></span>Senior</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(107,159,255,.2);border-color:rgba(107,159,255,.4);"></span>Principal</div>
+      <div class="cl-item"><span class="cl-dot" style="background:rgba(168,85,247,.2);border-color:rgba(168,85,247,.4);"></span>Exec</div>
+      <div class="cl-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--lb);margin-right:4px;vertical-align:middle;"></span>Vendor-neutral</div>
+      <div class="cl-item"><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:var(--or);margin-right:4px;vertical-align:middle;"></span>Vendor-specific</div>
     </div>
   </div>
 
@@ -649,15 +969,15 @@
     <div class="cdom-header">
       <div class="cdom-header-spacer"></div>
       <div class="cdom-header-cols">
-        <div class="cdom-hcell"><div class="cdom-hicon">🛡️</div><div class="cdom-hname">General</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">🔐</div><div class="cdom-hname">IAM</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">👁️</div><div class="cdom-hname">SOC / IR</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">⚙️</div><div class="cdom-hname">Sec Eng.</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">☁️</div><div class="cdom-hname">Cloud</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">🔧</div><div class="cdom-hname">AppSec</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">🔴</div><div class="cdom-hname">Offensive</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">📋</div><div class="cdom-hname">GRC</div></div>
-        <div class="cdom-hcell"><div class="cdom-hicon">🔬</div><div class="cdom-hname">DFIR</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🛡️</div><div class="cdom-hname">General Security</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔐</div><div class="cdom-hname">Identity & Access</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">👁️</div><div class="cdom-hname">SOC & Incident Response</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">⚙️</div><div class="cdom-hname">Security Engineering</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">☁️</div><div class="cdom-hname">Cloud Security</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔧</div><div class="cdom-hname">AppSec & DevSecOps</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔴</div><div class="cdom-hname">Offensive Security</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">📋</div><div class="cdom-hname">GRC & Compliance</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🔬</div><div class="cdom-hname">DFIR & Forensics</div></div>
       </div>
     </div>
 
@@ -687,6 +1007,7 @@
         <div class="cdomain-col">
           <span class="cb tier-entry vn" data-full="CompTIA Network+" data-desc="Networking fundamentals required for security engineering. Covers TCP/IP, DNS, routing, and network troubleshooting." onclick="openCert('net-plus')">Net+</span>
           <span class="cb tier-entry vn" data-full="CompTIA Linux+" data-desc="Linux administration fundamentals. Required knowledge for most security engineering roles." onclick="openCert('linux-plus')">Linux+</span>
+          <span class="cb tier-entry vn" data-full="CompTIA A+" data-desc="IT fundamentals cert. Covers hardware, OS, networking basics. Often the first cert for career changers entering tech." onclick="openCert('a-plus')">A+</span>
         </div>
         <div class="cdomain-col">
           <span class="cb tier-entry vs" data-full="AWS Cloud Practitioner (CLF-C02)" data-desc="AWS foundational cert. Required knowledge before AWS security specialty. Cloud concepts, services, pricing." onclick="openCert('aws-ccp')">AWS CCP</span>
@@ -696,6 +1017,7 @@
         <div class="cdomain-col">
           <span class="cb tier-entry vs" data-full="PortSwigger Burp Suite Certified Practitioner (BSCP)" data-desc="Hands-on web application security cert. Covers OWASP Top 10, injection, auth bypass. High practical value." onclick="openCert('bscp')">BSCP</span>
           <span class="cb tier-entry vn" data-full="GIAC Web Application Penetration Tester (GWAPT)" data-desc="SANS entry web app security cert. Covers SQL injection, XSS, CSRF, and web pentesting methodology." onclick="openCert('gweb')">GWEB</span>
+          <span class="cb tier-entry vs" data-full="INE eWAPT (Web Application Penetration Tester)" data-desc="INE's practical web application pentesting cert. Covers OWASP Top 10 in a fully hands-on lab environment." onclick="openCert('ewapt')">eWAPT</span>
         </div>
         <div class="cdomain-col">
           <span class="cb tier-entry vs" data-full="INE eJPT (eLearnSecurity Junior Penetration Tester)" data-desc="Affordable entry pentesting cert with practical labs. Real-world network and web pentesting scenarios." onclick="openCert('ejpt')">eJPT</span>
@@ -710,6 +1032,7 @@
         <div class="cdomain-col">
           <span class="cb tier-entry vs" data-full="Cellebrite Certified Operator (CCO)" data-desc="Mobile device forensics entry cert. Cellebrite is the industry standard tool for mobile forensic extraction." onclick="openCert('cco')">CCO</span>
           <span class="cb tier-entry vn" data-full="Blue Team Labs Level 1 (BTL1)" data-desc="Hands-on cert covering DFIR basics, phishing analysis, SIEM, and threat intel. Practical and affordable." onclick="openCert('btl1')">BTL1</span>
+          <span class="cb tier-entry vn" data-full="AccessData Certified Examiner (ACE)" data-desc="Entry digital forensics cert for FTK toolkit. Covers evidence acquisition, analysis, and reporting." onclick="openCert('ace')">ACE</span>
         </div>
       </div>
     </div>
@@ -737,6 +1060,7 @@
           <span class="cb tier-mid vn" data-full="CompTIA CySA+ (Cybersecurity Analyst+)" data-desc="Vendor-neutral SOC analyst cert. Covers threat detection, behavioral analytics, and incident response. DoD 8140 approved." onclick="openCert('cysa-plus')">CySA+</span>
           <span class="cb tier-mid vn" data-full="Blue Team Labs Level 2 (BTL2)" data-desc="Advanced hands-on defensive cert. Covers advanced SIEM, malware analysis, threat hunting, and forensics." onclick="openCert('btl2')">BTL2</span>
           <span class="cb tier-mid vs" data-full="Splunk Core Certified User / Power User" data-desc="Splunk's foundational certs covering search, reports, dashboards, and data onboarding." onclick="openCert('splunk-cu')">Splunk CU</span>
+          <span class="cb tier-mid vs" data-full="Microsoft SC-100: Cybersecurity Architect" data-desc="Microsoft's expert-level security architecture cert. Covers identity, network, endpoint, and governance across Azure." onclick="openCert('sc100')">SC-100</span>
         </div>
         <div class="cdomain-col">
           <span class="cb tier-mid vn" data-full="GIAC Certified Enterprise Defender (GCED)" data-desc="SANS cert for security engineers. Covers defensive network architecture, endpoint hardening, and security controls." onclick="openCert('gced')">GCED</span>
@@ -750,6 +1074,7 @@
         <div class="cdomain-col">
           <span class="cb tier-mid vn" data-full="ISC² CSSLP (Certified Secure Software Lifecycle Professional)" data-desc="Security in the SDLC. Covers secure design, implementation, testing, and deployment. For developers turning security." onclick="openCert('csslp')">CSSLP</span>
           <span class="cb tier-mid vn" data-full="GIAC GWEB (Advanced Web Application Defender)" data-desc="SANS advanced web application security cert. Defense focus: secure code review, WAF, and API security." onclick="openCert('gweb-a')">GWEB-A</span>
+          <span class="cb tier-mid vs" data-full="GitHub Advanced Security (GHAS)" data-desc="GitHub's DevSecOps cert covering code scanning, secret detection, and supply chain security in CI/CD pipelines." onclick="openCert('ghas')">GHAS</span>
         </div>
         <div class="cdomain-col">
           <span class="cb tier-mid vs" data-full="TCM Security PNPT (Practical Network Penetration Tester)" data-desc="Highly practical, affordable pentesting cert with a real-world report assessment. Great OSCP stepping stone." onclick="openCert('pnpt')">PNPT</span>
@@ -820,6 +1145,7 @@
           <span class="cb tier-senior vn" data-full="GIAC Cyber Threat Intelligence (GCTI)" data-desc="SANS threat intelligence cert. Covers structured analysis, collection, and dissemination for DFIR and threat intel teams." onclick="openCert('gcti')">GCTI</span>
           <span class="cb tier-senior vn" data-full="GCFA + Memory Forensics Path" data-desc="Senior DFIR path: GCFA combined with Volatility/memory analysis skills. The standard senior forensics combination." onclick="openCert('gcfa-adv')">GCFE-A</span>
           <span class="cb tier-senior vs" data-full="Magnet Certified Forensics Examiner (MCFE)" data-desc="Magnet Axiom platform cert. Covers forensic acquisition, analysis, and reporting using Magnet tools." onclick="openCert('mcfe')">MCFE</span>
+          <span class="cb tier-senior vn" data-full="OffSec OSED (Exploit Developer)" data-desc="OffSec's exploit development cert. Stack overflows, SEH, heap spray, and Windows user-mode exploit development." onclick="openCert('osed')">OSED</span>
         </div>
       </div>
     </div>
@@ -845,6 +1171,7 @@
           <span class="cb tier-principal vn" data-full="GIAC Defending Advanced Threats (GDAT)" data-desc="SANS advanced cert for senior defenders. Covers APT hunting, endpoint hardening, and advanced detection engineering." onclick="openCert('gdat')">GDAT</span>
           <span class="cb tier-principal vn" data-full="GIAC Cyber Threat Intelligence (GCTI)" data-desc="SANS cert for threat intel analysts. Covers intelligence frameworks, collection, analysis, and dissemination." onclick="openCert('gcti')">GCTI</span>
           <span class="cb tier-principal vn" data-full="GIAC Security Operations Manager (GSOM)" data-desc="SANS cert for SOC managers. Covers metrics, team management, process improvement, and executive reporting." onclick="openCert('gsom')">GSOM</span>
+          <span class="cb tier-principal vn" data-full="GIAC Security Expert (GSE)" data-desc="The most prestigious GIAC cert. Written + hands-on lab exam. Fewer than 300 holders worldwide. Elite mastery credential." onclick="openCert('gse')">GSE</span>
         </div>
         <div class="cdomain-col">
           <span class="cb tier-principal vn" data-full="CISSP-ISSAP (Information Security Architecture Professional)" data-desc="CISSP concentration for security architects. Covers IAM architecture, infrastructure, and governance." onclick="openCert('cissp-issap')">CISSP-ISSAP</span>
@@ -886,30 +1213,14 @@
           <span class="cb tier-exec vs" data-full="EC-Council CCISO (Certified Chief Information Security Officer)" data-desc="The only cert purpose-built for CISOs and aspiring CISOs. Covers all 5 CISO domains: governance, security mgmt, programs, strategy, and finance." onclick="openCert('cciso')">CCISO</span>
           <span class="cb tier-exec vn" data-full="NACD Cyber-Risk Oversight (Board-level)" data-desc="National Association of Corporate Directors cert for board members and CISOs presenting to boards. Non-technical strategic cert." onclick="openCert('nacd')">CISO+</span>
         </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="CAMS (Certified Anti-Money Laundering Specialist) + IAM" data-desc="Relevant for IAM executives in financial services. Regulatory identity verification at enterprise scale." onclick="openCert('cams')">CAMS</span>
-        </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="GIAC Security Expert (GSE)" data-desc="The most prestigious GIAC cert. Written + hands-on lab exam. Fewer than 250 holders worldwide." onclick="openCert('gse')">GSE</span>
-        </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="ISACA CISA (Certified Information Systems Auditor)" data-desc="The gold standard for IS audit, control, and assurance. Relevant for security engineering program oversight." onclick="openCert('cisa')">CISA</span>
-        </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="CSA STAR Certification + CCSP" data-desc="Cloud Security Alliance STAR + CCSP for cloud security program executives overseeing multi-cloud environments." onclick="openCert('csa-star')">CSA Star</span>
-        </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="CSSLP + Software Security Program Leadership" data-desc="Senior AppSec program leadership combining CSSLP with SANS GWEB and SDL governance experience." onclick="openCert('csslp-m')">CSSLP-M</span>
-        </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="GIAC Exploit Researcher & Advanced Penetration Tester (GXPN)" data-desc="SANS most advanced offensive cert. Exploit development, advanced network attacks, cryptographic attacks." onclick="openCert('gxpn')">GXPN</span>
-        </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="IAPP FIP (Fellow of Information Privacy)" data-desc="The highest IAPP designation. For senior privacy executives who have demonstrated significant contributions to the field." onclick="openCert('fip')">FIP</span>
-        </div>
-        <div class="cdomain-col">
-          <span class="cb tier-exec vn" data-full="GIAC Security Leadership (GSLC)" data-desc="For DFIR program leaders managing team operations, escalation procedures, and executive reporting." onclick="openCert('gslc')">GSLC</span>
-        </div>
+        <div class="cdomain-col"></div>
+        <div class="cdomain-col"></div>
+        <div class="cdomain-col"></div>
+        <div class="cdomain-col"></div>
+        <div class="cdomain-col"></div>
+        <div class="cdomain-col"></div>
+        <div class="cdomain-col"></div>
+        <div class="cdomain-col"></div>
       </div>
     </div>
 
@@ -1000,6 +1311,40 @@
       <div class="hl-footer">
         <div class="hl-price">~$7,000 total · World-class faculty</div>
         <a class="hl-cta hl-cta-o" href="https://omscs.gatech.edu/specialization-information-security" target="_blank" rel="noopener sponsored">★ Explore OMSCS</a>
+      </div>
+    </div>
+    <!-- TryHackMe -->
+    <div class="hl-card">
+      <div class="hl-ribbon">Top Pick</div>
+      <div class="hl-top">
+        <div class="hl-cat" style="color:var(--lb);">🎮 Hands-On Platform</div>
+        <div class="hl-name">TryHackMe — Cyber Security Training</div>
+        <div class="hl-inst">TryHackMe · Online · Self-paced · Gamified</div>
+        <div class="hl-pills">
+          <span class="hl-pill">3M+ Users</span><span class="hl-pill">Browser-Based Labs</span><span class="hl-pill">Beginner Friendly</span><span class="hl-pill">Learning Paths</span>
+        </div>
+        <div class="hl-desc">The most popular hands-on cybersecurity learning platform for beginners and intermediate learners. No setup required — labs run in your browser. Covers SOC fundamentals, penetration testing, DFIR, and more via structured learning paths. The Pre-Security and Jr. Penetration Tester paths are especially well-regarded for career changers entering the field.</div>
+      </div>
+      <div class="hl-footer">
+        <div class="hl-price">Free tier available · Premium ~$14/month</div>
+        <a class="hl-cta hl-cta-p" href="https://tryhackme.com/" target="_blank" rel="noopener sponsored">★ Start Learning Free</a>
+      </div>
+    </div>
+    <!-- INE Security -->
+    <div class="hl-card">
+      <div class="hl-ribbon">Top Pick</div>
+      <div class="hl-top">
+        <div class="hl-cat" style="color:var(--rd);">🔴 Professional Training</div>
+        <div class="hl-name">INE Security — Penetration Testing &amp; Defense Training</div>
+        <div class="hl-inst">INE (Internet Ninja Education) · Online · Expert-taught</div>
+        <div class="hl-pills">
+          <span class="hl-pill">eJPT · eCPPT · eWPT</span><span class="hl-pill">Practical Certs</span><span class="hl-pill">All Skill Levels</span><span class="hl-pill">Lab-Heavy</span>
+        </div>
+        <div class="hl-desc">INE is the leading professional security training provider for penetration testing and offensive security. Their eLearnSecurity certification track (eJPT → eCPPT → eCPTX) is one of the most respected practical cert paths in offensive security. Also covers DFIR, cloud security, and network defense. Far more affordable than SANS for professional-level content.</div>
+      </div>
+      <div class="hl-footer">
+        <div class="hl-price">$299–$749/year · eJPT cert included in entry plan</div>
+        <a class="hl-cta hl-cta-r" href="https://ine.com/learning/areas/cyber-security" target="_blank" rel="noopener sponsored">★ Explore INE Security</a>
       </div>
     </div>
   </div>
@@ -1531,6 +1876,36 @@
   <div class="st a2">Cybersecurity Salary Guide</div>
   <p class="ss a3">Filter by domain, track, tier, or salary range. Data reflects 2024–2025 U.S. market across all experience levels.</p>
 
+  <!-- Salary Calculator -->
+  <div class="sal-calc a3" id="sal-calc">
+    <div class="sc-title">💰 Salary Calculator</div>
+    <div class="sc-subtitle">Estimate your market value based on role, experience, location, and certifications.</div>
+    <div class="sc-form">
+      <div class="sc-form-row">
+        <label class="sc-label">Role</label>
+        <select id="sc-role" class="sc-select" onchange="calcSalary()"><option value="">Select a role...</option></select>
+      </div>
+      <div class="sc-form-row">
+        <label class="sc-label">Experience</label>
+        <select id="sc-exp" class="sc-select" onchange="calcSalary()">
+          <option value="entry">Entry (0–2 yrs)</option>
+          <option value="mid" selected>Mid (3–5 yrs)</option>
+          <option value="senior">Senior (6–9 yrs)</option>
+          <option value="lead">Lead/Principal (10+ yrs)</option>
+        </select>
+      </div>
+      <div class="sc-form-row">
+        <label class="sc-label">Location</label>
+        <select id="sc-loc" class="sc-select" onchange="calcSalary()"></select>
+      </div>
+    </div>
+    <div class="sc-form-row" style="margin-top:12px;">
+      <label class="sc-label">Premium Cert Bonuses</label>
+      <div class="sc-cert-bonuses" id="sc-cert-bonuses"></div>
+    </div>
+    <div class="sc-result" id="sc-result"><div class="sc-placeholder">Select a role above to calculate your estimated salary range.</div></div>
+  </div>
+
   <!-- Filters -->
   <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:20px 24px;margin-bottom:24px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;">
     <div style="flex:1;min-width:160px;">
@@ -1786,59 +2161,265 @@
   </div>
 </div>
 <div class="footer">InfoSecDeck · Interview Prep · Questions based on real hiring manager feedback and industry patterns</div>
-id="page-homelab">
-<div style="padding:52px 28px 100px;max-width:860px;margin:0 auto;">
+
+<!-- Interview Q&A modal — inside page-interview so position:fixed works when this page is active -->
+<div id="iprep-modal" class="iprep-modal" onclick="if(event.target===this)closeIprepModal()">
+  <div class="iprep-modal-panel">
+    <div class="iprep-modal-head">
+      <div>
+        <div id="iprep-modal-role" class="iprep-modal-role"></div>
+        <div id="iprep-modal-tier" class="iprep-modal-tier"></div>
+      </div>
+      <button class="iprep-modal-close" onclick="closeIprepModal()">✕</button>
+    </div>
+    <div id="iprep-modal-body" class="iprep-modal-body"></div>
+  </div>
+</div>
+</div>
+
+<div class="page" id="page-homelab">
+<div style="padding:52px 28px 100px;max-width:960px;margin:0 auto;">
   <div class="ey a1">Hands-On Practice</div>
   <div class="st a2">Home Lab Guide</div>
-  <p class="ss a3">Build your own cybersecurity practice environment from scratch. No expensive hardware required — everything runs on your existing machine.</p>
-  <div class="a3" style="display:flex;flex-direction:column;gap:20px;">
-    <div style="background:var(--sf);border:1px solid rgba(0,224,122,.2);border-radius:14px;padding:24px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🖥️</span><div><div style="font-weight:800;font-size:1rem;">Foundation: Virtualization</div><div style="font-size:.74rem;color:var(--mt);">Start here — everything else runs on top of this</div></div></div>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
-        <p><strong style="color:var(--tx);">VMware Workstation Pro</strong> (now free for personal use) or <strong style="color:var(--tx);">VirtualBox</strong> (free, open source) — install on Windows, Mac, or Linux. Minimum 16GB RAM recommended for running 2–3 VMs simultaneously; 8GB works but limits you to 1–2 at a time.</p>
-        <p>Download: <a href="https://www.vmware.com/products/workstation-pro.html" target="_blank" style="color:var(--bl);">VMware Workstation Pro</a> · <a href="https://www.virtualbox.org/" target="_blank" style="color:var(--bl);">VirtualBox</a></p>
+  <p class="ss a3">Build your own cybersecurity practice environment from scratch. Click any lab card to open a full step-by-step guide.</p>
+
+  <!-- Lab Cards Grid -->
+  <div class="a3" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;">
+
+    <!-- Card 1: Virtualization -->
+    <div class="lab-card" onclick="toggleLabGuide('lab-virt')" style="--lab-color:rgba(16,232,126,.25);--lab-border:rgba(16,232,126,.35);">
+      <div class="lab-card-icon">🖥️</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Foundation: Virtualization</div>
+        <div class="lab-card-sub">Start here — everything else runs on top</div>
+        <div class="lab-card-tags"><span class="lab-tag">All Roles</span><span class="lab-tag">Required First</span></div>
       </div>
+      <div class="lab-card-open" id="lab-virt-toggle">View Guide <span>&#9660;</span></div>
     </div>
-    <div style="background:var(--sf);border:1px solid rgba(34,211,238,.2);border-radius:14px;padding:24px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🛡️</span><div><div style="font-weight:800;font-size:1rem;">Defensive Lab: SIEM + Detection</div><div style="font-size:.74rem;color:var(--mt);">For SOC Analyst, DFIR, and Security Engineer roles</div></div></div>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
-        <p><strong style="color:var(--tx);">Splunk Free (500MB/day)</strong> — Ingest Windows event logs, Sysmon, and firewall logs. Build your first correlation searches and dashboards. This is the most in-demand SIEM tool and hands-on experience is priceless for interviews.</p>
-        <p><strong style="color:var(--tx);">Sysmon</strong> — Microsoft's free system monitor. Deploy it on a Windows VM and feed logs to Splunk. Instant visibility into process creation, network connections, and registry changes.</p>
-        <p><strong style="color:var(--tx);">Security Onion</strong> — All-in-one IDS/NSM/SIEM distro. Includes Zeek, Suricata, and Elasticsearch. Great for network traffic analysis practice.</p>
-        <p><strong style="color:var(--tx);">Wazuh</strong> — Free open-source SIEM and XDR. Good alternative to Splunk with a familiar interface.</p>
+
+    <!-- Card 2: Defensive / SIEM -->
+    <div class="lab-card" onclick="toggleLabGuide('lab-siem')" style="--lab-color:rgba(34,211,238,.2);--lab-border:rgba(34,211,238,.35);">
+      <div class="lab-card-icon">🛡️</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Defensive Lab: SIEM + Detection</div>
+        <div class="lab-card-sub">SOC Analyst, DFIR, Security Engineer</div>
+        <div class="lab-card-tags"><span class="lab-tag">Blue Team</span><span class="lab-tag">Splunk / Wazuh</span></div>
       </div>
+      <div class="lab-card-open" id="lab-siem-toggle">View Guide <span>&#9660;</span></div>
     </div>
-    <div style="background:var(--sf);border:1px solid rgba(249,115,22,.2);border-radius:14px;padding:24px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🔴</span><div><div style="font-weight:800;font-size:1rem;">Offensive Lab: Attack Practice</div><div style="font-size:.74rem;color:var(--mt);">For Penetration Testers and Red Team roles</div></div></div>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
-        <p><strong style="color:var(--tx);">Kali Linux</strong> — The standard offensive security distro. Run as a VM. All major pentesting tools pre-installed: Nmap, Metasploit, Burp Suite, Wireshark, John the Ripper.</p>
-        <p><strong style="color:var(--tx);">Metasploitable 2/3</strong> — Intentionally vulnerable Linux VM. Perfect safe target for Metasploit practice. Never expose to the internet.</p>
-        <p><strong style="color:var(--tx);">DVWA (Damn Vulnerable Web Application)</strong> — Practice SQL injection, XSS, CSRF, file upload vulnerabilities in a controlled environment.</p>
-        <p><strong style="color:var(--tx);">VulnHub</strong> — Free downloadable vulnerable VMs for CTF-style practice. Hundreds of machines, all skill levels.</p>
+
+    <!-- Card 3: Offensive -->
+    <div class="lab-card" onclick="toggleLabGuide('lab-offensive')" style="--lab-color:rgba(240,93,120,.18);--lab-border:rgba(240,93,120,.35);">
+      <div class="lab-card-icon">🔴</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Offensive Lab: Attack Practice</div>
+        <div class="lab-card-sub">Penetration Tester, Red Team Operator</div>
+        <div class="lab-card-tags"><span class="lab-tag">Red Team</span><span class="lab-tag">Kali / Metasploit</span></div>
       </div>
+      <div class="lab-card-open" id="lab-offensive-toggle">View Guide <span>&#9660;</span></div>
     </div>
-    <div style="background:var(--sf);border:1px solid rgba(107,159,255,.2);border-radius:14px;padding:24px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">🏢</span><div><div style="font-weight:800;font-size:1rem;">Active Directory Lab</div><div style="font-size:.74rem;color:var(--mt);">Essential for most enterprise security roles</div></div></div>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
-        <p>Build a small AD environment: one Windows Server 2022 VM as Domain Controller + one Windows 10/11 client joined to the domain. Use a free Microsoft Evaluation license (180 days). This environment lets you practice:</p>
-        <ul style="padding-left:18px;margin-top:6px;line-height:2;">
-          <li>GPO configuration and security hardening</li>
-          <li>IAM: user provisioning, group management, OU structure</li>
-          <li>Attack simulation: Pass-the-Hash, Kerberoasting, BloodHound mapping</li>
-          <li>Detection: configuring audit policies and feeding logs to your SIEM</li>
-        </ul>
-        <p>Best guide: <a href="https://github.com/0xBEN/Lab-in-a-Box" target="_blank" style="color:var(--bl);">Lab-in-a-Box by 0xBEN</a> — fully scripted AD lab setup.</p>
+
+    <!-- Card 4: Active Directory -->
+    <div class="lab-card" onclick="toggleLabGuide('lab-ad')" style="--lab-color:rgba(107,159,255,.18);--lab-border:rgba(107,159,255,.35);">
+      <div class="lab-card-icon">🏢</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Active Directory Lab</div>
+        <div class="lab-card-sub">Essential for most enterprise security roles</div>
+        <div class="lab-card-tags"><span class="lab-tag">IAM</span><span class="lab-tag">Windows Server</span></div>
       </div>
+      <div class="lab-card-open" id="lab-ad-toggle">View Guide <span>&#9660;</span></div>
     </div>
-    <div style="background:var(--sf);border:1px solid rgba(251,191,36,.2);border-radius:14px;padding:24px;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="font-size:1.4rem;">☁️</span><div><div style="font-weight:800;font-size:1rem;">Cloud Lab: AWS / Azure Free Tier</div><div style="font-size:.74rem;color:var(--mt);">For Cloud Security roles</div></div></div>
-      <div style="display:flex;flex-direction:column;gap:8px;font-size:.82rem;color:#94a3b8;line-height:1.7;">
-        <p><strong style="color:var(--tx);">AWS Free Tier</strong> — 12 months free with new account. Practice: IAM policy creation, S3 bucket policies, VPC security groups, CloudTrail logging, AWS Config rules, GuardDuty. Don't put anything sensitive or production workloads here.</p>
-        <p><strong style="color:var(--tx);">Microsoft Azure Free Account</strong> — $200 credit + 12 months of free services. Practice: Entra ID (Azure AD), Defender for Cloud, Sentinel SIEM, Key Vault, NSGs.</p>
-        <p><strong style="color:var(--tx);">CloudGoat by Rhino Security</strong> — Intentionally vulnerable AWS environment for attack/defense practice. Great for Cloud Security pentesting prep.</p>
+
+    <!-- Card 5: Cloud Lab -->
+    <div class="lab-card" onclick="toggleLabGuide('lab-cloud')" style="--lab-color:rgba(251,191,36,.15);--lab-border:rgba(251,191,36,.35);">
+      <div class="lab-card-icon">☁️</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Cloud Lab: AWS / Azure</div>
+        <div class="lab-card-sub">Cloud Security Engineer, Architect</div>
+        <div class="lab-card-tags"><span class="lab-tag">Cloud</span><span class="lab-tag">AWS / Azure</span></div>
       </div>
+      <div class="lab-card-open" id="lab-cloud-toggle">View Guide <span>&#9660;</span></div>
     </div>
+
+  </div><!-- end grid -->
+
+  <!-- ─── GUIDE: Virtualization ─── -->
+  <div class="lab-guide" id="lab-virt" style="display:none;">
+    <div class="lg-header" style="border-color:rgba(16,232,126,.4);">
+      <span class="lg-icon">🖥️</span>
+      <div><div class="lg-title">Foundation: Virtualization Setup</div><div class="lg-sub">Install your hypervisor before building any other lab</div></div>
+    </div>
+    <div class="lg-diagram">
+      <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
+        <rect x="10" y="10" width="540" height="100" rx="10" fill="rgba(16,232,126,.07)" stroke="rgba(16,232,126,.3)" stroke-width="1.5"/>
+        <text x="280" y="30" text-anchor="middle" fill="rgba(16,232,126,.7)" font-family="monospace" font-size="11">Your Physical Machine (Host OS)</text>
+        <rect x="30" y="45" width="140" height="50" rx="6" fill="rgba(16,232,126,.12)" stroke="rgba(16,232,126,.4)" stroke-width="1"/>
+        <text x="100" y="68" text-anchor="middle" fill="#10e87e" font-family="monospace" font-size="10">VM 1</text>
+        <text x="100" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Kali Linux</text>
+        <rect x="210" y="45" width="140" height="50" rx="6" fill="rgba(34,211,238,.1)" stroke="rgba(34,211,238,.35)" stroke-width="1"/>
+        <text x="280" y="68" text-anchor="middle" fill="#0dd4c8" font-family="monospace" font-size="10">VM 2</text>
+        <text x="280" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Windows Server</text>
+        <rect x="390" y="45" width="140" height="50" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.35)" stroke-width="1"/>
+        <text x="460" y="68" text-anchor="middle" fill="#4d9eff" font-family="monospace" font-size="10">VM 3</text>
+        <text x="460" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Security Onion</text>
+        <text x="170" y="74" text-anchor="middle" fill="rgba(255,255,255,.3)" font-family="monospace" font-size="14">|</text>
+        <text x="350" y="74" text-anchor="middle" fill="rgba(255,255,255,.3)" font-family="monospace" font-size="14">|</text>
+      </svg>
+    </div>
+    <div class="lg-steps">
+      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Check your hardware</div><div class="lg-step-desc">You need at least <strong>16GB RAM</strong> (8GB minimum, 2–3 VMs at once requires 16GB+). <strong>CPU:</strong> enable virtualization (Intel VT-x / AMD-V) in BIOS. <strong>Disk:</strong> 100GB+ free for VMs.</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Install a hypervisor</div><div class="lg-step-desc">Choose one: <strong>VMware Workstation Pro</strong> (now free for personal use — best performance) or <strong>VirtualBox</strong> (free, open source, cross-platform). Download from official sites only.</div><div class="lg-cmd">VMware: broadcom.com/support/vmware-by-broadcom<br>VirtualBox: virtualbox.org</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Create your first VM: Kali Linux</div><div class="lg-step-desc">Download the Kali pre-built VMware or VirtualBox image from kali.org. Import it directly — no manual install needed. Allocate 4GB RAM, 2 CPUs, 60GB disk.</div><div class="lg-cmd">kali.org/get-kali/ → Virtual Machine Images</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Set up networking</div><div class="lg-step-desc">Create a <strong>Host-Only network adapter</strong> for isolated lab traffic between VMs. Use <strong>NAT</strong> for internet access when updating tools. Never put vulnerable VMs on your main network.</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Take snapshots</div><div class="lg-step-desc">Before starting any lab exercise, take a snapshot of every VM. After breaking something (you will), just revert. This is the #1 habit that separates efficient lab users from frustrated ones.</div></div></div>
+    </div>
+    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">VMware Workstation Pro</span><span class="lg-tool-tag">VirtualBox</span><span class="lg-tool-tag">Kali Linux</span></div>
   </div>
+
+  <!-- ─── GUIDE: SIEM + Detection ─── -->
+  <div class="lab-guide" id="lab-siem" style="display:none;">
+    <div class="lg-header" style="border-color:rgba(34,211,238,.4);">
+      <span class="lg-icon">🛡️</span>
+      <div><div class="lg-title">Defensive Lab: SIEM + Detection Engineering</div><div class="lg-sub">Build a real detection environment with log collection, correlation, and alerting</div></div>
+    </div>
+    <div class="lg-diagram">
+      <svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
+        <rect x="10" y="10" width="115" height="50" rx="7" fill="rgba(34,211,238,.1)" stroke="rgba(34,211,238,.3)" stroke-width="1"/>
+        <text x="67" y="33" text-anchor="middle" fill="#0dd4c8" font-family="monospace" font-size="10">Windows VM</text>
+        <text x="67" y="49" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">+ Sysmon</text>
+        <rect x="10" y="75" width="115" height="50" rx="7" fill="rgba(34,211,238,.08)" stroke="rgba(34,211,238,.25)" stroke-width="1"/>
+        <text x="67" y="98" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="10">Linux VM</text>
+        <text x="67" y="114" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Syslog Agent</text>
+        <line x1="125" y1="35" x2="200" y2="55" stroke="rgba(34,211,238,.4)" stroke-width="1.5" stroke-dasharray="4"/>
+        <line x1="125" y1="100" x2="200" y2="70" stroke="rgba(34,211,238,.3)" stroke-width="1.5" stroke-dasharray="4"/>
+        <rect x="200" y="40" width="140" height="60" rx="8" fill="rgba(34,211,238,.14)" stroke="rgba(34,211,238,.5)" stroke-width="1.5"/>
+        <text x="270" y="65" text-anchor="middle" fill="#0dd4c8" font-family="monospace" font-size="11" font-weight="bold">SIEM</text>
+        <text x="270" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Splunk / Wazuh</text>
+        <line x1="340" y1="70" x2="400" y2="70" stroke="rgba(255,180,0,.5)" stroke-width="1.5"/>
+        <rect x="400" y="45" width="140" height="50" rx="7" fill="rgba(255,180,0,.1)" stroke="rgba(255,180,0,.3)" stroke-width="1"/>
+        <text x="470" y="68" text-anchor="middle" fill="#f5c842" font-family="monospace" font-size="10">Alerts &amp; Dashboards</text>
+        <text x="470" y="83" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Detection Rules</text>
+      </svg>
+    </div>
+    <div class="lg-steps">
+      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Set up a Windows VM (log source)</div><div class="lg-step-desc">Use a free <strong>Windows 10/11 evaluation ISO</strong> from Microsoft or use Windows Server 2022 (180-day eval). This will be your primary log-generating machine.</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Deploy Sysmon for rich telemetry</div><div class="lg-step-desc">Sysmon adds deep Windows event logging: process creation, network connections, file hashes, registry changes. Use the <strong>SwiftOnSecurity sysmon-config</strong> — the community standard configuration.</div><div class="lg-cmd">winget install Sysinternals.Sysmon<br>sysmon64.exe -accepteula -i sysmonconfig.xml</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Install Splunk Free (SIEM)</div><div class="lg-step-desc">Splunk Free gives 500MB/day of indexing — plenty for lab use. Install on your host or a dedicated Linux VM. Create a new index called "lab".</div><div class="lg-cmd">splunk.com/download → Free Trial → Install<br>splunk start<br># Navigate to localhost:8000</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Forward Windows logs to Splunk</div><div class="lg-step-desc">Install the <strong>Splunk Universal Forwarder</strong> on your Windows VM. Configure it to forward Security, System, Application event logs plus Sysmon (Event ID 1, 3, 7, 11).</div><div class="lg-cmd"># inputs.conf on Windows forwarder:<br>[WinEventLog://Microsoft-Windows-Sysmon/Operational]<br>[WinEventLog://Security]</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Write your first detection rule</div><div class="lg-step-desc">Create a saved search in Splunk that alerts when PowerShell is launched by a non-admin process — a common attacker technique. This is your first real detection engineering exercise.</div><div class="lg-cmd">index=lab EventCode=1 Image="*powershell.exe"<br>ParentImage!="*explorer.exe"<br>| alert if count &gt; 0</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Alternative: Try Wazuh (free open-source)</div><div class="lg-step-desc"><strong>Wazuh</strong> is a free, full-featured SIEM+XDR stack. Easier to deploy than Splunk for beginners. Includes pre-built MITRE ATT&CK correlation rules, FIM, and vulnerability scanning out of the box.</div><div class="lg-cmd">wazuh.com → OVA image → Import to VMware/VBox</div></div></div>
+    </div>
+    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">Splunk Free</span><span class="lg-tool-tag">Sysmon</span><span class="lg-tool-tag">Wazuh</span><span class="lg-tool-tag">Security Onion</span><span class="lg-tool-tag">Universal Forwarder</span></div>
+  </div>
+
+  <!-- ─── GUIDE: Offensive ─── -->
+  <div class="lab-guide" id="lab-offensive" style="display:none;">
+    <div class="lg-header" style="border-color:rgba(240,93,120,.4);">
+      <span class="lg-icon">🔴</span>
+      <div><div class="lg-title">Offensive Lab: Attack Practice</div><div class="lg-sub">Set up a safe, isolated environment to practice penetration testing techniques</div></div>
+    </div>
+    <div class="lg-diagram">
+      <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
+        <rect x="10" y="20" width="130" height="80" rx="8" fill="rgba(240,93,120,.12)" stroke="rgba(240,93,120,.4)" stroke-width="1.5"/>
+        <text x="75" y="50" text-anchor="middle" fill="#f05d78" font-family="monospace" font-size="11" font-weight="bold">Attacker</text>
+        <text x="75" y="68" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Kali Linux</text>
+        <text x="75" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">192.168.56.10</text>
+        <rect x="215" y="30" width="130" height="60" rx="7" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+        <text x="280" y="58" text-anchor="middle" fill="#dde6f0" font-family="monospace" font-size="10">Host-Only</text>
+        <text x="280" y="74" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">192.168.56.0/24</text>
+        <rect x="420" y="20" width="130" height="80" rx="8" fill="rgba(249,115,22,.1)" stroke="rgba(249,115,22,.35)" stroke-width="1.5"/>
+        <text x="485" y="50" text-anchor="middle" fill="#ff8c42" font-family="monospace" font-size="11" font-weight="bold">Target</text>
+        <text x="485" y="68" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Metasploitable 3</text>
+        <text x="485" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">192.168.56.20</text>
+        <line x1="140" y1="60" x2="215" y2="60" stroke="rgba(240,93,120,.5)" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="345" y1="60" x2="420" y2="60" stroke="rgba(240,93,120,.5)" stroke-width="2"/>
+        <text x="183" y="52" fill="#f05d78" font-family="monospace" font-size="9">scan/exploit</text>
+      </svg>
+    </div>
+    <div class="lg-steps">
+      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Install Kali Linux (attacker VM)</div><div class="lg-step-desc">Download the pre-built Kali VM image from kali.org. Import to VMware or VirtualBox. Kali includes Nmap, Metasploit, Burp Suite, Wireshark, Hydra, and hundreds of other tools pre-installed. Update immediately.</div><div class="lg-cmd">sudo apt update &amp;&amp; sudo apt full-upgrade -y</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Set up a vulnerable target VM</div><div class="lg-step-desc"><strong>Metasploitable 3</strong> — Intentionally vulnerable Ubuntu/Windows VMs. Built specifically for Metasploit practice. Also try <strong>VulnHub</strong> machines for CTF-style challenges.</div><div class="lg-cmd">github.com/rapid7/metasploitable3<br># or download pre-built from vulnhub.com</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Configure isolated Host-Only networking</div><div class="lg-step-desc">Put both VMs on the same Host-Only adapter (VMnet1 in VMware). This creates an isolated network — no internet access for target, preventing accidental exposure. Never put vulnerable VMs on NAT or bridged mode.</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Run your first Nmap scan</div><div class="lg-step-desc">Discover the target and enumerate open ports. Use this exact methodology for every engagement: ping sweep → port scan → service detection → OS fingerprint.</div><div class="lg-cmd">nmap -sn 192.168.56.0/24          # discover hosts<br>nmap -sV -sC -O 192.168.56.20     # full scan<br>nmap -p- --min-rate 5000 TARGET   # all ports</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Practice web application attacks with DVWA</div><div class="lg-step-desc">Deploy <strong>DVWA (Damn Vulnerable Web App)</strong> via Docker on your Kali VM. Practice SQL injection, XSS, CSRF, command injection, and file upload vulnerabilities at adjustable difficulty levels.</div><div class="lg-cmd">docker run -d -p 80:80 vulnerables/web-dvwa<br># Browse to http://localhost/login.php</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Progress to TryHackMe and HackTheBox</div><div class="lg-step-desc">After you're comfortable with local VMs, level up with <strong>TryHackMe</strong> (guided paths, beginner-friendly) and <strong>HackTheBox</strong> (realistic machines, OSCP prep). Both have free tiers.</div></div></div>
+    </div>
+    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">Kali Linux</span><span class="lg-tool-tag">Metasploit</span><span class="lg-tool-tag">Nmap</span><span class="lg-tool-tag">Burp Suite</span><span class="lg-tool-tag">DVWA</span><span class="lg-tool-tag">VulnHub</span></div>
+  </div>
+
+  <!-- ─── GUIDE: Active Directory ─── -->
+  <div class="lab-guide" id="lab-ad" style="display:none;">
+    <div class="lg-header" style="border-color:rgba(107,159,255,.4);">
+      <span class="lg-icon">🏢</span>
+      <div><div class="lg-title">Active Directory Lab</div><div class="lg-sub">Build a realistic enterprise environment for IAM, red team, and detection practice</div></div>
+    </div>
+    <div class="lg-diagram">
+      <svg viewBox="0 0 560 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
+        <rect x="180" y="10" width="200" height="55" rx="8" fill="rgba(107,159,255,.14)" stroke="rgba(107,159,255,.45)" stroke-width="1.5"/>
+        <text x="280" y="35" text-anchor="middle" fill="#82b8ff" font-family="monospace" font-size="11" font-weight="bold">Domain Controller</text>
+        <text x="280" y="52" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Windows Server 2022 | lab.local</text>
+        <line x1="175" y1="75" x2="100" y2="105" stroke="rgba(107,159,255,.35)" stroke-width="1.5"/>
+        <line x1="280" y1="65" x2="280" y2="95" stroke="rgba(107,159,255,.35)" stroke-width="1.5"/>
+        <line x1="385" y1="75" x2="460" y2="105" stroke="rgba(107,159,255,.35)" stroke-width="1.5"/>
+        <rect x="30" y="100" width="140" height="35" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.3)" stroke-width="1"/>
+        <text x="100" y="116" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Win 10/11 Client</text>
+        <text x="100" y="128" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">alice@lab.local</text>
+        <rect x="210" y="100" width="140" height="35" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.3)" stroke-width="1"/>
+        <text x="280" y="116" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Kali Linux (attacker)</text>
+        <text x="280" y="128" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">BloodHound / Mimikatz</text>
+        <rect x="390" y="100" width="140" height="35" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.3)" stroke-width="1"/>
+        <text x="460" y="116" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">SIEM VM</text>
+        <text x="460" y="128" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">Splunk / Wazuh</text>
+      </svg>
+    </div>
+    <div class="lg-steps">
+      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Download Windows Server 2022 evaluation</div><div class="lg-step-desc">Microsoft offers free 180-day evaluation ISOs. No license key required. Create a new VM: 4GB RAM, 2 CPUs, 60GB disk. Install Server Core or Desktop Experience.</div><div class="lg-cmd">microsoft.com/en-us/evalcenter/evaluate-windows-server-2022</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Promote to Domain Controller</div><div class="lg-step-desc">Install the AD DS role and promote the server to a Domain Controller. Use domain name <code>lab.local</code>. This will install DNS automatically.</div><div class="lg-cmd">Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools<br>Install-ADDSForest -DomainName "lab.local"</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Add a Windows 10/11 client VM</div><div class="lg-step-desc">Create a second VM with Windows 10/11 evaluation. Join it to the <code>lab.local</code> domain. Create 3–5 standard domain users and 1–2 admin accounts. This mirrors a real enterprise environment.</div><div class="lg-cmd">Add-Computer -DomainName "lab.local" -Restart</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Create deliberate misconfigurations for practice</div><div class="lg-step-desc">These are the real learning exercises: set a user with <code>adminCount=1</code>, enable unconstrained delegation on a computer, add a user to Domain Admins incorrectly, use a weak Service Account password (for Kerberoasting practice).</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Attack with BloodHound (from Kali VM)</div><div class="lg-step-desc">Run <strong>BloodHound</strong> with SharpHound collector to map all AD relationships. Identify attack paths to Domain Admin. This teaches both offense (how attackers escalate) and defense (what to harden).</div><div class="lg-cmd">python3 bloodhound.py -u alice -p Password1 -d lab.local -c All</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Detect the attacks in your SIEM</div><div class="lg-step-desc">Enable advanced audit policies on the DC. Forward Security event logs to Splunk/Wazuh. Write detection rules for: Kerberoasting (Event 4769), Pass-the-Hash (Event 4624 LogonType 3), BloodHound enumeration (4662 repeated ACL access).</div></div></div>
+    </div>
+    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">Windows Server 2022</span><span class="lg-tool-tag">BloodHound</span><span class="lg-tool-tag">Mimikatz</span><span class="lg-tool-tag">Impacket</span><span class="lg-tool-tag">PowerView</span></div>
+  </div>
+
+  <!-- ─── GUIDE: Cloud Lab ─── -->
+  <div class="lab-guide" id="lab-cloud" style="display:none;">
+    <div class="lg-header" style="border-color:rgba(251,191,36,.4);">
+      <span class="lg-icon">☁️</span>
+      <div><div class="lg-title">Cloud Lab: AWS + Azure Free Tier</div><div class="lg-sub">Practice real cloud security skills without any upfront cost</div></div>
+    </div>
+    <div class="lg-diagram">
+      <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
+        <rect x="10" y="15" width="255" height="90" rx="10" fill="rgba(251,191,36,.07)" stroke="rgba(251,191,36,.3)" stroke-width="1.5"/>
+        <text x="137" y="38" text-anchor="middle" fill="rgba(251,191,36,.8)" font-family="monospace" font-size="10" font-weight="bold">AWS Free Tier</text>
+        <rect x="25" y="50" width="100" height="40" rx="5" fill="rgba(251,191,36,.12)" stroke="rgba(251,191,36,.25)" stroke-width="1"/>
+        <text x="75" y="68" text-anchor="middle" fill="#f5c842" font-family="monospace" font-size="9">IAM / S3 / VPC</text>
+        <text x="75" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">GuardDuty / Config</text>
+        <rect x="145" y="50" width="105" height="40" rx="5" fill="rgba(251,191,36,.09)" stroke="rgba(251,191,36,.2)" stroke-width="1"/>
+        <text x="197" y="68" text-anchor="middle" fill="#f5c842" font-family="monospace" font-size="9">CloudTrail / Logs</text>
+        <text x="197" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">CloudWatch</text>
+        <rect x="295" y="15" width="255" height="90" rx="10" fill="rgba(77,158,255,.07)" stroke="rgba(77,158,255,.3)" stroke-width="1.5"/>
+        <text x="422" y="38" text-anchor="middle" fill="rgba(77,158,255,.8)" font-family="monospace" font-size="10" font-weight="bold">Azure Free Account</text>
+        <rect x="310" y="50" width="100" height="40" rx="5" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.25)" stroke-width="1"/>
+        <text x="360" y="68" text-anchor="middle" fill="#4d9eff" font-family="monospace" font-size="9">Entra ID / Defender</text>
+        <text x="360" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">Sentinel SIEM</text>
+        <rect x="430" y="50" width="105" height="40" rx="5" fill="rgba(77,158,255,.07)" stroke="rgba(77,158,255,.2)" stroke-width="1"/>
+        <text x="482" y="68" text-anchor="middle" fill="#4d9eff" font-family="monospace" font-size="9">Key Vault / NSGs</text>
+        <text x="482" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">Policy / Blueprints</text>
+      </svg>
+    </div>
+    <div class="lg-steps">
+      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Create an AWS Free Tier account</div><div class="lg-step-desc">AWS Free Tier gives 12 months of free services including EC2 (750 hrs/month), S3 (5GB), CloudTrail, and more. Set up billing alerts immediately — accidental charges happen to beginners.</div><div class="lg-cmd">aws.amazon.com/free<br>aws budgets create-budget --budget-name "lab" --amount 5</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Harden your AWS root account (Day 1)</div><div class="lg-step-desc">Never use root for daily work. Create an IAM user with least-privilege policies. Enable MFA on root and all IAM users. This is the first thing every cloud security interviewer will ask about.</div><div class="lg-cmd">aws iam create-virtual-mfa-device<br>aws iam enable-mfa-device --user-name admin --serial-number ARN</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Enable CloudTrail + GuardDuty</div><div class="lg-step-desc"><strong>CloudTrail</strong> logs every API call in your account — the equivalent of an audit log. <strong>GuardDuty</strong> is AWS's built-in threat detection (free 30-day trial). Enable both in every region you use.</div><div class="lg-cmd">aws cloudtrail create-trail --name lab-trail --s3-bucket-name lab-logs<br>aws guardduty create-detector --enable</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Practice CloudGoat (intentionally vulnerable AWS)</div><div class="lg-step-desc"><strong>CloudGoat</strong> by Rhino Security Labs is the "Metasploitable for AWS." It deploys misconfigured environments for attack/defense practice: privilege escalation, S3 data exfil, lambda abuse, and more.</div><div class="lg-cmd">git clone https://github.com/RhinoSecurityLabs/cloudgoat<br>pip3 install -r requirements.txt<br>./cloudgoat.py create iam_privesc_by_attachment</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Set up Azure free account + Microsoft Sentinel</div><div class="lg-step-desc">Azure gives $200 credit + 12 months of free services. Enable <strong>Microsoft Sentinel</strong> (cloud SIEM) and <strong>Defender for Cloud</strong>. Connect your Azure activity logs. Sentinel uses KQL for queries — a critical skill for Azure security jobs.</div><div class="lg-cmd">portal.azure.com → Microsoft Sentinel → Create workspace<br>az sentinel onboarding-state create -g lab-rg -w lab-workspace</div></div></div>
+      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Use Prowler for cloud security auditing</div><div class="lg-step-desc"><strong>Prowler</strong> is a free open-source cloud security assessment tool. Run it against your AWS account to identify misconfigurations and benchmark against CIS controls. Great for interview talking points.</div><div class="lg-cmd">pip3 install prowler<br>prowler aws --compliance cis_2.0_aws</div></div></div>
+    </div>
+    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">AWS Free Tier</span><span class="lg-tool-tag">Azure Free</span><span class="lg-tool-tag">CloudGoat</span><span class="lg-tool-tag">Prowler</span><span class="lg-tool-tag">Microsoft Sentinel</span><span class="lg-tool-tag">GuardDuty</span></div>
+  </div>
+
 </div>
 <div class="footer">InfoSecDeck · Home Lab Guide · All tools listed are free or have free tiers unless noted</div>
 </div>
@@ -2085,48 +2666,294 @@ id="page-homelab">
   </div>
 </div>
 <div class="footer">InfoSecDeck · Career Pivot Advisor · Powered by Claude AI · Your resume is not stored or used beyond this session</div>
+</div>
+
+<!-- page-quiz removed — quiz now lives inline on home page (#home-quiz) -->
+<div class="page" id="page-quiz">
+<div style="padding:52px 28px 100px;max-width:820px;margin:0 auto;text-align:center;color:var(--mt);">
+  <p style="margin-top:80px;">Use the <strong style="color:var(--tx);">What&#39;s my Cyber Career?</strong> button on the home page to take the quiz.</p>
+  <button onclick="showPage('home');openHomeQuiz()" style="margin-top:20px;padding:10px 24px;border-radius:10px;background:var(--bl);color:#fff;border:none;cursor:pointer;font-size:.9rem;">Go to Quiz</button>
+
+</div>
+</div>
 
 
-<!-- ═══ INTERVIEW MODAL ═══ -->
-<div id="iprep-modal" class="iprep-modal" onclick="if(event.target===this)closeIprepModal()">
-  <div class="iprep-modal-panel">
-    <div class="iprep-modal-head">
-      <div>
-        <div id="iprep-modal-role" class="iprep-modal-role"></div>
-        <div id="iprep-modal-tier" class="iprep-modal-tier"></div>
+<!-- ═══════════════════════════════ TOOL ENCYCLOPEDIA ═══════════════════════════════ -->
+<div class="page" id="page-tools">
+<div style="padding:52px 28px 100px;max-width:1100px;margin:0 auto;">
+  <div class="ey a1">Security Tools</div>
+  <div class="st a2">Tool Encyclopedia</div>
+  <p class="ss a3">65+ essential security tools organized by category. Search by name, tag, or category.</p>
+  <div class="tools-filters">
+    <input type="text" id="tf-search" class="tf-search" placeholder="Search tools..." oninput="filterTools()">
+    <select id="tf-cat" class="tf-cat-select" onchange="filterTools()"></select>
+    <span class="tools-count" id="tools-count"></span>
+  </div>
+  <div class="tools-grid" id="tools-grid"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════ CTF & CONFERENCE CALENDAR ═══════════════════════════════ -->
+<div class="page" id="page-calendar">
+<div style="padding:52px 28px 100px;max-width:900px;margin:0 auto;">
+  <div class="ey a1">Events</div>
+  <div class="st a2">CTF &amp; Conference Calendar</div>
+  <p class="ss a3">Upcoming cybersecurity events, CTF competitions, conferences, and free webinars. Updated annually.</p>
+  <div class="cal-filters" id="cal-filters"></div>
+  <div class="cal-list" id="cal-list"></div>
+  <div style="margin-top:32px;padding:16px 20px;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;font-size:.76rem;color:var(--mt);">
+    💡 <strong style="color:var(--tx);">Tip:</strong> Check <a href="https://ctftime.org" target="_blank" style="color:var(--bl);">CTFtime.org</a> for a continuously updated list of all active CTF competitions. Past events are automatically hidden. Events shown are within the next 12 months.
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════ RESUME TEMPLATES ═══════════════════════════════ -->
+<div class="page" id="page-resume">
+<div style="padding:52px 28px 100px;max-width:1000px;margin:0 auto;">
+  <div class="ey a1">Career Tools</div>
+  <div class="st a2">Resume Templates &amp; Tips</div>
+  <p class="ss a3">Role-specific resume guidance for 8 cybersecurity career paths. Click any card for tailored tips.</p>
+  <div class="resume-grid" id="resume-grid"></div>
+  <div id="resume-detail" style="display:none;"></div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════ WALL OF WINS ═══════════════════════════════ -->
+<div class="page" id="page-stories">
+<div style="padding:52px 28px 100px;max-width:1000px;margin:0 auto;">
+  <div class="ey a1">Community</div>
+  <div class="st a2">Wall of Wins</div>
+  <p class="ss a3">Real people. Real career transitions. Read their stories and share your own.</p>
+  <div class="stories-grid" id="stories-grid"></div>
+
+  <!-- Submit Form -->
+  <div class="story-submit-section">
+    <div class="ssf-header">🏆 Share Your Win</div>
+    <p class="ssf-sub">Made a career transition? Passed a hard cert? Got your first security role? Inspire the next person.</p>
+    <div class="ssf-form">
+      <div class="ssf-row">
+        <div class="ssf-field">
+          <label class="ssf-label">Your Name <span class="ssf-optional">(or "Anonymous")</span></label>
+          <input type="text" id="ssf-name" class="ssf-input" placeholder="Jane D." maxlength="50">
+        </div>
+        <div class="ssf-field">
+          <label class="ssf-label">New Role / Achievement</label>
+          <input type="text" id="ssf-role" class="ssf-input" placeholder="e.g. SOC Analyst II, Passed OSCP" maxlength="80">
+        </div>
       </div>
-      <button class="iprep-modal-close" onclick="closeIprepModal()">✕</button>
+      <div class="ssf-row">
+        <div class="ssf-field">
+          <label class="ssf-label">Previous Background <span class="ssf-optional">(optional)</span></label>
+          <input type="text" id="ssf-prev" class="ssf-input" placeholder="e.g. Help Desk, Retail Manager" maxlength="80">
+        </div>
+        <div class="ssf-field">
+          <label class="ssf-label">How Long It Took <span class="ssf-optional">(optional)</span></label>
+          <input type="text" id="ssf-dur" class="ssf-input" placeholder="e.g. 8 months" maxlength="40">
+        </div>
+      </div>
+      <div class="ssf-field">
+        <label class="ssf-label">Your Story</label>
+        <textarea id="ssf-quote" class="ssf-textarea" placeholder="What did you do? What was the hardest part? What helped most?" rows="3" maxlength="400"></textarea>
+      </div>
+      <div class="ssf-field">
+        <label class="ssf-label">One Piece of Advice <span class="ssf-optional">(optional)</span></label>
+        <input type="text" id="ssf-tip" class="ssf-input" placeholder="e.g. Get the OSCP before anything else." maxlength="200">
+      </div>
+      <button class="ssf-submit" onclick="submitStory()">Share My Win 🏆</button>
     </div>
-    <div id="iprep-modal-body" class="iprep-modal-body"></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════ SEARCH OVERLAY ═══════════════════════════════ -->
+<div id="search-overlay" class="search-overlay" onclick="if(event.target===this)closeSearchDirect()">
+  <div class="search-box">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input id="search-input" class="search-input" placeholder="Search roles, certs, tools, topics..." oninput="runSearch(this.value)" autocomplete="off" spellcheck="false">
+      <button class="search-close-btn" onclick="closeSearchDirect()">Esc</button>
+    </div>
+    <div id="search-results" class="search-results"></div>
   </div>
 </div>
 
-<!-- ═══ FLOATING QUIZ WIDGET ═══ -->
-<!-- Callout bubble -->
-<div id="quiz-callout" class="quiz-callout">
-  <span class="quiz-callout-dot"></span>
-  Take our questionnaire!
-  <div class="quiz-callout-arrow"></div>
+<!-- ═══════════════════════════════ CERT COMPARE MODAL ═══════════════════════════════ -->
+<div id="cert-compare-modal" class="cert-compare-modal" onclick="if(event.target===this)closeCertCompare()">
+  <div class="ccm-inner">
+    <div class="ccm-header">
+      <h2 class="ccm-title">⚖️ Compare Certifications</h2>
+      <button class="ccm-close" onclick="closeCertCompare()">✕</button>
+    </div>
+    <div class="ccm-selectors" id="ccm-selectors"></div>
+    <div class="ccm-table" id="ccm-table"></div>
+  </div>
 </div>
-<!-- Sticky button -->
-<button id="quiz-fab" class="quiz-fab" onclick="openQuizModal()" aria-label="What's my Cyber Career?">
-  <span class="quiz-fab-icon">🔍</span>
-  <span class="quiz-fab-text">What's my Cyber Career?</span>
+
+<!-- Toast notification -->
+<div id="isd-toast" class="isd-toast"></div>
+
+<!-- ═══════════════════════════════ DAILY CHALLENGE FLOATING ═══════════════════════════════ -->
+<button class="dc-float-btn" id="dc-float-btn" onclick="openDCModal()" title="Daily Security Challenge">
+  <span class="dc-float-icon">⚡</span>
+  <span class="dc-float-label">Daily Challenge</span>
+  <span class="dc-float-streak" id="dc-float-streak"></span>
 </button>
 
-<!-- Quiz Modal -->
-<div id="quiz-modal" class="quiz-modal" onclick="if(event.target===this)closeQuizModal()">
-  <div class="quiz-modal-panel">
-    <button class="quiz-modal-close" onclick="closeQuizModal()" aria-label="Close">✕</button>
-    <div class="quiz-modal-eyebrow">
-      <span class="quiz-modal-dot"></span> Domain Discovery Quiz
+<!-- Daily Challenge Modal -->
+<div id="dc-modal" class="dc-modal" onclick="if(event.target===this)closeDCModal()">
+  <div class="dc-modal-inner">
+    <div class="dc-modal-header">
+      <div class="dc-modal-title-wrap">
+        <span class="dc-modal-icon">⚡</span>
+        <div>
+          <div class="dc-modal-title">Daily Security Challenge</div>
+          <div class="dc-modal-streak-display" id="dc-modal-streak">Start your streak today!</div>
+        </div>
+      </div>
+      <button class="dc-modal-close" onclick="closeDCModal()">✕</button>
     </div>
-    <h2 class="quiz-modal-title">Which Cybersecurity Domain<br>Is Right for You?</h2>
-    <p class="quiz-modal-sub">12 quick questions · We'll match your top 3 specializations</p>
-    <div id="quiz-modal-inner"></div>
+    <div id="dc-modal-body"><!-- rendered by JS --></div>
+    <div id="dc-modal-signup" class="dc-signup-prompt" style="display:none;">
+      <div class="dc-signup-icon">🔥</div>
+      <div class="dc-signup-text">
+        <strong>Track your streak &amp; score history</strong>
+        <p>Create a free account to save your progress, compete with the community, and unlock advanced challenges.</p>
+      </div>
+      <button class="dc-signup-btn" onclick="showPage('profile');closeDCModal()">Create Account &rarr;</button>
+    </div>
   </div>
 </div>
 
-<script src="js/app.js"></script>
+<!-- ═══════════════════════════════ PROFILE PAGE ═══════════════════════════════ -->
+<div class="page" id="page-profile">
+<div style="padding:52px 28px 100px;max-width:860px;margin:0 auto;">
+  <div class="ey a1">Account</div>
+  <div class="st a2">My Profile</div>
+
+  <!-- Profile Header Card -->
+  <div class="profile-header-card">
+    <div class="ph-avatar" id="ph-avatar">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <div class="ph-info">
+      <div class="ph-name" id="ph-name-display">Guest User</div>
+      <div class="ph-role" id="ph-role-display">Not signed in</div>
+      <div class="ph-badges" id="ph-badges"></div>
+    </div>
+    <div class="ph-auth-area">
+      <div class="ph-supabase-note">
+        <div class="ph-note-icon">🔐</div>
+        <div>
+          <strong>Authentication coming soon</strong>
+          <p>We're integrating Supabase for secure login. Create your profile now and it will sync when auth launches.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="profile-stats-row">
+    <div class="ps-stat">
+      <div class="ps-stat-n" id="ps-streak">0</div>
+      <div class="ps-stat-l">Day Streak</div>
+    </div>
+    <div class="ps-stat">
+      <div class="ps-stat-n" id="ps-challenges">0</div>
+      <div class="ps-stat-l">Challenges Done</div>
+    </div>
+    <div class="ps-stat">
+      <div class="ps-stat-n" id="ps-certs-done">0</div>
+      <div class="ps-stat-l">Certs Earned</div>
+    </div>
+    <div class="ps-stat">
+      <div class="ps-stat-n" id="ps-certs-prog">0</div>
+      <div class="ps-stat-l">In Progress</div>
+    </div>
+  </div>
+
+  <!-- Profile Form -->
+  <div class="profile-section">
+    <div class="profile-section-hd">Personal Information</div>
+    <div class="profile-form-grid">
+      <div class="pf-field">
+        <label class="pf-label">Full Name</label>
+        <input type="text" id="pf-name" class="pf-input" placeholder="Your name">
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Email</label>
+        <input type="email" id="pf-email" class="pf-input" placeholder="your@email.com">
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Current Role</label>
+        <input type="text" id="pf-current-role" class="pf-input" placeholder="e.g. SOC Analyst, Student">
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Target Role</label>
+        <input type="text" id="pf-target-role" class="pf-input" placeholder="e.g. Penetration Tester">
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Years of Experience</label>
+        <select id="pf-exp" class="pf-input">
+          <option value="">Select...</option>
+          <option value="0">Student / No experience</option>
+          <option value="1">Less than 1 year</option>
+          <option value="2">1–3 years</option>
+          <option value="4">3–6 years</option>
+          <option value="6">6–10 years</option>
+          <option value="10">10+ years</option>
+        </select>
+      </div>
+      <div class="pf-field">
+        <label class="pf-label">Location</label>
+        <input type="text" id="pf-location" class="pf-input" placeholder="City, State / Remote">
+      </div>
+    </div>
+    <div class="pf-field" style="margin-top:16px;">
+      <label class="pf-label">Bio / Notes <span style="color:var(--mt);font-weight:400;">(optional)</span></label>
+      <textarea id="pf-bio" class="pf-input" rows="3" placeholder="What you're working toward, certs you're studying, etc."></textarea>
+    </div>
+    <button class="pf-save-btn" onclick="saveProfile()">Save Profile</button>
+  </div>
+
+  <!-- Cert Progress Summary -->
+  <div class="profile-section">
+    <div class="profile-section-hd">Certification Progress
+      <a class="psh-link" onclick="showPage('certs')">Go to Cert Tracker &rarr;</a>
+    </div>
+    <div id="profile-cert-summary" class="profile-cert-summary">
+      <p style="color:var(--mt);font-size:.84rem;">Visit the <strong style="color:var(--tx);">Certifications</strong> page and right-click any cert badge to track your progress. Your data saves automatically.</p>
+    </div>
+  </div>
+
+  <!-- Saved Salary Calc -->
+  <div class="profile-section">
+    <div class="profile-section-hd">Saved Salary Estimate
+      <a class="psh-link" onclick="showPage('salary')">Go to Salary Guide &rarr;</a>
+    </div>
+    <div id="profile-salary-save" class="profile-salary-save">
+      <p style="color:var(--mt);font-size:.84rem;">Use the Salary Calculator on the <strong style="color:var(--tx);">Salary Guide</strong> page. Your last calculation will appear here.</p>
+    </div>
+  </div>
+
+  <!-- Account / Supabase Section -->
+  <div class="profile-section profile-supabase-section">
+    <div class="profile-section-hd">Account &amp; Authentication</div>
+    <div class="pss-inner">
+      <div class="pss-logo">
+        <svg width="28" height="28" viewBox="0 0 109 113" fill="none"><path d="M63.7 110.2c-2.6 3.5-8.3 1.7-8.3-2.7V64.4H28.2c-3.9 0-6-4.5-3.6-7.5L45.3 2.7c2.6-3.5 8.3-1.7 8.3 2.7v43.1h27.2c3.9 0 6 4.5 3.6 7.5L63.7 110.2z" fill="#3ECF8E"/></svg>
+        <span>Supabase Auth</span>
+      </div>
+      <p class="pss-desc">Sign in with email, Google, or GitHub. Your cert progress, salary estimates, and challenge scores will sync across devices.</p>
+      <div class="pss-buttons">
+        <button class="pss-btn pss-primary" disabled>Sign In with Email <span class="pss-soon">Coming Soon</span></button>
+        <button class="pss-btn" disabled>Continue with Google <span class="pss-soon">Coming Soon</span></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script src="js/app.js?v=11"></script>
 </body>
 </html>
