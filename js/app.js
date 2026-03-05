@@ -4078,9 +4078,10 @@ initProfile=function(){
   if(p.location){var el=document.getElementById('pf-location');if(el)el.value=p.location;}
   if(p.bio){var el=document.getElementById('pf-bio');if(el)el.value=p.bio;}
   updateProfileDisplay(p);
-  // Streak
+  // Streak + challenges done
   var sk=loadStreak();
   var streakEl=document.getElementById('ps-streak');if(streakEl)streakEl.textContent=sk.count;
+  var challEl=document.getElementById('ps-challenges');if(challEl)challEl.textContent=sk.total||0;
   // Cert progress
   var cp=getCertProgress();
   var done=Object.values(cp).filter(function(v){return v==='done';}).length;
@@ -4126,6 +4127,21 @@ calcSalary=function(){
   if(btn&&typeof _currentUser!=='undefined'&&_currentUser){
     var res=document.getElementById('sc-result');
     if(res&&!res.querySelector('.sc-placeholder'))btn.style.display='inline-flex';
+  }
+};
+
+// Track total challenges answered (for ps-challenges stat)
+var _origSubmitDCModalAnswer=submitDCModalAnswer;
+submitDCModalAnswer=function(chosen){
+  var dcState=loadDCState();
+  var today=new Date().toDateString();
+  var isNew=!dcState||dcState.date!==today;
+  _origSubmitDCModalAnswer(chosen);
+  if(isNew){
+    var sk=loadStreak();
+    sk.total=(sk.total||0)+1;
+    saveStreak(sk);
+    if(typeof syncStreakToDB==='function')syncStreakToDB(sk);
   }
 };
 

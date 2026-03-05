@@ -235,10 +235,11 @@ function _syncFromDB() {
   _sb.from('challenge_streaks').select('*').eq('id', _currentUser.id).maybeSingle().then(function(res) {
     if (res.error) { console.error('[ISD] Streak sync read error:', res.error); return; }
     if (res.data) {
-      var sk = { count: res.data.streak_count || 0, last: res.data.last_date || null };
+      var sk = { count: res.data.streak_count || 0, last: res.data.last_date || null, total: res.data.total_answered || 0 };
       try { localStorage.setItem('isd_streak', JSON.stringify(sk)); } catch(e) {}
       var floatStreak = document.getElementById('dc-float-streak');
       if (floatStreak && sk.count > 0) floatStreak.textContent = '\uD83D\uDD25' + sk.count;
+      if (typeof initProfile === 'function') initProfile();
     }
   });
 
@@ -249,6 +250,7 @@ function _syncFromDB() {
       var cp = {};
       res.data.forEach(function(r) { cp[r.cert_key] = r.status; });
       try { localStorage.setItem('isd_cert_prog', JSON.stringify(cp)); } catch(e) {}
+      if (typeof initProfile === 'function') initProfile();
     }
   });
 }
@@ -278,6 +280,7 @@ function syncStreakToDB(sk) {
     id: _currentUser.id,
     streak_count: sk.count || 0,
     last_date: sk.last || null,
+    total_answered: sk.total || 0,
     updated_at: new Date().toISOString()
   }).then(function(res) {
     if (res.error) console.error('[ISD] Streak sync write error:', res.error);
