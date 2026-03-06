@@ -2776,10 +2776,10 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 }
 .auth-modal.open{opacity:1;pointer-events:all;}
 .auth-modal-inner{
-  background:var(--bg2);border:1px solid var(--br);
+  background:#0d1526;border:1px solid rgba(0,212,200,.25);
   border-radius:18px;padding:36px 32px 32px;
   width:100%;max-width:400px;position:relative;
-  box-shadow:0 24px 64px rgba(0,0,0,.5);
+  box-shadow:0 32px 80px rgba(0,0,0,.85),0 0 0 1px rgba(0,212,200,.08),inset 0 1px 0 rgba(255,255,255,.06);
 }
 .auth-modal-close{
   position:absolute;top:14px;right:14px;
@@ -3281,4 +3281,235 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
   .hmv-cards{grid-template-columns:1fr 1fr;}
   .cl-node-row{flex-direction:column;}
   .cl-node-time-input{width:100%;}
+}
+
+/* ══════════════════════ v15 STYLES ══════════════════════ */
+
+/* ─── NORDVPN AFFILIATE BANNER ────────────────────────────── */
+.nordvpn-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  background:linear-gradient(135deg,rgba(61,14,107,.35),rgba(5,8,16,.8));
+  border:1px solid rgba(99,70,255,.3);border-radius:16px;
+  padding:20px 24px;margin:32px 0 16px;
+}
+.nvpn-left{display:flex;align-items:center;gap:16px;}
+.nvpn-icon{font-size:1.8rem;flex-shrink:0;}
+.nvpn-title{font-size:.92rem;font-weight:700;color:var(--tx);margin-bottom:4px;}
+.nvpn-sub{font-size:.76rem;color:var(--mt);line-height:1.55;max-width:500px;}
+.nvpn-cta{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:6px;
+  padding:9px 20px;border-radius:10px;
+  background:linear-gradient(135deg,#5b3cf5,#8b5cf6);
+  color:#fff;font-family:var(--fm);font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;
+  text-decoration:none;font-weight:700;transition:opacity .15s;white-space:nowrap;
+}
+.nvpn-cta:hover{opacity:.85;}
+@media(max-width:640px){
+  .nordvpn-banner{flex-direction:column;align-items:flex-start;}
+  .nvpn-cta{width:100%;justify-content:center;}
+}
+
+/* ─── CAREER LADDER v15 ──────────────────────────────────── */
+/* Final role row */
+.clp-final-row{
+  background:linear-gradient(135deg,rgba(245,200,66,.06),rgba(77,158,255,.04));
+  border:1px solid rgba(245,200,66,.2);border-radius:14px;
+  padding:18px 22px;margin-bottom:28px;
+}
+.clp-final-label{
+  font-size:.82rem;font-weight:700;color:#f5c842;
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+  flex-wrap:wrap;
+}
+.clp-final-hint{font-size:.72rem;color:var(--mt);font-weight:400;}
+.clp-final-inputs{display:flex;gap:10px;flex-wrap:wrap;}
+.clp-final-input{
+  flex:1;min-width:200px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(245,200,66,.2);
+  border-radius:8px;padding:8px 12px;color:var(--tx);
+  font-family:var(--fd);font-size:.84rem;
+}
+.clp-final-input:focus{outline:none;border-color:rgba(245,200,66,.45);background:rgba(245,200,66,.04);}
+.clp-final-save-btn{padding:8px 18px;font-size:.7rem;}
+
+/* Add milestone buttons */
+.clp-add-label{
+  font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dm);text-align:center;margin-bottom:10px;
+}
+.clp-add-btns{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.clp-add-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:8px;
+  font-family:var(--fm);font-size:.68rem;letter-spacing:.05em;
+  cursor:pointer;transition:all .18s;font-weight:600;
+}
+.clp-add-role{border:1px solid rgba(77,158,255,.3);background:rgba(77,158,255,.06);color:#4d9eff;}
+.clp-add-cert{border:1px solid rgba(16,232,126,.3);background:rgba(16,232,126,.06);color:#10e87e;}
+.clp-add-train{border:1px solid rgba(245,200,66,.3);background:rgba(245,200,66,.06);color:#f5c842;}
+.clp-add-proj{border:1px solid rgba(192,132,252,.3);background:rgba(192,132,252,.06);color:#c084fc;}
+.clp-add-role:hover{background:rgba(77,158,255,.14);}
+.clp-add-cert:hover{background:rgba(16,232,126,.14);}
+.clp-add-train:hover{background:rgba(245,200,66,.14);}
+.clp-add-proj:hover{background:rgba(192,132,252,.14);}
+
+/* Node v15 styles */
+.cl-node-v15{
+  background:rgba(255,255,255,.02);
+  border:1px solid var(--node-color,rgba(77,158,255,.25));
+  border-radius:14px;padding:16px 18px;
+  box-shadow:0 0 20px rgba(0,0,0,.2),inset 0 0 0 1px rgba(255,255,255,.02);
+  transition:box-shadow .2s;
+}
+.cl-node-v15:hover{box-shadow:0 0 30px rgba(0,0,0,.3),0 0 0 1px var(--node-color,rgba(77,158,255,.2));}
+.cl-node-final{
+  background:linear-gradient(135deg,rgba(245,200,66,.06),rgba(77,158,255,.04)) !important;
+  border-color:rgba(245,200,66,.35) !important;
+  box-shadow:0 0 20px rgba(245,200,66,.06) !important;
+}
+.cl-type-badge{
+  display:inline-block;padding:2px 8px;border-radius:4px;
+  font-family:var(--fm);font-size:.58rem;letter-spacing:.07em;text-transform:uppercase;
+  margin-bottom:6px;
+}
+.cl-node-icon-v15{font-size:1.2rem;flex-shrink:0;margin-right:4px;}
+.cl-advice-v15{
+  margin-top:12px;padding:12px 14px;
+  background:rgba(0,212,200,.04);border:1px solid rgba(0,212,200,.12);
+  border-radius:8px;
+}
+.cl-advice-hdr{font-size:.72rem;font-weight:700;color:#00d4c8;margin-bottom:6px;}
+
+/* Rec panel sub header */
+.clp-rec-sub{font-size:.74rem;color:var(--mt);margin-left:8px;}
+
+/* ─── WELCOME CARD: ANIMATED ILLUSTRATION ────────────────── */
+.hmv-role-anim{
+  display:none;text-align:center;margin:10px 0 6px;
+  min-height:72px;
+}
+.hmv-anim-svg{
+  width:120px;height:72px;
+  filter:drop-shadow(0 4px 16px rgba(0,0,0,.4));
+}
+
+/* ─── WELCOME CARD: CERTS ROW ───────────────────────────── */
+.hmv-certs-row{
+  margin:8px 0 6px;
+}
+.hmv-certs-label{
+  font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dm);margin-bottom:5px;
+}
+.hmv-certs-list{display:flex;flex-wrap:wrap;gap:4px;}
+.hmv-cert-badge{
+  display:inline-block;padding:2px 7px;border-radius:5px;
+  background:rgba(16,232,126,.1);border:1px solid rgba(16,232,126,.22);
+  color:#10e87e;font-family:var(--fm);font-size:.58rem;letter-spacing:.04em;
+}
+.hmv-cert-more{
+  display:inline-block;padding:2px 7px;border-radius:5px;
+  background:rgba(255,255,255,.05);border:1px solid var(--bd);
+  color:var(--mt);font-family:var(--fm);font-size:.58rem;
+}
+
+/* ─── AI SECURITY DOMAIN CARD ────────────────────────────── */
+.dcard-new{position:relative;overflow:visible;}
+.dcard-new::after{
+  content:'NEW';position:absolute;top:-8px;right:10px;
+  background:linear-gradient(90deg,#38bdf8,#818cf8);
+  color:#fff;font-family:var(--fm);font-size:.5rem;letter-spacing:.1em;
+  padding:2px 7px;border-radius:4px;font-weight:700;
+}
+
+/* ─── CYBER-THEMED PAGE BACKGROUNDS ─────────────────────── */
+/* Each page gets a unique subtle background texture / gradient */
+
+/* Certifications page */
+#page-certs{background-image:radial-gradient(ellipse 80% 50% at 100% 0%,rgba(77,158,255,.05) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 0% 100%,rgba(16,232,126,.04) 0%,transparent 50%);}
+
+/* Domains page */
+#page-domains{background-image:radial-gradient(ellipse 90% 60% at 50% -10%,rgba(192,132,252,.07) 0%,transparent 60%);}
+
+/* Career Ladder page */
+#page-ladder{background-image:radial-gradient(ellipse 70% 50% at 0% 50%,rgba(13,212,200,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 100% 100%,rgba(77,158,255,.05) 0%,transparent 50%);}
+
+/* Salary page */
+#page-salary{background-image:radial-gradient(ellipse 80% 50% at 80% 0%,rgba(245,200,66,.05) 0%,transparent 55%);}
+
+/* Certs page */
+#page-certs::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='40' cy='40' r='38' fill='none' stroke='rgba(77,158,255,0.025)' stroke-width='1'/%3E%3Ccircle cx='40' cy='40' r='28' fill='none' stroke='rgba(77,158,255,0.018)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:80px 80px;
+  z-index:-1;
+}
+
+/* Interview page */
+#page-interview{background-image:radial-gradient(ellipse 70% 40% at 30% 20%,rgba(240,93,120,.04) 0%,transparent 55%);}
+
+/* Homelab page */
+#page-homelab{background-image:radial-gradient(ellipse 80% 50% at 10% 30%,rgba(16,232,126,.04) 0%,transparent 50%),radial-gradient(ellipse 50% 40% at 90% 70%,rgba(13,212,200,.04) 0%,transparent 50%);}
+
+/* Glossary page */
+#page-glossary{background-image:radial-gradient(ellipse 90% 60% at 50% 10%,rgba(13,212,200,.04) 0%,transparent 55%);}
+
+/* Threats page */
+#page-threats{background-image:radial-gradient(ellipse 70% 50% at 100% 30%,rgba(240,93,120,.05) 0%,transparent 50%);}
+
+/* Jobs page */
+#page-jobs{background-image:radial-gradient(ellipse 80% 50% at 20% 20%,rgba(77,158,255,.05) 0%,transparent 55%);}
+
+/* Calendar page */
+#page-calendar{background-image:radial-gradient(ellipse 70% 40% at 80% 10%,rgba(245,200,66,.04) 0%,transparent 50%);}
+
+/* Career Ladder (My Roadmap) page */
+#page-career-ladder{background-image:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(77,158,255,.06) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 100% 100%,rgba(13,212,200,.04) 0%,transparent 50%);}
+
+/* Stories / Wall of Wins page */
+#page-stories{background-image:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(245,200,66,.05) 0%,transparent 50%);}
+
+/* About page */
+#page-about{background-image:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(77,158,255,.05) 0%,transparent 55%);}
+
+/* Profile page */
+#page-profile{background-image:radial-gradient(ellipse 60% 40% at 0% 50%,rgba(13,212,200,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 100% 0%,rgba(77,158,255,.04) 0%,transparent 50%);}
+
+/* Tools page */
+#page-tools{background-image:radial-gradient(ellipse 90% 50% at 50% -5%,rgba(192,132,252,.05) 0%,transparent 55%);}
+
+/* Resume page */
+#page-resume{background-image:radial-gradient(ellipse 70% 40% at 70% 10%,rgba(16,232,126,.04) 0%,transparent 50%);}
+
+/* Blog page */
+#page-blog{background-image:radial-gradient(ellipse 80% 50% at 30% 20%,rgba(13,212,200,.04) 0%,transparent 55%);}
+
+/* Games page */
+#page-games{background-image:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(240,93,120,.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 100% 80%,rgba(245,200,66,.04) 0%,transparent 50%);}
+
+/* Domain detail page */
+#page-domain{background-image:radial-gradient(ellipse 80% 50% at 0% 30%,rgba(192,132,252,.05) 0%,transparent 55%);}
+
+/* Roaster page */
+#page-roaster{background-image:radial-gradient(ellipse 80% 50% at 80% 10%,rgba(255,140,66,.06) 0%,transparent 55%);}
+
+/* Training page */
+#page-training{background-image:radial-gradient(ellipse 70% 40% at 30% 0%,rgba(16,232,126,.05) 0%,transparent 50%);}
+
+/* Pivot page */
+#page-pivot{background-image:radial-gradient(ellipse 70% 50% at 70% 0%,rgba(77,158,255,.05) 0%,transparent 55%);}
+
+/* Reviews page */
+#page-reviews{background-image:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(245,200,66,.04) 0%,transparent 50%);}
+
+/* ─── ADMIN ONLY ELEMENTS ──────────────────────────────── */
+.admin-only{display:none;}
+
+/* ─── CERT DETAIL SCROLL ANCHOR ──────────────────────────── */
+#cert-detail-panel{scroll-margin-top:80px;}
+
+@media(max-width:640px){
+  .clp-final-inputs{flex-direction:column;}
+  .clp-add-btns{gap:6px;}
+  .nvpn-left{flex-direction:column;align-items:flex-start;}
 }

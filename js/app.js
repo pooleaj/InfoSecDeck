@@ -3504,14 +3504,7 @@ function openResumeTemplate(id){
 }
 
 // ─── F11: WALL OF WINS ────────────────────────────────────
-var FEATURED_STORIES=[
-  {name:'Marcus T.',role:'SOC Analyst II',prev:'Retail Store Manager',domain:'soc',duration:'14 months',quote:'I had zero tech background. Started with CompTIA A+ and Security+, then grinded TryHackMe every night. Got my first SOC role at month 11.',tip:'Consistency beats intensity. 1 hour every day beats 8 hours on weekends.',date:'Jan 2026',icon:'🛡️',color:'#00d4c8'},
-  {name:'Priya M.',role:'Cloud Security Engineer',prev:'Network Engineer',domain:'cloud',duration:'8 months',quote:'The AWS Security Specialty cert was a game changer. Every interview asked about cloud security architecture — I had all the answers.',tip:'If you\'re already in networking, cloud security is a natural next step. Get the AWS Security Specialty.',date:'Dec 2025',icon:'☁️',color:'#4d9eff'},
-  {name:'James R.',role:'Penetration Tester',prev:'IT Help Desk',domain:'red',duration:'18 months',quote:'OSCP was brutal but worth every painful moment. The day I passed, three companies reached out within a week.',tip:'OSCP is the minimum bar for serious pentest roles. Don\'t skip it.',date:'Feb 2026',icon:'⚔️',color:'#f05d78'},
-  {name:'Aisha K.',role:'GRC Analyst',prev:'Paralegal',domain:'grc',duration:'6 months',quote:'My legal background translated perfectly. Risk assessment, policy writing, contract review — I already had those skills. CISA study solidified the rest.',tip:'Non-tech backgrounds aren\'t a weakness in GRC. Lean into your transferable skills.',date:'Nov 2025',icon:'📋',color:'#818cf8'},
-  {name:'Tyler B.',role:'IAM Engineer',prev:'Systems Administrator',domain:'iam',duration:'10 months',quote:'Moved from managing Active Directory to building CyberArk implementations. The jump in salary was $35K.',tip:'If you manage AD/Entra ID, you\'re already halfway to IAM Engineering. Get CyberArk or SailPoint certified.',date:'Jan 2026',icon:'🔑',color:'#ff8c42'},
-  {name:'Sarah L.',role:'Security Architect',prev:'Security Engineer',domain:'eng',duration:'3 years',quote:'The path from engineer to architect is about developing business fluency. I started presenting risk in dollars, not CVE scores. That changed everything.',tip:'Learn to speak executive language. Risk in dollars, not technical jargon.',date:'Oct 2025',icon:'🏗️',color:'#c084fc'},
-];
+var FEATURED_STORIES=[];
 function getStories(){
   try{var s=localStorage.getItem('isd_stories');var sub=s?JSON.parse(s):[];return sub.concat(FEATURED_STORIES);}catch(e){return FEATURED_STORIES;}
 }
@@ -4614,3 +4607,355 @@ function _generateStepAdvice(prev, step, profile, myCerts, stepIdx, totalSteps) 
 
 // Page init hook for career ladder
 _pageInits['career-ladder'] = function() { initCareerLadder(); };
+
+// ══════════════════════ v15 UPDATES ══════════════════════
+
+// ─── HASH-BASED BACK BUTTON NAVIGATION ──────────────────
+// Patch showPage to push browser history entry via hash
+var _origShowPageV15 = showPage;
+showPage = function(p) {
+  _origShowPageV15(p);
+  var desired = '#' + p;
+  if (window.location.hash !== desired) {
+    history.pushState({ page: p }, '', desired);
+  }
+};
+// Listen for back/forward navigation
+window.addEventListener('popstate', function(e) {
+  var p = e.state && e.state.page;
+  if (!p) {
+    var h = window.location.hash.replace('#', '');
+    p = h || 'home';
+  }
+  _origShowPageV15(p); // use original to avoid pushing another history entry
+  // sync quiz float and DC badge
+  var qfb = document.getElementById('quiz-float-btn');
+  if (qfb) qfb.style.display = (p === 'home') ? 'flex' : 'none';
+  if (typeof initNavDCBadge === 'function') initNavDCBadge();
+});
+// On initial load, navigate to hash if present
+(function() {
+  var h = window.location.hash.replace('#', '');
+  if (h && h !== 'home' && document.getElementById('page-' + h)) {
+    setTimeout(function() { showPage(h); }, 100);
+  } else {
+    // seed initial history state so back button doesn't exit on first press
+    history.replaceState({ page: 'home' }, '', '#home');
+  }
+})();
+
+// ─── CERT PAGE: SCROLL TO DETAIL ON OPEN ────────────────
+var _origOpenCertV15 = openCert;
+openCert = function(id) {
+  _origOpenCertV15(id);
+  setTimeout(function() {
+    var panel = document.getElementById('cert-detail-panel');
+    if (panel && panel.classList.contains('open')) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 80);
+};
+
+// ─── DOMAINS PAGE: SCROLL TO DETAIL INLINE ──────────────
+var _origShowDomainV15 = showDomain;
+showDomain = function(id) {
+  // Navigate to domain detail page
+  _origShowDomainV15(id);
+  // After the page transition, scroll to content
+  setTimeout(function() {
+    var content = document.getElementById('domain-content');
+    if (content) content.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+};
+
+// ─── AI SECURITY DOMAIN DATA ────────────────────────────
+D['aisec'] = {
+  icon: '🤖',
+  name: 'AI Security',
+  tag: 'Securing AI/ML systems — the fastest-emerging domain in cybersecurity',
+  salary: '$130K–$180K',
+  hot: 'LLM Red Teaming / MLSecOps',
+  fit: ['Curious about AI/ML technology', 'Strong software security background', 'Analytical problem solver', 'Interested in emerging threats'],
+  no: 'Prefer mature, well-defined tooling — this space is still being defined',
+  jobs: [
+    { t: 'AI Security Engineer', s: '$130K–$175K', c: '#38bdf8', d: 'Design and implement security controls for AI/ML pipelines, model serving infrastructure, and training environments.' },
+    { t: 'ML Red Team Researcher', s: '$140K–$185K', c: '#818cf8', d: 'Adversarially probe AI models for vulnerabilities including prompt injection, jailbreaks, model extraction, and data poisoning.' },
+    { t: 'AI Trust & Safety Engineer', s: '$125K–$170K', c: '#38bdf8', d: 'Build guardrails, content moderation systems, and safety layers for LLM-powered products deployed at scale.' },
+    { t: 'MLSecOps Engineer', s: '$120K–$165K', c: '#818cf8', d: 'Integrate security scanning and compliance checks into ML training pipelines and model deployment workflows.' }
+  ],
+  skills: [
+    'Prompt injection and jailbreak techniques',
+    'Model extraction and inversion attacks',
+    'Data poisoning detection and prevention',
+    'LLM security evaluation frameworks (Garak, PyRIT)',
+    'AI governance frameworks (NIST AI RMF, EU AI Act)',
+    'Secure ML pipeline design (MLflow, Kubeflow)',
+    'Python and ML libraries (PyTorch, HuggingFace)',
+    'Threat modeling for AI systems',
+    'RAG pipeline security',
+    'Agent and agentic AI security'
+  ],
+  tools: ['Garak', 'Microsoft PyRIT', 'LangChain', 'LLM Guard', 'PromptBench', 'HuggingFace Evaluate', 'Rebuff', 'Vigil', 'MLflow', 'Weights & Biases'],
+  certs: ['GCIA (adapted)', 'CISSP (AI modules)', 'AI Security Practitioner (emerging)', 'Google Professional ML Engineer', 'AWS ML Specialty'],
+  links: [
+    { tx: 'OWASP Top 10 for LLMs', l: 'https://owasp.org/www-project-top-10-for-large-language-model-applications/', t: 'rl-free' },
+    { tx: 'NIST AI Risk Management Framework', l: 'https://www.nist.gov/artificial-intelligence', t: 'rl-free' },
+    { tx: 'Microsoft PyRIT (Red Team Tool)', l: 'https://github.com/Azure/PyRIT', t: 'rl-free' },
+    { tx: 'Garak — LLM Vulnerability Scanner', l: 'https://github.com/NVIDIA/garak', t: 'rl-free' },
+    { tx: 'AI Security on Coursera', l: 'https://www.coursera.org/search?query=AI+security', t: 'rl-paid' }
+  ],
+  day: 'Your day as an AI Security Engineer: Review a new LLM feature deployment, run prompt injection test suite against the staging model, attend a threat modeling session for the RAG pipeline, review OWASP LLM Top 10 findings in the latest audit, and write a security brief for the product team on emerging jailbreak techniques.'
+};
+
+// ─── CALENDAR: ADD JAN/FEB 2027 EVENTS ──────────────────
+// Append early 2027 events to EVENTS array
+EVENTS.push(
+  {name:'ShmooCon 2027',type:'conference',date:'2027-01-17',url:'https://www.shmoocon.org',cost:'paid',virtual:false,desc:'Intimate hacker conference in Washington DC. Known for its community feel, quality talks, and difficult-to-get tickets.',diff:null},
+  {name:'SANS New Year\u2019s CTF 2027',type:'ctf',date:'2027-01-20',url:'https://www.sans.org',cost:'free',virtual:true,desc:'SANS annual new year CTF challenge. Beginner to intermediate difficulty with a holiday twist.',diff:'Beginner'},
+  {name:'IEEE S&P (Oakland) 2027',type:'conference',date:'2027-02-09',url:'https://www.ieee-security.org',cost:'paid',virtual:false,desc:'One of the most prestigious academic security conferences. Deep technical research across all security domains.',diff:null},
+  {name:'BSides DC 2027',type:'conference',date:'2027-02-14',url:'https://bsidesdc.org',cost:'free',virtual:false,desc:'One of the most established BSides events, attracting practitioners from across the DC/Northern Virginia security corridor.',diff:null},
+  {name:'DiceCTF 2027',type:'ctf',date:'2027-02-20',url:'https://ctf.dicega.ng',cost:'free',virtual:true,desc:'High-quality CTF from Cornell University students. Known for challenging crypto, pwn, and web challenges.',diff:'Advanced'}
+);
+
+// ─── CAREER LADDER v15: FULL OVERHAUL ───────────────────
+
+// Override career ladder init to support new fields (finalRole, milestone types)
+var _clStepsV15 = null; // will be set on init
+
+function _clDefaultSteps(p) {
+  var start = p && p.currentRole ? p.currentRole : 'Current Role';
+  var end = p && p.targetRole ? p.targetRole : 'Target Role';
+  return [
+    { id: 1, type: 'start', title: start, sub: 'Where I am now', timeline: '', tags: [], advice: [] },
+    { id: 2, type: 'end', title: end, sub: 'My target role', timeline: '', tags: [], advice: [] }
+  ];
+}
+
+function loadCareerLadderV15() {
+  var p = loadProfile();
+  var saved = p && p.careerLadder;
+  if (saved && saved.steps && saved.steps.length >= 2) {
+    _clSteps = saved.steps;
+    _clNextId = saved.nextId || (_clSteps.length + 1);
+    // Sync start/end titles from profile if not manually customized
+    if (p.currentRole && _clSteps[0] && _clSteps[0].type === 'start' && !_clSteps[0]._customized) {
+      _clSteps[0].title = p.currentRole;
+    }
+  } else {
+    _clSteps = _clDefaultSteps(p);
+    _clNextId = 3;
+  }
+  // Handle finalRole node
+  var finalExists = _clSteps.some(function(s) { return s.type === 'final'; });
+  if (!finalExists && p && p.finalRole) {
+    _clSteps.push({ id: _clNextId++, type: 'final', title: p.finalRole, sub: 'My highest career aspiration', timeline: '', tags: [], advice: [] });
+  }
+}
+
+function addCLMilestone(milestoneType) {
+  var insertIdx = _clSteps.findIndex(function(s) { return s.type === 'end' || s.type === 'final'; });
+  if (insertIdx === -1) insertIdx = _clSteps.length;
+  var labels = {
+    role: { title: 'New Role', sub: 'Role milestone' },
+    cert: { title: 'Certification Goal', sub: 'e.g. CISSP, OSCP, AWS Security Specialty' },
+    training: { title: 'Training / Course', sub: 'e.g. SANS SEC401, GIAC, Bootcamp' },
+    project: { title: 'Key Project', sub: 'e.g. Built SOC playbooks, Led pentest engagement' }
+  };
+  var lbl = labels[milestoneType] || labels.role;
+  var newStep = { id: _clNextId++, type: 'mid', milestoneType: milestoneType || 'role', title: lbl.title, sub: lbl.sub, timeline: '', tags: [], advice: [] };
+  _clSteps.splice(insertIdx, 0, newStep);
+  renderCLCanvasV15();
+  saveCareerLadder();
+}
+
+function removeCLStepV15(id) {
+  var step = _clSteps.find(function(s) { return s.id === id; });
+  if (!step || step.type === 'start' || step.type === 'end') return;
+  _clSteps = _clSteps.filter(function(s) { return s.id !== id; });
+  renderCLCanvasV15();
+  saveCareerLadder();
+}
+
+function updateCLStepV15(id, field, val) {
+  var s = _clSteps.find(function(x) { return x.id === id; });
+  if (s) { s[field] = val; if (field === 'title') s._customized = true; }
+}
+
+function saveFinalRole() {
+  var inp = document.getElementById('cl-final-role-input');
+  if (!inp) return;
+  var val = inp.value.trim();
+  var p = loadProfile();
+  p.finalRole = val;
+  try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
+  // Update or add final node
+  var finalNode = _clSteps.find(function(s) { return s.type === 'final'; });
+  if (val) {
+    if (finalNode) { finalNode.title = val; finalNode._customized = true; }
+    else { _clSteps.push({ id: _clNextId++, type: 'final', title: val, sub: 'My highest career aspiration', timeline: '', tags: [], advice: [] }); }
+  } else {
+    _clSteps = _clSteps.filter(function(s) { return s.type !== 'final'; });
+  }
+  renderCLCanvasV15();
+  saveCareerLadder();
+  showToast('Final goal saved!');
+}
+
+var _milestoneTypeIcons = { role: '💼', cert: '📜', training: '🎓', project: '⚡', start: '🟢', end: '🎯', final: '⭐' };
+var _milestoneTypeColors = { role: '#4d9eff', cert: '#10e87e', training: '#f5c842', project: '#c084fc', start: '#10e87e', end: '#4d9eff', final: '#f5c842' };
+
+function renderCLCanvasV15() {
+  var canvas = document.getElementById('clp-canvas');
+  if (!canvas) return;
+  canvas.innerHTML = _clSteps.map(function(step, i) {
+    var icon = _milestoneTypeIcons[step.type] || _milestoneTypeIcons[step.milestoneType] || '🔵';
+    var color = _milestoneTypeColors[step.type] || _milestoneTypeColors[step.milestoneType] || '#4d9eff';
+    var isFixed = (step.type === 'start' || step.type === 'end');
+    var isFinal = step.type === 'final';
+    var nodeClass = 'cl-node cl-node-v15' + (step.type === 'start' ? ' cl-node-start' : '') + (step.type === 'end' ? ' cl-node-end' : '') + (isFinal ? ' cl-node-final' : '') + (step.milestoneType === 'cert' ? ' cl-node-cert' : '') + (step.milestoneType === 'training' ? ' cl-node-train' : '');
+    var connector = i < _clSteps.length - 1 ?
+      '<div class="cl-connector"><div class="cl-connector-line" style="border-color:' + color + '44"></div><div class="cl-connector-arrow" style="color:' + color + '">▼</div></div>' : '';
+    var adviceHtml = step.advice && step.advice.length ?
+      '<div class="cl-advice-v15"><div class="cl-advice-hdr">💡 Recommendations</div><ul class="cl-advice-list">' + step.advice.map(function(a) { return '<li>' + a + '</li>'; }).join('') + '</ul></div>' : '';
+    var typeLabel = step.type !== 'start' && step.type !== 'end' && step.type !== 'final' && step.milestoneType ? '<span class="cl-type-badge" style="background:' + color + '22;color:' + color + '">' + (step.milestoneType) + '</span>' : '';
+    return '<div class="' + nodeClass + '" id="cl-node-' + step.id + '" style="--node-color:' + color + '">'
+      + '<div class="cl-node-header">'
+      + '<span class="cl-node-icon-v15">' + icon + '</span>'
+      + '<div class="cl-node-fields">'
+      + typeLabel
+      + '<input class="cl-node-title-input" value="' + (step.title || '').replace(/"/g, '&quot;') + '" placeholder="' + (isFixed ? 'Role title' : isFinal ? 'Ultimate career goal' : 'Milestone title') + '" ' + (isFixed ? '' : '') + ' oninput="updateCLStepV15(' + step.id + ',\'title\',this.value)">'
+      + '<div class="cl-node-row">'
+      + '<input class="cl-node-sub-input" value="' + (step.sub || '').replace(/"/g, '&quot;') + '" placeholder="Brief note" oninput="updateCLStepV15(' + step.id + ',\'sub\',this.value)">'
+      + '<input class="cl-node-time-input" value="' + (step.timeline || '').replace(/"/g, '&quot;') + '" placeholder="Timeline" oninput="updateCLStepV15(' + step.id + ',\'timeline\',this.value)">'
+      + '</div></div>'
+      + (!isFixed && !isFinal ? '<button class="cl-remove-btn" onclick="removeCLStepV15(' + step.id + ')" title="Remove">✕</button>' : '')
+      + '</div>'
+      + adviceHtml
+      + '</div>' + connector;
+  }).join('');
+}
+
+function initCareerLadderV15() {
+  var gateEl = document.getElementById('clp-auth-gate');
+  var builderEl = document.getElementById('clp-builder');
+  var recEl = document.getElementById('clp-rec-panel');
+  var isLoggedIn = typeof _currentUser !== 'undefined' && _currentUser;
+  if (gateEl) gateEl.style.display = isLoggedIn ? 'none' : 'flex';
+  if (builderEl) builderEl.style.display = isLoggedIn ? 'block' : 'none';
+  if (!isLoggedIn) return;
+  loadCareerLadderV15();
+  renderCLCanvasV15();
+  // Populate finalRole input
+  var p = loadProfile();
+  var inp = document.getElementById('cl-final-role-input');
+  if (inp && p && p.finalRole) inp.value = p.finalRole;
+  if (recEl) recEl.style.display = 'none';
+}
+
+// Override the page init hook
+_pageInits['career-ladder'] = function() { initCareerLadderV15(); };
+
+// Override saveCareerLadder to use v15 steps
+var _origSaveCareerLadder = saveCareerLadder;
+saveCareerLadder = function() {
+  var p = loadProfile();
+  p.careerLadder = { steps: _clSteps, nextId: _clNextId, updated: new Date().toISOString() };
+  try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
+  if (typeof syncProfileToDB === 'function') syncProfileToDB(p);
+  showToast('Roadmap saved! \u2705');
+};
+
+// Enhanced recommendation engine for v15
+function generateCLRecommendationsV15() {
+  var p = loadProfile();
+  var myCerts = p.myCerts || [];
+  var recPanel = document.getElementById('clp-rec-panel');
+  var recBody = document.getElementById('clp-rec-body');
+  if (!recPanel || !recBody) return;
+  if (_clSteps.length < 2) { showToast('Add milestones first.'); return; }
+
+  var expNum = parseInt(p.exp) || 0;
+  var recs = [];
+
+  _clSteps.forEach(function(step, i) {
+    if (i === 0) return;
+    var prev = _clSteps[i - 1];
+    var advice = _generateStepAdviceV15(prev, step, p, myCerts, expNum, i, _clSteps.length);
+    step.advice = advice;
+    recs.push({ step: step, from: prev.title, advice: advice });
+  });
+
+  renderCLCanvasV15();
+  recBody.innerHTML = recs.map(function(r) {
+    var icon = _milestoneTypeIcons[r.step.type] || _milestoneTypeIcons[r.step.milestoneType] || '🔵';
+    return '<div class="clr-item"><div class="clr-transition">' + icon + ' ' + r.step.title + '</div>'
+      + '<ul class="clr-list">' + r.advice.map(function(a) { return '<li>' + a + '</li>'; }).join('') + '</ul></div>';
+  }).join('');
+  recPanel.style.display = 'block';
+  recPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('Recommendations generated! \u2705');
+}
+
+function _generateStepAdviceV15(prev, step, profile, myCerts, expNum, stepIdx, totalSteps) {
+  var advice = [];
+  var title = (step.title || '').toLowerCase();
+  var milestoneType = step.milestoneType || step.type;
+
+  var hasCISSP = myCerts.some(function(c) { return c.indexOf('CISSP') !== -1; });
+  var hasSec = myCerts.some(function(c) { return c.indexOf('Security+') !== -1 || c.indexOf('Sec+') !== -1; });
+  var hasCloud = myCerts.some(function(c) { return c.indexOf('AWS') !== -1 || c.indexOf('Azure') !== -1 || c.indexOf('GCP') !== -1; });
+  var hasCISM = myCerts.some(function(c) { return c.indexOf('CISM') !== -1; });
+  var hasOSCP = myCerts.some(function(c) { return c.indexOf('OSCP') !== -1; });
+
+  // EXPERIENCE is #1 factor
+  if (expNum < 2) {
+    advice.push('With under 2 years of experience, focus on breadth first — hands-on labs, TryHackMe, and HackTheBox will accelerate your foundation faster than certifications alone.');
+    if (!hasSec) advice.push('CompTIA Security+ is your highest-priority credential. It unlocks the majority of entry-level security job filters.');
+  } else if (expNum >= 2 && expNum < 5) {
+    advice.push('At 2–5 years, you\'re in the prime window for a domain-specific cert and your first senior role. Employers at this stage want depth, not breadth.');
+    if (!hasCISSP) advice.push('Start reading the CISSP CBK now — even if you\'re not exam-ready, the framework will sharpen your technical judgment significantly.');
+  } else if (expNum >= 5 && expNum < 8) {
+    advice.push('With 5+ years, your network and reputation start to matter as much as certs. Contribute to the community — BSides talks, blog posts, open-source projects.');
+    if (!hasCISSP) advice.push('CISSP is essentially required at this experience level for senior roles. Prioritize it.');
+  } else if (expNum >= 8) {
+    advice.push('At 8+ years, strategy and leadership skills differentiate you from peers. Look for opportunities to own programs, not just contribute to them.');
+    if (!hasCISM && !hasCISSP) advice.push('CISM is the management-focused credential that complements deep technical expertise for leadership track.');
+  }
+
+  // Milestone-type specific advice
+  if (milestoneType === 'cert') {
+    advice.push('When choosing a certification, verify it appears in job postings for your target role — use LinkedIn Jobs to search the cert name and count matches.');
+    advice.push('Budget at least 3 months of consistent study (1–2 hours/day) for any mid-to-senior level cert. Don\'t cram.');
+  }
+  if (milestoneType === 'training') {
+    advice.push('SANS courses are expensive but carry enormous credibility. If your employer won\'t pay, look for scholarships or the OnDemand format for lower cost.');
+    advice.push('Document everything you learn — maintain a private notes repo or blog. Teaching what you learn cements it.');
+  }
+  if (milestoneType === 'project') {
+    advice.push('Quantify the impact of this project for your resume: "Reduced MTTD by X%", "Implemented tool covering N endpoints", "Led team of N engineers".');
+  }
+
+  // Role-specific
+  if (title.indexOf('ciso') !== -1 || title.indexOf('director') !== -1 || title.indexOf('vp') !== -1) {
+    advice.push('CISO-track roles require board-level communication skills. Practice translating technical risk into business impact and financial terms.');
+    advice.push('Consider an MBA or executive leadership program alongside CISM/CISSP to build the business credibility that accelerates the final jump.');
+  }
+  if (title.indexOf('cloud') !== -1 && !hasCloud) {
+    advice.push('No cloud cert detected — AWS Security Specialty (SCS-C02) or AZ-500 is strongly recommended for cloud security roles.');
+  }
+  if ((title.indexOf('pentest') !== -1 || title.indexOf('red team') !== -1) && !hasOSCP) {
+    advice.push('OSCP is the minimum credibility bar for penetration testing. Most employers use it as a filter — get it before applying.');
+  }
+  if (title.indexOf('iam') !== -1 || title.indexOf('identity') !== -1) {
+    advice.push('IAM is heavily tool-specific. Get hands-on with CyberArk, Okta, or SailPoint — vendor certifications carry significant weight in this domain.');
+  }
+
+  if (!advice.length) {
+    advice.push('Build 2–3 years of hands-on experience in this area before advancing to the next milestone.');
+    advice.push('Seek a domain-specific certification that aligns with this role and appears regularly in job postings.');
+  }
+  return advice;
+}
+
+// Override recommendations function
+generateCLRecommendations = generateCLRecommendationsV15;

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=14">
+<link rel="stylesheet" href="css/styles.css?v=15">
 </head>
 <body>
 <nav>
@@ -40,7 +40,7 @@
         </div>
         <div class="ndi" onclick="showPage('domains');closeAllDrops()">
           <span class="ndi-icon">🗂️</span>
-          <div class="ndi-text"><span class="ndi-label">8 Domains</span><span class="ndi-desc">SOC, IAM, Cloud, GRC &amp; more</span></div>
+          <div class="ndi-text"><span class="ndi-label">Security Domains</span><span class="ndi-desc">SOC, IAM, Cloud, GRC, AI Security &amp; more</span></div>
         </div>
         <div class="ndi" onclick="showPage('salary');closeAllDrops()">
           <span class="ndi-icon">💰</span>
@@ -138,13 +138,13 @@
           <span class="ndi-icon">💬</span>
           <div class="ndi-text"><span class="ndi-label">Reviews</span><span class="ndi-desc">Community feedback &amp; ratings</span></div>
         </div>
-        <div class="ndi" onclick="showPage('about');closeAllDrops()">
-          <span class="ndi-icon">👤</span>
-          <div class="ndi-text"><span class="ndi-label">About</span><span class="ndi-desc">Who built this &amp; why</span></div>
-        </div>
         <div class="ndi" onclick="showPage('stories');closeAllDrops()">
           <span class="ndi-icon">🏆</span>
           <div class="ndi-text"><span class="ndi-label">Wall of Wins</span><span class="ndi-desc">Community success stories</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('about');closeAllDrops()">
+          <span class="ndi-icon">👤</span>
+          <div class="ndi-text"><span class="ndi-label">About</span><span class="ndi-desc">Who built this &amp; why</span></div>
         </div>
       </div>
     </div>
@@ -245,6 +245,17 @@
             <span class="hmv-role-text" id="hmv-role-text">Loading your profile&hellip;</span>
           </div>
 
+          <!-- Animated role illustration -->
+          <div class="hmv-role-anim" id="hmv-role-anim">
+            <!-- Populated by JS based on domain -->
+          </div>
+
+          <!-- Certs row -->
+          <div class="hmv-certs-row" id="hmv-certs-row" style="display:none">
+            <div class="hmv-certs-label">My Certs</div>
+            <div class="hmv-certs-list" id="hmv-certs-list"></div>
+          </div>
+
           <!-- 4 Personalized Cards -->
           <div class="hmv-cards">
             <div class="hmv-card hmv-card-salary" onclick="goToMySalary()">
@@ -267,26 +278,6 @@
               <div class="hmv-card-title">My Profile</div>
               <div class="hmv-card-sub" id="hmv-profile-sub">Account</div>
             </div>
-          </div>
-
-          <!-- Decorative security visualization -->
-          <div class="hmv-visual">
-            <svg class="hmv-radar" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="60" cy="40" r="35" stroke="rgba(0,212,200,.08)" stroke-width="1"/>
-              <circle cx="60" cy="40" r="24" stroke="rgba(0,212,200,.1)" stroke-width="1"/>
-              <circle cx="60" cy="40" r="13" stroke="rgba(0,212,200,.14)" stroke-width="1"/>
-              <line x1="60" y1="5" x2="60" y2="75" stroke="rgba(0,212,200,.07)" stroke-width="1"/>
-              <line x1="25" y1="40" x2="95" y2="40" stroke="rgba(0,212,200,.07)" stroke-width="1"/>
-              <line x1="35.3" y1="15.3" x2="84.7" y2="64.7" stroke="rgba(0,212,200,.05)" stroke-width="1"/>
-              <line x1="84.7" y1="15.3" x2="35.3" y2="64.7" stroke="rgba(0,212,200,.05)" stroke-width="1"/>
-              <polygon class="hmv-radar-sweep" points="60,40 60,5 90,22" fill="rgba(0,212,200,.12)" opacity="0.7"/>
-              <circle cx="60" cy="40" r="2.5" fill="#00d4c8" opacity="0.8"/>
-              <circle cx="42" cy="28" r="1.5" fill="#10e87e" class="hmv-blip"/>
-              <circle cx="74" cy="52" r="1.5" fill="#f5c842" class="hmv-blip" style="animation-delay:.4s"/>
-              <circle cx="68" cy="22" r="1" fill="#4d9eff" class="hmv-blip" style="animation-delay:.8s"/>
-              <circle cx="38" cy="55" r="1" fill="#c084fc" class="hmv-blip" style="animation-delay:1.2s"/>
-            </svg>
-            <div class="hmv-visual-label" id="hmv-cert-count-label">Radar</div>
           </div>
 
           <div class="hmv-footer">
@@ -540,9 +531,9 @@
           </div>
         </div>
         <div class="ed-feature-text">
-          <h3 class="ed-section-h">There Isn't One Cybersecurity Career. There Are Eight.</h3>
-          <p>Most people think &ldquo;hacker&rdquo; when they hear cybersecurity. But the field spans eight distinct disciplines: Security Operations, Identity &amp; Access Management, Cloud Security, Application Security, Governance Risk &amp; Compliance, Offensive Security, Digital Forensics &amp; Incident Response, and Security Engineering. Each has its own tools, career trajectory, and compensation ceiling &mdash; and the right path for you depends on where your interests and existing skills intersect.</p>
-          <p>The <strong>Career Ladder</strong> maps every role across 6 tiers from Help Desk to CISO &mdash; with real salary bands, required skills, and adjacent paths. The <strong>8 Domains Explorer</strong> breaks down each specialty in depth so you can find your fit before you spend money on a certification that won't serve your actual goal.</p>
+          <h3 class="ed-section-h">There Isn't One Cybersecurity Career. There Are Many.</h3>
+          <p>Most people think &ldquo;hacker&rdquo; when they hear cybersecurity. But the field spans multiple distinct disciplines: Security Operations, Identity &amp; Access Management, Cloud Security, Application Security, Governance Risk &amp; Compliance, Offensive Security, Digital Forensics &amp; Incident Response, Security Engineering, and the rapidly emerging field of AI Security. Each has its own tools, career trajectory, and compensation ceiling &mdash; and the right path for you depends on where your interests and existing skills intersect.</p>
+          <p>The <strong>Career Ladder</strong> maps every role across 6 tiers from Help Desk to CISO &mdash; with real salary bands, required skills, and adjacent paths. The <strong>Security Domains Explorer</strong> breaks down each specialty in depth so you can find your fit before you spend money on a certification that won't serve your actual goal.</p>
         </div>
       </div>
 
@@ -962,9 +953,9 @@
 
 <div class="page" id="page-domains">
 <div class="dw">
-  <div class="ey a1">Specializations</div><div class="st a2">The 8 Core Domains</div>
+  <div class="ey a1">Specializations</div><div class="st a2">Security Domains</div>
   <p class="ss a3">Every major cybersecurity specialization — click to explore skills, tools, certifications, and how to break in.</p>
-  <div class="dgrid a3">
+  <div class="dgrid a3" id="domains-grid">
     <div class="dcard" onclick="showDomain('iam')" style="border-color:rgba(34,211,238,.18);"><div class="tbar" style="background:linear-gradient(90deg,#3b82f6,#22d3ee)"></div><div class="dcb"><div class="dci">🔐</div><div class="dcn" style="color:#22d3ee;">Identity &amp; Access Management</div><div class="dct">Who has access to what — and proving it</div><div class="dcm"><span class="dcs">$100K–$140K mid</span><span class="dca">→</span></div></div></div>
     <div class="dcard" onclick="showDomain('soc')" style="border-color:rgba(249,115,22,.18);"><div class="tbar" style="background:linear-gradient(90deg,#f97316,#f43f5e)"></div><div class="dcb"><div class="dci">🛡️</div><div class="dcn" style="color:#f97316;">Security Operations (SOC)</div><div class="dct">Detect, respond, and contain — 24/7</div><div class="dcm"><span class="dcs">$100K–$145K mid</span><span class="dca">→</span></div></div></div>
     <div class="dcard" onclick="showDomain('eng')" style="border-color:rgba(168,85,247,.18);"><div class="tbar" style="background:linear-gradient(90deg,#9333ea,#3b82f6)"></div><div class="dcb"><div class="dci">⚙️</div><div class="dcn" style="color:#c084fc;">Security Engineering &amp; Architecture</div><div class="dct">Build the defenses. Design the blueprint.</div><div class="dcm"><span class="dcs">$120K–$165K mid</span><span class="dca">→</span></div></div></div>
@@ -973,7 +964,9 @@
     <div class="dcard" onclick="showDomain('red')" style="border-color:rgba(244,63,94,.18);"><div class="tbar" style="background:linear-gradient(90deg,#f43f5e,#f97316)"></div><div class="dcb"><div class="dci">🔴</div><div class="dcn" style="color:#f87171;">Offensive Security (Red Team)</div><div class="dct">Think like the attacker. Break things legally.</div><div class="dcm"><span class="dcs">$115K–$160K mid</span><span class="dca">→</span></div></div></div>
     <div class="dcard" onclick="showDomain('grc')" style="border-color:rgba(0,224,122,.18);"><div class="tbar" style="background:linear-gradient(90deg,#00e07a,#3b82f6)"></div><div class="dcb"><div class="dci">📋</div><div class="dcn" style="color:#00e07a;">GRC &amp; Privacy</div><div class="dct">The bridge between security and the business</div><div class="dcm"><span class="dcs">$95K–$135K · Best non-tech entry</span><span class="dca">→</span></div></div></div>
     <div class="dcard" onclick="showDomain('forensics')" style="border-color:rgba(168,85,247,.18);"><div class="tbar" style="background:linear-gradient(90deg,#a855f7,#f43f5e)"></div><div class="dcb"><div class="dci">🔬</div><div class="dcn" style="color:#a78bfa;">Digital Forensics &amp; Threat Intel</div><div class="dct">Investigate. Attribute. Anticipate.</div><div class="dcm"><span class="dcs">$105K–$155K mid</span><span class="dca">→</span></div></div></div>
+    <div class="dcard dcard-new" onclick="showDomain('aisec')" style="border-color:rgba(99,202,255,.25);"><div class="tbar" style="background:linear-gradient(90deg,#38bdf8,#818cf8)"></div><div class="dcb"><div class="dci">🤖</div><div class="dcn" style="color:#38bdf8;">AI Security</div><div class="dct">Secure AI/ML systems — the fastest-emerging domain</div><div class="dcm"><span class="dcs">$130K–$180K · Emerging</span><span class="dca">→</span></div></div></div>
   </div>
+  <div id="domain-detail-inline" style="display:none;"></div>
 </div>
 <div class="footer">InfoSecDeck · 2025–2026 U.S. Market Data</div>
 </div>
@@ -2465,6 +2458,17 @@
   </div>
 
 </div>
+<!-- NordVPN Banner -->
+<div class="nordvpn-banner a4">
+  <div class="nvpn-left">
+    <div class="nvpn-icon">🔒</div>
+    <div class="nvpn-text">
+      <div class="nvpn-title">Secure Your Home Lab Traffic</div>
+      <div class="nvpn-sub">Use a VPN when practicing on public networks or testing vulnerable machines. NordVPN is AJ's personal recommendation — fast, no-logs, and trusted by the security community.</div>
+    </div>
+  </div>
+  <a class="nvpn-cta" href="https://nordvpn.com/" target="_blank" rel="noopener sponsored">Get NordVPN &rarr;</a>
+</div>
 <div class="footer">InfoSecDeck · Home Lab Guide · All tools listed are free or have free tiers unless noted</div>
 </div>
 
@@ -2628,10 +2632,10 @@
   <div class="clp-header">
     <div class="ey a1">My Career</div>
     <div class="st a2">Career Roadmap</div>
-    <p class="clp-intro a3">Map your journey from where you are now to where you want to be. Add milestones, get personalized recommendations, and track your path forward.</p>
+    <p class="clp-intro a3">Map your journey from where you are now to your highest aspiration. Add roles, certs, training, and key projects. Get personalized recommendations based on your experience.</p>
     <div class="clp-header-actions">
-      <button class="clp-btn-primary" onclick="saveCareerLadder()">&#x1F4BE; Save Roadmap</button>
-      <button class="clp-btn-ghost" onclick="generateCLRecommendations()">&#x2728; Generate Advice</button>
+      <button class="clp-btn-primary" onclick="saveCareerLadder()">&#x1F4BE; Save</button>
+      <button class="clp-btn-ghost" onclick="generateCLRecommendations()">&#x2728; Get Advice</button>
       <button class="clp-btn-ghost clp-reset" onclick="resetCareerLadder()">Reset</button>
     </div>
   </div>
@@ -2641,7 +2645,7 @@
     <div class="clp-gate-card">
       <div class="clp-gate-icon">&#128274;</div>
       <div class="clp-gate-title">Sign In to Build Your Roadmap</div>
-      <p class="clp-gate-sub">Your career roadmap saves to your account and syncs across all devices.</p>
+      <p class="clp-gate-sub">Your career roadmap is personal — it saves to your account and syncs across all devices.</p>
       <div class="clp-gate-btns">
         <button class="clp-btn-primary" onclick="openAuthModal('signin')">Sign In</button>
         <button class="clp-btn-ghost" onclick="openAuthModal('signup')">Create Account</button>
@@ -2651,14 +2655,41 @@
 
   <!-- Builder canvas (shown when logged in) -->
   <div id="clp-builder" style="display:none">
+
+    <!-- Final Role input -->
+    <div class="clp-final-row">
+      <div class="clp-final-label">
+        <span>&#11088;</span> Ultimate Career Goal
+        <span class="clp-final-hint">Your highest aspiration — the north star of your entire career</span>
+      </div>
+      <div class="clp-final-inputs">
+        <input type="text" id="cl-final-role-input" class="clp-final-input" placeholder="e.g. CISO, VP of Security, Principal Security Architect..." />
+        <button class="clp-btn-primary clp-final-save-btn" onclick="saveFinalRole()">Set Goal</button>
+      </div>
+    </div>
+
+    <!-- Roadmap canvas -->
     <div class="clp-canvas" id="clp-canvas">
       <!-- Steps rendered by JS -->
     </div>
+
+    <!-- Add milestone type buttons -->
     <div class="clp-add-row">
-      <button class="clp-add-btn" onclick="addCLStep()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        Add Milestone
-      </button>
+      <div class="clp-add-label">Add Milestone</div>
+      <div class="clp-add-btns">
+        <button class="clp-add-btn clp-add-role" onclick="addCLMilestone('role')">
+          &#x1F4BC; Role
+        </button>
+        <button class="clp-add-btn clp-add-cert" onclick="addCLMilestone('cert')">
+          &#x1F4DC; Certification
+        </button>
+        <button class="clp-add-btn clp-add-train" onclick="addCLMilestone('training')">
+          &#x1F393; Training
+        </button>
+        <button class="clp-add-btn clp-add-proj" onclick="addCLMilestone('project')">
+          &#x26A1; Project
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2666,31 +2697,45 @@
   <div id="clp-rec-panel" class="clp-rec-panel" style="display:none">
     <div class="clp-rec-header">
       <span class="clp-rec-icon">&#x1F4A1;</span>
-      <span class="clp-rec-title">Personalized Recommendations</span>
+      <span class="clp-rec-title">Personalized Roadmap Advice</span>
+      <span class="clp-rec-sub">Based on your experience level — the #1 factor in career advancement</span>
     </div>
     <div id="clp-rec-body" class="clp-rec-body"></div>
   </div>
 </div>
-<div class="footer">InfoSecDeck &middot; My Career Roadmap &middot; Save your path and revisit anytime</div>
+<div class="footer">InfoSecDeck &middot; My Career Roadmap &middot; Experience is the #1 factor. Build it deliberately.</div>
 </div>
 
 <div class="page" id="page-about">
-<div style="padding:52px 28px 100px;max-width:700px;margin:0 auto;">
+<div style="padding:52px 28px 100px;max-width:720px;margin:0 auto;">
   <div class="ey a1">The Builder</div>
   <div class="st a2">About InfoSecDeck</div>
-  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:20px;padding:36px;margin-bottom:24px;">
-    <div style="font-size:1.15rem;font-weight:800;letter-spacing:-.02em;margin-bottom:6px;">[Your Name]</div>
-    <div style="font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:var(--lb);margin-bottom:20px;">[Your Title / Domain / Years of Experience]</div>
-    <p style="font-size:.88rem;color:#94a3b8;line-height:1.85;margin-bottom:16px;">InfoSecDeck was built because I couldn't find a single resource that mapped out the full cybersecurity career landscape — from first job to CISO — with honest salary data, a real certification roadmap, and practical tools that don't try to sell you something.</p>
-    <p style="font-size:.88rem;color:#94a3b8;line-height:1.85;margin-bottom:16px;">I work in [your domain] and have spent [X] years navigating a field that's notoriously hard to break into and even harder to find your bearings in once you're there. This site is the resource I wish had existed when I was starting out.</p>
-    <p style="font-size:.88rem;color:#94a3b8;line-height:1.85;">Everything on InfoSecDeck is independently researched and maintained. No advertisers, no sponsored rankings, no vendor bias — just the information you actually need.</p>
+
+  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:20px;padding:40px;margin-bottom:28px;">
+    <!-- Avatar + Name -->
+    <div style="display:flex;align-items:center;gap:18px;margin-bottom:28px;">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#4d9eff,#00d4c8);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900;color:#fff;flex-shrink:0;">AJ</div>
+      <div>
+        <div style="font-size:1.2rem;font-weight:800;letter-spacing:-.02em;margin-bottom:4px;">AJ Poole</div>
+        <div style="font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:var(--lb);">IAM Engineer &nbsp;&middot;&nbsp; 10 Years Experience</div>
+      </div>
+    </div>
+
+    <p style="font-size:.9rem;color:#cbd5e1;line-height:1.9;margin-bottom:18px;">I started my career at the help desk. Ten years later, I've spent eight of them working in Identity &amp; Access Management — and I still get messages from friends, coworkers, and former colleagues asking the same questions: <em>How do I break into cybersecurity? What certs should I get first? What domain is right for me?</em></p>
+
+    <p style="font-size:.9rem;color:#cbd5e1;line-height:1.9;margin-bottom:18px;">Every time I tried to point people to a resource, I ran into the same problem: there wasn't one place that laid it all out clearly — the career paths, the honest cert guidance, the salary data, the domain breakdowns. Everything was scattered, outdated, or trying to sell something. So I built InfoSecDeck.</p>
+
+    <p style="font-size:.9rem;color:#cbd5e1;line-height:1.9;margin-bottom:18px;">This site is a compilation of the advice I was given throughout my own career, combined with best practices and recommendations from top sources across the industry. My goal was simple: create the universal resource I wish I could have shared with everyone who reached out to me — a single place where someone serious about cybersecurity can find everything they need, without the noise.</p>
+
+    <p style="font-size:.9rem;color:#cbd5e1;line-height:1.9;">Everything on InfoSecDeck is independently researched and maintained. No vendor bias, no fluff — just real, practitioner-tested guidance.</p>
   </div>
+
   <div class="a4" style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
     <a href="https://linkedin.com/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;background:rgba(10,102,194,.15);border:1px solid rgba(10,102,194,.3);color:#60a5fa;text-decoration:none;font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;" onmouseover="this.style.background='rgba(10,102,194,.25)'" onmouseout="this.style.background='rgba(10,102,194,.15)'">LinkedIn</a>
     <span onclick="showPage('reviews')" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);color:var(--lb);font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s;" onmouseover="this.style.background='rgba(34,211,238,.15)'" onmouseout="this.style.background='rgba(34,211,238,.08)'">Leave Feedback</span>
   </div>
 </div>
-<div class="footer">InfoSecDeck · Built by a practitioner, for practitioners</div>
+<div class="footer">InfoSecDeck &middot; Built by a practitioner &mdash; for the community</div>
 </div>
 
 
@@ -3053,8 +3098,8 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=14"></script>
-<script src="js/auth.js?v=14"></script>
+<script src="js/app.js?v=15"></script>
+<script src="js/auth.js?v=15"></script>
 
 <!-- AUTH MODAL -->
 <div id="auth-modal" class="auth-modal" onclick="if(event.target===this)closeAuthModal()">
