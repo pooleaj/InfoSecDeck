@@ -4635,7 +4635,13 @@ window.addEventListener('popstate', function(e) {
 });
 // On initial load, navigate to hash if present
 (function() {
-  var h = window.location.hash.replace('#', '');
+  var raw = window.location.hash;
+  // Guard: if this is a Supabase OAuth callback (tokens in hash), do NOT touch
+  // the hash — let auth.js initialize and read the tokens first.
+  if (raw.indexOf('access_token') !== -1 || raw.indexOf('refresh_token') !== -1 || raw.indexOf('error_description') !== -1) {
+    return;
+  }
+  var h = raw.replace('#', '');
   if (h && h !== 'home' && document.getElementById('page-' + h)) {
     setTimeout(function() { showPage(h); }, 100);
   } else {
