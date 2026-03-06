@@ -5177,6 +5177,7 @@ window._onPlanLoaded = function(plan) {
   window._userPlan = plan;
   _updateUpgradeNavBtn();
   _updateProBadge();
+  _updatePricingState();
 };
 
 // Check if user is Pro
@@ -5234,13 +5235,10 @@ function _updateProBadge() {
 (function() {
   var search = window.location.search;
   if (search.indexOf('checkout=success') !== -1) {
-    // Clean up URL
-    history.replaceState({}, '', window.location.pathname + window.location.hash.replace(/\?.*/, '') || '#pricing');
-    // Show success toast after a short delay (auth needs to load first)
+    history.replaceState({}, '', window.location.pathname + '#pro-welcome');
     setTimeout(function() {
-      showToast('Welcome to Pro! \uD83C\uDF89 Your account has been upgraded.');
-      showPage('pricing');
-    }, 1500);
+      showPage('pro-welcome');
+    }, 1200);
   } else if (search.indexOf('checkout=canceled') !== -1) {
     history.replaceState({}, '', window.location.pathname + '#pricing');
     setTimeout(function() {
@@ -5248,5 +5246,39 @@ function _updateProBadge() {
     }, 300);
   }
 })();
+
+// Update pricing page CTA buttons based on auth/plan state
+function _updatePricingState() {
+  var isPro = _isPro();
+  var isLoggedIn = !!(typeof _currentUser !== 'undefined' && _currentUser);
+
+  // Free column CTA
+  var freeBtn = document.querySelector('#page-pricing .pg-btn-free');
+  if (freeBtn) {
+    if (isPro) {
+      freeBtn.textContent = 'Pro Member \u2713';
+      freeBtn.disabled = true;
+      freeBtn.classList.add('pg-btn-state');
+    } else if (isLoggedIn) {
+      freeBtn.textContent = 'Current Plan';
+      freeBtn.disabled = true;
+      freeBtn.classList.add('pg-btn-state');
+    } else {
+      freeBtn.textContent = 'Get Started Free';
+      freeBtn.disabled = false;
+      freeBtn.classList.remove('pg-btn-state');
+    }
+  }
+
+  // Pro billing option buttons (monthly=0, yearly=1, lifetime=2)
+  var proBtns = document.querySelectorAll('#page-pricing .pg-btn-pro');
+  if (isPro) {
+    if (proBtns[0]) { proBtns[0].textContent = 'Subscribed \u2713'; proBtns[0].disabled = true; proBtns[0].classList.add('pg-btn-subscribed'); }
+    if (proBtns[1]) { proBtns[1].textContent = 'Go Annual \u2192'; proBtns[1].disabled = false; proBtns[1].classList.remove('pg-btn-subscribed'); }
+    if (proBtns[2]) { proBtns[2].textContent = 'Go Lifetime \u2192'; proBtns[2].disabled = false; proBtns[2].classList.remove('pg-btn-subscribed'); }
+  }
+}
+
+_pageInits.pricing = function() { _updatePricingState(); };
 
 _updateUpgradeNavBtn();
