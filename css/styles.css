@@ -1765,6 +1765,34 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 }
 .hsc-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,212,200,.45); }
 
+.hsc-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  background: #fff;
+  color: #1f1f1f;
+  border: 1.5px solid #dadce0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-family: var(--fd);
+  font-weight: 600;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: box-shadow .18s, background .18s;
+  margin-bottom: 12px;
+}
+.hsc-google-btn:hover { background: #f5f5f5; box-shadow: 0 3px 12px rgba(0,0,0,.15); }
+.hsc-google-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.hsc-error-msg {
+  font-size: .78rem;
+  margin-bottom: 6px;
+  color: #f05d78;
+  min-height: 16px;
+}
+
 .hsc-divider {
   display: flex;
   align-items: center;

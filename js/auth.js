@@ -25,15 +25,20 @@ _sb.auth.onAuthStateChange(function(event, session) {
 
 // ─── JOIN CARD (home page) ───────────────────────────────────
 function joinFreeFromCard() {
-  var emailEl = document.getElementById('hsc-email');
-  var email = emailEl ? emailEl.value.trim() : '';
-  openAuthModal('signin');
-  if (email) {
-    setTimeout(function() {
-      var input = document.getElementById('auth-magic-email');
-      if (input) input.value = email;
-    }, 150);
-  }
+  var email = ((document.getElementById('hsc-email') || {}).value || '').trim();
+  var pass = (document.getElementById('hsc-pass') || {}).value || '';
+  var errEl = document.getElementById('hsc-form-error');
+  function showErr(msg) { if (errEl) { errEl.style.color = ''; errEl.textContent = msg; } }
+  if (!email) { showErr('Please enter your email address.'); return; }
+  if (!pass) { showErr('Please create a password.'); return; }
+  if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+  var btn = document.querySelector('#hsc-email-form .hsc-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Creating\u2026'; }
+  _sb.auth.signUp({ email: email, password: pass }).then(function(res) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+    if (res.error) { showErr(res.error.message); return; }
+    if (errEl) { errEl.style.color = '#00d4c8'; errEl.textContent = 'Account created! Check your email to confirm. \u2705'; }
+  });
 }
 
 // ─── AUTH MODAL ──────────────────────────────────────────────
