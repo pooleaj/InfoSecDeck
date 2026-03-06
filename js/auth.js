@@ -322,7 +322,9 @@ function _syncFromDB() {
         careerLadder: (dbLadder && dbLadder.steps) ? dbLadder : (existing.careerLadder || {}),
         savedJobFilters: existing.savedJobFilters || null,
         plan: d.plan || 'free',
-        purchases: d.purchases || {}
+        purchases: d.purchases || {},
+        cancelAtPeriodEnd: d.cancel_at_period_end || false,
+        subscriptionPeriodEnd: d.subscription_period_end || null
       };
       try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
       // Notify app.js of the user's plan (controls nav button + paywall)
