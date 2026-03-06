@@ -5,12 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=12">
+<link rel="stylesheet" href="css/styles.css?v=13">
 </head>
 <body>
 <nav>
   <div class="nlogo" onclick="showPage('home')">
-    <svg class="nlogo-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="9" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9V7a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>
+    <div class="nlogo-shield-wrap" onclick="event.stopPropagation();openDCModal()" title="Daily Security Challenge — click to answer!">
+      <svg class="nlogo-icon" width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="9" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M7 9V7a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14" r="1.4" fill="currentColor"/></svg>
+      <span class="nlogo-dc-badge" id="nlogo-dc-badge" style="display:none">!</span>
+    </div>
     <div class="ntxt"><span class="ntxt-main">InfoSec</span><span class="ntxt-accent">Deck</span></div>
   </div>
 
@@ -181,62 +184,74 @@
           Built by a practitioner — for people serious about this field.
         </p>
 
-        <div class="hero-stats">
-          <div class="hero-stat"><span class="hero-stat-n" style="color:#00d4c8">4M+</span><span class="hero-stat-l">Jobs Unfilled</span></div>
-          <div class="hero-stat-sep"></div>
-          <div class="hero-stat"><span class="hero-stat-n" style="color:#10e87e">$119K</span><span class="hero-stat-l">Median Salary</span></div>
-          <div class="hero-stat-sep"></div>
-          <div class="hero-stat"><span class="hero-stat-n" style="color:#4d9eff">+33%</span><span class="hero-stat-l">Job Growth</span></div>
-          <div class="hero-stat-sep"></div>
-          <div class="hero-stat"><span class="hero-stat-n" style="color:#f5c842">$9.8T</span><span class="hero-stat-l">Cybercrime Cost</span></div>
-        </div>
-
         <div class="hero-actions">
           <button class="hero-btn-primary" onclick="document.getElementById('platform-section').scrollIntoView({behavior:'smooth'})">
             Explore the Platform
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
-          <div class="hero-quiz-wrap">
-            <button id="quiz-toggle-btn" class="hero-btn-ghost hero-btn-quiz" onclick="openHomeQuiz()">What&#39;s my Cyber Career? <span class="quiz-arrow">&#9660;</span></button>
-          </div>
         </div>
       </div>
 
-      <!-- Right: Marketing / Signup Card (future-proof) -->
+      <!-- Right: Marketing / Signup Card -->
       <div class="hero-signup-card">
 
-        <!-- Brand Header -->
-        <div class="hsc-brand">
-          <svg class="hsc-lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4c8" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <span class="hsc-brand-name">InfoSec<span class="hsc-brand-accent">Deck</span></span>
-          <span class="hsc-brand-tag">Community</span>
-        </div>
-
-        <!-- Headline -->
-        <div class="hsc-headline">Stay Ahead.<br>Stay Informed.</div>
-        <p class="hsc-sub">Join cyber professionals leveling up their careers. Get weekly resources, tools, and domain insights — free.</p>
-
-        <!-- Join Free Form -->
-        <div class="hsc-form">
-          <input class="hsc-input" id="hsc-email" type="email" placeholder="your@email.com" autocomplete="off" onkeydown="if(event.key==='Enter')joinFreeFromCard()">
-          <button class="hsc-submit-btn" onclick="joinFreeFromCard()">
-            Join Free
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
-        </div>
-
-        <!-- Sign-in link -->
-        <p class="hsc-signin-row">Already a member? <span class="hsc-signin-link" onclick="openAuthModal('signin')">Sign in &rarr;</span></p>
-
-        <!-- Social Proof -->
-        <div class="hsc-proof">
-          <div class="hsc-avatars">
-            <div class="hsc-av" style="background:linear-gradient(135deg,#10e87e,#00d4c8)">A</div>
-            <div class="hsc-av" style="background:linear-gradient(135deg,#4d9eff,#c084fc)">B</div>
-            <div class="hsc-av" style="background:linear-gradient(135deg,#f5c842,#ff8c42)">C</div>
-            <div class="hsc-av" style="background:linear-gradient(135deg,#f05d78,#c084fc)">D</div>
+        <!-- GUEST VIEW (shown when not signed in) -->
+        <div id="hsc-guest">
+          <!-- Brand Header -->
+          <div class="hsc-brand">
+            <svg class="hsc-lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4c8" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span class="hsc-brand-name">InfoSec<span class="hsc-brand-accent">Deck</span></span>
+            <span class="hsc-brand-tag">Community</span>
           </div>
-          <span class="hsc-proof-txt">2,400+ professionals enrolled</span>
+
+          <!-- Headline -->
+          <div class="hsc-headline">Stay Ahead.<br>Stay Informed.</div>
+          <p class="hsc-sub">Join cyber professionals leveling up their careers. Get weekly resources, tools, and domain insights &mdash; free.</p>
+
+          <!-- Join Free Form -->
+          <div class="hsc-form">
+            <input class="hsc-input" id="hsc-email" type="email" placeholder="your@email.com" autocomplete="off" onkeydown="if(event.key==='Enter')joinFreeFromCard()">
+            <button class="hsc-submit-btn" onclick="joinFreeFromCard()">
+              Join Free
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <!-- Sign-in link -->
+          <p class="hsc-signin-row">Already a member? <span class="hsc-signin-link" onclick="openAuthModal('signin')">Sign in &rarr;</span></p>
+
+          <!-- Social Proof -->
+          <div class="hsc-proof">
+            <div class="hsc-avatars">
+              <div class="hsc-av" style="background:linear-gradient(135deg,#10e87e,#00d4c8)">A</div>
+              <div class="hsc-av" style="background:linear-gradient(135deg,#4d9eff,#c084fc)">B</div>
+              <div class="hsc-av" style="background:linear-gradient(135deg,#f5c842,#ff8c42)">C</div>
+              <div class="hsc-av" style="background:linear-gradient(135deg,#f05d78,#c084fc)">D</div>
+            </div>
+            <span class="hsc-proof-txt">2,400+ professionals enrolled</span>
+          </div>
+        </div>
+
+        <!-- MEMBER VIEW (shown when signed in, populated by auth.js) -->
+        <div id="hsc-member" style="display:none">
+          <div class="hmv-greeting">Welcome back</div>
+          <div class="hmv-name" id="hmv-name">Cyber Pro</div>
+          <div class="hmv-role-row" id="hmv-role-row">
+            <span class="hmv-role-icon">💼</span>
+            <span class="hmv-role-text" id="hmv-role-text">Loading your profile&hellip;</span>
+          </div>
+          <div class="hmv-quick-links">
+            <div class="hmv-ql" onclick="showPage('salary')"><span class="hmv-ql-icon">💰</span>Salary Guide</div>
+            <div class="hmv-ql" onclick="showPage('certs')"><span class="hmv-ql-icon">📜</span>Certifications</div>
+            <div class="hmv-ql" onclick="showPage('interview')"><span class="hmv-ql-icon">🎯</span>Interview Prep</div>
+            <div class="hmv-ql" onclick="showPage('jobs')"><span class="hmv-ql-icon">💼</span>Job Board</div>
+          </div>
+          <div class="hmv-cert-bar" id="hmv-cert-bar"></div>
+          <div class="hmv-footer">
+            <span class="hmv-status-dot"></span>
+            <span class="hmv-status-txt" id="hmv-status-txt">Synced across all devices</span>
+            <span class="hmv-profile-btn" onclick="showPage('profile')">My Profile &rarr;</span>
+          </div>
         </div>
 
       </div>
@@ -2784,11 +2799,10 @@
 <!-- Toast notification -->
 <div id="isd-toast" class="isd-toast"></div>
 
-<!-- ═══════════════════════════════ DAILY CHALLENGE FLOATING ═══════════════════════════════ -->
-<button class="dc-float-btn" id="dc-float-btn" onclick="openDCModal()" title="Daily Security Challenge">
-  <span class="dc-float-icon">⚡</span>
-  <span class="dc-float-label">Daily Challenge</span>
-  <span class="dc-float-streak" id="dc-float-streak"></span>
+<!-- ═══════════════════════════════ QUIZ FLOATING BUTTON ═══════════════════════════════ -->
+<button class="quiz-float-btn" id="quiz-float-btn" onclick="openQuizFloat()" title="Find Your Cyber Career Path" style="display:none">
+  <span class="qfb-icon">🧭</span>
+  <span class="qfb-label">What's my Cyber Career?</span>
 </button>
 
 <!-- Daily Challenge Modal -->
@@ -2849,26 +2863,6 @@
 
   <!-- Everything below is only shown when signed in -->
   <div id="profile-auth-content" style="display:none">
-
-  <!-- Stats Row -->
-  <div class="profile-stats-row">
-    <div class="ps-stat">
-      <div class="ps-stat-n" id="ps-streak">0</div>
-      <div class="ps-stat-l">Day Streak</div>
-    </div>
-    <div class="ps-stat">
-      <div class="ps-stat-n" id="ps-challenges">0</div>
-      <div class="ps-stat-l">Challenges Done</div>
-    </div>
-    <div class="ps-stat">
-      <div class="ps-stat-n" id="ps-certs-done">0</div>
-      <div class="ps-stat-l">Certs Earned</div>
-    </div>
-    <div class="ps-stat">
-      <div class="ps-stat-n" id="ps-certs-prog">0</div>
-      <div class="ps-stat-l">In Progress</div>
-    </div>
-  </div>
 
   <!-- Profile Form -->
   <div class="profile-section">
@@ -2955,8 +2949,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=12"></script>
-<script src="js/auth.js?v=12"></script>
+<script src="js/app.js?v=13"></script>
+<script src="js/auth.js?v=13"></script>
 
 <!-- AUTH MODAL -->
 <div id="auth-modal" class="auth-modal" onclick="if(event.target===this)closeAuthModal()">

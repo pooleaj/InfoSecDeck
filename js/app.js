@@ -3575,11 +3575,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // ─── DAILY CHALLENGE MODAL ───────────────────────────────
 function initDCFloat(){
-  var sk=loadStreak();
-  var floatBtn=document.getElementById('dc-float-btn');
-  var floatStreak=document.getElementById('dc-float-streak');
-  if(floatStreak&&sk.count>0){floatStreak.textContent='🔥'+sk.count;}
-  if(floatBtn){floatBtn.style.display='flex';}
+  // Legacy stub — DC float button replaced by nav logo badge in v13
+  initNavDCBadge();
 }
 function openDCModal(){
   var m=document.getElementById('dc-modal');
@@ -3638,9 +3635,6 @@ function submitDCModalAnswer(chosen){
   var today=new Date().toDateString();
   saveDCState({date:today,chosen:chosen,won:won});
   var sk=updateStreak(won);
-  // Update float button streak
-  var floatStreak=document.getElementById('dc-float-streak');
-  if(floatStreak&&sk.count>0){floatStreak.textContent='🔥'+sk.count;}
   var streakEl=document.getElementById('dc-modal-streak');
   if(streakEl)streakEl.textContent=(sk.count>0?'🔥 '+sk.count+' day streak':'Keep going!');
   renderDCModal();
@@ -4143,5 +4137,138 @@ submitDCModalAnswer=function(chosen){
     saveStreak(sk);
     if(typeof syncStreakToDB==='function')syncStreakToDB(sk);
   }
+  // After answering, hide DC badge on logo
+  initNavDCBadge();
 };
+
+// ══════════════════════ v13 UPDATES ══════════════════════
+
+// ─── NAV LOGO DAILY CHALLENGE BADGE ──────────────────────
+function initNavDCBadge(){
+  var badge=document.getElementById('nlogo-dc-badge');
+  if(!badge)return;
+  var state=loadDCState();
+  var today=new Date().toDateString();
+  var hasNew=!state||state.date!==today;
+  badge.style.display=hasNew?'flex':'none';
+}
+
+// ─── QUIZ FLOAT BUTTON ───────────────────────────────────
+function openQuizFloat(){
+  var btn=document.getElementById('quiz-float-btn');
+  if(btn){btn.classList.remove('qfb-glow');try{localStorage.setItem('isd_quiz_float_seen','1');}catch(e){}}
+  // Close any open daily challenge modal first
+  if(typeof closeDCModal==='function')closeDCModal();
+  openHomeQuiz();
+}
+
+// Patch showPage to manage quiz float visibility + DC badge
+var _origShowPageV13=showPage;
+showPage=function(p){
+  _origShowPageV13(p);
+  var qfb=document.getElementById('quiz-float-btn');
+  if(qfb)qfb.style.display=(p==='home')?'flex':'none';
+  initNavDCBadge();
+};
+
+// ─── SALARY VISUALIZATION ON PROFILE ─────────────────────
+function renderSavedSalaryViz(p){
+  var salEl=document.getElementById('profile-salary-save');
+  if(!salEl)return;
+  if(!p)p=loadProfile();
+  if(!p||!p.savedSalary){return;}
+  var nums=(p.savedSalaryNums||(p.savedSalary.match(/\$[\d,]+/g)||[]));
+  var parsed=nums.map(function(n){return parseInt(n.replace(/[$,]/g,''))||0;}).filter(Boolean);
+  if(parsed.length<2){
+    salEl.innerHTML='<div class="sal-viz-card"><div class="sal-viz-role">Saved Estimate</div><div class="pss-saved-sal">'+(p.savedSalary||'')+'</div></div>';
+    return;
+  }
+  var minV=Math.min.apply(null,parsed);
+  var maxV=Math.max.apply(null,parsed);
+  var midV=parsed.length>=3?parsed[Math.floor(parsed.length/2)]:Math.round((minV+maxV)/2);
+  var markerPct=maxV>minV?Math.round(((midV-minV)/(maxV-minV))*100):50;
+  var role=p.savedSalaryRole||'';
+  var meta=[p.savedSalaryExp,p.savedSalaryLoc].filter(Boolean).join(' \u00b7 ');
+  var fmtK=function(n){return'$'+Math.round(n/1000)+'K';};
+  salEl.innerHTML='<div class="sal-viz-card">'
+    +(role?'<div class="sal-viz-role">'+role+'</div>':'')
+    +(meta?'<div class="sal-viz-meta">'+meta+'</div>':'')
+    +'<div class="sal-viz-range">'
+      +'<div class="sal-viz-min">'+fmtK(minV)+'<br><small>low</small></div>'
+      +'<div class="sal-viz-mid">'+fmtK(midV)+'<br><small>mid-range</small></div>'
+      +'<div class="sal-viz-max">'+fmtK(maxV)+'<br><small>high</small></div>'
+    +'</div>'
+    +'<div class="sal-viz-bar">'
+      +'<div class="sal-viz-fill" style="width:100%"></div>'
+      +'<div class="sal-viz-marker" style="left:'+markerPct+'%"></div>'
+    +'</div>'
+    +'<span class="sal-viz-cta" onclick="showPage(\'salary\')">Recalculate \u2192</span>'
+    +'</div>';
+}
+
+// Override saveSalaryToProfile to capture extra metadata for viz
+var _origSaveSalaryToProfile=saveSalaryToProfile;
+saveSalaryToProfile=function(){
+  var res=document.getElementById('sc-result');
+  if(!res||res.querySelector('.sc-placeholder')){showToast('Calculate your salary first.');return;}
+  var p=loadProfile();
+  p.savedSalary=res.innerText||res.textContent;
+  p.savedSalaryNums=(p.savedSalary.match(/\$[\d,]+/g)||[]);
+  var roleEl=document.getElementById('sc-role');
+  var expEl=document.getElementById('sc-exp');
+  var locEl=document.getElementById('sc-loc');
+  p.savedSalaryRole=roleEl&&roleEl.selectedIndex>=0?roleEl.options[roleEl.selectedIndex].text:'';
+  p.savedSalaryExp=expEl&&expEl.selectedIndex>=0?expEl.options[expEl.selectedIndex].text:'';
+  p.savedSalaryLoc=locEl&&locEl.selectedIndex>=0?locEl.options[locEl.selectedIndex].text:'';
+  try{localStorage.setItem(_PROFILE_KEY,JSON.stringify(p));}catch(e){}
+  renderSavedSalaryViz(p);
+  showToast('Salary estimate saved! \u2705');
+  if(typeof syncProfileToDB==='function')syncProfileToDB(p);
+};
+
+// Patch initProfile to render salary viz and drop streak/challenge elements
+var _origInitProfileV13=initProfile;
+initProfile=function(){
+  _origInitProfileV13();
+  var p=loadProfile();
+  if(p&&p.savedSalary)renderSavedSalaryViz(p);
+};
+
+// ─── SCROLL REVEAL (editorial section) ───────────────────
+function initScrollReveal(){
+  var targets=document.querySelectorAll(
+    '.ed-inline-card,.ed-feature-row,.ed-pullquote,.ed-full-break,.ed-closing,.ed-three-cards,.ed-article-header'
+  );
+  targets.forEach(function(el,i){
+    el.classList.add('sr-hidden');
+    if(i%3===1)el.classList.add('sr-delay-1');
+    else if(i%3===2)el.classList.add('sr-delay-2');
+  });
+  if(!window.IntersectionObserver){
+    targets.forEach(function(el){el.classList.remove('sr-hidden');el.classList.add('sr-visible');});
+    return;
+  }
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){e.target.classList.add('sr-visible');}
+      else{e.target.classList.remove('sr-visible');}
+    });
+  },{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
+  targets.forEach(function(el){obs.observe(el);});
+}
+
+// ─── INIT ON LOAD ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  // DC badge
+  initNavDCBadge();
+  // Quiz float — visible on home, glow if never seen
+  var qfb=document.getElementById('quiz-float-btn');
+  if(qfb){
+    qfb.style.display='flex';
+    var seen=localStorage.getItem('isd_quiz_float_seen');
+    if(!seen)qfb.classList.add('qfb-glow');
+  }
+  // Scroll reveal
+  initScrollReveal();
+});
 

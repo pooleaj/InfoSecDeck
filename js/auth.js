@@ -182,14 +182,63 @@ function _updateProfilePage() {
 }
 
 function _updateJoinCard() {
-  // Hide join card when already logged in
-  var card = document.querySelector('.hero-signup-card');
-  if (!card) return;
+  var guestEl = document.getElementById('hsc-guest');
+  var memberEl = document.getElementById('hsc-member');
+  if (!guestEl || !memberEl) return;
+
   if (_currentUser) {
-    card.style.display = 'none';
+    guestEl.style.display = 'none';
+    memberEl.style.display = 'flex';
+    _renderMemberBanner();
   } else {
-    card.style.display = '';
+    guestEl.style.display = '';
+    memberEl.style.display = 'none';
   }
+}
+
+function _renderMemberBanner() {
+  var p = (typeof loadProfile === 'function') ? loadProfile() : {};
+  var cp = (typeof getCertProgress === 'function') ? getCertProgress() : {};
+
+  // Name display
+  var displayName = p.username ? '@' + p.username : (p.name || (_currentUser.email ? _currentUser.email.split('@')[0] : 'Cyber Pro'));
+  var nameEl = document.getElementById('hmv-name');
+  if (nameEl) nameEl.textContent = displayName;
+
+  // Role row
+  var roleEl = document.getElementById('hmv-role-text');
+  if (roleEl) {
+    if (p.currentRole && p.targetRole) {
+      roleEl.innerHTML = '<strong>' + p.currentRole + '</strong> &rarr; <strong style="color:#00d4c8">' + p.targetRole + '</strong>';
+    } else if (p.currentRole) {
+      roleEl.innerHTML = 'Currently: <strong>' + p.currentRole + '</strong>';
+    } else if (p.targetRole) {
+      roleEl.innerHTML = 'Targeting: <strong style="color:#00d4c8">' + p.targetRole + '</strong>';
+    } else {
+      roleEl.innerHTML = '<span style="color:var(--mt)">Set your role in <strong style="color:var(--tx);cursor:pointer" onclick="showPage(\'profile\')">My Profile</strong></span>';
+    }
+  }
+
+  // Cert progress bar
+  var certBarEl = document.getElementById('hmv-cert-bar');
+  if (certBarEl) {
+    var done = Object.values(cp).filter(function(v) { return v === 'done'; }).length;
+    var inprog = Object.values(cp).filter(function(v) { return v === 'inprog'; }).length;
+    var planned = Object.values(cp).filter(function(v) { return v === 'planned'; }).length;
+    if (done > 0 || inprog > 0 || planned > 0) {
+      certBarEl.innerHTML = '<div class="hmv-cert-summary">'
+        + (done > 0 ? '<span class="hmv-cs-item hmv-cs-done">&#x2705; ' + done + ' earned</span>' : '')
+        + (inprog > 0 ? '<span class="hmv-cs-item hmv-cs-prog">&#x23F3; ' + inprog + ' in progress</span>' : '')
+        + (planned > 0 ? '<span class="hmv-cs-item hmv-cs-plan">&#x1F4CC; ' + planned + ' planned</span>' : '')
+        + '</div>';
+    } else {
+      certBarEl.innerHTML = '<div class="hmv-cert-hint" onclick="showPage(\'certs\')">Track your cert progress &rarr;</div>';
+    }
+  }
+
+  // Status text
+  var stEl = document.getElementById('hmv-status-txt');
+  if (stEl) stEl.textContent = 'Synced \u2014 ' + _currentUser.email;
 }
 
 // ─── PATCH showPage to close auth modal ──────────────────────
@@ -223,11 +272,16 @@ function _syncFromDB() {
         exp: d.experience || existing.exp || '',
         location: d.location || existing.location || '',
         bio: d.bio || existing.bio || '',
-        savedSalary: d.saved_salary || existing.savedSalary || ''
+        savedSalary: d.saved_salary || existing.savedSalary || '',
+        savedSalaryNums: existing.savedSalaryNums || [],
+        savedSalaryRole: existing.savedSalaryRole || '',
+        savedSalaryExp: existing.savedSalaryExp || '',
+        savedSalaryLoc: existing.savedSalaryLoc || ''
       };
       try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
       if (typeof initProfile === 'function') initProfile();
       _updateAuthUI();
+      _renderMemberBanner();
     }
   });
 
@@ -237,8 +291,7 @@ function _syncFromDB() {
     if (res.data) {
       var sk = { count: res.data.streak_count || 0, last: res.data.last_date || null, total: res.data.total_answered || 0 };
       try { localStorage.setItem('isd_streak', JSON.stringify(sk)); } catch(e) {}
-      var floatStreak = document.getElementById('dc-float-streak');
-      if (floatStreak && sk.count > 0) floatStreak.textContent = '\uD83D\uDD25' + sk.count;
+      if (typeof initNavDCBadge === 'function') initNavDCBadge();
       if (typeof initProfile === 'function') initProfile();
     }
   });
@@ -251,6 +304,8 @@ function _syncFromDB() {
       res.data.forEach(function(r) { cp[r.cert_key] = r.status; });
       try { localStorage.setItem('isd_cert_prog', JSON.stringify(cp)); } catch(e) {}
       if (typeof initProfile === 'function') initProfile();
+      if (typeof initCertTracker === 'function') initCertTracker();
+      _updateJoinCard();
     }
   });
 }
