@@ -642,6 +642,68 @@ function _getDomainFromRole(role) {
   return 'default';
 }
 
+// ══════════════════════ NEW USER ONBOARDING ══════════════════
+// Detects first-time OAuth logins (no profiles row) and shows welcome modal
+
+function _showNewUserWelcome(user) {
+  var modal = document.getElementById('new-user-modal');
+  if (!modal) return;
+  // Pre-fill name from Google metadata
+  var meta = ((user || _currentUser) || {}).user_metadata || {};
+  var nameVal = meta.full_name || meta.name || '';
+  var nameInput = document.getElementById('num-name');
+  if (nameInput) nameInput.value = nameVal;
+  document.body.style.overflow = 'hidden';
+  modal.classList.add('open');
+}
+
+function _skipNewUserWelcome() {
+  var modal = document.getElementById('new-user-modal');
+  if (modal) modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function _submitNewUserProfile() {
+  var name = ((document.getElementById('num-name') || {}).value || '').trim();
+  var role = ((document.getElementById('num-role') || {}).value || '').trim();
+  var target = ((document.getElementById('num-target') || {}).value || '').trim();
+  if (!name && _currentUser) name = _currentUser.email.split('@')[0];
+  // Save to localStorage
+  var existing = {};
+  try { existing = JSON.parse(localStorage.getItem('isd_profile') || '{}'); } catch(e) {}
+  var merged = Object.assign({}, existing, { name: name, currentRole: role, targetRole: target });
+  try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
+  // Upsert to Supabase
+  if (_currentUser) {
+    _sb.from('profiles').upsert({
+      id: _currentUser.id,
+      name: name,
+      curr_role: role,
+      target_role: target
+    }).then(function() {
+      if (typeof initProfile === 'function') initProfile();
+    });
+  }
+  _skipNewUserWelcome();
+  if (typeof _renderMemberBanner === 'function') _renderMemberBanner();
+  showToast('Profile saved! Welcome aboard \uD83C\uDF89');
+}
+
+// Second onAuthStateChange listener — runs after the original, detects new users
+_sb.auth.onAuthStateChange(function(event, session) {
+  if (event === 'SIGNED_IN' && session) {
+    // Wait for _syncFromDB to complete its profile query, then check
+    setTimeout(function() {
+      _sb.from('profiles').select('id, name').eq('id', session.user.id).maybeSingle().then(function(res) {
+        // Show onboarding if no profile row OR name was never set
+        if (!res.data || !res.data.name) {
+          _showNewUserWelcome(session.user);
+        }
+      });
+    }, 1200);
+  }
+});
+
 // Override _renderMemberBanner to add certs and animation
 var _origRenderMemberBanner = _renderMemberBanner;
 _renderMemberBanner = function() {

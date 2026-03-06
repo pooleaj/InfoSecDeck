@@ -2862,6 +2862,55 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .auth-switch a{color:var(--ac);cursor:pointer;text-decoration:underline;}
 .auth-switch a:hover{opacity:.8;}
 
+/* ── New User Onboarding Modal ── */
+.new-user-modal{
+  position:fixed;inset:0;z-index:10700;
+  background:rgba(5,8,16,.88);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .28s;
+}
+.new-user-modal.open{opacity:1;pointer-events:auto;}
+.num-inner{
+  background:#0d1526;border:1px solid rgba(0,212,200,.28);
+  border-radius:20px;padding:40px 36px 32px;
+  width:100%;max-width:440px;
+  box-shadow:0 40px 100px rgba(0,0,0,.9),0 0 0 1px rgba(0,212,200,.08);
+  text-align:center;
+  animation:numSlide .3s ease;
+}
+@keyframes numSlide{from{transform:translateY(16px);opacity:0;}to{transform:none;opacity:1;}}
+.num-icon{font-size:2.2rem;margin-bottom:12px;}
+.num-title{
+  font-family:var(--fd);font-size:1.4rem;font-weight:800;
+  color:#fff;letter-spacing:-.03em;margin-bottom:8px;
+}
+.num-sub{font-size:.82rem;color:var(--mt);line-height:1.6;margin-bottom:24px;}
+.num-field{text-align:left;margin-bottom:14px;}
+.num-label{display:block;font-size:.75rem;font-weight:600;color:var(--mt);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;}
+.num-opt{font-weight:400;color:rgba(255,255,255,.28);text-transform:none;letter-spacing:0;}
+.num-input{
+  width:100%;box-sizing:border-box;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:9px;padding:11px 14px;font-family:var(--fd);
+  font-size:.88rem;color:#fff;outline:none;transition:border-color .2s;
+}
+.num-input:focus{border-color:rgba(0,212,200,.5);}
+.num-input::placeholder{color:rgba(255,255,255,.25);}
+.num-submit{
+  width:100%;background:var(--ac);color:#050810;border:none;
+  border-radius:10px;padding:13px;font-family:var(--fd);
+  font-size:.95rem;font-weight:800;cursor:pointer;margin-top:8px;
+  letter-spacing:.01em;transition:opacity .15s,transform .15s;
+}
+.num-submit:hover{opacity:.88;transform:translateY(-1px);}
+.num-skip{
+  background:none;border:none;color:rgba(255,255,255,.3);
+  font-size:.78rem;cursor:pointer;margin-top:12px;
+  text-decoration:underline;display:block;width:100%;
+  transition:color .15s;
+}
+.num-skip:hover{color:rgba(255,255,255,.6);}
+
 /* ── v16: Google OAuth + Magic Link ── */
 .auth-google-btn{
   width:100%;display:flex;align-items:center;justify-content:center;

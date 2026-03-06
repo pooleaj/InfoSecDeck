@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=16">
+<link rel="stylesheet" href="css/styles.css?v=17">
 </head>
 <body>
 <nav>
@@ -3109,10 +3109,33 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=16"></script>
-<script src="js/auth.js?v=16"></script>
+<script src="js/app.js?v=17"></script>
+<script src="js/auth.js?v=17"></script>
 
 <!-- AUTH MODAL -->
+<!-- New User Onboarding Modal (first Google OAuth login) -->
+<div id="new-user-modal" class="new-user-modal">
+  <div class="num-inner">
+    <div class="num-icon">&#127881;</div>
+    <h2 class="num-title">Welcome to InfoSecDeck!</h2>
+    <p class="num-sub">Your account is ready. Tell us a bit about yourself so we can personalize your experience.</p>
+    <div class="num-field">
+      <label class="num-label">Your Name</label>
+      <input type="text" id="num-name" class="num-input" placeholder="How should we call you?">
+    </div>
+    <div class="num-field">
+      <label class="num-label">Current Role <span class="num-opt">(optional)</span></label>
+      <input type="text" id="num-role" class="num-input" placeholder="e.g. Help Desk, IT Admin, Student...">
+    </div>
+    <div class="num-field">
+      <label class="num-label">Career Goal <span class="num-opt">(optional)</span></label>
+      <input type="text" id="num-target" class="num-input" placeholder="e.g. SOC Analyst, Cloud Security Engineer...">
+    </div>
+    <button class="num-submit" onclick="_submitNewUserProfile()">Get Started &rarr;</button>
+    <button class="num-skip" onclick="_skipNewUserWelcome()">Skip for now</button>
+  </div>
+</div>
+
 <div id="auth-modal" class="auth-modal" onclick="if(event.target===this)closeAuthModal()">
   <div class="auth-modal-inner">
     <button class="auth-modal-close" onclick="closeAuthModal()" aria-label="Close">&#10005;</button>
