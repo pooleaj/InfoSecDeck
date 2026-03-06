@@ -4965,3 +4965,126 @@ function _generateStepAdviceV15(prev, step, profile, myCerts, expNum, stepIdx, t
 
 // Override recommendations function
 generateCLRecommendations = generateCLRecommendationsV15;
+
+// ══════════════════════ v19: QUIZ MODAL + SAVE ══════════════
+
+// Open/close quiz as a fixed overlay modal
+function openQuizModal() {
+  var m = document.getElementById('quiz-modal');
+  if (!m) return;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  quizInit();
+}
+
+function closeQuizModal() {
+  var m = document.getElementById('quiz-modal');
+  if (!m) return;
+  m.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Redirect all existing openHomeQuiz() calls to the modal
+var _origOpenHomeQuizV19 = openHomeQuiz;
+openHomeQuiz = function() { openQuizModal(); };
+
+// Patch quizShowResults to save results and show confirmation
+var _origQuizShowResultsV19 = quizShowResults;
+quizShowResults = function() {
+  _origQuizShowResultsV19();
+  // Recompute scores (same logic as original) to build saveable summary
+  var sc = {soc:0,de:0,ir:0,ti:0,pt:0,rt:0,cs:0,se:0,sa:0,as:0,iam:0,grc:0,ciso:0,ma:0,vm:0};
+  for (var i = 0; i < 15; i++) {
+    if (qz.ans[i] === undefined) continue;
+    var s = QUIZ_SCORES[i][qz.ans[i]];
+    for (var k in s) sc[k] = (sc[k] || 0) + s[k];
+  }
+  var sorted = Object.keys(sc).sort(function(a,b){return sc[b]-sc[a];});
+  var top5 = sorted.slice(0, 5);
+  var max = sc[sorted[0]] || 1;
+  var results = top5.map(function(id) {
+    return {id:id, title:(JT[id]||{}).title||id, pct:Math.round((sc[id]/max)*100)};
+  });
+  _saveQuizResultsV19(results);
+  // Append save/sign-in message to results area
+  var res = document.getElementById('quiz-results');
+  if (res) {
+    var msg = document.createElement('div');
+    msg.className = 'qr-save-msg';
+    if (typeof _currentUser !== 'undefined' && _currentUser) {
+      msg.innerHTML = '\u2705 Results saved to your profile \u2014 '
+        + '<span class="qr-profile-link" onclick="closeQuizModal();showPage(\'profile\')">View Profile \u2192</span>';
+    } else {
+      msg.innerHTML = '\uD83D\uDCBE <span class="qr-profile-link" onclick="closeQuizModal();openAuthModal(\'signin\')">'
+        + 'Sign in</span> to save your results permanently.';
+    }
+    res.appendChild(msg);
+  }
+  _updateQuizFloatVisibility();
+};
+
+function _saveQuizResultsV19(results) {
+  // Save to localStorage
+  try {
+    var p = {};
+    try { p = JSON.parse(localStorage.getItem('isd_profile') || '{}'); } catch(e) {}
+    p.quizResults = results;
+    localStorage.setItem('isd_profile', JSON.stringify(p));
+    localStorage.setItem('isd_quiz_done', '1');
+  } catch(e) {}
+  // Sync to Supabase if signed in
+  if (typeof _currentUser !== 'undefined' && _currentUser && typeof _sb !== 'undefined' && _sb) {
+    _sb.from('profiles').upsert({id: _currentUser.id, quiz_results: JSON.stringify(results)});
+  }
+}
+
+// Hide float button after quiz is completed
+function _updateQuizFloatVisibility() {
+  var done = localStorage.getItem('isd_quiz_done') === '1';
+  var qfb = document.getElementById('quiz-float-btn');
+  if (qfb && done) qfb.style.display = 'none';
+}
+
+// Render saved quiz results on profile page
+function renderQuizProfileSection() {
+  var body = document.getElementById('pqs-body');
+  if (!body) return;
+  var p = {};
+  try { p = JSON.parse(localStorage.getItem('isd_profile') || '{}'); } catch(e) {}
+  var results = p.quizResults || [];
+  if (!results.length) {
+    body.innerHTML = '<p style="font-size:.78rem;color:var(--mt);line-height:1.6;">Take the '
+      + '<strong style="color:var(--tx);cursor:pointer;" onclick="openQuizModal()">Career Quiz</strong>'
+      + ' to discover your top cybersecurity role matches.</p>';
+    return;
+  }
+  var medalColors = ['rgba(251,191,36,.15)','rgba(148,163,184,.1)','rgba(180,120,60,.1)','rgba(255,255,255,.04)','rgba(255,255,255,.03)'];
+  var accentColors = ['#fbbf24','#94a3b8','#b4783c','#6b7280','#6b7280'];
+  var medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49','4th','5th'];
+  body.innerHTML = '<div class="pqs-results">'
+    + results.map(function(r, i) {
+      return '<div class="pqs-result-row" style="background:' + medalColors[i] + '">'
+        + '<span class="pqs-medal" style="color:' + accentColors[i] + '">' + medals[i] + '</span>'
+        + '<span class="pqs-title">' + r.title + '</span>'
+        + '<span class="pqs-pct" style="color:' + accentColors[i] + '">' + r.pct + '% match</span>'
+        + '</div>';
+    }).join('')
+    + '</div>';
+}
+
+// Patch profile page init to render quiz results
+var _origProfileInitV19 = _pageInits['profile'];
+_pageInits['profile'] = function() {
+  if (_origProfileInitV19) _origProfileInitV19();
+  renderQuizProfileSection();
+};
+
+// Patch showPage to hide float btn when quiz done
+var _origShowPageV19 = showPage;
+showPage = function(p) {
+  _origShowPageV19(p);
+  _updateQuizFloatVisibility();
+};
+
+// On load, apply float button state
+_updateQuizFloatVisibility();
