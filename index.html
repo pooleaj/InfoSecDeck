@@ -155,6 +155,9 @@
       Search
     </button>
 
+    <!-- Upgrade CTA -->
+    <button class="nav-upgrade-btn" onclick="showPage('pricing');closeAllDrops()" id="nav-upgrade-btn" title="Go Pro">Go Pro</button>
+
     <!-- Profile icon -->
     <button class="nav-profile-btn" onclick="showPage('profile')" title="My Profile" id="nav-profile-btn">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -483,7 +486,7 @@
   </div>
 
 
-  <div class="footer">InfoSecDeck &middot; 2025&ndash;2026 &middot; Sources: BLS, Glassdoor, ISC&sup2;, ISACA</div>
+  <div class="footer">InfoSecDeck &middot; 2025&ndash;2026 &middot; Sources: BLS, Glassdoor, ISC&sup2;, ISACA &nbsp;&middot;&nbsp; <span class="footer-link" onclick="showPage('privacy')">Privacy Policy</span> &nbsp;&middot;&nbsp; <span class="footer-link" onclick="showPage('tos')">Terms of Service</span></div>
 </div>
 
 <div class="page" id="page-ladder">
@@ -2928,6 +2931,357 @@
 </div>
 </div>
 
+<!-- ═══════════════════════════ PRICING ═══════════════════════════ -->
+<div class="page" id="page-pricing">
+<div class="pricing-wrap">
+  <div class="ey a1">InfoSecDeck Pro</div>
+  <div class="st a2">Invest in Your Cyber Career</div>
+  <p class="pricing-sub a3">Everything you need to break in, level up, and get hired — backed by real practitioners.</p>
+
+  <!-- Pricing Grid -->
+  <div class="pricing-grid a4">
+    <!-- Free column -->
+    <div class="pg-free-col">
+      <div class="pg-free-header">
+        <div class="pg-plan-eyebrow">Free</div>
+        <div class="pg-free-price">$0</div>
+        <div class="pg-free-period">forever &mdash; no credit card</div>
+        <p class="pg-free-desc">The best free cybersecurity career resource on the web.</p>
+        <button class="pg-btn-free" onclick="showPage('home')">Get Started Free</button>
+      </div>
+      <div class="pg-free-features">
+        <div class="pg-features-label">What's included</div>
+        <ul class="pg-feature-list">
+          <li><span class="pg-chk">&#10003;</span>Career Ladder (all 6 tiers)</li>
+          <li><span class="pg-chk">&#10003;</span>Security Domains (15 domains)</li>
+          <li><span class="pg-chk">&#10003;</span>Certification Tracker</li>
+          <li><span class="pg-chk">&#10003;</span>Salary Guide</li>
+          <li><span class="pg-chk">&#10003;</span>Tool Encyclopedia (80+ tools)</li>
+          <li><span class="pg-chk">&#10003;</span>Daily Security Challenge</li>
+          <li><span class="pg-chk">&#10003;</span>CTF &amp; Conference Calendar</li>
+          <li><span class="pg-chk">&#10003;</span>Glossary (300+ terms)</li>
+          <li><span class="pg-chk">&#10003;</span>Career Quiz</li>
+          <li><span class="pg-chk">&#10003;</span>Wall of Wins community</li>
+          <li><span class="pg-chk">&#10003;</span>3 Resume Templates</li>
+        </ul>
+      </div>
+    </div>
+    <!-- Pro column -->
+    <div class="pg-pro-col">
+      <div class="pg-pro-header-top">
+        <div class="pg-pro-eyebrow">Pro</div>
+        <div class="pg-billing-options">
+          <div class="pg-billing-opt pg-billing-featured">
+            <div class="pg-billing-period">Monthly</div>
+            <div class="pg-billing-price">$12.99</div>
+            <div class="pg-billing-per">/month</div>
+            <div class="pg-billing-tag pg-tag-early">Early Bird</div>
+            <button class="pg-btn-pro" onclick="startCheckout('monthly_early_bird')">Start Pro</button>
+          </div>
+          <div class="pg-billing-opt">
+            <div class="pg-billing-period">Yearly</div>
+            <div class="pg-billing-price">$99</div>
+            <div class="pg-billing-per">/year</div>
+            <div class="pg-billing-tag pg-tag-save">Save 36%</div>
+            <button class="pg-btn-pro" onclick="startCheckout('yearly')">Start Pro</button>
+          </div>
+          <div class="pg-billing-opt">
+            <div class="pg-billing-period">Lifetime</div>
+            <div class="pg-billing-price">$199</div>
+            <div class="pg-billing-per">one-time</div>
+            <div class="pg-billing-tag pg-tag-forever">Pay once</div>
+            <button class="pg-btn-pro" onclick="startCheckout('lifetime')">Get Lifetime</button>
+          </div>
+        </div>
+      </div>
+      <div class="pg-pro-features">
+        <div class="pg-everything-label"><span>Everything in Free, plus</span></div>
+        <ul class="pg-pro-feature-list">
+          <li><span class="pg-diamond">&#9670;</span><span>Resume Roaster Pro<span class="pg-pro-sub">Deep AI analysis + ATS score</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>Career Pivot Advisor Pro<span class="pg-pro-sub">Full AI roadmap to target role</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>Interview Prep Pro<span class="pg-pro-sub">Full Q&amp;A + AI follow-ups</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>ATS Job Match Scanner<span class="pg-pro-sub">JD vs profile % match</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>Cert ROI Calculator<span class="pg-pro-sub">Salary lift per certification</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>8 ATS-Optimized Templates<span class="pg-pro-sub">SOC, Pen Tester, Cloud, GRC&hellip;</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>Skills Gap Visualizer<span class="pg-pro-sub">Current &rarr; target role gap map</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>AI Mock Interview<span class="pg-pro-sub">Text Q&amp;A + feedback, 10/mo</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>Salary Negotiation Scripts<span class="pg-pro-sub">Role-specific playbooks</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>Mentor Marketplace<span class="pg-pro-sub">Early access &mdash; coming soon</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>Priority Support<span class="pg-pro-sub">Direct response from the team</span></span></li>
+        </ul>
+        <div class="pg-more-coming">&#43; More features shipping every month &mdash; Pro members get early access to everything new.</div>
+      </div>
+    </div>
+  </div><!-- /pricing-grid -->
+
+  <!-- Guarantee strip -->
+  <div class="pricing-guarantee a5">
+    <span class="pg-icon">&#128274;</span>
+    <span>Cancel anytime &mdash; no questions asked. Grandfathered pricing: your rate never increases once you subscribe.</span>
+  </div>
+
+  <!-- Pricing cadence note -->
+  <div class="pricing-cadence a5">
+    <div class="pricing-cadence-hd">Pricing grows with the community</div>
+    <div class="pricing-cadence-row">
+      <div class="pcr-item pcr-current"><span class="pcr-label">Now (0–100 subs)</span><span class="pcr-val">$12.99/mo</span></div>
+      <div class="pcr-arrow">&rarr;</div>
+      <div class="pcr-item"><span class="pcr-label">100 subs</span><span class="pcr-val">$14.99/mo</span></div>
+      <div class="pcr-arrow">&rarr;</div>
+      <div class="pcr-item"><span class="pcr-label">500 subs</span><span class="pcr-val">$16.99/mo</span></div>
+      <div class="pcr-arrow">&rarr;</div>
+      <div class="pcr-item"><span class="pcr-label">1,000 subs</span><span class="pcr-val">$19.99/mo</span></div>
+      <div class="pcr-arrow">&rarr;</div>
+      <div class="pcr-item"><span class="pcr-label">2,500 subs</span><span class="pcr-val">$24.99/mo</span></div>
+    </div>
+    <p class="pcr-note">Subscribers always keep their locked-in rate. Price increases apply to new subscribers only.</p>
+  </div>
+
+  <!-- One-time purchases -->
+  <div class="pricing-otp a5">
+    <div class="pricing-otp-hd">One-Time Purchases</div>
+    <p class="pricing-otp-sub">Don't need a full subscription? Buy individual Pro features once — no recurring charge.</p>
+    <div class="otp-grid">
+      <div class="otp-card">
+        <div class="otp-icon">&#128293;</div>
+        <div class="otp-name">Resume Roaster Pro</div>
+        <div class="otp-desc">One deep AI analysis of your resume. Includes ATS score, tone feedback, and rewrite suggestions.</div>
+        <div class="otp-price">$7.99</div>
+        <button class="otp-btn" onclick="startOtpCheckout('roaster')">Buy Now</button>
+      </div>
+      <div class="otp-card">
+        <div class="otp-icon">&#128260;</div>
+        <div class="otp-name">Career Pivot Advisor Pro</div>
+        <div class="otp-desc">Full AI-generated pivot roadmap from your current role to your target. Step-by-step with cert recommendations.</div>
+        <div class="otp-price">$9.99</div>
+        <button class="otp-btn" onclick="startOtpCheckout('pivot')">Buy Now</button>
+      </div>
+      <div class="otp-card">
+        <div class="otp-icon">&#128196;</div>
+        <div class="otp-name">Resume Template Pack</div>
+        <div class="otp-desc">8 ATS-optimized, role-specific templates: SOC Analyst, Pen Tester, Cloud Security, GRC, IAM, and more.</div>
+        <div class="otp-price">$14.99</div>
+        <button class="otp-btn" onclick="startOtpCheckout('templates')">Buy Now</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pricing-legal-links">
+    <span class="footer-link" onclick="showPage('privacy')">Privacy Policy</span>
+    <span class="footer-link-sep">&middot;</span>
+    <span class="footer-link" onclick="showPage('tos')">Terms of Service</span>
+  </div>
+
+</div>
+</div>
+<!-- /PRICING -->
+
+<!-- ═══════════════════════════ PRIVACY POLICY ═══════════════════════════ -->
+<div class="page" id="page-privacy">
+<div class="legal-wrap">
+  <div class="ey a1">Legal</div>
+  <div class="st a2">Privacy Policy</div>
+  <p class="legal-meta a3">Last updated: March 2026 &nbsp;&middot;&nbsp; Effective: March 2026</p>
+
+  <div class="legal-body a3">
+
+    <section class="legal-section">
+      <h2>1. Who We Are</h2>
+      <p>InfoSecDeck ("<strong>we</strong>", "<strong>us</strong>", "<strong>our</strong>") is a cybersecurity career resource platform operated independently. If you have questions about this policy, contact us at <a href="mailto:hello@infosecdeck.com">hello@infosecdeck.com</a>.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>2. Information We Collect</h2>
+      <h3>Account Information</h3>
+      <p>When you create an account, we collect your email address and, optionally, your name. If you sign in with Google, we receive your email and name from Google's OAuth service.</p>
+      <h3>Profile Data</h3>
+      <p>Information you voluntarily provide: your current role, experience level, certifications, career goals, and quiz results. This data is stored in your profile and used to personalize your experience.</p>
+      <h3>Payment Information</h3>
+      <p>All payments are processed by <strong>Stripe</strong>. We never see or store your full card number. We receive a Stripe Customer ID and subscription/purchase status from Stripe after a successful transaction.</p>
+      <h3>Usage Analytics</h3>
+      <p>We use <strong>Google Analytics 4 (GA4)</strong> to understand how visitors use the site — pages visited, session duration, and general usage patterns. GA4 collects anonymized data and sets cookies in your browser. You can opt out via the cookie consent banner or by using a browser extension such as the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Add-on</a>.</p>
+      <h3>Technical Data</h3>
+      <p>Standard server logs may include your IP address, browser type, and referring URL. This data is used for security and performance monitoring only.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>3. How We Use Your Information</h2>
+      <ul>
+        <li>To create and manage your account</li>
+        <li>To deliver Pro features and one-time purchases you have paid for</li>
+        <li>To send transactional emails (account confirmation, receipts) — we do not send marketing emails without explicit opt-in</li>
+        <li>To improve the platform based on aggregated usage data</li>
+        <li>To detect and prevent fraud or abuse</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>4. Data Processors</h2>
+      <p>We share data with the following third-party services solely to operate InfoSecDeck:</p>
+      <div class="legal-processor-grid">
+        <div class="legal-processor">
+          <div class="lp-name">Supabase</div>
+          <div class="lp-role">Authentication &amp; database (user profiles, plan status, purchases)</div>
+        </div>
+        <div class="legal-processor">
+          <div class="lp-name">Stripe</div>
+          <div class="lp-role">Payment processing (subscriptions &amp; one-time purchases)</div>
+        </div>
+        <div class="legal-processor">
+          <div class="lp-name">Google Analytics 4</div>
+          <div class="lp-role">Anonymized usage analytics</div>
+        </div>
+        <div class="legal-processor">
+          <div class="lp-name">Vercel</div>
+          <div class="lp-role">Web hosting &amp; content delivery</div>
+        </div>
+      </div>
+      <p>We do not sell your personal data to any third party.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>5. Cookies</h2>
+      <p>We use the following cookies:</p>
+      <ul>
+        <li><strong>Authentication cookies</strong> — set by Supabase to keep you signed in. These are strictly necessary and cannot be disabled.</li>
+        <li><strong>Analytics cookies</strong> — set by Google Analytics 4 to measure site usage. You can decline these via our cookie banner or browser settings.</li>
+        <li><strong>Preference cookies</strong> — set by InfoSecDeck to remember your consent choice and local preferences (stored in localStorage).</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>6. Your Rights</h2>
+      <p>Depending on your location, you may have the right to:</p>
+      <ul>
+        <li><strong>Access</strong> — request a copy of the personal data we hold about you</li>
+        <li><strong>Correction</strong> — request that inaccurate data be corrected</li>
+        <li><strong>Deletion</strong> — request deletion of your account and associated data</li>
+        <li><strong>Data portability</strong> — receive your data in a machine-readable format</li>
+        <li><strong>Withdraw consent</strong> — opt out of analytics cookies at any time</li>
+      </ul>
+      <p>To exercise any of these rights, email us at <a href="mailto:hello@infosecdeck.com">hello@infosecdeck.com</a>. We will respond within 30 days.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>7. Data Retention</h2>
+      <p>We retain your account data for as long as your account is active. If you delete your account, we will delete your profile data within 30 days, except where retention is required by law (e.g., financial records related to Stripe transactions, which Stripe retains per their policy).</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>8. Children's Privacy</h2>
+      <p>InfoSecDeck is not directed at children under 13. We do not knowingly collect personal data from children. If you believe a child has provided us with personal data, please contact us at <a href="mailto:hello@infosecdeck.com">hello@infosecdeck.com</a>.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>9. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. We will update the "Last updated" date above and, for material changes, notify users via email or an in-app notice.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>10. Contact</h2>
+      <p>For privacy questions or requests: <a href="mailto:hello@infosecdeck.com">hello@infosecdeck.com</a></p>
+    </section>
+
+  </div>
+
+  <div class="legal-nav-links">
+    <span onclick="showPage('tos')" class="legal-nav-link">Terms of Service &rarr;</span>
+    <span onclick="showPage('home')" class="legal-nav-link">Back to InfoSecDeck &rarr;</span>
+  </div>
+</div>
+<div class="footer">InfoSecDeck &middot; Privacy Policy</div>
+</div>
+<!-- /PRIVACY -->
+
+<!-- ═══════════════════════════ TERMS OF SERVICE ═══════════════════════════ -->
+<div class="page" id="page-tos">
+<div class="legal-wrap">
+  <div class="ey a1">Legal</div>
+  <div class="st a2">Terms of Service</div>
+  <p class="legal-meta a3">Last updated: March 2026 &nbsp;&middot;&nbsp; Effective: March 2026</p>
+
+  <div class="legal-body a3">
+
+    <section class="legal-section">
+      <h2>1. Acceptance of Terms</h2>
+      <p>By accessing or using InfoSecDeck ("<strong>the Service</strong>"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service. These terms apply to all visitors, registered users, and paying subscribers.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>2. What InfoSecDeck Provides</h2>
+      <p>InfoSecDeck is an educational platform providing cybersecurity career guidance, certification information, salary data, and career planning tools. All content is for informational purposes only. While we strive for accuracy, we do not guarantee specific career outcomes, job offers, salary figures, or certification exam success. Career data is sourced from publicly available industry reports (BLS, Glassdoor, ISC², ISACA) and is subject to market change.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>3. Accounts</h2>
+      <p>You must provide an accurate email address to create an account. You are responsible for maintaining the security of your account credentials. You may not share your account with others or use another person's account. We reserve the right to suspend or terminate accounts that violate these terms.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>4. Pro Subscription</h2>
+      <h3>Billing</h3>
+      <p>Pro subscriptions are billed in advance on a monthly or annual basis. All prices are in USD. By subscribing, you authorize us to charge your payment method on a recurring basis until you cancel.</p>
+      <h3>Early Bird Pricing</h3>
+      <p>Subscribers who join during the early bird period lock in their rate permanently. Price increases for new subscribers do not affect existing subscribers.</p>
+      <h3>Cancellation</h3>
+      <p>You may cancel your subscription at any time through the customer portal. Cancellation takes effect at the end of the current billing period — you retain Pro access until then. We do not offer prorated refunds for partial billing periods.</p>
+      <h3>Refunds</h3>
+      <p>We offer a 7-day money-back guarantee for first-time subscribers. To request a refund within this window, email <a href="mailto:hello@infosecdeck.com">hello@infosecdeck.com</a>. After 7 days, subscriptions are non-refundable.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>5. One-Time Purchases</h2>
+      <p>One-time purchases (Resume Roaster Pro, Career Pivot Advisor Pro, Resume Template Pack) grant permanent access to the purchased feature for your account. One-time purchases are non-refundable once the feature has been accessed.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>6. Acceptable Use</h2>
+      <p>You agree not to:</p>
+      <ul>
+        <li>Use the Service for any unlawful purpose</li>
+        <li>Attempt to reverse-engineer, scrape, or reproduce the platform's content or data in bulk</li>
+        <li>Share Pro account access with non-subscribers</li>
+        <li>Submit false, misleading, or harmful content (e.g., Wall of Wins submissions)</li>
+        <li>Attempt to bypass any access controls or paywalls</li>
+      </ul>
+    </section>
+
+    <section class="legal-section">
+      <h2>7. Intellectual Property</h2>
+      <p>All content on InfoSecDeck — including text, data compilations, UI design, and code — is owned by InfoSecDeck and protected by copyright. You may not reproduce or redistribute it without written permission. Career guidance content is original editorial work; certification details are factual and sourced from public information.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>8. Disclaimers &amp; Limitation of Liability</h2>
+      <p>The Service is provided "as is" without warranties of any kind. We are not liable for any indirect, incidental, or consequential damages arising from your use of InfoSecDeck, including but not limited to career decisions made based on content on this platform. Our total liability to you for any claim shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>9. Changes to Terms</h2>
+      <p>We may update these Terms from time to time. Continued use of the Service after changes are posted constitutes acceptance of the new Terms. We will notify users of material changes via email.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>10. Governing Law</h2>
+      <p>These Terms are governed by the laws of the United States. Any disputes shall be resolved through binding arbitration under the rules of the American Arbitration Association, except that either party may seek injunctive relief in a court of competent jurisdiction.</p>
+    </section>
+
+    <section class="legal-section">
+      <h2>11. Contact</h2>
+      <p>For questions about these Terms: <a href="mailto:hello@infosecdeck.com">hello@infosecdeck.com</a></p>
+    </section>
+
+  </div>
+
+  <div class="legal-nav-links">
+    <span onclick="showPage('privacy')" class="legal-nav-link">Privacy Policy &rarr;</span>
+    <span onclick="showPage('home')" class="legal-nav-link">Back to InfoSecDeck &rarr;</span>
+  </div>
+</div>
+<div class="footer">InfoSecDeck &middot; Terms of Service</div>
+</div>
+<!-- /TOS -->
+
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-49QCYN526W"></script>
 <script>
@@ -2937,8 +3291,8 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=19"></script>
-<script src="js/auth.js?v=19"></script>
+<script src="js/app.js?v=20"></script>
+<script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->
 <!-- Career Quiz Modal -->
@@ -3212,6 +3566,40 @@
     </details>
   </div>
 </div>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-banner" class="cookie-banner" style="display:none">
+  <div class="cookie-banner-inner">
+    <div class="cookie-banner-text">
+      <span class="cookie-banner-icon">&#127850;</span>
+      <span>We use cookies for authentication and analytics (Google Analytics 4). See our <span class="cookie-link" onclick="showPage('privacy')">Privacy Policy</span> for details.</span>
+    </div>
+    <div class="cookie-banner-actions">
+      <button class="cookie-btn cookie-btn-decline" onclick="setCookieConsent('declined')">Decline Analytics</button>
+      <button class="cookie-btn cookie-btn-accept" onclick="setCookieConsent('accepted')">Accept All</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var consent = localStorage.getItem('isd_cookie_consent');
+    if (!consent) {
+      var banner = document.getElementById('cookie-banner');
+      if (banner) banner.style.display = 'flex';
+    }
+  })();
+
+  function setCookieConsent(choice) {
+    localStorage.setItem('isd_cookie_consent', choice);
+    var banner = document.getElementById('cookie-banner');
+    if (banner) {
+      banner.style.opacity = '0';
+      banner.style.transform = 'translateY(20px)';
+      setTimeout(function() { banner.style.display = 'none'; }, 300);
+    }
+  }
+</script>
 
 </body>
 </html>

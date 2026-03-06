@@ -5088,3 +5088,158 @@ showPage = function(p) {
 
 // On load, apply float button state
 _updateQuizFloatVisibility();
+
+// ══════════════════════ v20 — PRICING + STRIPE ══════════════════════
+
+var STRIPE_PRICES = {
+  monthly_early_bird: 'price_1T82qDHcMBLR0w0VjaXeVFlM',
+  monthly_standard:   'price_1T82qeHcMBLR0w0VK9T42DfU',
+  yearly:             'price_1T82qyHcMBLR0w0VFOQPrivP',
+  lifetime:           'price_1T82rLHcMBLR0w0VKzLGb0UX',
+  otp_roaster:        'price_1T82rkHcMBLR0w0VHwN27kRM',
+  otp_pivot:          'price_1T82s3HcMBLR0w0VWevxrO9S',
+  otp_templates:      'price_1T82sOHcMBLR0w0VlPD5ySWH'
+};
+
+var EDGE_BASE = 'https://eaynqvgeqdnaswwuwbha.supabase.co/functions/v1';
+
+// Current billing tab
+var _pricingTab = 'monthly';
+
+function startCheckout(planKey) {
+  if (typeof _currentUser === 'undefined' || !_currentUser) {
+    if (typeof openAuthModal === 'function') openAuthModal('signup');
+    return;
+  }
+  var priceId = STRIPE_PRICES[planKey] || STRIPE_PRICES.monthly_early_bird;
+  _callCheckout(priceId);
+}
+
+function startOtpCheckout(product) {
+  if (typeof _currentUser === 'undefined' || !_currentUser) {
+    if (typeof openAuthModal === 'function') openAuthModal('signup');
+    return;
+  }
+  var priceId = STRIPE_PRICES['otp_' + product];
+  _callCheckout(priceId);
+}
+
+function _callCheckout(priceId) {
+  var btn = document.getElementById('pc-checkout-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading\u2026'; }
+
+  if (priceId.indexOf('REPLACE') !== -1) {
+    alert('Stripe price IDs not yet configured. Replace the STRIPE_PRICES values in app.js with your actual Stripe Price IDs.');
+    if (btn) { btn.disabled = false; setPricingTab(_pricingTab); }
+    return;
+  }
+
+  var userId = _currentUser.id;
+  var userEmail = _currentUser.email;
+
+  fetch(EDGE_BASE + '/create-checkout-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ priceId: priceId, userId: userId, email: userEmail })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('Checkout error: ' + (data.error || 'Unknown error'));
+      if (btn) { btn.disabled = false; btn.textContent = 'Start Pro \u2192'; }
+    }
+  })
+  .catch(function(err) {
+    alert('Network error. Please try again.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Start Pro \u2192'; }
+  });
+}
+
+// Show/hide "Go Pro" nav button based on plan
+function _updateUpgradeNavBtn() {
+  var btn = document.getElementById('nav-upgrade-btn');
+  if (!btn) return;
+  var isPro = (typeof window._userPlan !== 'undefined' && window._userPlan === 'pro');
+  btn.style.display = isPro ? 'none' : '';
+}
+
+// Called from auth.js after profile sync
+window._onPlanLoaded = function(plan) {
+  window._userPlan = plan;
+  _updateUpgradeNavBtn();
+  _updateProBadge();
+};
+
+// Check if user is Pro
+function _isPro() {
+  // Check live window var first, fall back to localStorage
+  if (typeof window._userPlan !== 'undefined') return window._userPlan === 'pro';
+  try {
+    var p = JSON.parse(localStorage.getItem('isd_profile') || '{}');
+    return p.plan === 'pro';
+  } catch(e) { return false; }
+}
+
+// Gate a feature — returns true if Pro, otherwise shows upgrade prompt and returns false
+function _requirePro(featureName) {
+  if (_isPro()) return true;
+  _showUpgradePrompt(featureName);
+  return false;
+}
+
+function _showUpgradePrompt(featureName) {
+  var msg = featureName
+    ? featureName + ' is a Pro feature.'
+    : 'This is a Pro feature.';
+  // Show a non-blocking toast-style prompt
+  var existing = document.getElementById('pro-gate-toast');
+  if (existing) existing.remove();
+  var el = document.createElement('div');
+  el.id = 'pro-gate-toast';
+  el.className = 'pro-gate-toast';
+  el.innerHTML = '<span class="pgt-lock">&#128274;</span><span class="pgt-msg">' + msg + '</span>'
+    + '<button class="pgt-btn" onclick="showPage(\'pricing\');this.parentNode.remove()">Go Pro &rarr;</button>'
+    + '<button class="pgt-close" onclick="this.parentNode.remove()">&#10005;</button>';
+  document.body.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.remove(); }, 6000);
+}
+
+// Show Pro badge on profile page
+function _updateProBadge() {
+  var badges = document.getElementById('ph-badges');
+  if (!badges) return;
+  if (_isPro()) {
+    if (!badges.querySelector('.pro-badge')) {
+      var b = document.createElement('span');
+      b.className = 'pro-badge';
+      b.textContent = 'Pro';
+      badges.appendChild(b);
+    }
+  } else {
+    var existing = badges.querySelector('.pro-badge');
+    if (existing) existing.remove();
+  }
+}
+
+// Handle Stripe redirect back to site after checkout
+(function() {
+  var search = window.location.search;
+  if (search.indexOf('checkout=success') !== -1) {
+    // Clean up URL
+    history.replaceState({}, '', window.location.pathname + window.location.hash.replace(/\?.*/, '') || '#pricing');
+    // Show success toast after a short delay (auth needs to load first)
+    setTimeout(function() {
+      showToast('Welcome to Pro! \uD83C\uDF89 Your account has been upgraded.');
+      showPage('pricing');
+    }, 1500);
+  } else if (search.indexOf('checkout=canceled') !== -1) {
+    history.replaceState({}, '', window.location.pathname + '#pricing');
+    setTimeout(function() {
+      showPage('pricing');
+    }, 300);
+  }
+})();
+
+_updateUpgradeNavBtn();

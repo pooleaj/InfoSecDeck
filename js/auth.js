@@ -319,9 +319,13 @@ function _syncFromDB() {
         savedSalaryLoc: existing.savedSalaryLoc || '',
         myCerts: dbCerts.length ? dbCerts : (existing.myCerts || []),
         careerLadder: (dbLadder && dbLadder.steps) ? dbLadder : (existing.careerLadder || {}),
-        savedJobFilters: existing.savedJobFilters || null
+        savedJobFilters: existing.savedJobFilters || null,
+        plan: d.plan || 'free',
+        purchases: d.purchases || {}
       };
       try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
+      // Notify app.js of the user's plan (controls nav button + paywall)
+      if (typeof window._onPlanLoaded === 'function') window._onPlanLoaded(d.plan || 'free');
       if (typeof initProfile === 'function') initProfile();
       if (typeof renderMyCerts === 'function') renderMyCerts();
       if (typeof initCareerLadder === 'function') initCareerLadder();
