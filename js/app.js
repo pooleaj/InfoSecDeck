@@ -5130,30 +5130,37 @@ function _callCheckout(priceId) {
 
   if (priceId.indexOf('REPLACE') !== -1) {
     alert('Stripe price IDs not yet configured. Replace the STRIPE_PRICES values in app.js with your actual Stripe Price IDs.');
-    if (btn) { btn.disabled = false; setPricingTab(_pricingTab); }
+    if (btn) { btn.disabled = false; }
     return;
   }
 
   var userId = _currentUser.id;
   var userEmail = _currentUser.email;
 
-  fetch(EDGE_BASE + '/create-checkout-session', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ priceId: priceId, userId: userId, email: userEmail })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      alert('Checkout error: ' + (data.error || 'Unknown error'));
+  _sb.auth.getSession().then(function(res) {
+    var token = (res.data && res.data.session) ? res.data.session.access_token : SUPA_KEY;
+
+    fetch(EDGE_BASE + '/create-checkout-session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ priceId: priceId, userId: userId, email: userEmail })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Checkout error: ' + (data.error || data.message || 'Unknown error'));
+        if (btn) { btn.disabled = false; btn.textContent = 'Start Pro \u2192'; }
+      }
+    })
+    .catch(function(err) {
+      alert('Network error. Please try again.');
       if (btn) { btn.disabled = false; btn.textContent = 'Start Pro \u2192'; }
-    }
-  })
-  .catch(function(err) {
-    alert('Network error. Please try again.');
-    if (btn) { btn.disabled = false; btn.textContent = 'Start Pro \u2192'; }
+    });
   });
 }
 
