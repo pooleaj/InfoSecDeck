@@ -4272,3 +4272,345 @@ document.addEventListener('DOMContentLoaded',function(){
   initScrollReveal();
 });
 
+// ══════════════════════ v14 UPDATES ══════════════════════
+
+// ─── CERT TRACKER: remove right-click, keep comparison ───
+var _origInitCertTrackerV14 = initCertTracker;
+initCertTracker = function() {
+  _origInitCertTrackerV14();
+  // Strip contextmenu (right-click) bindings — replaced by My Certifications field
+  document.querySelectorAll('.cb[data-cert-key]').forEach(function(b) {
+    var fresh = b.cloneNode(true);
+    b.parentNode.replaceChild(fresh, b);
+  });
+};
+
+// ─── MY CERTIFICATIONS TAG INPUT ─────────────────────────
+function getMyCerts() {
+  var p = loadProfile();
+  return Array.isArray(p.myCerts) ? p.myCerts : [];
+}
+function saveMyCerts(arr) {
+  var p = loadProfile();
+  p.myCerts = arr;
+  try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
+  if (typeof syncProfileToDB === 'function') syncProfileToDB(p);
+  if (typeof _renderMemberBanner === 'function') _renderMemberBanner();
+}
+function renderMyCerts() {
+  var tags = document.getElementById('mc-tags');
+  if (!tags) return;
+  var arr = getMyCerts();
+  if (!arr.length) { tags.innerHTML = '<span class="mc-empty">No certifications added yet.</span>'; return; }
+  tags.innerHTML = arr.map(function(c, i) {
+    return '<span class="mc-tag">' + c + '<button class="mc-tag-rm" onclick="removeMyCert(' + i + ')" aria-label="Remove">&times;</button></span>';
+  }).join('');
+}
+function removeMyCert(idx) {
+  var arr = getMyCerts();
+  arr.splice(idx, 1);
+  saveMyCerts(arr);
+  renderMyCerts();
+}
+function addMyCert(name) {
+  if (!name || !name.trim()) return;
+  var arr = getMyCerts();
+  if (arr.indexOf(name.trim()) !== -1) return; // no dupes
+  arr.push(name.trim());
+  saveMyCerts(arr);
+  renderMyCerts();
+  var inp = document.getElementById('mc-search-input');
+  if (inp) { inp.value = ''; }
+  mcHideDropdown();
+}
+
+// Build cert autocomplete list from CERTS object
+function getMCCertList() {
+  if (!window.CERTS) return [];
+  return Object.values(CERTS).map(function(c) { return c.name; }).sort();
+}
+
+function mcSearchUpdate(val) {
+  var hint = document.getElementById('mc-hint');
+  if (!val || val.length < 2) { mcHideDropdown(); if (hint) hint.style.display = 'none'; return; }
+  if (hint) hint.style.display = '';
+  var list = getMCCertList();
+  var q = val.toLowerCase();
+  var matches = list.filter(function(n) { return n.toLowerCase().indexOf(q) !== -1; }).slice(0, 8);
+  var dd = document.getElementById('mc-dropdown');
+  if (!dd) return;
+  if (!matches.length) { mcHideDropdown(); return; }
+  dd.style.display = 'block';
+  dd.innerHTML = matches.map(function(n) {
+    return '<div class="mc-dd-item" onmousedown="addMyCert(\'' + n.replace(/'/g, "\\'") + '\')">' + n + '</div>';
+  }).join('');
+}
+function mcSearchKeydown(e) {
+  if (e.key === 'Enter') {
+    var inp = document.getElementById('mc-search-input');
+    var val = inp ? inp.value.trim() : '';
+    if (val) addMyCert(val);
+    e.preventDefault();
+  }
+  if (e.key === 'Escape') mcHideDropdown();
+}
+function mcHideDropdown() {
+  var dd = document.getElementById('mc-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.mc-input-wrap')) mcHideDropdown();
+});
+
+// Init cert field on profile page open
+var _origInitProfileV14 = initProfile;
+initProfile = function() {
+  _origInitProfileV14();
+  renderMyCerts();
+};
+
+// ─── JOB BOARD FILTER SAVE / RESTORE ────────────────────
+function saveJobFilterToProfile() {
+  if (!window.jbState || !jbState.domain) { showToast('Complete your job search selections first.'); return; }
+  var p = loadProfile();
+  p.savedJobFilters = { domain: jbState.domain, titles: jbState.titles || [], exp: jbState.exp, work: jbState.work, clearance: jbState.clearance };
+  try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
+  if (typeof syncProfileToDB === 'function') syncProfileToDB(p);
+  if (typeof _renderMemberBanner === 'function') _renderMemberBanner();
+  showToast('Job filter saved to profile! \u2705');
+}
+
+// Show save button when results are generated
+var _origGenerateJobLinks = generateJobLinks;
+generateJobLinks = function() {
+  _origGenerateJobLinks();
+  var btn = document.getElementById('jb-save-btn');
+  if (btn) btn.style.display = 'inline-flex';
+};
+
+function goToMyJobBoard() {
+  var p = loadProfile();
+  var f = p.savedJobFilters;
+  showPage('jobs');
+  if (!f || !f.domain) return;
+  // restore state and re-run
+  setTimeout(function() {
+    window.jbState = { domain: f.domain, titles: f.titles || [], exp: f.exp, work: f.work, clearance: f.clearance };
+    // click matching buttons
+    document.querySelectorAll('#jb-domain-btns .jb-choice-btn').forEach(function(b) {
+      if (b.textContent.indexOf(f.domain) !== -1 || b.getAttribute('onclick').indexOf("'" + f.domain + "'") !== -1) b.click();
+    });
+    if (f.exp) document.querySelectorAll('[onclick*="selectJbChoice(\'exp\'"]').forEach(function(b) {
+      if (b.getAttribute('onclick').indexOf("'" + f.exp + "'") !== -1) b.classList.add('active');
+    });
+    if (f.work) document.querySelectorAll('[onclick*="selectJbChoice(\'work\'"]').forEach(function(b) {
+      if (b.getAttribute('onclick').indexOf("'" + f.work + "'") !== -1) b.classList.add('active');
+    });
+    if (f.clearance) document.querySelectorAll('[onclick*="selectJbChoice(\'clearance\'"]').forEach(function(b) {
+      if (b.getAttribute('onclick').indexOf("'" + f.clearance + "'") !== -1) b.classList.add('active');
+    });
+    generateJobLinks();
+  }, 120);
+}
+
+// ─── MY SALARY GUIDE NAVIGATION ──────────────────────────
+function goToMySalary() {
+  showPage('salary');
+  var p = loadProfile();
+  if (!p.savedSalaryRole) return;
+  setTimeout(function() {
+    // Pre-select role dropdown
+    var roleEl = document.getElementById('sc-role');
+    if (roleEl) {
+      for (var i = 0; i < roleEl.options.length; i++) {
+        if (roleEl.options[i].text === p.savedSalaryRole) { roleEl.selectedIndex = i; break; }
+      }
+    }
+    // Pre-select exp + loc
+    var expEl = document.getElementById('sc-exp');
+    if (expEl && p.savedSalaryExp) {
+      for (var j = 0; j < expEl.options.length; j++) {
+        if (expEl.options[j].text === p.savedSalaryExp) { expEl.selectedIndex = j; break; }
+      }
+    }
+    var locEl = document.getElementById('sc-loc');
+    if (locEl && p.savedSalaryLoc) {
+      for (var k = 0; k < locEl.options.length; k++) {
+        if (locEl.options[k].text === p.savedSalaryLoc) { locEl.selectedIndex = k; break; }
+      }
+    }
+    if (typeof calcSalary === 'function') calcSalary();
+    var res = document.getElementById('sc-result');
+    if (res) res.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 150);
+}
+
+// ─── CAREER LADDER PAGE ───────────────────────────────────
+var _clSteps = [];
+var _clNextId = 1;
+
+function loadCareerLadder() {
+  var p = loadProfile();
+  var cl = p.careerLadder;
+  if (cl && cl.steps && cl.steps.length) {
+    _clSteps = cl.steps;
+    _clNextId = cl.nextId || (_clSteps.length + 1);
+  } else {
+    // Bootstrap from profile
+    _clSteps = [
+      { id: 'start', type: 'start', title: p.currentRole || 'Current Role', sub: 'Where I am now', timeline: 'Now', advice: [] },
+      { id: 'end', type: 'end', title: p.targetRole || 'Target Role', sub: 'My goal', timeline: 'Goal', advice: [] }
+    ];
+    _clNextId = 1;
+  }
+}
+
+function saveCareerLadder() {
+  var p = loadProfile();
+  p.careerLadder = { steps: _clSteps, nextId: _clNextId, updated: new Date().toISOString() };
+  try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
+  if (typeof syncProfileToDB === 'function') syncProfileToDB(p);
+  if (typeof _renderMemberBanner === 'function') _renderMemberBanner();
+  showToast('Career roadmap saved! \u2705');
+}
+
+function resetCareerLadder() {
+  if (!confirm('Reset your career roadmap? This cannot be undone.')) return;
+  var p = loadProfile();
+  p.careerLadder = {};
+  try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
+  if (typeof syncProfileToDB === 'function') syncProfileToDB(p);
+  _clSteps = [];
+  initCareerLadder();
+}
+
+function addCLStep() {
+  var idx = _clSteps.length > 1 ? _clSteps.length - 1 : _clSteps.length;
+  var newStep = { id: 'step-' + (_clNextId++), type: 'mid', title: 'Milestone ' + (_clNextId - 1), sub: '', timeline: '', advice: [] };
+  _clSteps.splice(idx, 0, newStep);
+  renderCLCanvas();
+}
+
+function removeCLStep(id) {
+  _clSteps = _clSteps.filter(function(s) { return s.id !== id; });
+  renderCLCanvas();
+}
+
+function updateCLStep(id, field, val) {
+  var s = _clSteps.find(function(x) { return x.id === id; });
+  if (s) s[field] = val;
+}
+
+function renderCLCanvas() {
+  var canvas = document.getElementById('clp-canvas');
+  if (!canvas) return;
+  canvas.innerHTML = _clSteps.map(function(step, i) {
+    var typeClass = step.type === 'start' ? 'cl-node-start' : step.type === 'end' ? 'cl-node-end' : 'cl-node-mid';
+    var icon = step.type === 'start' ? '&#x1F7E2;' : step.type === 'end' ? '&#x2B50;' : '&#x1F539;';
+    var canRemove = step.type === 'mid';
+    var connector = i < _clSteps.length - 1 ?
+      '<div class="cl-connector"><div class="cl-connector-line"></div><div class="cl-connector-arrow">&#x25BC;</div></div>' : '';
+    var adviceHtml = step.advice && step.advice.length ?
+      '<ul class="cl-advice-list">' + step.advice.map(function(a) { return '<li>' + a + '</li>'; }).join('') + '</ul>' : '';
+    return '<div class="cl-node ' + typeClass + '" id="cl-node-' + step.id + '">'
+      + '<div class="cl-node-header">'
+      + '  <span class="cl-node-icon">' + icon + '</span>'
+      + '  <div class="cl-node-fields">'
+      + '    <input class="cl-node-title-input" value="' + (step.title || '').replace(/"/g,'&quot;') + '" placeholder="Role / Milestone" oninput="updateCLStep(\'' + step.id + '\',\'title\',this.value)">'
+      + '    <div class="cl-node-row">'
+      + '      <input class="cl-node-sub-input" value="' + (step.sub || '').replace(/"/g,'&quot;') + '" placeholder="Brief description" oninput="updateCLStep(\'' + step.id + '\',\'sub\',this.value)">'
+      + '      <input class="cl-node-time-input" value="' + (step.timeline || '').replace(/"/g,'&quot;') + '" placeholder="Timeline (e.g. 2 yrs)" oninput="updateCLStep(\'' + step.id + '\',\'timeline\',this.value)">'
+      + '    </div>'
+      + '  </div>'
+      + (canRemove ? '  <button class="cl-remove-btn" onclick="removeCLStep(\'' + step.id + '\')" title="Remove">&#x2715;</button>' : '')
+      + '</div>'
+      + (adviceHtml ? '<div class="cl-advice">' + adviceHtml + '</div>' : '')
+      + '</div>'
+      + connector;
+  }).join('');
+}
+
+function initCareerLadder() {
+  var gateEl = document.getElementById('clp-auth-gate');
+  var builderEl = document.getElementById('clp-builder');
+  var recEl = document.getElementById('clp-rec-panel');
+  var isLoggedIn = typeof _currentUser !== 'undefined' && _currentUser;
+  if (gateEl) gateEl.style.display = isLoggedIn ? 'none' : 'flex';
+  if (builderEl) builderEl.style.display = isLoggedIn ? 'block' : 'none';
+  if (!isLoggedIn) return;
+  loadCareerLadder();
+  renderCLCanvas();
+  if (recEl) recEl.style.display = 'none';
+}
+
+function generateCLRecommendations() {
+  var p = loadProfile();
+  var myCerts = p.myCerts || [];
+  var recPanel = document.getElementById('clp-rec-panel');
+  var recBody = document.getElementById('clp-rec-body');
+  if (!recPanel || !recBody) return;
+  if (!_clSteps.length) { showToast('Add milestones first.'); return; }
+  var recs = [];
+  _clSteps.forEach(function(step, i) {
+    if (i === 0) return; // skip start
+    var prev = _clSteps[i - 1];
+    var advice = _generateStepAdvice(prev, step, p, myCerts, i, _clSteps.length);
+    step.advice = advice;
+    recs.push({ from: prev.title, to: step.title, advice: advice });
+  });
+  renderCLCanvas(); // re-render with advice
+  recBody.innerHTML = recs.map(function(r) {
+    return '<div class="clr-item"><div class="clr-transition">' + r.from + ' &rarr; ' + r.to + '</div>'
+      + '<ul class="clr-list">' + r.advice.map(function(a) { return '<li>' + a + '</li>'; }).join('') + '</ul></div>';
+  }).join('');
+  recPanel.style.display = 'block';
+  recPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  showToast('Recommendations generated! \u2705');
+}
+
+function _generateStepAdvice(prev, step, profile, myCerts, stepIdx, totalSteps) {
+  var advice = [];
+  var exp = profile.exp || '0';
+  var expNum = parseInt(exp) || 0;
+  var isFirst = stepIdx === 1;
+  var isLast = stepIdx === totalSteps - 1;
+
+  // Certs advice
+  var hasCISSP = myCerts.some(function(c) { return c.indexOf('CISSP') !== -1; });
+  var hasSec = myCerts.some(function(c) { return c.indexOf('Security+') !== -1 || c.indexOf('Sec+') !== -1; });
+  var hasCloud = myCerts.some(function(c) { return c.indexOf('AWS') !== -1 || c.indexOf('Azure') !== -1 || c.indexOf('GCP') !== -1; });
+
+  if (isFirst) {
+    if (!hasSec) advice.push('Earn CompTIA Security+ first — it\'s the HR filter for most security roles.');
+    if (expNum < 2) advice.push('Target entry-level SOC, IT helpdesk, or junior security analyst roles to build foundational experience.');
+    advice.push('Set up a home lab (TryHackMe, HackTheBox) to build practical skills alongside certifications.');
+  }
+
+  if (!isFirst && !isLast) {
+    advice.push('Build 2–3 years of hands-on experience in the ' + (prev.title || 'previous') + ' role before moving on.');
+    if (!hasCISSP && expNum >= 3) advice.push('Begin studying toward CISSP — it\'s the most recognized senior-level credential globally.');
+    advice.push('Seek a domain-specific certification that aligns with ' + (step.title || 'this role') + '.');
+    advice.push('Build your professional network through ISACA, ISC², or local BSides chapters.');
+  }
+
+  if (isLast) {
+    if (!hasCISSP) advice.push('CISSP is strongly recommended — most senior roles require or strongly prefer it.');
+    if (step.title && step.title.toLowerCase().indexOf('cloud') !== -1 && !hasCloud) {
+      advice.push('Pursue AWS Security Specialty or AZ-500 to prove cloud security expertise.');
+    }
+    if (step.title && (step.title.toLowerCase().indexOf('ciso') !== -1 || step.title.toLowerCase().indexOf('director') !== -1)) {
+      advice.push('Develop business acumen: risk management, board-level communication, and budget ownership.');
+      advice.push('Consider an MBA or CISM to complement your technical depth with management credibility.');
+    }
+    advice.push('At this level, your reputation and professional network matter as much as credentials.');
+  }
+
+  if (!advice.length) {
+    advice.push('Focus on deepening expertise in your current domain for 2–3 years before advancing.');
+    advice.push('Identify 1–2 certifications aligned with your target role and create a study plan.');
+  }
+  return advice;
+}
+
+// Page init hook for career ladder
+_pageInits['career-ladder'] = function() { initCareerLadder(); };

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=13">
+<link rel="stylesheet" href="css/styles.css?v=14">
 </head>
 <body>
 <nav>
@@ -53,6 +53,10 @@
         <div class="ndi" onclick="showPage('pivot');closeAllDrops()">
           <span class="ndi-icon">🔀</span>
           <div class="ndi-text"><span class="ndi-label">Career Pivot Advisor</span><span class="ndi-desc">AI-powered domain switching guide</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('career-ladder');closeAllDrops()">
+          <span class="ndi-icon">🗺️</span>
+          <div class="ndi-text"><span class="ndi-label">My Career Roadmap</span><span class="ndi-desc">Build your personalized career path</span></div>
         </div>
       </div>
     </div>
@@ -237,20 +241,57 @@
           <div class="hmv-greeting">Welcome back</div>
           <div class="hmv-name" id="hmv-name">Cyber Pro</div>
           <div class="hmv-role-row" id="hmv-role-row">
-            <span class="hmv-role-icon">💼</span>
+            <span class="hmv-role-icon">&#128188;</span>
             <span class="hmv-role-text" id="hmv-role-text">Loading your profile&hellip;</span>
           </div>
-          <div class="hmv-quick-links">
-            <div class="hmv-ql" onclick="showPage('salary')"><span class="hmv-ql-icon">💰</span>Salary Guide</div>
-            <div class="hmv-ql" onclick="showPage('certs')"><span class="hmv-ql-icon">📜</span>Certifications</div>
-            <div class="hmv-ql" onclick="showPage('interview')"><span class="hmv-ql-icon">🎯</span>Interview Prep</div>
-            <div class="hmv-ql" onclick="showPage('jobs')"><span class="hmv-ql-icon">💼</span>Job Board</div>
+
+          <!-- 4 Personalized Cards -->
+          <div class="hmv-cards">
+            <div class="hmv-card hmv-card-salary" onclick="goToMySalary()">
+              <div class="hmv-card-icon">&#x1F4B0;</div>
+              <div class="hmv-card-title">My Salary</div>
+              <div class="hmv-card-sub" id="hmv-sal-sub">Salary Guide</div>
+            </div>
+            <div class="hmv-card hmv-card-jobs" onclick="goToMyJobBoard()">
+              <div class="hmv-card-icon">&#x1F4BC;</div>
+              <div class="hmv-card-title">My Job Board</div>
+              <div class="hmv-card-sub" id="hmv-job-sub">Job Search</div>
+            </div>
+            <div class="hmv-card hmv-card-ladder" onclick="showPage('career-ladder')">
+              <div class="hmv-card-icon">&#x1F5FA;&#xFE0F;</div>
+              <div class="hmv-card-title">My Roadmap</div>
+              <div class="hmv-card-sub" id="hmv-ladder-sub">Career Path</div>
+            </div>
+            <div class="hmv-card hmv-card-profile" onclick="showPage('profile')">
+              <div class="hmv-card-icon"><span class="hmv-avatar-initial" id="hmv-avatar-initial">?</span></div>
+              <div class="hmv-card-title">My Profile</div>
+              <div class="hmv-card-sub" id="hmv-profile-sub">Account</div>
+            </div>
           </div>
-          <div class="hmv-cert-bar" id="hmv-cert-bar"></div>
+
+          <!-- Decorative security visualization -->
+          <div class="hmv-visual">
+            <svg class="hmv-radar" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="40" r="35" stroke="rgba(0,212,200,.08)" stroke-width="1"/>
+              <circle cx="60" cy="40" r="24" stroke="rgba(0,212,200,.1)" stroke-width="1"/>
+              <circle cx="60" cy="40" r="13" stroke="rgba(0,212,200,.14)" stroke-width="1"/>
+              <line x1="60" y1="5" x2="60" y2="75" stroke="rgba(0,212,200,.07)" stroke-width="1"/>
+              <line x1="25" y1="40" x2="95" y2="40" stroke="rgba(0,212,200,.07)" stroke-width="1"/>
+              <line x1="35.3" y1="15.3" x2="84.7" y2="64.7" stroke="rgba(0,212,200,.05)" stroke-width="1"/>
+              <line x1="84.7" y1="15.3" x2="35.3" y2="64.7" stroke="rgba(0,212,200,.05)" stroke-width="1"/>
+              <polygon class="hmv-radar-sweep" points="60,40 60,5 90,22" fill="rgba(0,212,200,.12)" opacity="0.7"/>
+              <circle cx="60" cy="40" r="2.5" fill="#00d4c8" opacity="0.8"/>
+              <circle cx="42" cy="28" r="1.5" fill="#10e87e" class="hmv-blip"/>
+              <circle cx="74" cy="52" r="1.5" fill="#f5c842" class="hmv-blip" style="animation-delay:.4s"/>
+              <circle cx="68" cy="22" r="1" fill="#4d9eff" class="hmv-blip" style="animation-delay:.8s"/>
+              <circle cx="38" cy="55" r="1" fill="#c084fc" class="hmv-blip" style="animation-delay:1.2s"/>
+            </svg>
+            <div class="hmv-visual-label" id="hmv-cert-count-label">Radar</div>
+          </div>
+
           <div class="hmv-footer">
             <span class="hmv-status-dot"></span>
             <span class="hmv-status-txt" id="hmv-status-txt">Synced across all devices</span>
-            <span class="hmv-profile-btn" onclick="showPage('profile')">My Profile &rarr;</span>
           </div>
         </div>
 
@@ -950,13 +991,9 @@
   <div class="cert-header a1">
     <div class="ey">Certifications &amp; Training</div>
     <div class="st" style="margin-bottom:6px;">Cert Roadmap by Domain &amp; Career Stage</div>
-    <p style="font-size:.78rem;color:var(--mt);line-height:1.6;">Hover any badge for details. Click to expand full info. Right-click a badge to track your progress. Columns = domains &middot; rows = career stage.</p>
+    <p style="font-size:.78rem;color:var(--mt);line-height:1.6;">Hover any badge for details. Click to expand full info. Columns = domains &middot; rows = career stage.</p>
     <div class="cpt-summary" id="cpt-summary">
-      <span id="cpt-done">✅ 0 earned</span>
-      <span id="cpt-inprog">⏳ 0 in progress</span>
-      <span id="cpt-planned">📌 0 planned</span>
-      <button class="cpt-reset-btn" onclick="resetCertProgress()">Reset</button>
-      <button class="cpt-compare-btn" onclick="openCertCompare()">⚖️ Compare Certs</button>
+      <button class="cpt-compare-btn" onclick="openCertCompare()">&#x2696;&#xFE0F; Compare Certs</button>
     </div>
     <div class="cert-legend" style="justify-content:center;">
       <div class="cl-item"><span class="cl-dot" style="background:rgba(0,224,122,.25);border-color:rgba(0,224,122,.5);"></span>Entry</div>
@@ -2576,10 +2613,65 @@
       <div style="font-size:.8rem;color:#94a3b8;line-height:1.8;" id="jb-tips"></div>
     </div>
 
-    <button onclick="resetJobQuiz()" style="margin-top:20px;font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:10px 20px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;">← Start Over</button>
+    <div style="margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button onclick="resetJobQuiz()" style="font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:10px 20px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;">&#8592; Start Over</button>
+      <button class="jb-save-btn" id="jb-save-btn" onclick="saveJobFilterToProfile()" style="display:none">&#128190; Save to My Profile</button>
+    </div>
   </div>
 </div>
 <div class="footer">InfoSecDeck · Job Search Assistant · Links open external job boards · InfoSecDeck does not post or manage listings</div>
+</div>
+
+<!-- ═══════════════ CAREER LADDER (My Roadmap) ═══════════════ -->
+<div class="page" id="page-career-ladder">
+<div class="clp-wrap">
+  <div class="clp-header">
+    <div class="ey a1">My Career</div>
+    <div class="st a2">Career Roadmap</div>
+    <p class="clp-intro a3">Map your journey from where you are now to where you want to be. Add milestones, get personalized recommendations, and track your path forward.</p>
+    <div class="clp-header-actions">
+      <button class="clp-btn-primary" onclick="saveCareerLadder()">&#x1F4BE; Save Roadmap</button>
+      <button class="clp-btn-ghost" onclick="generateCLRecommendations()">&#x2728; Generate Advice</button>
+      <button class="clp-btn-ghost clp-reset" onclick="resetCareerLadder()">Reset</button>
+    </div>
+  </div>
+
+  <!-- Gated: show only when logged in -->
+  <div id="clp-auth-gate" style="display:none">
+    <div class="clp-gate-card">
+      <div class="clp-gate-icon">&#128274;</div>
+      <div class="clp-gate-title">Sign In to Build Your Roadmap</div>
+      <p class="clp-gate-sub">Your career roadmap saves to your account and syncs across all devices.</p>
+      <div class="clp-gate-btns">
+        <button class="clp-btn-primary" onclick="openAuthModal('signin')">Sign In</button>
+        <button class="clp-btn-ghost" onclick="openAuthModal('signup')">Create Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Builder canvas (shown when logged in) -->
+  <div id="clp-builder" style="display:none">
+    <div class="clp-canvas" id="clp-canvas">
+      <!-- Steps rendered by JS -->
+    </div>
+    <div class="clp-add-row">
+      <button class="clp-add-btn" onclick="addCLStep()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add Milestone
+      </button>
+    </div>
+  </div>
+
+  <!-- Recommendations panel -->
+  <div id="clp-rec-panel" class="clp-rec-panel" style="display:none">
+    <div class="clp-rec-header">
+      <span class="clp-rec-icon">&#x1F4A1;</span>
+      <span class="clp-rec-title">Personalized Recommendations</span>
+    </div>
+    <div id="clp-rec-body" class="clp-rec-body"></div>
+  </div>
+</div>
+<div class="footer">InfoSecDeck &middot; My Career Roadmap &middot; Save your path and revisit anytime</div>
 </div>
 
 <div class="page" id="page-about">
@@ -2912,14 +3004,18 @@
     <button class="pf-save-btn" onclick="saveProfile()">Save Profile</button>
   </div>
 
-  <!-- Cert Progress Summary -->
+  <!-- My Certifications -->
   <div class="profile-section">
-    <div class="profile-section-hd">Certification Progress
-      <a class="psh-link" onclick="showPage('certs')">Go to Cert Tracker &rarr;</a>
+    <div class="profile-section-hd">My Certifications
+      <a class="psh-link" onclick="showPage('certs')">Browse All Certs &rarr;</a>
     </div>
-    <div id="profile-cert-summary" class="profile-cert-summary">
-      <p style="color:var(--mt);font-size:.84rem;">Visit the <strong style="color:var(--tx);">Certifications</strong> page and right-click any cert badge to track your progress. Your data saves automatically.</p>
+    <p style="font-size:.78rem;color:var(--mt);margin-bottom:14px;line-height:1.6;">Add the certifications you currently hold. This shows on your welcome card and helps personalize recommendations.</p>
+    <div class="mc-input-wrap">
+      <input type="text" id="mc-search-input" class="mc-input" placeholder="Type a cert name (e.g. CISSP, Security+)..." autocomplete="off" oninput="mcSearchUpdate(this.value)" onkeydown="mcSearchKeydown(event)">
+      <div class="mc-dropdown" id="mc-dropdown" style="display:none"></div>
     </div>
+    <div class="mc-tags" id="mc-tags"></div>
+    <p class="mc-hint" id="mc-hint" style="display:none">Press Enter or click a suggestion to add.</p>
   </div>
 
   <!-- Saved Salary Calc -->
@@ -2949,8 +3045,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=13"></script>
-<script src="js/auth.js?v=13"></script>
+<script src="js/app.js?v=14"></script>
+<script src="js/auth.js?v=14"></script>
 
 <!-- AUTH MODAL -->
 <div id="auth-modal" class="auth-modal" onclick="if(event.target===this)closeAuthModal()">

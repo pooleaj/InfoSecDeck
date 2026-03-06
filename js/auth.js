@@ -198,12 +198,13 @@ function _updateJoinCard() {
 
 function _renderMemberBanner() {
   var p = (typeof loadProfile === 'function') ? loadProfile() : {};
-  var cp = (typeof getCertProgress === 'function') ? getCertProgress() : {};
 
-  // Name display
+  // Name + avatar initial
   var displayName = p.username ? '@' + p.username : (p.name || (_currentUser.email ? _currentUser.email.split('@')[0] : 'Cyber Pro'));
   var nameEl = document.getElementById('hmv-name');
   if (nameEl) nameEl.textContent = displayName;
+  var avatarEl = document.getElementById('hmv-avatar-initial');
+  if (avatarEl) avatarEl.textContent = displayName[0].toUpperCase();
 
   // Role row
   var roleEl = document.getElementById('hmv-role-text');
@@ -219,21 +220,50 @@ function _renderMemberBanner() {
     }
   }
 
-  // Cert progress bar
-  var certBarEl = document.getElementById('hmv-cert-bar');
-  if (certBarEl) {
-    var done = Object.values(cp).filter(function(v) { return v === 'done'; }).length;
-    var inprog = Object.values(cp).filter(function(v) { return v === 'inprog'; }).length;
-    var planned = Object.values(cp).filter(function(v) { return v === 'planned'; }).length;
-    if (done > 0 || inprog > 0 || planned > 0) {
-      certBarEl.innerHTML = '<div class="hmv-cert-summary">'
-        + (done > 0 ? '<span class="hmv-cs-item hmv-cs-done">&#x2705; ' + done + ' earned</span>' : '')
-        + (inprog > 0 ? '<span class="hmv-cs-item hmv-cs-prog">&#x23F3; ' + inprog + ' in progress</span>' : '')
-        + (planned > 0 ? '<span class="hmv-cs-item hmv-cs-plan">&#x1F4CC; ' + planned + ' planned</span>' : '')
-        + '</div>';
+  // Salary card sub-label
+  var salSubEl = document.getElementById('hmv-sal-sub');
+  if (salSubEl) {
+    if (p.savedSalaryRole) {
+      var parts = p.savedSalaryRole.split(' ').slice(0, 3).join(' ');
+      salSubEl.textContent = parts;
     } else {
-      certBarEl.innerHTML = '<div class="hmv-cert-hint" onclick="showPage(\'certs\')">Track your cert progress &rarr;</div>';
+      salSubEl.textContent = 'Salary Guide';
     }
+  }
+
+  // Job board card sub-label
+  var jobSubEl = document.getElementById('hmv-job-sub');
+  if (jobSubEl) {
+    if (p.savedJobFilters && p.savedJobFilters.domain) {
+      jobSubEl.textContent = p.savedJobFilters.domain;
+    } else {
+      jobSubEl.textContent = 'Job Search';
+    }
+  }
+
+  // Career ladder card sub-label
+  var ladderSubEl = document.getElementById('hmv-ladder-sub');
+  if (ladderSubEl) {
+    var cl = p.careerLadder;
+    if (cl && cl.steps && cl.steps.length > 2) {
+      ladderSubEl.textContent = cl.steps.length + ' milestones';
+    } else {
+      ladderSubEl.textContent = 'Build your path';
+    }
+  }
+
+  // Profile card sub-label
+  var profSubEl = document.getElementById('hmv-profile-sub');
+  if (profSubEl) {
+    var certCount = (p.myCerts || []).length;
+    profSubEl.textContent = certCount > 0 ? certCount + ' cert' + (certCount !== 1 ? 's' : '') : 'Account';
+  }
+
+  // Radar visual label
+  var certLabelEl = document.getElementById('hmv-cert-count-label');
+  if (certLabelEl) {
+    var mc = p.myCerts || [];
+    certLabelEl.textContent = mc.length > 0 ? mc.length + ' cert' + (mc.length !== 1 ? 's' : '') + ' earned' : 'No certs added yet';
   }
 
   // Status text
@@ -264,6 +294,10 @@ function _syncFromDB() {
       var d = res.data;
       var existing = {};
       try { existing = JSON.parse(localStorage.getItem('isd_profile') || '{}'); } catch(e) {}
+      var dbCerts = [];
+      try { dbCerts = JSON.parse(d.my_certs || '[]'); } catch(e) {}
+      var dbLadder = {};
+      try { dbLadder = JSON.parse(d.career_ladder || '{}'); } catch(e) {}
       var merged = {
         name: d.name || existing.name || '',
         username: d.username || existing.username || '',
@@ -276,10 +310,15 @@ function _syncFromDB() {
         savedSalaryNums: existing.savedSalaryNums || [],
         savedSalaryRole: existing.savedSalaryRole || '',
         savedSalaryExp: existing.savedSalaryExp || '',
-        savedSalaryLoc: existing.savedSalaryLoc || ''
+        savedSalaryLoc: existing.savedSalaryLoc || '',
+        myCerts: dbCerts.length ? dbCerts : (existing.myCerts || []),
+        careerLadder: (dbLadder && dbLadder.steps) ? dbLadder : (existing.careerLadder || {}),
+        savedJobFilters: existing.savedJobFilters || null
       };
       try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
       if (typeof initProfile === 'function') initProfile();
+      if (typeof renderMyCerts === 'function') renderMyCerts();
+      if (typeof initCareerLadder === 'function') initCareerLadder();
       _updateAuthUI();
       _renderMemberBanner();
     }
@@ -323,6 +362,8 @@ function syncProfileToDB(p) {
     location: p.location || '',
     bio: p.bio || '',
     saved_salary: p.savedSalary || '',
+    my_certs: JSON.stringify(p.myCerts || []),
+    career_ladder: JSON.stringify(p.careerLadder || {}),
     updated_at: new Date().toISOString()
   }).then(function(res) {
     if (res.error) console.error('[ISD] Profile sync write error:', res.error);
