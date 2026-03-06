@@ -27,10 +27,10 @@ _sb.auth.onAuthStateChange(function(event, session) {
 function joinFreeFromCard() {
   var emailEl = document.getElementById('hsc-email');
   var email = emailEl ? emailEl.value.trim() : '';
-  openAuthModal('signup');
+  openAuthModal('signin');
   if (email) {
     setTimeout(function() {
-      var input = document.getElementById('auth-email-up');
+      var input = document.getElementById('auth-magic-email');
       if (input) input.value = email;
     }, 150);
   }
@@ -45,8 +45,7 @@ function openAuthModal(tab) {
   _switchAuthTab(tab || 'signin');
   _clearAuthErrors();
   setTimeout(function() {
-    var inputId = (tab === 'signup') ? 'auth-email-up' : 'auth-email-in';
-    var input = document.getElementById(inputId);
+    var input = document.getElementById('auth-magic-email');
     if (input) input.focus();
   }, 120);
 }
@@ -75,8 +74,10 @@ function _switchAuthTab(tab) {
 function _clearAuthErrors() {
   var ei = document.getElementById('auth-error-in');
   var eu = document.getElementById('auth-error-up');
+  var em = document.getElementById('auth-error-magic');
   if (ei) ei.textContent = '';
   if (eu) eu.textContent = '';
+  if (em) { em.textContent = ''; em.style.color = ''; }
 }
 
 function _setAuthLoading(loading, panel) {
@@ -575,6 +576,53 @@ _roleAnims.forensics = _roleAnims.soc; // similar monitor scene
 _roleAnims.eng = _roleAnims.default;
 _roleAnims.appsec = _roleAnims.red; // terminal scene
 _roleAnims.ciso = _roleAnims.grc; // document scene
+
+// ══════════════════════ v16 AUTH UPDATES ══════════════════════
+// Google OAuth + Magic Link (passwordless) sign-in
+
+function doGoogleSignIn() {
+  var errEl = document.getElementById('auth-error-magic');
+  if (errEl) errEl.textContent = '';
+  var btn = document.querySelector('.auth-google-btn');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; }
+  _sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + window.location.pathname
+    }
+  }).then(function(res) {
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    if (res.error) {
+      if (errEl) errEl.textContent = res.error.message;
+    }
+    // On success, Supabase redirects the browser — no further action needed here
+  });
+}
+
+function doMagicLink() {
+  var email = ((document.getElementById('auth-magic-email') || {}).value || '').trim();
+  var errEl = document.getElementById('auth-error-magic');
+  if (!email) {
+    if (errEl) errEl.textContent = 'Please enter your email address.';
+    return;
+  }
+  var btn = document.getElementById('auth-submit-magic');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
+  _sb.auth.signInWithOtp({
+    email: email,
+    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+  }).then(function(res) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Magic Link \u2192'; }
+    if (res.error) {
+      if (errEl) errEl.textContent = res.error.message;
+      return;
+    }
+    if (errEl) {
+      errEl.style.color = '#00d4c8';
+      errEl.textContent = 'Check your email \u2014 magic link sent! \u2705';
+    }
+  });
+}
 
 function _getDomainFromRole(role) {
   if (!role) return 'default';

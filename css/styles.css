@@ -2834,6 +2834,39 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .auth-switch a{color:var(--ac);cursor:pointer;text-decoration:underline;}
 .auth-switch a:hover{opacity:.8;}
 
+/* ── v16: Google OAuth + Magic Link ── */
+.auth-google-btn{
+  width:100%;display:flex;align-items:center;justify-content:center;
+  gap:10px;background:#fff;color:#1f1f1f;border:1.5px solid #dadce0;
+  border-radius:9px;padding:12px;font-size:.95rem;font-weight:600;
+  cursor:pointer;transition:box-shadow .15s,background .15s;
+  margin-bottom:4px;
+}
+.auth-google-btn:hover{background:#f8f8f8;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+.auth-google-btn:disabled{opacity:.6;cursor:not-allowed;}
+.auth-divider{
+  display:flex;align-items:center;gap:10px;
+  margin:18px 0 16px;color:rgba(255,255,255,.3);font-size:.78rem;
+}
+.auth-divider::before,.auth-divider::after{
+  content:'';flex:1;height:1px;background:rgba(255,255,255,.1);
+}
+.auth-hint{
+  text-align:center;color:rgba(255,255,255,.35);
+  font-size:.78rem;margin-top:8px;line-height:1.5;
+}
+.auth-advanced{margin-top:22px;}
+.auth-advanced > summary{
+  color:rgba(255,255,255,.4);font-size:.82rem;cursor:pointer;
+  text-align:center;list-style:none;user-select:none;
+  transition:color .15s;
+}
+.auth-advanced > summary::-webkit-details-marker{display:none;}
+.auth-advanced > summary::before{content:'+ ';}
+.auth-advanced[open] > summary::before{content:'− ';}
+.auth-advanced > summary:hover{color:rgba(255,255,255,.7);}
+.auth-adv-body{margin-top:16px;border-top:1px solid rgba(255,255,255,.08);padding-top:16px;}
+
 /* Nav profile initial badge */
 .nav-profile-initial{
   width:28px;height:28px;border-radius:50%;
