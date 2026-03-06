@@ -137,6 +137,7 @@ function _updateAuthUI() {
   _updateNavBtn();
   _updateProfilePage();
   _updateJoinCard();
+  if (typeof _updateAccountDrop === 'function') _updateAccountDrop();
 }
 
 function _updateNavBtn() {

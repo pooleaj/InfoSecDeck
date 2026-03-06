@@ -158,10 +158,53 @@
     <!-- Upgrade CTA -->
     <button class="nav-upgrade-btn" onclick="showPage('pricing');closeAllDrops()" id="nav-upgrade-btn" title="Go Pro">Go Pro</button>
 
-    <!-- Profile icon -->
-    <button class="nav-profile-btn" onclick="showPage('profile')" title="My Profile" id="nav-profile-btn">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-    </button>
+    <!-- Account dropdown -->
+    <div class="ncat ncat-account" id="ncat-account">
+      <button class="nav-profile-btn" id="nav-profile-btn" onclick="toggleAccountDrop()" title="My Account">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      </button>
+      <div class="ndrop account-drop" id="account-drop">
+        <!-- Logged-in menu -->
+        <div id="account-drop-auth" style="display:none">
+          <div class="account-drop-header" id="account-drop-header">
+            <div class="adh-initial" id="adh-initial">?</div>
+            <div class="adh-info">
+              <div class="adh-name" id="adh-name">Account</div>
+              <div class="adh-plan" id="adh-plan">Free</div>
+            </div>
+          </div>
+          <div class="ndrop-divider"></div>
+          <div class="ndi" onclick="showPage('profile');closeAllDrops()">
+            <span class="ndi-icon">&#128100;</span>
+            <div class="ndi-text"><span class="ndi-label">My Account</span><span class="ndi-desc">Profile, certs &amp; saved data</span></div>
+          </div>
+          <div class="ndi" onclick="showPage('pricing');closeAllDrops()">
+            <span class="ndi-icon">&#9733;</span>
+            <div class="ndi-text"><span class="ndi-label">Subscription</span><span class="ndi-desc" id="adrop-sub-desc">View plans &amp; billing</span></div>
+          </div>
+          <div class="ndi" onclick="showPage('stories');closeAllDrops()">
+            <span class="ndi-icon">&#127942;</span>
+            <div class="ndi-text"><span class="ndi-label">Wall of Wins</span><span class="ndi-desc">Share your career win</span></div>
+          </div>
+          <div class="ndrop-divider"></div>
+          <div class="ndi ndi-signout" onclick="doSignOut();closeAllDrops()">
+            <span class="ndi-icon">&#8594;</span>
+            <div class="ndi-text"><span class="ndi-label">Sign Out</span></div>
+          </div>
+        </div>
+        <!-- Logged-out menu -->
+        <div id="account-drop-guest" style="display:none">
+          <div class="ndi" onclick="openAuthModal('login');closeAllDrops()">
+            <span class="ndi-icon">&#128274;</span>
+            <div class="ndi-text"><span class="ndi-label">Sign In</span><span class="ndi-desc">Access your account</span></div>
+          </div>
+          <div class="ndi" onclick="openAuthModal('signup');closeAllDrops()">
+            <span class="ndi-icon">&#43;</span>
+            <div class="ndi-text"><span class="ndi-label">Create Account</span><span class="ndi-desc">Free &mdash; no credit card</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 </nav>
@@ -3063,6 +3106,18 @@
         <div class="otp-price">$14.99</div>
         <button class="otp-btn" onclick="startOtpCheckout('templates')">Buy Now</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Manage Subscription (visible to Pro members only) -->
+  <div class="manage-sub-section" id="manage-sub-section" style="display:none">
+    <div class="manage-sub-inner">
+      <div class="manage-sub-left">
+        <div class="manage-sub-label">Your Subscription</div>
+        <div class="manage-sub-status"><span class="manage-sub-dot"></span><span id="manage-sub-status-txt">Pro &mdash; Active</span></div>
+        <p class="manage-sub-note">Update payment, download invoices, or cancel at any time. Your current rate is locked in.</p>
+      </div>
+      <button class="manage-sub-btn" onclick="openCustomerPortal()">Manage Subscription &rarr;</button>
     </div>
   </div>
 

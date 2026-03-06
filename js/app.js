@@ -5178,6 +5178,7 @@ window._onPlanLoaded = function(plan) {
   _updateUpgradeNavBtn();
   _updateProBadge();
   _updatePricingState();
+  _updateAccountDrop();
 };
 
 // Check if user is Pro
@@ -5279,6 +5280,82 @@ function _updatePricingState() {
   }
 }
 
-_pageInits.pricing = function() { _updatePricingState(); };
+_pageInits.pricing = function() {
+  _updatePricingState();
+  // Show manage subscription section for Pro users
+  var manageSection = document.getElementById('manage-sub-section');
+  if (manageSection) manageSection.style.display = _isPro() ? 'block' : 'none';
+};
+
+// ── Account nav dropdown ──────────────────────────────────────
+function toggleAccountDrop() {
+  var cat = document.getElementById('ncat-account');
+  if (!cat) return;
+  var isOpen = cat.classList.contains('open');
+  closeAllDrops();
+  if (!isOpen) {
+    _updateAccountDrop();
+    cat.classList.add('open');
+  }
+}
+
+function _updateAccountDrop() {
+  var authDiv  = document.getElementById('account-drop-auth');
+  var guestDiv = document.getElementById('account-drop-guest');
+  if (!authDiv || !guestDiv) return;
+
+  if (typeof _currentUser !== 'undefined' && _currentUser) {
+    authDiv.style.display  = 'block';
+    guestDiv.style.display = 'none';
+
+    // Header initial + name
+    var p = (typeof loadProfile === 'function') ? loadProfile() : {};
+    var displayName = p.username || p.name || _currentUser.email.split('@')[0];
+    var initial = displayName[0].toUpperCase();
+    var initEl = document.getElementById('adh-initial');
+    var nameEl = document.getElementById('adh-name');
+    var planEl = document.getElementById('adh-plan');
+    var subDesc = document.getElementById('adrop-sub-desc');
+    if (initEl) initEl.textContent = initial;
+    if (nameEl) nameEl.textContent = displayName;
+    if (planEl) {
+      planEl.textContent = _isPro() ? 'Pro Member' : 'Free Plan';
+      planEl.className = 'adh-plan' + (_isPro() ? ' adh-plan-pro' : '');
+    }
+    if (subDesc) subDesc.textContent = _isPro() ? 'Manage or cancel plan' : 'Upgrade to Pro';
+  } else {
+    authDiv.style.display  = 'none';
+    guestDiv.style.display = 'block';
+  }
+}
+
+// ── Stripe Customer Portal ────────────────────────────────────
+function openCustomerPortal() {
+  if (!_currentUser) { openAuthModal('login'); return; }
+  var btn = document.querySelector('.manage-sub-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading\u2026'; }
+
+  _sb.auth.getSession().then(function(res) {
+    var token = (res.data && res.data.session) ? res.data.session.access_token : SUPA_KEY;
+    fetch(EDGE_BASE + '/create-portal-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ userId: _currentUser.id })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Portal error: ' + (data.error || 'Unknown error'));
+        if (btn) { btn.disabled = false; btn.textContent = 'Manage Subscription \u2192'; }
+      }
+    })
+    .catch(function() {
+      alert('Network error. Please try again.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Manage Subscription \u2192'; }
+    });
+  });
+}
 
 _updateUpgradeNavBtn();

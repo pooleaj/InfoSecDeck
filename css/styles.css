@@ -2407,6 +2407,27 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
   transition:all .2s;flex-shrink:0;
 }
 .nav-profile-btn:hover{background:rgba(77,158,255,.22);border-color:rgba(77,158,255,.6);transform:scale(1.08);}
+.ncat-account{position:relative;}
+.ncat-account .account-drop{right:0;left:auto;min-width:240px;}
+.account-drop-header{display:flex;align-items:center;gap:12px;padding:14px 14px 10px;}
+.adh-initial{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--lb),var(--bl));color:#000;font-weight:800;font-size:.95rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.adh-info{display:flex;flex-direction:column;gap:2px;overflow:hidden;}
+.adh-name{font-size:.85rem;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adh-plan{font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mt);}
+.adh-plan-pro{color:var(--lb);}
+.ndrop-divider{height:1px;background:var(--bd);margin:4px 8px;}
+.ndi-signout .ndi-label{color:var(--mt);}
+.ndi-signout:hover .ndi-label{color:#ff6b6b;}
+/* Manage subscription section */
+.manage-sub-section{background:var(--sf);border:1px solid var(--bd2);border-radius:16px;padding:28px 32px;margin-bottom:36px;}
+.manage-sub-inner{display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.manage-sub-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--lb);margin-bottom:8px;}
+.manage-sub-status{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:700;color:var(--tx);margin-bottom:8px;}
+.manage-sub-dot{width:8px;height:8px;border-radius:50%;background:var(--gn);box-shadow:0 0 6px var(--gn);flex-shrink:0;}
+.manage-sub-note{font-size:.78rem;color:var(--mt);line-height:1.6;max-width:420px;}
+.manage-sub-btn{font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:11px 22px;border-radius:9px;background:transparent;border:1px solid var(--bd2);color:var(--tx);cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+.manage-sub-btn:hover{border-color:var(--lb);color:var(--lb);}
+.manage-sub-btn:disabled{opacity:.6;cursor:default;}
 
 /* ─── EDITORIAL ARTICLE SECTION ─────────────────────────── */
 .editorial-section{
