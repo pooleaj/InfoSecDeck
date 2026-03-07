@@ -3841,8 +3841,13 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .rpu-heading{font-size:.85rem;font-weight:800;letter-spacing:-.02em;color:var(--tx);margin-bottom:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .rpu-badge,.ppu-badge{font-family:var(--fm);font-size:.48rem;letter-spacing:.14em;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:linear-gradient(90deg,rgba(13,212,200,.2),rgba(77,158,255,.15));border:1px solid rgba(13,212,200,.35);color:var(--lb);font-weight:700;}
 .rpu-desc{font-size:.78rem;color:var(--mt);line-height:1.55;margin-bottom:12px;}
+.rpu-cta-row,.ppu-cta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .rpu-cta{font-family:var(--fm);font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;padding:8px 16px;border-radius:8px;background:linear-gradient(90deg,rgba(245,200,66,.15),rgba(13,212,200,.12));border:1px solid rgba(245,200,66,.3);color:var(--am);cursor:pointer;font-weight:700;transition:all .2s;}
 .rpu-cta:hover{background:linear-gradient(90deg,rgba(245,200,66,.25),rgba(13,212,200,.2));border-color:rgba(245,200,66,.5);}
+.upsell-divider{font-size:.68rem;color:var(--dm);}
+.rpu-otp-link,.ppu-otp-link{font-family:var(--fm);font-size:.55rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mt);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:3px;transition:color .2s;}
+.rpu-otp-link:hover{color:var(--tx);}
+.ppu-otp-link:hover{color:var(--lb);}
 /* ── Career Pivot Pro inline upsell ── */
 .ppu-card{display:flex;align-items:flex-start;gap:14px;background:linear-gradient(135deg,rgba(13,212,200,.05),rgba(77,158,255,.04));border:1px solid rgba(13,212,200,.22);border-radius:12px;padding:18px 20px;margin-bottom:18px;}
 .ppu-icon{font-size:1.25rem;flex-shrink:0;margin-top:2px;filter:drop-shadow(0 0 6px rgba(13,212,200,.35));}

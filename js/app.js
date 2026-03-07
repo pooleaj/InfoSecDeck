@@ -1185,7 +1185,7 @@ function rShowErr(title,msg){
 }
 
 async function rSubmit(){
-  if (!_requirePro('Resume Roaster Pro')) return;
+  if (!_isPro() && !_hasOtpAccess('roaster')) { _showUpgradePrompt('Resume Roaster'); return; }
   document.getElementById('r-err').classList.remove('show');
   if(!rBase64){rShowErr('No file','Please upload your resume first.');return;}
   var domain=document.getElementById('r-domain').value;
@@ -1700,7 +1700,7 @@ function handlePivotResume(input) {
 }
 
 async function runPivotAdvisor() {
-  if (!_requirePro('Career Pivot Advisor Pro')) return;
+  if (!_isPro() && !_hasOtpAccess('pivot')) { _showUpgradePrompt('Career Pivot Advisor'); return; }
   var fromTitle = document.getElementById('pivot-from').value.trim();
   var toTitle = document.getElementById('pivot-to').value.trim();
   
@@ -5236,6 +5236,14 @@ function _isPro() {
   } catch(e) { return false; }
 }
 
+// Check if user has purchased a specific one-time product
+function _hasOtpAccess(product) {
+  try {
+    var p = JSON.parse(localStorage.getItem('isd_profile') || '{}');
+    return !!(p.purchases && p.purchases['otp_' + product]);
+  } catch(e) { return false; }
+}
+
 // Gate a feature — returns true if Pro, otherwise shows upgrade prompt and returns false
 function _requirePro(featureName) {
   if (_isPro()) return true;
@@ -5323,6 +5331,26 @@ function _updatePricingState() {
     if (proBtns[1]) { proBtns[1].textContent = 'Go Annual \u2192'; proBtns[1].disabled = false; proBtns[1].classList.remove('pg-btn-subscribed'); }
     if (proBtns[2]) { proBtns[2].textContent = 'Go Lifetime \u2192'; proBtns[2].disabled = false; proBtns[2].classList.remove('pg-btn-subscribed'); }
   }
+
+  // OTP buttons — "Included with Pro" or "Purchased" if already owned
+  var otpMap = { roaster: 'otp-btn-roaster', pivot: 'otp-btn-pivot', templates: 'otp-btn-templates' };
+  Object.keys(otpMap).forEach(function(product) {
+    var btn = document.getElementById(otpMap[product]);
+    if (!btn) return;
+    if (isPro) {
+      btn.textContent = 'Included with Pro \u2713';
+      btn.className = 'otp-btn pg-btn-subscribed';
+      btn.disabled = true;
+    } else if (_hasOtpAccess(product)) {
+      btn.textContent = 'Purchased \u2713';
+      btn.className = 'otp-btn pg-btn-subscribed';
+      btn.disabled = true;
+    } else {
+      btn.textContent = 'Buy Now';
+      btn.className = 'otp-btn';
+      btn.disabled = false;
+    }
+  });
 }
 
 _pageInits.pricing = function() {
@@ -5500,12 +5528,12 @@ function _renderProGate(pageId) {
 
 function _updateInlineUpsells() {
   var isPro = _isPro();
-  // Roaster upsell — hide when Pro
+  // Roaster upsell — hide when Pro OR has OTP roaster access
   var ru = document.getElementById('roaster-pro-upsell');
-  if (ru) ru.style.display = isPro ? 'none' : '';
-  // Pivot upsell — hide when Pro
+  if (ru) ru.style.display = (isPro || _hasOtpAccess('roaster')) ? 'none' : '';
+  // Pivot upsell — hide when Pro OR has OTP pivot access
   var pu = document.getElementById('pivot-pro-upsell');
-  if (pu) pu.style.display = isPro ? 'none' : '';
+  if (pu) pu.style.display = (isPro || _hasOtpAccess('pivot')) ? 'none' : '';
 }
 
 _pageInits.roaster   = function() { _updateInlineUpsells(); };

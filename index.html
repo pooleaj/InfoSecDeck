@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=22">
+<link rel="stylesheet" href="css/styles.css?v=23">
 </head>
 <body>
 <nav>
@@ -1599,7 +1599,11 @@
         <div class="rpu-body">
           <div class="rpu-heading">Want the full picture? <span class="rpu-badge">Pro</span></div>
           <div class="rpu-desc">Unlock <strong>Resume Roaster Pro</strong> — deep AI analysis with an ATS compatibility score, 6-dimension breakdown, and line-by-line role-specific feedback powered by Claude.</div>
-          <button class="rpu-cta" onclick="showPage('pricing')">Upgrade for the full analysis &rarr;</button>
+          <div class="rpu-cta-row">
+            <button class="rpu-cta" onclick="showPage('pricing')">Upgrade for the full analysis &rarr;</button>
+            <span class="upsell-divider">or</span>
+            <button class="rpu-otp-link" onclick="startOtpCheckout('roaster')">One-time roast &mdash; $7.99</button>
+          </div>
         </div>
       </div>
 
@@ -2680,7 +2684,11 @@
       <div class="ppu-body">
         <div class="ppu-heading">Get a full AI-powered roadmap <span class="ppu-badge">Pro</span></div>
         <div class="ppu-desc">Upgrade to <strong>Career Pivot Advisor Pro</strong> — receive a complete, step-by-step AI roadmap from your current role to your target domain, personalized to your experience level and resume.</div>
-        <button class="ppu-cta" onclick="showPage('pricing')">Upgrade for your full pivot plan &rarr;</button>
+        <div class="ppu-cta-row">
+          <button class="ppu-cta" onclick="showPage('pricing')">Upgrade for your full pivot plan &rarr;</button>
+          <span class="upsell-divider">or</span>
+          <button class="ppu-otp-link" onclick="startOtpCheckout('pivot')">One-time plan &mdash; $9.99</button>
+        </div>
       </div>
     </div>
 
@@ -3110,21 +3118,21 @@
         <div class="otp-name">Resume Roaster Pro</div>
         <div class="otp-desc">One deep AI analysis of your resume. Includes ATS score, tone feedback, and rewrite suggestions.</div>
         <div class="otp-price">$7.99</div>
-        <button class="otp-btn" onclick="startOtpCheckout('roaster')">Buy Now</button>
+        <button class="otp-btn" id="otp-btn-roaster" onclick="startOtpCheckout('roaster')">Buy Now</button>
       </div>
       <div class="otp-card">
         <div class="otp-icon">&#128260;</div>
         <div class="otp-name">Career Pivot Advisor Pro</div>
         <div class="otp-desc">Full AI-generated pivot roadmap from your current role to your target. Step-by-step with cert recommendations.</div>
         <div class="otp-price">$9.99</div>
-        <button class="otp-btn" onclick="startOtpCheckout('pivot')">Buy Now</button>
+        <button class="otp-btn" id="otp-btn-pivot" onclick="startOtpCheckout('pivot')">Buy Now</button>
       </div>
       <div class="otp-card">
         <div class="otp-icon">&#128196;</div>
         <div class="otp-name">Resume Template Pack</div>
         <div class="otp-desc">8 ATS-optimized, role-specific templates: SOC Analyst, Pen Tester, Cloud Security, GRC, IAM, and more.</div>
         <div class="otp-price">$14.99</div>
-        <button class="otp-btn" onclick="startOtpCheckout('templates')">Buy Now</button>
+        <button class="otp-btn" id="otp-btn-templates" onclick="startOtpCheckout('templates')">Buy Now</button>
       </div>
     </div>
   </div>
@@ -3428,7 +3436,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=22"></script>
+<script src="js/app.js?v=23"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->
