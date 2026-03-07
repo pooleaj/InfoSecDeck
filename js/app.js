@@ -5299,12 +5299,15 @@ function _updateManageSubSection() {
   var subNote = section.querySelector('.manage-sub-note');
   var dot = section.querySelector('.manage-sub-dot');
 
-  if (p.cancelAtPeriodEnd && p.subscriptionPeriodEnd) {
-    var endDate = new Date(p.subscriptionPeriodEnd);
-    var formatted = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    if (statusTxt) statusTxt.textContent = 'Pro \u2014 Cancels ' + formatted;
+  if (p.cancelAtPeriodEnd) {
+    var formatted = p.subscriptionPeriodEnd
+      ? new Date(p.subscriptionPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      : null;
+    if (statusTxt) statusTxt.textContent = formatted ? 'Pro \u2014 Cancels ' + formatted : 'Pro \u2014 Canceling';
     if (dot) dot.style.background = 'var(--am)';
-    if (subNote) subNote.textContent = 'Your subscription is scheduled to cancel. You keep Pro access until ' + formatted + '. Resubscribe anytime to continue.';
+    if (subNote) subNote.textContent = formatted
+      ? 'Your subscription is scheduled to cancel. You keep Pro access until ' + formatted + '. Resubscribe anytime to continue.'
+      : 'Your subscription is scheduled to cancel at the end of the billing period.';
   } else {
     if (statusTxt) statusTxt.textContent = 'Pro \u2014 Active';
     if (dot) dot.style.background = 'var(--gn)';
@@ -5346,8 +5349,8 @@ function _updateAccountDrop() {
     if (planEl) {
       var planLabel = 'Free Plan';
       if (_isPro()) {
-        planLabel = p.cancelAtPeriodEnd && p.subscriptionPeriodEnd
-          ? 'Pro \u2014 Cancels ' + new Date(p.subscriptionPeriodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        planLabel = p.cancelAtPeriodEnd
+          ? (p.subscriptionPeriodEnd ? 'Pro \u2014 Cancels ' + new Date(p.subscriptionPeriodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Pro \u2014 Canceling')
           : 'Pro Member';
       }
       planEl.textContent = planLabel;
