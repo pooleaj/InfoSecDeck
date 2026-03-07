@@ -2523,7 +2523,6 @@ function filterIprepOptions() {
 }
 
 function selectIprepTile(tile, jobKey) {
-  if (!_requirePro('Interview Prep Pro')) return;
   document.querySelectorAll('.iprep-tile').forEach(function(t){ t.classList.remove('active'); });
   tile.classList.add('active');
   openIprepModal(jobKey);
@@ -2539,15 +2538,57 @@ function openIprepModal(jobKey) {
   // Get tier info from the clicked tile
   var tile = document.querySelector('.iprep-tile.active');
   tierEl.textContent = tile ? tile.querySelector('.iprep-tile-tier').textContent : '';
-  // Build Q&A content
+  // Build Q&A content — first 3 free, rest blurred for non-Pro
+  var qs = data.qs || [];
+  var FREE_QS = 3;
   var html = '';
-  (data.qs || []).forEach(function(item, i) {
+  var freeQs = qs.slice(0, FREE_QS);
+  var lockedQs = qs.slice(FREE_QS);
+
+  freeQs.forEach(function(item, i) {
     html += '<div class="iprep-qa">'
       + '<div class="iprep-q-num">Q' + (i+1) + '</div>'
       + '<div class="iprep-q-text">' + item.q + '</div>'
       + '<div class="iprep-a-text">' + item.a + '</div>'
       + '</div>';
   });
+
+  if (lockedQs.length > 0 && !_isPro()) {
+    // Render blurred questions behind an overlay
+    var blurredHtml = '';
+    lockedQs.forEach(function(item, i) {
+      blurredHtml += '<div class="iprep-qa iprep-qa-blurred">'
+        + '<div class="iprep-q-num">Q' + (FREE_QS + i + 1) + '</div>'
+        + '<div class="iprep-q-text">' + item.q + '</div>'
+        + '<div class="iprep-a-text">' + item.a + '</div>'
+        + '</div>';
+    });
+    html += '<div class="iprep-blur-wrap">'
+      + blurredHtml
+      + '<div class="iprep-blur-overlay">'
+      + '<div class="ibo-lock">&#128274;</div>'
+      + '<div class="ibo-title">Interview Prep Pro — ' + lockedQs.length + ' more questions</div>'
+      + '<div class="ibo-sub">Go deeper with a Pro subscription and get everything you need to walk in confident.</div>'
+      + '<ul class="ibo-perks">'
+      + '<li><span class="ibo-diamond">&#9670;</span>Full Q&amp;A set for your target role</li>'
+      + '<li><span class="ibo-diamond">&#9670;</span>AI follow-up questions that push deeper</li>'
+      + '<li><span class="ibo-diamond">&#9670;</span>Sample answers from hiring managers</li>'
+      + '<li><span class="ibo-diamond">&#9670;</span>Role-specific insights and red flags to avoid</li>'
+      + '</ul>'
+      + '<button class="ibo-btn" onclick="closeIprepModal();showPage(\'pricing\')">Upgrade to Interview Prep Pro &rarr;</button>'
+      + '</div>'
+      + '</div>';
+  } else if (lockedQs.length > 0 && _isPro()) {
+    // Pro users see all questions
+    lockedQs.forEach(function(item, i) {
+      html += '<div class="iprep-qa">'
+        + '<div class="iprep-q-num">Q' + (FREE_QS + i + 1) + '</div>'
+        + '<div class="iprep-q-text">' + item.q + '</div>'
+        + '<div class="iprep-a-text">' + item.a + '</div>'
+        + '</div>';
+    });
+  }
+
   bodyEl.innerHTML = html || '<p style="color:var(--mt);padding:20px;">No questions found for this role.</p>';
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -5457,18 +5498,25 @@ function _renderProGate(pageId) {
   }
 }
 
-_pageInits.roaster   = function() { _renderProGate('roaster'); };
-_pageInits.pivot     = function() { _renderProGate('pivot'); };
-_pageInits.interview = function() { _renderProGate('interview'); };
+function _updateInlineUpsells() {
+  var isPro = _isPro();
+  // Roaster upsell — hide when Pro
+  var ru = document.getElementById('roaster-pro-upsell');
+  if (ru) ru.style.display = isPro ? 'none' : '';
+  // Pivot upsell — hide when Pro
+  var pu = document.getElementById('pivot-pro-upsell');
+  if (pu) pu.style.display = isPro ? 'none' : '';
+}
 
-// Re-render gates when plan loads (e.g. after sign-in)
+_pageInits.roaster   = function() { _updateInlineUpsells(); };
+_pageInits.pivot     = function() { _updateInlineUpsells(); };
+_pageInits.interview = function() { _updateInlineUpsells(); };
+
+// Re-render upsells when plan loads (e.g. after sign-in)
 var _origOnPlanLoaded = window._onPlanLoaded;
 window._onPlanLoaded = function(plan) {
   if (_origOnPlanLoaded) _origOnPlanLoaded(plan);
-  ['roaster','pivot','interview'].forEach(function(p) {
-    var page = document.getElementById('page-' + p);
-    if (page && page.style.display !== 'none') _renderProGate(p);
-  });
+  _updateInlineUpsells();
 };
 
 _updateUpgradeNavBtn();

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=21">
+<link rel="stylesheet" href="css/styles.css?v=22">
 </head>
 <body>
 <nav>
@@ -1593,6 +1593,16 @@
         <label class="int-opt"><input type="radio" name="rintensity" value="brutal" style="accent-color:var(--rd);"> 🔥 Brutal — no sugarcoating</label>
         <label class="int-opt"><input type="radio" name="rintensity" value="gentle" style="accent-color:var(--lb);"> 💙 Encouraging</label>
       </div>
+      <!-- Resume Roaster Pro upsell — hidden for Pro users -->
+      <div class="rpu-card" id="roaster-pro-upsell">
+        <div class="rpu-icon">&#128274;</div>
+        <div class="rpu-body">
+          <div class="rpu-heading">Want the full picture? <span class="rpu-badge">Pro</span></div>
+          <div class="rpu-desc">Unlock <strong>Resume Roaster Pro</strong> — deep AI analysis with an ATS compatibility score, 6-dimension breakdown, and line-by-line role-specific feedback powered by Claude.</div>
+          <button class="rpu-cta" onclick="showPage('pricing')">Upgrade for the full analysis &rarr;</button>
+        </div>
+      </div>
+
       <div class="r-err" id="r-err"><div class="r-err-title" id="r-err-title">Error</div><div class="r-err-msg" id="r-err-msg"></div></div>
       <button class="roast-btn" id="r-submit-btn" onclick="rSubmit()">🔥 Roast My Resume</button>
     </div>
@@ -2664,6 +2674,16 @@
       <input type="file" id="pivot-resume" accept=".pdf,.doc,.docx" style="display:none;" onchange="handlePivotResume(this)">
     </div>
 
+    <!-- Career Pivot Pro upsell — hidden for Pro users -->
+    <div class="ppu-card" id="pivot-pro-upsell">
+      <div class="ppu-icon">&#128274;</div>
+      <div class="ppu-body">
+        <div class="ppu-heading">Get a full AI-powered roadmap <span class="ppu-badge">Pro</span></div>
+        <div class="ppu-desc">Upgrade to <strong>Career Pivot Advisor Pro</strong> — receive a complete, step-by-step AI roadmap from your current role to your target domain, personalized to your experience level and resume.</div>
+        <button class="ppu-cta" onclick="showPage('pricing')">Upgrade for your full pivot plan &rarr;</button>
+      </div>
+    </div>
+
     <button class="pivot-submit-btn" id="pivot-submit" onclick="runPivotAdvisor()">Get My Pivot Plan →</button>
   </div>
 
@@ -3408,7 +3428,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=21"></script>
+<script src="js/app.js?v=22"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->
