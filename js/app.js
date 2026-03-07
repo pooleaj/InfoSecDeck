@@ -1185,6 +1185,7 @@ function rShowErr(title,msg){
 }
 
 async function rSubmit(){
+  if (!_requirePro('Resume Roaster Pro')) return;
   document.getElementById('r-err').classList.remove('show');
   if(!rBase64){rShowErr('No file','Please upload your resume first.');return;}
   var domain=document.getElementById('r-domain').value;
@@ -1699,6 +1700,7 @@ function handlePivotResume(input) {
 }
 
 async function runPivotAdvisor() {
+  if (!_requirePro('Career Pivot Advisor Pro')) return;
   var fromTitle = document.getElementById('pivot-from').value.trim();
   var toTitle = document.getElementById('pivot-to').value.trim();
   
@@ -2521,6 +2523,7 @@ function filterIprepOptions() {
 }
 
 function selectIprepTile(tile, jobKey) {
+  if (!_requirePro('Interview Prep Pro')) return;
   document.querySelectorAll('.iprep-tile').forEach(function(t){ t.classList.remove('active'); });
   tile.classList.add('active');
   openIprepModal(jobKey);
@@ -5391,5 +5394,81 @@ function openCustomerPortal() {
     });
   });
 }
+
+// ── Pro Page Gate ─────────────────────────────────────────────
+var PRO_GATE_FEATURES = {
+  roaster: {
+    title: 'Resume Roaster Pro',
+    desc: 'Deep AI-powered resume analysis with ATS scoring, 6-dimension breakdown, and role-specific feedback — powered by Claude.'
+  },
+  pivot: {
+    title: 'Career Pivot Advisor Pro',
+    desc: 'Full AI-generated roadmap from your current role to your target domain, personalized to your experience and resume.'
+  },
+  interview: {
+    title: 'Interview Prep Pro',
+    desc: 'Full Q&A sets with AI follow-up questions, sample answers, and hiring manager insights for your target role.'
+  }
+};
+
+function _renderProGate(pageId) {
+  var page = document.getElementById('page-' + pageId);
+  if (!page) return;
+  var feat = PRO_GATE_FEATURES[pageId];
+  if (!feat) return;
+
+  var existing = page.querySelector('.pro-page-gate');
+  var isPro = _isPro();
+
+  if (isPro) {
+    if (existing) existing.style.display = 'none';
+    // Remove lock styling from interview tiles
+    if (pageId === 'interview') {
+      page.querySelectorAll('.iprep-tile').forEach(function(t){ t.classList.remove('ppg-locked'); });
+    }
+    return;
+  }
+
+  // Not Pro — show gate
+  if (!existing) {
+    existing = document.createElement('div');
+    existing.className = 'pro-page-gate';
+    page.insertBefore(existing, page.firstChild);
+  }
+  existing.style.display = '';
+
+  var isLoggedIn = !!(typeof _currentUser !== 'undefined' && _currentUser);
+  var actionsHtml = isLoggedIn
+    ? '<button class="ppg-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button>'
+    : '<button class="ppg-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button>'
+      + '<span class="ppg-signin" onclick="if(typeof openAuthModal===\'function\')openAuthModal()">Sign in</span>';
+
+  existing.innerHTML = '<div class="ppg-lock">&#128274;</div>'
+    + '<div class="ppg-body">'
+    +   '<div class="ppg-tag">Pro Feature</div>'
+    +   '<div class="ppg-title">' + feat.title + '</div>'
+    +   '<div class="ppg-desc">' + feat.desc + '</div>'
+    + '</div>'
+    + '<div class="ppg-actions">' + actionsHtml + '</div>';
+
+  // Lock interview tiles visually
+  if (pageId === 'interview') {
+    page.querySelectorAll('.iprep-tile').forEach(function(t){ t.classList.add('ppg-locked'); });
+  }
+}
+
+_pageInits.roaster   = function() { _renderProGate('roaster'); };
+_pageInits.pivot     = function() { _renderProGate('pivot'); };
+_pageInits.interview = function() { _renderProGate('interview'); };
+
+// Re-render gates when plan loads (e.g. after sign-in)
+var _origOnPlanLoaded = window._onPlanLoaded;
+window._onPlanLoaded = function(plan) {
+  if (_origOnPlanLoaded) _origOnPlanLoaded(plan);
+  ['roaster','pivot','interview'].forEach(function(p) {
+    var page = document.getElementById('page-' + p);
+    if (page && page.style.display !== 'none') _renderProGate(p);
+  });
+};
 
 _updateUpgradeNavBtn();
