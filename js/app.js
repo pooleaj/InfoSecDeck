@@ -5136,13 +5136,13 @@ _updateQuizFloatVisibility();
 // ══════════════════════ v20 — PRICING + STRIPE ══════════════════════
 
 var STRIPE_PRICES = {
-  monthly_early_bird: 'price_1T82qDHcMBLR0w0VjaXeVFlM',
-  monthly_standard:   'price_1T82qeHcMBLR0w0VK9T42DfU',
-  yearly:             'price_1T82qyHcMBLR0w0VFOQPrivP',
-  lifetime:           'price_1T82rLHcMBLR0w0VKzLGb0UX',
-  otp_roaster:        'price_1T82rkHcMBLR0w0VHwN27kRM',
-  otp_pivot:          'price_1T82s3HcMBLR0w0VWevxrO9S',
-  otp_templates:      'price_1T82sOHcMBLR0w0VlPD5ySWH'
+  monthly_early_bird: 'price_1T8U9kHcMBLR0w0VTwKkpUf7',
+  monthly_standard:   'price_1T8U9kHcMBLR0w0VTwKkpUf7', // update when standard pricing tier is created
+  yearly:             'price_1T8UAKHcMBLR0w0VBxhH5k5z',
+  lifetime:           'price_1T8UAgHcMBLR0w0VjT843Qf3',
+  otp_roaster:        'price_1T8UB2HcMBLR0w0V6zEq40cr',
+  otp_pivot:          'price_1T8UBKHcMBLR0w0Vf3DPKW0D',
+  otp_templates:      'price_1T8UBgHcMBLR0w0VrstMUJCz'
 };
 
 var EDGE_BASE = 'https://eaynqvgeqdnaswwuwbha.supabase.co/functions/v1';
