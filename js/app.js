@@ -2575,7 +2575,7 @@ function openIprepModal(jobKey) {
       + '<li><span class="ibo-diamond">&#9670;</span>Sample answers from hiring managers</li>'
       + '<li><span class="ibo-diamond">&#9670;</span>Role-specific insights and red flags to avoid</li>'
       + '</ul>'
-      + '<button class="ibo-btn" onclick="closeIprepModal();showPage(\'pricing\')">Upgrade to Interview Prep Pro &rarr;</button>'
+      + '<button class="ibo-btn" onclick="closeIprepModal();showPage(\'pricing\')">Upgrade for full access &rarr;</button>'
       + '</div>'
       + '</div>';
   } else if (lockedQs.length > 0 && _isPro()) {
