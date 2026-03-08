@@ -2582,9 +2582,10 @@ function openIprepModal(jobKey) {
   var lockedQs = qs.slice(FREE_QS);
 
   var roleTitle = data.title || jobKey;
+  function escAttr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
   function buildQA(item, num) {
     var aiBtn = _isPro()
-      ? '<button class="iprep-ai-btn" onclick="askIprepFollowUp(this,\''+roleTitle.replace(/'/g,"\\'")+'\',' + JSON.stringify(item.q) + ',' + JSON.stringify(item.a) + ')">&#9670; AI Follow-up</button>'
+      ? '<button class="iprep-ai-btn" onclick="askIprepFollowUp(this)" data-title="'+escAttr(roleTitle)+'" data-q="'+escAttr(item.q)+'" data-a="'+escAttr(item.a)+'">&#9670; AI Follow-up</button>'
       : '';
     return '<div class="iprep-qa">'
       + '<div class="iprep-q-num">Q' + num + '</div>'
@@ -2635,7 +2636,10 @@ function closeIprepModal() {
   document.body.style.overflow = '';
 }
 
-async function askIprepFollowUp(btn, jobTitle, question, answer) {
+async function askIprepFollowUp(btn) {
+  var jobTitle = btn.getAttribute('data-title');
+  var question = btn.getAttribute('data-q');
+  var answer = btn.getAttribute('data-a');
   var card = btn.closest('.iprep-qa');
   var area = card.querySelector('.iprep-followup-area');
   if (!area) return;
