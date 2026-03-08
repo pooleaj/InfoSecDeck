@@ -3907,6 +3907,20 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 /* ── Interview Prep blur gate ── */
 .iprep-blur-wrap{position:relative;margin-top:8px;}
 .iprep-qa-blurred{filter:blur(5px);pointer-events:none;user-select:none;opacity:.7;}
+.iprep-ai-btn{display:inline-flex;align-items:center;gap:5px;margin-top:12px;padding:6px 13px;border-radius:7px;border:1px solid rgba(13,212,200,.3);background:rgba(13,212,200,.06);color:var(--lb);font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.iprep-ai-btn:hover{background:rgba(13,212,200,.12);border-color:rgba(13,212,200,.5);}
+.iprep-ai-btn:disabled{opacity:.5;cursor:default;}
+.iprep-followup-area{margin-top:10px;}
+.iprep-fu-loading{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:rgba(255,255,255,.02);border:1px solid var(--bd);font-size:.75rem;color:var(--mt);}
+.iprep-fu-spinner{width:14px;height:14px;border:2px solid var(--bd);border-top-color:var(--lb);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;}
+.iprep-fu-card{background:linear-gradient(135deg,rgba(13,212,200,.05),rgba(77,158,255,.03));border:1px solid rgba(13,212,200,.2);border-radius:10px;padding:16px 18px;}
+.iprep-fu-label{font-family:var(--fm);font-size:.5rem;letter-spacing:.16em;text-transform:uppercase;color:var(--lb);margin-bottom:10px;}
+.iprep-fu-q{font-size:.86rem;font-weight:700;color:var(--tx);line-height:1.5;margin-bottom:12px;}
+.iprep-fu-hint{font-size:.75rem;color:#94a3b8;line-height:1.6;margin-bottom:8px;padding:10px 12px;background:rgba(16,232,126,.04);border-radius:7px;border-left:2px solid var(--gn);}
+.iprep-fu-hint-lbl{font-weight:700;color:var(--gn);}
+.iprep-fu-redflag{font-size:.75rem;color:#94a3b8;line-height:1.6;padding:10px 12px;background:rgba(244,63,94,.04);border-radius:7px;border-left:2px solid var(--rd);}
+.iprep-fu-rf-lbl{font-weight:700;color:var(--rd);}
+.iprep-fu-error{font-size:.75rem;color:var(--rd);padding:10px;}
 .iprep-blur-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse 100% 80% at 50% 40%,rgba(11,17,32,.94) 35%,rgba(11,17,32,.75) 100%);border-radius:12px;padding:28px 24px;text-align:center;z-index:10;}
 .ibo-lock{font-size:1.8rem;margin-bottom:10px;filter:drop-shadow(0 0 8px rgba(13,212,200,.4));}
 .ibo-title{font-size:1rem;font-weight:800;letter-spacing:-.03em;color:var(--tx);margin-bottom:6px;}

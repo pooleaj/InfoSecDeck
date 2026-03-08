@@ -2581,13 +2581,21 @@ function openIprepModal(jobKey) {
   var freeQs = qs.slice(0, FREE_QS);
   var lockedQs = qs.slice(FREE_QS);
 
-  freeQs.forEach(function(item, i) {
-    html += '<div class="iprep-qa">'
-      + '<div class="iprep-q-num">Q' + (i+1) + '</div>'
+  var roleTitle = data.title || jobKey;
+  function buildQA(item, num) {
+    var aiBtn = _isPro()
+      ? '<button class="iprep-ai-btn" onclick="askIprepFollowUp(this,\''+roleTitle.replace(/'/g,"\\'")+'\',' + JSON.stringify(item.q) + ',' + JSON.stringify(item.a) + ')">&#9670; AI Follow-up</button>'
+      : '';
+    return '<div class="iprep-qa">'
+      + '<div class="iprep-q-num">Q' + num + '</div>'
       + '<div class="iprep-q-text">' + item.q + '</div>'
       + '<div class="iprep-a-text">' + item.a + '</div>'
+      + aiBtn
+      + '<div class="iprep-followup-area"></div>'
       + '</div>';
-  });
+  }
+
+  freeQs.forEach(function(item, i) { html += buildQA(item, i + 1); });
 
   if (lockedQs.length > 0 && !_isPro()) {
     // Render blurred questions behind an overlay
@@ -2615,14 +2623,7 @@ function openIprepModal(jobKey) {
       + '</div>'
       + '</div>';
   } else if (lockedQs.length > 0 && _isPro()) {
-    // Pro users see all questions
-    lockedQs.forEach(function(item, i) {
-      html += '<div class="iprep-qa">'
-        + '<div class="iprep-q-num">Q' + (FREE_QS + i + 1) + '</div>'
-        + '<div class="iprep-q-text">' + item.q + '</div>'
-        + '<div class="iprep-a-text">' + item.a + '</div>'
-        + '</div>';
-    });
+    lockedQs.forEach(function(item, i) { html += buildQA(item, FREE_QS + i + 1); });
   }
 
   bodyEl.innerHTML = html || '<p style="color:var(--mt);padding:20px;">No questions found for this role.</p>';
@@ -2632,6 +2633,44 @@ function openIprepModal(jobKey) {
 function closeIprepModal() {
   document.getElementById('iprep-modal').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+async function askIprepFollowUp(btn, jobTitle, question, answer) {
+  var card = btn.closest('.iprep-qa');
+  var area = card.querySelector('.iprep-followup-area');
+  if (!area) return;
+
+  // If already shown, toggle off
+  if (area.children.length > 0) { area.innerHTML = ''; btn.textContent = '◆ AI Follow-up'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  area.innerHTML = '<div class="iprep-fu-loading"><div class="iprep-fu-spinner"></div><span>Thinking like an interviewer…</span></div>';
+
+  var sessionRes = await _sb.auth.getSession();
+  var token = (sessionRes.data && sessionRes.data.session) ? sessionRes.data.session.access_token : SUPA_KEY;
+
+  try {
+    var resp = await fetch(EDGE_BASE + '/interview-ai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ jobTitle: jobTitle, question: question, answer: answer })
+    });
+    if (!resp.ok) { var eb = await resp.json(); throw new Error(eb.error || 'Error ' + resp.status); }
+    var r = await resp.json();
+    area.innerHTML = '<div class="iprep-fu-card">'
+      + '<div class="iprep-fu-label">&#9670; Interviewer Follow-up</div>'
+      + '<div class="iprep-fu-q">' + (r.followUp || '') + '</div>'
+      + '<div class="iprep-fu-hint"><span class="iprep-fu-hint-lbl">Strong answer covers:</span> ' + (r.hint || '') + '</div>'
+      + '<div class="iprep-fu-redflag"><span class="iprep-fu-rf-lbl">&#9888; Avoid:</span> ' + (r.redFlag || '') + '</div>'
+      + '</div>';
+    btn.textContent = '◆ Hide Follow-up';
+    btn.disabled = false;
+  } catch(err) {
+    area.innerHTML = '<div class="iprep-fu-error">Failed: ' + (err.message || 'Please try again.') + '</div>';
+    btn.textContent = '◆ AI Follow-up';
+    btn.disabled = false;
+  }
 }
 
 
