@@ -1204,14 +1204,12 @@ async function rSubmit(){
   }[intensity];
   var systemPrompt='You are InfoSecDeck Resume Roaster — a senior cybersecurity hiring manager with 20+ years experience. '+intensityInstr+'\n\nRespond with ONLY valid JSON, no markdown, no preamble:\n{\n  "score": <0-100>,\n  "grade": "<A+/A/A-/B+/B/B-/C+/C/C-/D+/D/F>",\n  "grade_label": "<one-line verdict>",\n  "verdict": "<1-sentence punch>",\n  "summary": "<2-3 sentence assessment>",\n  "dimensions": [\n    {"name":"Relevant Experience","score":<0-100>,"note":"<1-2 sentences>"},\n    {"name":"Technical Skills Match","score":<0-100>,"note":"<1-2 sentences>"},\n    {"name":"Certifications","score":<0-100>,"note":"<1-2 sentences>"},\n    {"name":"Impact & Quantification","score":<0-100>,"note":"<1-2 sentences>"},\n    {"name":"Keywords & ATS","score":<0-100>,"note":"<1-2 sentences>"},\n    {"name":"Formatting & Clarity","score":<0-100>,"note":"<1-2 sentences>"}\n  ],\n  "feedback": [\n    {"type":"<critical|warning|tip|strength>","title":"<short title>","body":"<2-4 sentences specific to resume>","quote":"<excerpt or empty string>"}\n  ],\n  "actions": [\n    {"text":"<start with a verb>","priority":"<high|med|low>"}\n  ]\n}\nRules: 5-8 feedback items, 5-8 actions. Be SPECIFIC. Most resumes score 40-75. 80+ is genuinely strong.';
   var userMsg='Analyze this resume for:\nTarget Domain: '+domain+'\nTarget Tier: '+tier+(jobTitle?'\nJob Title: '+jobTitle:'')+'\n\nReturn complete JSON analysis.';
+  var sessionRes=await _sb.auth.getSession();
+  var token=(sessionRes.data&&sessionRes.data.session)?sessionRes.data.session.access_token:SUPA_KEY;
   try{
-    var resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,system:systemPrompt,messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:rMime,data:rBase64}},{type:'text',text:userMsg}]}]})});
-    if(!resp.ok){var eb=await resp.text();throw new Error('API '+resp.status+': '+eb.slice(0,200));}
-    var data=await resp.json();
-    var raw=data.content.map(function(c){return c.text||'';}).join('');
-    var jt=raw.replace(/^```json\s*/,'').replace(/^```\s*/,'').replace(/\s*```$/,'').trim();
-    var result;
-    try{result=JSON.parse(jt);}catch(pe){var m=raw.match(/\{[\s\S]*\}/);if(m)result=JSON.parse(m[0]);else throw new Error('Parse failed: '+raw.slice(0,200));}
+    var resp=await fetch(EDGE_BASE+'/resume-roaster',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({resumeBase64:rBase64,mimeType:rMime,domain:domain,tier:tier,jobTitle:jobTitle,intensity:intensity})});
+    if(!resp.ok){var eb=await resp.json();throw new Error(eb.error||'API error '+resp.status);}
+    var result=await resp.json();
     rClearSteps();
     document.getElementById('r-loading').classList.remove('show');
     rRenderResults(result,domain,tier);
