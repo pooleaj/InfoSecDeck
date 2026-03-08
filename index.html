@@ -2697,14 +2697,53 @@
 
   <!-- Results area -->
   <div id="pivot-results" style="display:none;">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--bl),var(--pu));display:flex;align-items:center;justify-content:center;font-size:1.1rem;">🧭</div>
+    <!-- Score card -->
+    <div class="pv-score-card">
+      <div class="pv-ring-wrap">
+        <svg class="pv-ring-svg" viewBox="0 0 130 130">
+          <circle class="pv-ring-bg" cx="65" cy="65" r="55"/>
+          <circle class="pv-ring-fg" id="pv-ring-fg" cx="65" cy="65" r="55" stroke-dasharray="345" stroke-dashoffset="345" transform="rotate(-90 65 65)"/>
+        </svg>
+        <div class="pv-ring-num"><div class="pv-ring-pct" id="pv-pct">—</div><div class="pv-ring-lbl">Readiness</div></div>
+      </div>
       <div>
-        <div style="font-weight:800;font-size:1rem;" id="pivot-results-title">Your Pivot Plan</div>
-        <div style="font-size:.74rem;color:var(--mt);" id="pivot-results-sub"></div>
+        <div class="pv-from-to" id="pv-from-to"></div>
+        <div class="pv-readiness-label" id="pv-readiness-label"></div>
+        <div class="pv-summary" id="pv-summary"></div>
+        <div class="pv-meta-pills" id="pv-meta-pills"></div>
       </div>
     </div>
-    <div id="pivot-results-body" style="font-size:.86rem;color:#cbd5e1;line-height:1.9;white-space:pre-wrap;background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:24px;"></div>
+    <!-- Transferable skills + Gaps -->
+    <div class="pv-two-col">
+      <div class="pv-card">
+        <div class="sec-label">Transferable Skills</div>
+        <div id="pv-transferable"></div>
+      </div>
+      <div class="pv-card">
+        <div class="sec-label">Skill Gaps to Fill</div>
+        <div id="pv-gaps"></div>
+      </div>
+    </div>
+    <!-- Certifications -->
+    <div class="pv-card">
+      <div class="sec-label">Recommended Certifications</div>
+      <div class="pv-cert-list" id="pv-certs"></div>
+    </div>
+    <!-- Timeline phases -->
+    <div class="pv-card">
+      <div class="sec-label">Transition Timeline — <span id="pv-timeline-total" style="color:var(--lb);"></span></div>
+      <div class="pv-phases" id="pv-phases"></div>
+    </div>
+    <!-- First 3 steps -->
+    <div class="pv-card">
+      <div class="sec-label">Your First 3 Steps</div>
+      <div class="pv-steps" id="pv-steps"></div>
+    </div>
+    <div class="r-retry-row">
+      <button class="r-retry-btn primary" onclick="pivotReset()">↩ New Pivot Plan</button>
+      <button class="r-retry-btn" onclick="showPage('certs')">📜 View Cert Roadmap</button>
+      <button class="r-retry-btn" onclick="showPage('resume')">📄 Resume Templates</button>
+    </div>
   </div>
 
   <div id="pivot-loading" style="display:none;text-align:center;padding:60px 0;">
@@ -3436,7 +3475,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=28"></script>
+<script src="js/app.js?v=29"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->

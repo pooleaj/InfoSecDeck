@@ -1733,22 +1733,76 @@ async function runPivotAdvisor() {
       })
     });
     if (!response.ok) { var eb = await response.json(); throw new Error(eb.error || 'API error ' + response.status); }
-    var data = await response.json();
-    var text = data.text || '';
-
+    var result = await response.json();
     document.getElementById('pivot-loading').style.display = 'none';
-    document.getElementById('pivot-results').style.display = 'block';
-    document.getElementById('pivot-results-title').textContent = fromTitle + ' → ' + toTitle;
-    document.getElementById('pivot-results-sub').textContent = pivotResumeBase64 ? 'Personalized plan based on your resume' : 'General pivot plan — add your resume for a personalized assessment';
-    document.getElementById('pivot-results-body').textContent = text;
     document.getElementById('pivot-submit').disabled = false;
-    document.getElementById('pivot-results').scrollIntoView({behavior:'smooth',block:'start'});
+    renderPivotResults(result, fromTitle, toTitle, !!pivotResumeBase64);
   } catch(err) {
     document.getElementById('pivot-loading').style.display = 'none';
-    document.getElementById('pivot-results-body').textContent = 'Error generating pivot plan: ' + (err.message || 'Please try again.');
-    document.getElementById('pivot-results').style.display = 'block';
     document.getElementById('pivot-submit').disabled = false;
+    alert('Error: ' + (err.message || 'Please try again.'));
   }
+}
+
+function renderPivotResults(r, fromTitle, toTitle, hasResume) {
+  var el = document.getElementById('pivot-results');
+  el.style.display = 'block';
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+
+  // Ring
+  var readiness = Math.max(0, Math.min(100, r.readiness || 0));
+  var circ = 345;
+  var col = readiness >= 70 ? 'var(--gn)' : readiness >= 50 ? 'var(--lb)' : readiness >= 35 ? 'var(--am)' : 'var(--or)';
+  var fg = document.getElementById('pv-ring-fg');
+  if (fg) { fg.style.stroke = col; fg.style.strokeDasharray = circ; fg.style.strokeDashoffset = circ; setTimeout(function(){ fg.style.strokeDashoffset = circ - (readiness/100)*circ; }, 100); }
+  var pctEl = document.getElementById('pv-pct'); if (pctEl) { pctEl.textContent = readiness + '%'; pctEl.style.color = col; }
+  var ftEl = document.getElementById('pv-from-to'); if (ftEl) ftEl.textContent = fromTitle + ' → ' + toTitle;
+  var rlEl = document.getElementById('pv-readiness-label'); if (rlEl) { rlEl.textContent = r.readiness_label || ''; rlEl.style.color = col; }
+  var sumEl = document.getElementById('pv-summary'); if (sumEl) sumEl.textContent = r.summary || '';
+  var metaEl = document.getElementById('pv-meta-pills');
+  if (metaEl) metaEl.innerHTML = (hasResume ? '<span class="pv-meta-pill pv-pill-resume">Personalized</span>' : '<span class="pv-meta-pill">General Plan</span>') + '<span class="pv-meta-pill">' + (r.timeline || '') + '</span>';
+
+  // Transferable skills
+  var strMap = {strong:'var(--gn)', moderate:'var(--lb)', partial:'var(--am)'};
+  var trEl = document.getElementById('pv-transferable');
+  if (trEl) trEl.innerHTML = (r.transferable || []).map(function(t) {
+    var c = strMap[t.strength] || 'var(--mt)';
+    return '<div class="pv-skill-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+t.skill+'</div><div class="pv-skill-note">'+t.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+t.strength+'</div></div>';
+  }).join('');
+
+  // Gaps
+  var priMap = {critical:'var(--rd)', important:'var(--or)', 'nice-to-have':'var(--lb)'};
+  var gapEl = document.getElementById('pv-gaps');
+  if (gapEl) gapEl.innerHTML = (r.gaps || []).map(function(g) {
+    var c = priMap[g.priority] || 'var(--mt)';
+    return '<div class="pv-gap-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+g.area+'</div><div class="pv-skill-note">'+g.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+g.priority+'</div></div>';
+  }).join('');
+
+  // Certifications
+  var certEl = document.getElementById('pv-certs');
+  if (certEl) certEl.innerHTML = (r.certifications || []).map(function(c) {
+    return '<div class="pv-cert-item"><div class="pv-cert-order">'+c.order+'</div><div class="pv-cert-body"><div class="pv-cert-name">'+c.name+'</div><div class="pv-cert-why">'+c.why+'</div></div><div class="pv-cert-timeline">'+c.timeline+'</div></div>';
+  }).join('');
+
+  // Timeline phases
+  var tlEl = document.getElementById('pv-timeline-total'); if (tlEl) tlEl.textContent = r.timeline || '';
+  var phEl = document.getElementById('pv-phases');
+  if (phEl) phEl.innerHTML = (r.phases || []).map(function(p, i) {
+    return '<div class="pv-phase"><div class="pv-phase-dot"></div><div class="pv-phase-body"><div class="pv-phase-name">'+p.name+'</div><div class="pv-phase-dur">'+p.duration+'</div><div class="pv-phase-focus">'+p.focus+'</div></div></div>';
+  }).join('');
+
+  // First steps
+  var stpEl = document.getElementById('pv-steps');
+  if (stpEl) stpEl.innerHTML = (r.steps || []).map(function(s, i) {
+    var tw = s.timeframe === 'this week' ? 'var(--gn)' : 'var(--lb)';
+    return '<div class="pv-step"><div class="pv-step-n">'+(i+1)+'</div><div class="pv-step-body"><div class="pv-step-action">'+s.action+'</div><div class="pv-step-detail">'+s.detail+'</div></div><div class="pv-step-when" style="color:'+tw+'">'+s.timeframe+'</div></div>';
+  }).join('');
+}
+
+function pivotReset() {
+  document.getElementById('pivot-results').style.display = 'none';
+  document.getElementById('pivot-submit').disabled = false;
+  window.scrollTo({top: document.getElementById('page-pivot').offsetTop, behavior: 'smooth'});
 }
 
 // ══════════ SALARY TABLE ══════════

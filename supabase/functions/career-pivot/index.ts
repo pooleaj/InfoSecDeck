@@ -12,22 +12,13 @@ async function extractDocxText(base64: string): Promise<string> {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-
   const zip = await JSZip.loadAsync(bytes);
   const docXml = await zip.file('word/document.xml')?.async('string');
   if (!docXml) throw new Error('Invalid DOCX: missing word/document.xml');
-
   return docXml
-    .replace(/<w:br[^>]*/g, '\n')
-    .replace(/<\/w:p>/g, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+    .replace(/<w:br[^>]*/g, '\n').replace(/<\/w:p>/g, '\n').replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\n{3,}/g, '\n\n').trim();
 }
 
 Deno.serve(async (req) => {
@@ -59,10 +50,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
     const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('plan, purchases')
-      .eq('id', user.id)
-      .maybeSingle();
+      .from('profiles').select('plan, purchases').eq('id', user.id).maybeSingle();
 
     const isPro = profile?.plan === 'pro';
     const hasOtp = !!(profile?.purchases as Record<string, boolean>)?.otp_pivot;
@@ -81,19 +69,39 @@ Deno.serve(async (req) => {
       });
     }
 
-    const systemPrompt = 'You are an expert cybersecurity career coach with deep knowledge of all cybersecurity domains, job roles, and career paths. Give direct, specific, actionable advice. Format your response with clear sections using plain text headers (no markdown bold or asterisks). Use line breaks between sections. Be honest about challenges. Experience always matters more than certifications, though certs validate skills. Keep response under 600 words.';
+    const systemPrompt = `You are an expert cybersecurity career coach. Analyze the career pivot request and respond with ONLY valid JSON, no markdown, no preamble:
+{
+  "readiness": <0-100>,
+  "readiness_label": "<one-line verdict, e.g. 'Well-positioned for this pivot'>",
+  "summary": "<2-3 sentence honest assessment of this transition>",
+  "transferable": [
+    {"skill": "<skill name>", "strength": "<strong|moderate|partial>", "note": "<1 sentence>"}
+  ],
+  "gaps": [
+    {"area": "<gap area>", "priority": "<critical|important|nice-to-have>", "note": "<1 sentence>"}
+  ],
+  "certifications": [
+    {"name": "<cert name>", "order": <1-N>, "why": "<1 sentence>", "timeline": "<e.g. 3-4 months>"}
+  ],
+  "timeline": "<total duration, e.g. '12-18 months'>",
+  "phases": [
+    {"name": "<phase name>", "duration": "<e.g. months 1-3>", "focus": "<1-2 sentences>"}
+  ],
+  "steps": [
+    {"action": "<verb-first action>", "detail": "<1 sentence>", "timeframe": "<this week|this month>"}
+  ]
+}
+Rules: 3-6 transferable skills, 3-5 gaps, 2-4 certifications in priority order, 2-4 timeline phases, exactly 3 first steps. Be SPECIFIC and HONEST. Readiness 40-70 is typical; 80+ means strong overlap.`;
+
+    const resumeContext = resumeBase64 ? ' Here is my resume for personalized analysis.' : '';
+    const userMsg = `I want to transition from ${fromTitle} to ${toTitle}. I have ${expLabel} of cybersecurity experience.${resumeContext} Give me a detailed career pivot plan.`;
 
     let messageContent;
-
     if (resumeBase64) {
       const isDocx = mimeType && mimeType.includes('wordprocessingml');
-      const userMsg = `I want to transition from ${fromTitle} to ${toTitle}. I have ${expLabel} of cybersecurity experience. Here is my resume. Please give me a detailed, personalized career pivot plan covering: 1) Skills I already have that transfer, 2) Key gaps I need to fill based on my actual experience, 3) Specific certifications to pursue (in priority order), 4) Realistic timeline, 5) Concrete first 3 steps to start this week.`;
-
       if (isDocx) {
         const resumeText = await extractDocxText(resumeBase64);
-        messageContent = [
-          { type: 'text', text: `Resume Content:\n\n${resumeText}\n\n---\n\n${userMsg}` },
-        ];
+        messageContent = [{ type: 'text', text: `Resume Content:\n\n${resumeText}\n\n---\n\n${userMsg}` }];
       } else {
         messageContent = [
           { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: resumeBase64 } },
@@ -101,7 +109,6 @@ Deno.serve(async (req) => {
         ];
       }
     } else {
-      const userMsg = `I want to transition from ${fromTitle} to ${toTitle}. I have ${expLabel} of cybersecurity experience. Please give me a career pivot plan covering: 1) Which skills likely transfer from my current role, 2) Key gaps I will need to fill, 3) Top 3 certifications to prioritize, 4) Realistic timeline for the transition, 5) Concrete first 3 steps to start this week.`;
       messageContent = [{ type: 'text', text: userMsg }];
     }
 
@@ -114,7 +121,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 1500,
+        max_tokens: 3000,
         system: systemPrompt,
         messages: [{ role: 'user', content: messageContent }],
       }),
@@ -126,13 +133,21 @@ Deno.serve(async (req) => {
     }
 
     const claudeData = await claudeResp.json();
-    const text = claudeData.content
-      .map((c: { type: string; text?: string }) => c.text || '')
-      .join('');
+    const raw = claudeData.content.map((c: { type: string; text?: string }) => c.text || '').join('');
+    const cleaned = raw.replace(/^```json\s*/m, '').replace(/^```\s*/m, '').replace(/\s*```$/m, '').trim();
 
-    console.log(`[career-pivot] userId=${user.id} from=${fromTitle} to=${toTitle}`);
+    let result;
+    try {
+      result = JSON.parse(cleaned);
+    } catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) result = JSON.parse(m[0]);
+      else throw new Error('Failed to parse response: ' + raw.slice(0, 200));
+    }
 
-    return new Response(JSON.stringify({ text }), {
+    console.log(`[career-pivot] userId=${user.id} from=${fromTitle} to=${toTitle} readiness=${result.readiness}`);
+
+    return new Response(JSON.stringify(result), {
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
 
