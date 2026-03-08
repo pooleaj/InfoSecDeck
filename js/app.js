@@ -1146,7 +1146,7 @@ if(rFi) rFi.addEventListener('change',function(){if(rFi.files[0])rHandleFile(rFi
 
 function rHandleFile(f){
   var ext=f.name.split('.').pop().toLowerCase();
-  if(ext!=='pdf'){rShowErr('Unsupported file','Please upload a PDF. Word documents are not supported.');return;}
+  if(!['pdf','docx'].includes(ext)){rShowErr('Unsupported file','Please upload a PDF or DOCX file.');return;}
   if(f.size>10*1024*1024){rShowErr('File too large','Max 10MB.');return;}
   rFile=f;
   var mime=f.type||(ext==='pdf'?'application/pdf':'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
