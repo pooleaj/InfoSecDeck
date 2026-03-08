@@ -1715,43 +1715,27 @@ async function runPivotAdvisor() {
   document.getElementById('pivot-results').style.display = 'none';
   document.getElementById('pivot-loading').style.display = 'block';
 
-  var systemPrompt = 'You are an expert cybersecurity career coach with deep knowledge of all cybersecurity domains, job roles, and career paths. Give direct, specific, actionable advice. Format your response with clear sections using plain text headers (no markdown bold or asterisks). Use line breaks between sections. Be honest about challenges. Experience always matters more than certifications, though certs validate skills. Keep response under 600 words.';
-
   var expMap = {'0-2':'0–2 years','3-5':'3–5 years','6-9':'6–9 years','10+':'10+ years'};
   var expLabel = expMap[pivotExpSelected] || pivotExpSelected;
-  
-  var userMsg;
-  var messages;
 
-  if (pivotResumeBase64) {
-    var mediaType = pivotResumeFilename.endsWith('.pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    userMsg = 'I want to transition from ' + fromTitle + ' to ' + toTitle + '. I have ' + expLabel + ' of cybersecurity experience. Here is my resume. Please give me a detailed, personalized career pivot plan covering: 1) Skills I already have that transfer, 2) Key gaps I need to fill based on my actual experience, 3) Specific certifications to pursue (in priority order), 4) Realistic timeline, 5) Concrete first 3 steps to start this week.';
-    messages = [{
-      role: 'user',
-      content: [
-        {type: 'document', source: {type: 'base64', media_type: mediaType, data: pivotResumeBase64}},
-        {type: 'text', text: userMsg}
-      ]
-    }];
-  } else {
-    userMsg = 'I want to transition from ' + fromTitle + ' to ' + toTitle + '. I have ' + expLabel + ' of cybersecurity experience. Please give me a career pivot plan covering: 1) Which skills likely transfer from my current role, 2) Key gaps I will need to fill, 3) Top 3 certifications to prioritize, 4) Realistic timeline for the transition, 5) Concrete first 3 steps to start this week.';
-    messages = [{role: 'user', content: userMsg}];
-  }
-
+  var sessionRes = await _sb.auth.getSession();
+  var token = (sessionRes.data && sessionRes.data.session) ? sessionRes.data.session.access_token : SUPA_KEY;
   try {
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
+    var response = await fetch(EDGE_BASE + '/career-pivot', {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token},
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: messages
+        fromTitle: fromTitle,
+        toTitle: toTitle,
+        expLabel: expLabel,
+        resumeBase64: pivotResumeBase64 || null,
+        mimeType: pivotResumeBase64 ? (pivotResumeFilename && pivotResumeFilename.endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf') : null
       })
     });
+    if (!response.ok) { var eb = await response.json(); throw new Error(eb.error || 'API error ' + response.status); }
     var data = await response.json();
-    var text = (data.content || []).map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
-    
+    var text = data.text || '';
+
     document.getElementById('pivot-loading').style.display = 'none';
     document.getElementById('pivot-results').style.display = 'block';
     document.getElementById('pivot-results-title').textContent = fromTitle + ' → ' + toTitle;
@@ -1761,7 +1745,7 @@ async function runPivotAdvisor() {
     document.getElementById('pivot-results').scrollIntoView({behavior:'smooth',block:'start'});
   } catch(err) {
     document.getElementById('pivot-loading').style.display = 'none';
-    document.getElementById('pivot-results-body').textContent = 'Error generating pivot plan. Please try again.';
+    document.getElementById('pivot-results-body').textContent = 'Error generating pivot plan: ' + (err.message || 'Please try again.');
     document.getElementById('pivot-results').style.display = 'block';
     document.getElementById('pivot-submit').disabled = false;
   }
