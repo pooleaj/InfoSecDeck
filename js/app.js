@@ -6942,3 +6942,242 @@ _pageInits.mock = function() {
   // If user plan changes, update free note
   _updateMockFreeNote();
 };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SALARY NEGOTIATION SCRIPT GENERATOR (v35)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+function _sngInit() {
+  var sel = document.getElementById('sng-role');
+  if (!sel || sel.options.length > 1) return;
+  var opts = Object.keys(JT).map(function(k){ return {k:k, v:JT[k].title}; });
+  opts.sort(function(a,b){ return a.v.localeCompare(b.v); });
+  opts.forEach(function(r){
+    var o = document.createElement('option');
+    o.value = r.k; o.textContent = r.v;
+    sel.appendChild(o);
+  });
+  // Pre-fill role from salary calculator if already chosen
+  var scRole = document.getElementById('sc-role');
+  if (scRole && scRole.value) sel.value = scRole.value;
+}
+
+// Wrap existing salary page init
+_pageInits.salary = (function(_orig){
+  return function(){
+    if (_orig) _orig();
+    _sngInit();
+  };
+})(_pageInits.salary);
+
+async function generateNegotiationScript() {
+  if (!_isPro()) { _showUpgradePrompt('Salary Negotiation Script Generator'); return; }
+  if (!window._supabaseSession) { if (typeof _showSignInModal === 'function') _showSignInModal(); return; }
+
+  var role    = (document.getElementById('sng-role')   || {}).value || '';
+  var offer   = parseInt((document.getElementById('sng-offer')  || {}).value || '0');
+  var target  = parseInt((document.getElementById('sng-target') || {}).value || '0');
+  var exp     = (document.getElementById('sng-exp')    || {}).value || '3';
+  var notes   = ((document.getElementById('sng-notes') || {}).value || '').trim();
+  var strengths = Array.from(document.querySelectorAll('#sng-strengths input:checked')).map(function(el){ return el.value; });
+
+  if (!role)              { alert('Please select a target role.'); return; }
+  if (!offer || offer < 20000)  { alert('Please enter a valid current offer.'); return; }
+  if (!target || target <= offer) { alert('Your target salary should be higher than the current offer.'); return; }
+
+  var btn = document.getElementById('sng-gen-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating script...'; }
+
+  try {
+    var token = window._supabaseSession.access_token;
+    var resp = await fetch(EDGE_BASE + '/salary-negotiation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        role: JT[role] ? JT[role].title : role,
+        current_offer: offer,
+        target_salary: target,
+        experience_years: exp,
+        strengths: strengths,
+        notes: notes
+      })
+    });
+    var data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Generation failed');
+    _renderNegotiationScript(data, offer, target);
+  } catch(e) {
+    alert('Could not generate script: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate My Script →'; }
+  }
+}
+
+function _renderNegotiationScript(data, offer, target) {
+  var out = document.getElementById('sng-output');
+  if (!out) return;
+
+  var sections = [
+    { key: 'opening',           label: '📞 Opening Statement'    },
+    { key: 'value_proposition', label: '💪 Your Value'           },
+    { key: 'market_context',    label: '📊 Market Context'       },
+    { key: 'counter_offer',     label: '💰 Counter-Offer Script' },
+    { key: 'handle_pushback',   label: '🔄 If They Push Back'    },
+    { key: 'closing',           label: '🤝 Closing Statement'    },
+  ];
+
+  var gap = (target || 0) - (offer || 0);
+  var likelihood = data.success_likelihood || '';
+
+  var html = '<div class="sng-result">' +
+    '<div class="sng-result-header">' +
+      '<div class="sng-result-title">Your Negotiation Script</div>' +
+      '<div class="sng-result-meta">' +
+        '<span>Gap: <strong>$' + gap.toLocaleString() + '</strong></span>' +
+        (likelihood ? '<span class="sng-likelihood">' + likelihood + '</span>' : '') +
+      '</div>' +
+    '</div>';
+
+  sections.forEach(function(s) {
+    if (!data[s.key]) return;
+    html += '<div class="sng-section">' +
+      '<div class="sng-section-label">' + s.label + '</div>' +
+      '<div class="sng-section-text">' + data[s.key].replace(/\n/g, '<br>') + '</div>' +
+      '</div>';
+  });
+
+  if (data.tips && data.tips.length) {
+    html += '<div class="sng-tips">' +
+      '<div class="sng-tips-label">⚡ Negotiation Tips</div>' +
+      '<ul class="sng-tips-list">' +
+      data.tips.map(function(t){ return '<li>' + t + '</li>'; }).join('') +
+      '</ul></div>';
+  }
+
+  html += '<div class="sng-copy-row"><button class="sng-copy-btn" onclick="copySNGScript()">📋 Copy Full Script</button></div></div>';
+
+  out.innerHTML = html;
+  out.style.display = 'block';
+  out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Store plain text for clipboard
+  window._sngScriptText = sections
+    .filter(function(s){ return !!data[s.key]; })
+    .map(function(s){ return '=== ' + s.label + ' ===\n' + data[s.key]; })
+    .join('\n\n');
+}
+
+function copySNGScript() {
+  if (!window._sngScriptText) return;
+  navigator.clipboard.writeText(window._sngScriptText).then(function() {
+    var btn = document.querySelector('.sng-copy-btn');
+    if (btn) { btn.textContent = '✓ Copied!'; setTimeout(function(){ btn.textContent = '📋 Copy Full Script'; }, 2200); }
+  }).catch(function() {
+    // Fallback
+    var ta = document.createElement('textarea');
+    ta.value = window._sngScriptText;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// JOB FIT ANALYZER — "Will I Get This Job?" (v35)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function analyzeJobFit() {
+  if (!_isPro()) { _showUpgradePrompt('Job Fit Analyzer'); return; }
+  if (!window._supabaseSession) { if (typeof _showSignInModal === 'function') _showSignInModal(); return; }
+
+  var jd    = ((document.getElementById('jfa-jd')    || {}).value || '').trim();
+  var exp   = (document.getElementById('jfa-exp')   || {}).value || '3';
+  var certs = (document.getElementById('jfa-certs') || {}).value || 'none';
+  var pitch = ((document.getElementById('jfa-pitch') || {}).value || '').trim();
+
+  if (!jd || jd.length < 100) { alert('Please paste a full job description (at least 100 characters).'); return; }
+
+  var btn = document.getElementById('jfa-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
+
+  try {
+    var token = window._supabaseSession.access_token;
+    var resp = await fetch(EDGE_BASE + '/job-fit-analyzer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ job_description: jd, experience_years: exp, certs_level: certs, elevator_pitch: pitch })
+    });
+    var data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || 'Analysis failed');
+    _renderJobFit(data);
+  } catch(e) {
+    alert('Analysis failed: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Analyze My Fit →'; }
+  }
+}
+
+function _renderJobFit(data) {
+  var out = document.getElementById('jfa-output');
+  if (!out) return;
+
+  var fitColors = {
+    'Strong Candidate':      '#10e87e',
+    'Competitive Candidate': '#0dd4c8',
+    'Reach Role':            '#f5c842',
+    'Not Ready Yet':         '#ff5c5c'
+  };
+  var color = fitColors[data.fit_label] || '#7a90a8';
+  var score = data.fit_score || 0;
+
+  var html = '<div class="jfa-result">' +
+    '<div class="jfa-result-header">' +
+      '<div class="jfa-result-badge" style="background:' + color + '18;color:' + color + ';border-color:' + color + '44">' + (data.fit_label || 'Analyzed') + '</div>' +
+      '<div class="jfa-result-score" style="color:' + color + '">' + score + '%</div>' +
+    '</div>' +
+    '<div class="jfa-honest-take">' + (data.honest_take || '') + '</div>';
+
+  // Dimension bars
+  var dims = data.dimension_scores || {};
+  var dimLabels = { experience: 'Experience Match', certifications: 'Certification Match', technical_skills: 'Technical Skills', domain_knowledge: 'Domain Knowledge' };
+  if (Object.keys(dims).length) {
+    html += '<div class="jfa-dims">';
+    Object.keys(dims).forEach(function(k) {
+      var pct = Math.max(0, Math.min(100, dims[k] || 0));
+      var bc = pct >= 70 ? '#10e87e' : pct >= 50 ? '#0dd4c8' : pct >= 30 ? '#f5c842' : '#ff5c5c';
+      html += '<div class="jfa-dim">' +
+        '<div class="jfa-dim-header"><span class="jfa-dim-label">' + (dimLabels[k] || k) + '</span><span class="jfa-dim-score">' + pct + '%</span></div>' +
+        '<div class="jfa-dim-bar"><div class="jfa-dim-fill" style="width:' + pct + '%;background:' + bc + '"></div></div>' +
+        '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Gaps
+  if (data.gaps && data.gaps.length) {
+    html += '<div class="jfa-gaps"><div class="jfa-gaps-label">📌 Gaps to Close</div>';
+    data.gaps.forEach(function(g) {
+      html += '<div class="jfa-gap-item">' +
+        '<div class="jfa-gap-name">' + g.gap + '</div>' +
+        '<div class="jfa-gap-how">' + g.how_to_close + '</div>' +
+        '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Recommendation
+  if (data.recommendation) {
+    var recColor = data.recommendation.includes('Apply Now') ? '#10e87e'
+      : data.recommendation.includes('Cover Letter') ? '#0dd4c8'
+      : data.recommendation.includes('gaps first') ? '#f5c842' : '#ff5c5c';
+    html += '<div class="jfa-rec" style="border-color:' + recColor + '33;background:' + recColor + '0a">' +
+      '<span class="jfa-rec-arrow" style="color:' + recColor + '">→</span>' +
+      '<span style="color:' + recColor + ';font-weight:600;">' + data.recommendation + '</span>' +
+      '</div>';
+  }
+
+  html += '</div>';
+  out.innerHTML = html;
+  out.style.display = 'block';
+  out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
