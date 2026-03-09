@@ -6097,14 +6097,16 @@ function _showRateLimitMsg(errData, featureName) {
 // ─── ADMIN USAGE PANEL ────────────────────────────────────────────────────
 function _renderAdminUsage() {
   var el = document.getElementById('admin-usage-panel');
-  if (!el || !_currentUser || !window._supabaseSession) return;
+  if (!el || !_currentUser) return;
 
   el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Loading usage data&hellip;</p>';
 
-  var token = window._supabaseSession.access_token;
-  fetch(EDGE_BASE + '/admin-usage', {
-    headers: { 'Authorization': 'Bearer ' + token }
-  }).then(function(r) { return r.json(); }).then(function(data) {
+  _sb.auth.getSession().then(function(sessionRes) {
+    var token = sessionRes.data && sessionRes.data.session ? sessionRes.data.session.access_token : null;
+    if (!token) { el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Not authenticated.</p>'; return; }
+    return fetch(EDGE_BASE + '/admin-usage', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) { return r.json(); }).then(function(data) {
     var errMsg = data.error || data.msg || data.message;
     if (errMsg) { el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Error: ' + errMsg + '</p>'; return; }
 
@@ -6145,7 +6147,10 @@ function _renderAdminUsage() {
 
     html += '</tbody></table></div>';
     el.innerHTML = html;
-  }).catch(function(err) {
+    }).catch(function(err) {
+      el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Failed to load usage data.</p>';
+    });
+  }).catch(function() {
     el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Failed to load usage data.</p>';
   });
 }
