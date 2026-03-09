@@ -6105,15 +6105,20 @@ function _renderAdminUsage() {
   fetch(EDGE_BASE + '/admin-usage', {
     headers: { 'Authorization': 'Bearer ' + token }
   }).then(function(r) { return r.json(); }).then(function(data) {
-    if (data.error) { el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Error: ' + data.error + '</p>'; return; }
+    var errMsg = data.error || data.msg || data.message;
+    if (errMsg) { el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Error: ' + errMsg + '</p>'; return; }
 
     var users = data.users || [];
     var totals = data.totals || {};
 
-    var monthParts = (data.month || '').split('-');
-    var monthLabel = monthParts.length === 2
-      ? new Date(Number(monthParts[0]), Number(monthParts[1]) - 1).toLocaleString('default', {month:'long', year:'numeric'})
-      : data.month;
+    var monthLabel = 'current month';
+    if (data.month) {
+      var monthParts = data.month.split('-');
+      if (monthParts.length === 2) {
+        try { monthLabel = new Date(Number(monthParts[0]), Number(monthParts[1]) - 1).toLocaleString('default', {month:'long', year:'numeric'}); }
+        catch(e) { monthLabel = data.month; }
+      } else { monthLabel = data.month; }
+    }
 
     if (users.length === 0) {
       el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">No AI feature usage recorded for ' + monthLabel + '.</p>';
