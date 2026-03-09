@@ -4167,7 +4167,8 @@ saveProfile=function(){
     targetRole:(document.getElementById('pf-target-role')&&document.getElementById('pf-target-role').value)||'',
     exp:(document.getElementById('pf-exp')&&document.getElementById('pf-exp').value)||'',
     location:(document.getElementById('pf-location')&&document.getElementById('pf-location').value)||'',
-    bio:(document.getElementById('pf-bio')&&document.getElementById('pf-bio').value)||''
+    bio:(document.getElementById('pf-bio')&&document.getElementById('pf-bio').value)||'',
+    pitch:(document.getElementById('pf-pitch')&&document.getElementById('pf-pitch').value)||''
   };
   var existing={};try{existing=JSON.parse(localStorage.getItem(_PROFILE_KEY)||'{}');}catch(e){}
   p.savedSalary=existing.savedSalary||'';
@@ -4187,6 +4188,7 @@ initProfile=function(){
   if(p.exp){var el=document.getElementById('pf-exp');if(el)el.value=p.exp;}
   if(p.location){var el=document.getElementById('pf-location');if(el)el.value=p.location;}
   if(p.bio){var el=document.getElementById('pf-bio');if(el)el.value=p.bio;}
+  if(p.pitch){var el=document.getElementById('pf-pitch');if(el)el.value=p.pitch;}
   updateProfileDisplay(p);
   // Streak + challenges done
   var sk=loadStreak();
@@ -7093,9 +7095,10 @@ async function analyzeJobFit() {
   var jd    = ((document.getElementById('jfa-jd')    || {}).value || '').trim();
   var exp   = (document.getElementById('jfa-exp')   || {}).value || '3';
   var certs = (document.getElementById('jfa-certs') || {}).value || 'none';
-  var pitch = ((document.getElementById('jfa-pitch') || {}).value || '').trim();
+  var pitch = loadProfile().pitch || '';
 
   if (!jd || jd.length < 100) { alert('Please paste a full job description (at least 100 characters).'); return; }
+  if (!pitch) { showToast('Add your Professional Pitch in your profile before analyzing.'); showPage('profile'); return; }
 
   var btn = document.getElementById('jfa-btn');
   if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
@@ -7181,3 +7184,85 @@ function _renderJobFit(data) {
   out.style.display = 'block';
   out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
+
+// ── v36: Salary Tools Accordion + JFA Profile Pitch ─────────────────────────
+
+// Salary toggle accordion: shows/hides calc or negotiation panel below toggle row
+var _salActiveTool = null;
+function toggleSalTool(which) {
+  var panel   = document.getElementById('sal-expand-panel');
+  var calcEl  = document.getElementById('sal-calc');
+  var sngEl   = document.getElementById('sng-tool');
+  var calcCard = document.getElementById('sal-tc-calc');
+  var sngCard  = document.getElementById('sal-tc-sng');
+  var calcArrow = document.getElementById('sal-arrow-calc');
+  var sngArrow  = document.getElementById('sal-arrow-sng');
+  if (!panel) return;
+
+  if (_salActiveTool === which) {
+    // Collapse current
+    panel.classList.remove('open');
+    if (calcEl)  calcEl.style.display  = 'none';
+    if (sngEl)   sngEl.style.display   = 'none';
+    if (calcCard) calcCard.classList.remove('sal-tc-active');
+    if (sngCard)  sngCard.classList.remove('sal-tc-active');
+    if (calcArrow) calcArrow.textContent = '\u25be';
+    if (sngArrow)  sngArrow.textContent  = '\u25be';
+    _salActiveTool = null;
+  } else {
+    _salActiveTool = which;
+    if (which === 'calc') {
+      if (calcEl) calcEl.style.display = '';
+      if (sngEl)  sngEl.style.display  = 'none';
+      if (calcCard) calcCard.classList.add('sal-tc-active');
+      if (sngCard)  sngCard.classList.remove('sal-tc-active');
+      if (calcArrow) calcArrow.textContent = '\u25b4';
+      if (sngArrow)  sngArrow.textContent  = '\u25be';
+    } else {
+      if (sngEl)  sngEl.style.display  = '';
+      if (calcEl) calcEl.style.display  = 'none';
+      if (sngCard)  sngCard.classList.add('sal-tc-active');
+      if (calcCard) calcCard.classList.remove('sal-tc-active');
+      if (sngArrow)  sngArrow.textContent  = '\u25b4';
+      if (calcArrow) calcArrow.textContent  = '\u25be';
+    }
+    panel.classList.add('open');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+// On salary page load, reset accordion state
+_pageInits.salary = (function(_orig) {
+  return function() {
+    if (_orig) _orig();
+    _salActiveTool = null;
+    var panel = document.getElementById('sal-expand-panel');
+    if (panel) panel.classList.remove('open');
+    var calcEl = document.getElementById('sal-calc');
+    var sngEl  = document.getElementById('sng-tool');
+    if (calcEl) calcEl.style.display = 'none';
+    if (sngEl)  sngEl.style.display  = 'none';
+    ['sal-tc-calc','sal-tc-sng'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('sal-tc-active');});
+    var ca = document.getElementById('sal-arrow-calc'); if(ca) ca.textContent='\u25be';
+    var sa = document.getElementById('sal-arrow-sng');  if(sa) sa.textContent='\u25be';
+  };
+})(_pageInits.salary);
+
+// Populate JFA pitch display from profile
+function _jfaLoadPitch() {
+  var p = loadProfile();
+  var display = document.getElementById('jfa-pitch-display');
+  var missing = document.getElementById('jfa-pitch-missing');
+  if (!display) return;
+  if (p && p.pitch && p.pitch.trim()) {
+    display.textContent = p.pitch.trim();
+    display.style.display = 'block';
+    if (missing) missing.style.display = 'none';
+  } else {
+    display.style.display = 'none';
+    if (missing) missing.style.display = 'flex';
+  }
+}
+
+// Init jobs page
+_pageInits.jobs = function() { _jfaLoadPitch(); };

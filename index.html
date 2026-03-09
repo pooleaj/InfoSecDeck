@@ -29,7 +29,7 @@
 <meta name="twitter:image" content="https://infosecdeck.com/og-image.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=35">
+<link rel="stylesheet" href="css/styles.css?v=36">
 </head>
 <body>
 <nav>
@@ -1874,35 +1874,116 @@
   <div class="st a2">Cybersecurity Salary Guide</div>
   <p class="ss a3">Filter by domain, track, tier, or salary range. Data reflects 2024–2025 U.S. market across all experience levels.</p>
 
-  <!-- Salary Calculator -->
-  <div class="sal-calc a3" id="sal-calc">
-    <div class="sc-title">💰 Salary Calculator</div>
-    <div class="sc-subtitle">Estimate your market value based on role, experience, location, and certifications.</div>
-    <div class="sc-form">
-      <div class="sc-form-row">
-        <label class="sc-label">Role</label>
-        <select id="sc-role" class="sc-select" onchange="calcSalary()"><option value="">Select a role...</option></select>
+  <!-- Salary Tools Toggle Row -->
+  <div class="sal-toggle-row a3">
+    <div class="sal-toggle-card" id="sal-tc-calc" onclick="toggleSalTool('calc')">
+      <div class="stc-left">
+        <div class="stc-icon">💰</div>
+        <div class="stc-body">
+          <div class="stc-title">Salary Calculator</div>
+          <div class="stc-desc">Estimate your market value by role, experience &amp; location</div>
+        </div>
       </div>
-      <div class="sc-form-row">
-        <label class="sc-label">Experience</label>
-        <select id="sc-exp" class="sc-select" onchange="calcSalary()">
-          <option value="entry">Entry (0–2 yrs)</option>
-          <option value="mid" selected>Mid (3–5 yrs)</option>
-          <option value="senior">Senior (6–9 yrs)</option>
-          <option value="lead">Lead/Principal (10+ yrs)</option>
-        </select>
-      </div>
-      <div class="sc-form-row">
-        <label class="sc-label">Location</label>
-        <select id="sc-loc" class="sc-select" onchange="calcSalary()"></select>
-      </div>
+      <div class="stc-arrow" id="sal-arrow-calc">▾</div>
     </div>
-    <div class="sc-form-row" style="margin-top:12px;">
-      <label class="sc-label">Premium Cert Bonuses</label>
-      <div class="sc-cert-bonuses" id="sc-cert-bonuses"></div>
+    <div class="sal-toggle-sep"></div>
+    <div class="sal-toggle-card" id="sal-tc-sng" onclick="toggleSalTool('sng')">
+      <div class="stc-left">
+        <div class="stc-icon">💬</div>
+        <div class="stc-body">
+          <div class="stc-title">Negotiation Script <span class="pro-lock-badge" style="margin-left:8px;font-size:.55rem;vertical-align:middle;">🔒 Pro</span></div>
+          <div class="stc-desc">Get a personalized, ready-to-use negotiation playbook</div>
+        </div>
+      </div>
+      <div class="stc-arrow" id="sal-arrow-sng">▾</div>
     </div>
-    <div class="sc-result" id="sc-result"><div class="sc-placeholder">Select a role above to calculate your estimated salary range.</div></div>
-    <button class="sc-save-btn" id="sc-save-btn" onclick="saveSalaryToProfile()" style="display:none">Save to My Profile &#8599;</button>
+  </div>
+
+  <!-- Salary Tools Expand Panel -->
+  <div class="sal-expand-panel" id="sal-expand-panel">
+    <!-- Salary Calculator -->
+    <div class="sal-calc" id="sal-calc" style="display:none">
+      <div class="sc-title">💰 Salary Calculator</div>
+      <div class="sc-subtitle">Estimate your market value based on role, experience, location, and certifications.</div>
+      <div class="sc-form">
+        <div class="sc-form-row">
+          <label class="sc-label">Role</label>
+          <select id="sc-role" class="sc-select" onchange="calcSalary()"><option value="">Select a role...</option></select>
+        </div>
+        <div class="sc-form-row">
+          <label class="sc-label">Experience</label>
+          <select id="sc-exp" class="sc-select" onchange="calcSalary()">
+            <option value="entry">Entry (0–2 yrs)</option>
+            <option value="mid" selected>Mid (3–5 yrs)</option>
+            <option value="senior">Senior (6–9 yrs)</option>
+            <option value="lead">Lead/Principal (10+ yrs)</option>
+          </select>
+        </div>
+        <div class="sc-form-row">
+          <label class="sc-label">Location</label>
+          <select id="sc-loc" class="sc-select" onchange="calcSalary()"></select>
+        </div>
+      </div>
+      <div class="sc-form-row" style="margin-top:12px;">
+        <label class="sc-label">Premium Cert Bonuses</label>
+        <div class="sc-cert-bonuses" id="sc-cert-bonuses"></div>
+      </div>
+      <div class="sc-result" id="sc-result"><div class="sc-placeholder">Select a role above to calculate your estimated salary range.</div></div>
+      <button class="sc-save-btn" id="sc-save-btn" onclick="saveSalaryToProfile()" style="display:none">Save to My Profile &#8599;</button>
+    </div>
+    <!-- Salary Negotiation Script Generator -->
+    <div class="sng-tool" id="sng-tool" style="display:none">
+      <div class="sng-header">
+        <div class="sng-icon">💬</div>
+        <div class="sng-header-text">
+          <div class="sng-title">Salary Negotiation Script Generator</div>
+          <div class="sng-subtitle">Get a personalized, ready-to-use negotiation script for your offer</div>
+        </div>
+        <span class="pro-lock-badge">🔒 Pro</span>
+      </div>
+      <div class="sng-form" id="sng-form">
+        <div class="sng-form-grid">
+          <div class="sng-field">
+            <label class="sng-label">Target Role</label>
+            <select id="sng-role" class="sng-select"><option value="">Select a role...</option></select>
+          </div>
+          <div class="sng-field">
+            <label class="sng-label">Current Offer</label>
+            <div class="sng-input-wrap"><span class="sng-prefix">$</span><input type="number" id="sng-offer" class="sng-input" placeholder="95000" min="30000" max="800000"></div>
+          </div>
+          <div class="sng-field">
+            <label class="sng-label">Your Target Salary</label>
+            <div class="sng-input-wrap"><span class="sng-prefix">$</span><input type="number" id="sng-target" class="sng-input" placeholder="115000" min="30000" max="800000"></div>
+          </div>
+          <div class="sng-field">
+            <label class="sng-label">Years of Experience</label>
+            <select id="sng-exp" class="sng-select">
+              <option value="1">0–2 years</option>
+              <option value="3" selected>3–5 years</option>
+              <option value="6">6–9 years</option>
+              <option value="10">10+ years</option>
+            </select>
+          </div>
+        </div>
+        <div class="sng-field">
+          <label class="sng-label">Your leverage points <span class="sng-label-hint">(select all that apply)</span></label>
+          <div class="sng-strength-chips" id="sng-strengths">
+            <label class="sng-chip"><input type="checkbox" value="relevant_certs"> Relevant Certifications</label>
+            <label class="sng-chip"><input type="checkbox" value="security_clearance"> Security Clearance</label>
+            <label class="sng-chip"><input type="checkbox" value="competing_offer"> Competing Offer</label>
+            <label class="sng-chip"><input type="checkbox" value="specialized_skills"> Specialized Niche Skills</label>
+            <label class="sng-chip"><input type="checkbox" value="leadership"> Leadership Experience</label>
+            <label class="sng-chip"><input type="checkbox" value="rare_domain"> Rare Domain Expertise</label>
+          </div>
+        </div>
+        <div class="sng-field">
+          <label class="sng-label">Additional context <span class="sng-label-hint">(optional — competing offer $, unique background, etc.)</span></label>
+          <textarea id="sng-notes" class="sng-textarea" placeholder="e.g. I have a competing offer at $110K from Acme Corp. I also have active TS/SCI clearance and 2 years of ICS/SCADA experience which is rare at this level."></textarea>
+        </div>
+        <button class="sng-gen-btn" id="sng-gen-btn" onclick="generateNegotiationScript()">Generate My Script →</button>
+      </div>
+      <div class="sng-output" id="sng-output" style="display:none"></div>
+    </div>
   </div>
 
   <!-- Filters -->
@@ -1986,60 +2067,6 @@
     </table>
   </div>
   <p style="font-size:.65rem;color:var(--dm);margin-top:16px;text-align:center;">Sources: BLS OES 2024 · Glassdoor 2024 · Levels.fyi · Motion Recruitment Cybersecurity Salary Report 2024 · SANS 2024 Cybersecurity Workforce Study. U.S. base salary; total comp at tech firms may be higher.</p>
-
-  <!-- Salary Negotiation Script Generator -->
-  <div class="sng-tool a3" id="sng-tool">
-    <div class="sng-header">
-      <div class="sng-icon">💬</div>
-      <div class="sng-header-text">
-        <div class="sng-title">Salary Negotiation Script Generator</div>
-        <div class="sng-subtitle">Get a personalized, ready-to-use negotiation script for your offer</div>
-      </div>
-      <span class="pro-lock-badge">🔒 Pro</span>
-    </div>
-    <div class="sng-form" id="sng-form">
-      <div class="sng-form-grid">
-        <div class="sng-field">
-          <label class="sng-label">Target Role</label>
-          <select id="sng-role" class="sng-select"><option value="">Select a role...</option></select>
-        </div>
-        <div class="sng-field">
-          <label class="sng-label">Current Offer</label>
-          <div class="sng-input-wrap"><span class="sng-prefix">$</span><input type="number" id="sng-offer" class="sng-input" placeholder="95000" min="30000" max="800000"></div>
-        </div>
-        <div class="sng-field">
-          <label class="sng-label">Your Target Salary</label>
-          <div class="sng-input-wrap"><span class="sng-prefix">$</span><input type="number" id="sng-target" class="sng-input" placeholder="115000" min="30000" max="800000"></div>
-        </div>
-        <div class="sng-field">
-          <label class="sng-label">Years of Experience</label>
-          <select id="sng-exp" class="sng-select">
-            <option value="1">0–2 years</option>
-            <option value="3" selected>3–5 years</option>
-            <option value="6">6–9 years</option>
-            <option value="10">10+ years</option>
-          </select>
-        </div>
-      </div>
-      <div class="sng-field">
-        <label class="sng-label">Your leverage points <span class="sng-label-hint">(select all that apply)</span></label>
-        <div class="sng-strength-chips" id="sng-strengths">
-          <label class="sng-chip"><input type="checkbox" value="relevant_certs"> Relevant Certifications</label>
-          <label class="sng-chip"><input type="checkbox" value="security_clearance"> Security Clearance</label>
-          <label class="sng-chip"><input type="checkbox" value="competing_offer"> Competing Offer</label>
-          <label class="sng-chip"><input type="checkbox" value="specialized_skills"> Specialized Niche Skills</label>
-          <label class="sng-chip"><input type="checkbox" value="leadership"> Leadership Experience</label>
-          <label class="sng-chip"><input type="checkbox" value="rare_domain"> Rare Domain Expertise</label>
-        </div>
-      </div>
-      <div class="sng-field">
-        <label class="sng-label">Additional context <span class="sng-label-hint">(optional — competing offer $, unique background, etc.)</span></label>
-        <textarea id="sng-notes" class="sng-textarea" placeholder="e.g. I have a competing offer at $110K from Acme Corp. I also have active TS/SCI clearance and 2 years of ICS/SCADA experience which is rare at this level."></textarea>
-      </div>
-      <button class="sng-gen-btn" id="sng-gen-btn" onclick="generateNegotiationScript()">Generate My Script →</button>
-    </div>
-    <div class="sng-output" id="sng-output" style="display:none"></div>
-  </div>
 
 </div>
 <div class="footer">InfoSecDeck · Salary Guide · 2024–2025 data · Not financial advice</div>
@@ -2553,10 +2580,16 @@
 
 <!-- ═══════════════ JOB BOARD ═══════════════ -->
 <div class="page" id="page-jobs">
-<div style="padding:52px 28px 100px;max-width:820px;margin:0 auto;">
+<div style="padding:52px 28px 100px;max-width:1200px;margin:0 auto;">
   <div class="ey a1">Find Work</div>
-  <div class="st a2">Job Search Assistant</div>
-  <p class="ss a3">Answer a few questions and we'll generate custom search links across the top job boards — filtered to your exact domain, title, and experience level.</p>
+  <div class="st a2">Job Search Tools</div>
+  <p class="ss a3">Find your next role and assess your fit — both tools work best together.</p>
+
+  <div class="jobs-split">
+  <!-- Left: Job Search Assistant -->
+  <div class="jobs-left">
+  <div class="jobs-col-label a2">Job Search Assistant</div>
+  <p class="jobs-col-desc a3">Answer a few questions and get custom links across the top job boards — filtered to your domain, title, and experience level.</p>
 
   <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:16px;padding:32px;margin-bottom:24px;" id="job-quiz-form">
 
@@ -2640,6 +2673,13 @@
     </div>
   </div>
 
+  </div><!-- /jobs-left -->
+
+  <div class="jobs-split-divider"></div>
+
+  <div class="jobs-right">
+  <div class="jobs-col-label a2">Will I Get This Job?</div>
+  <p class="jobs-col-desc a3">Paste a job description for an honest AI fit assessment — before you spend time applying.</p>
   <!-- Will I Get This Job? Analyzer -->
   <div class="jfa-tool a3" id="jfa-tool">
     <div class="jfa-header">
@@ -2677,13 +2717,19 @@
         </div>
       </div>
       <div class="jfa-field">
-        <label class="jfa-label">Your background <span class="sng-label-hint">(optional — 2–3 sentences on your experience)</span></label>
-        <textarea id="jfa-pitch" class="jfa-textarea jfa-textarea-sm" placeholder="e.g. I'm a SOC analyst with 3 years at an MSSP. I hold Security+ and CySA+. I've triaged 500+ alerts using Splunk and QRadar and led a Tier 2 escalation team."></textarea>
+        <label class="jfa-label">Your professional pitch <span class="jfa-pitch-source">— synced from your profile</span></label>
+        <div id="jfa-pitch-display" class="jfa-pitch-display"></div>
+        <div id="jfa-pitch-missing" class="jfa-pitch-missing" style="display:none">
+          &#9888; Add a <button onclick="showPage('profile')" class="jfa-profile-link">Professional Pitch in your profile</button> to personalize this analysis.
+        </div>
       </div>
       <button class="jfa-btn" id="jfa-btn" onclick="analyzeJobFit()">Analyze My Fit →</button>
     </div>
     <div class="jfa-output" id="jfa-output" style="display:none"></div>
   </div>
+  </div><!-- /jobs-right -->
+
+  </div><!-- /jobs-split -->
 
 </div>
 <div class="footer">InfoSecDeck · Job Search Assistant · Links open external job boards · InfoSecDeck does not post or manage listings</div>
@@ -3161,6 +3207,10 @@
     <div class="pf-field" style="margin-top:16px;">
       <label class="pf-label">Bio / Notes <span style="color:var(--mt);font-weight:400;">(optional)</span></label>
       <textarea id="pf-bio" class="pf-input" rows="3" placeholder="What you're working toward, certs you're studying, etc."></textarea>
+    </div>
+    <div class="pf-field pf-field-pitch" style="margin-top:16px;">
+      <label class="pf-label">Professional Pitch <span class="pf-pitch-hint">used by Will I Get This Job? Analyzer</span></label>
+      <textarea id="pf-pitch" class="pf-input" rows="3" placeholder="In 2–3 sentences, describe your cybersecurity background and what makes you stand out. e.g. &quot;I'm a SOC analyst with 3 years at an MSSP, specializing in threat hunting with Splunk. I hold Security+ and CySA+ and led a Tier 2 escalation team that reduced MTTR by 40%.&quot;"></textarea>
     </div>
     <button class="pf-save-btn" onclick="saveProfile()">Save Profile</button>
   </div>
@@ -4084,7 +4134,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=35"></script>
+<script src="js/app.js?v=36"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->
