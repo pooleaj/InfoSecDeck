@@ -5813,3 +5813,31 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
   padding: 2px 7px;
   font-size: .68rem;
 }
+
+/* ── CERT RANKINGS (v43) ───────────────────────────────────────── */
+.cr-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0 18px;}
+.cr-tab{padding:8px 16px;border-radius:20px;border:1px solid var(--bd2);background:var(--sf);color:var(--mt);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.cr-tab:hover{border-color:var(--lb);color:var(--lb);}
+.cr-tab.active{background:var(--lb);border-color:var(--lb);color:#000;}
+.cr-filter-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+.cr-filter-label{font-size:.72rem;color:var(--mt);font-weight:600;white-space:nowrap;min-width:52px;}
+.cr-chips{display:flex;gap:6px;flex-wrap:wrap;}
+.cr-chip{padding:4px 12px;border-radius:14px;border:1px solid var(--bd);background:transparent;color:var(--mt);font-size:.72rem;cursor:pointer;transition:all .18s;}
+.cr-chip:hover{border-color:var(--bd2);color:var(--tx);}
+.cr-chip.active{border-color:var(--lb);color:var(--lb);background:rgba(13,212,200,.08);}
+.cr-list{display:flex;flex-direction:column;gap:10px;margin-top:22px;}
+.cr-card{display:flex;align-items:center;gap:14px;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;cursor:pointer;transition:border-color .2s,background .2s;}
+.cr-card:hover{border-color:var(--bd2);background:var(--sf3);}
+.cr-rank{font-size:1.4rem;min-width:36px;text-align:center;flex-shrink:0;line-height:1;}
+.cr-body{flex:1;min-width:0;}
+.cr-name{font-size:.88rem;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cr-issuer{font-size:.71rem;color:var(--mt);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cr-meta-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px;}
+.cr-tier-badge{font-size:.66rem;font-weight:700;border:1px solid;border-radius:10px;padding:2px 8px;}
+.cr-tag{font-size:.64rem;color:var(--mt);background:var(--sf3);border:1px solid var(--bd);border-radius:8px;padding:2px 7px;}
+.cr-metrics{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;min-width:148px;text-align:right;}
+.cr-metric-primary{font-size:.78rem;font-weight:700;color:var(--lb);}
+.cr-metric-secondary{font-size:.72rem;color:var(--tx);}
+.cr-metric-tertiary{font-size:.68rem;color:var(--mt);}
+.cr-arrow{color:var(--mt);font-size:1.3rem;flex-shrink:0;padding-left:4px;}
+@media(max-width:640px){.cr-metrics{display:none;}.cr-rank{min-width:28px;font-size:1.1rem;}.cr-tabs{gap:6px;}.cr-tab{font-size:.72rem;padding:6px 12px;}}

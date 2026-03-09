@@ -102,6 +102,10 @@
           <span class="ndi-icon">📜</span>
           <div class="ndi-text"><span class="ndi-label">Certifications</span><span class="ndi-desc">Roadmap grid by domain &amp; tier</span></div>
         </div>
+        <div class="ndi" onclick="showPage('certranks');closeAllDrops()">
+          <span class="ndi-icon">🏆</span>
+          <div class="ndi-text"><span class="ndi-label">Cert Rankings</span><span class="ndi-desc">Best certs by ROI, demand &amp; more</span></div>
+        </div>
         <div class="ndi" onclick="showPage('training');closeAllDrops()">
           <span class="ndi-icon">🎓</span>
           <div class="ndi-text"><span class="ndi-label">Training</span><span class="ndi-desc">Certificates, degrees &amp; bootcamps</span></div>
@@ -1258,6 +1262,66 @@
 </div><!-- end cw-inner -->
 </div><!-- end cw-scroll-outer -->
 <div class="footer">InfoSecDeck · Cert data sourced from vendor official sites &amp; job posting analysis 2024–2025</div>
+</div>
+
+<!-- ═══════════════════════ CERT RANKINGS ═══════════════════════ -->
+<div class="page" id="page-certranks">
+<div style="padding:52px 28px 100px;max-width:1100px;margin:0 auto;">
+  <div class="cert-header a1">
+    <div class="ey">Certifications</div>
+    <div class="st">Cert Rankings</div>
+    <p style="color:var(--mt);font-size:.9rem;margin-top:6px;">Ranked by real metrics — ROI, salary lift, demand, and beginner-friendliness. Click any cert to view full details.</p>
+  </div>
+
+  <!-- Login gate -->
+  <div id="cr-login-gate" style="display:none;text-align:center;padding:48px 20px;">
+    <div style="font-size:2rem;margin-bottom:10px;">🏆</div>
+    <div style="font-weight:700;color:var(--tx);font-size:1rem;margin-bottom:6px;">Sign in to view cert rankings</div>
+    <p style="color:var(--mt);font-size:.85rem;margin-bottom:20px;">Free for all registered users.</p>
+    <button class="btn-primary" onclick="_showSignInModal()">Sign In / Create Account</button>
+  </div>
+
+  <!-- Rankings content -->
+  <div id="cr-content" style="display:none;">
+    <!-- Ranking tabs -->
+    <div class="cr-tabs" id="cr-tabs">
+      <button class="cr-tab active" onclick="crSetTab('demand',this)">🔥 Most In-Demand</button>
+      <button class="cr-tab" onclick="crSetTab('salary',this)">💰 Highest Salary Boost</button>
+      <button class="cr-tab" onclick="crSetTab('roi',this)">📈 Best ROI</button>
+      <button class="cr-tab" onclick="crSetTab('beginner',this)">🚀 Best for Beginners</button>
+    </div>
+    <!-- Domain filter -->
+    <div class="cr-filter-row">
+      <span class="cr-filter-label">Domain:</span>
+      <div class="cr-chips" id="cr-domain-chips">
+        <button class="cr-chip active" onclick="crSetDomain('all',this)">All</button>
+        <button class="cr-chip" onclick="crSetDomain('General Security',this)">General</button>
+        <button class="cr-chip" onclick="crSetDomain('SOC',this)">SOC</button>
+        <button class="cr-chip" onclick="crSetDomain('IAM',this)">IAM</button>
+        <button class="cr-chip" onclick="crSetDomain('Cloud',this)">Cloud</button>
+        <button class="cr-chip" onclick="crSetDomain('AppSec',this)">AppSec</button>
+        <button class="cr-chip" onclick="crSetDomain('Offensive',this)">Offensive</button>
+        <button class="cr-chip" onclick="crSetDomain('GRC',this)">GRC</button>
+        <button class="cr-chip" onclick="crSetDomain('DFIR',this)">DFIR</button>
+        <button class="cr-chip" onclick="crSetDomain('Security Engineering',this)">Sec Eng</button>
+        <button class="cr-chip" onclick="crSetDomain('AI Security',this)">AI Sec</button>
+      </div>
+    </div>
+    <!-- Tier filter -->
+    <div class="cr-filter-row">
+      <span class="cr-filter-label">Tier:</span>
+      <div class="cr-chips" id="cr-tier-chips">
+        <button class="cr-chip active" onclick="crSetTier('all',this)">All Tiers</button>
+        <button class="cr-chip" onclick="crSetTier('tier-entry',this)">Entry</button>
+        <button class="cr-chip" onclick="crSetTier('tier-mid',this)">Mid</button>
+        <button class="cr-chip" onclick="crSetTier('tier-senior',this)">Senior</button>
+        <button class="cr-chip" onclick="crSetTier('tier-principal',this)">Principal+</button>
+      </div>
+    </div>
+    <!-- Ranked list -->
+    <div id="cr-list" class="cr-list"></div>
+  </div>
+</div>
 </div>
 
 <div class="page" id="page-training">
@@ -4257,7 +4321,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=42"></script>
+<script src="js/app.js?v=43"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->

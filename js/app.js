@@ -7772,3 +7772,147 @@ _pageInits.news = function() {
     }
   });
 })();
+
+// ─── CERT RANKINGS (v43) ──────────────────────────────────────────────────
+var _crTab = 'demand', _crDomain = 'all', _crTier = 'all';
+
+function _rankCerts(tab, domain, tier) {
+  var BASE_SAL = 105000;
+  var keys = Object.keys(CERTS).filter(function(k) {
+    var c = CERTS[k];
+    if (domain !== 'all') {
+      var d = c.domains || [];
+      if (d.indexOf(domain) < 0 && d.indexOf('All Domains') < 0) return false;
+    }
+    if (tier !== 'all') {
+      if (tier === 'tier-principal') {
+        if (c.tierClass !== 'tier-principal' && c.tierClass !== 'tier-exec') return false;
+      } else {
+        if (c.tierClass !== tier) return false;
+      }
+    }
+    return true;
+  });
+
+  return keys.map(function(k) {
+    var c = CERTS[k];
+    var normKey = _normCertKey(k);
+    var bonusPct = (typeof CERT_BONUSES !== 'undefined' && CERT_BONUSES[normKey])
+                 || (typeof CERT_TIER_BONUS !== 'undefined' && CERT_TIER_BONUS[c.tierClass]) || 0.07;
+    var costMatch = c.issuer ? c.issuer.match(/\$[\d,]+/) : null;
+    var examCost = costMatch ? parseInt(costMatch[0].replace(/[$,]/g,'')) : 0;
+    var annualLift = Math.round(BASE_SAL * bonusPct / 100) * 100;
+    var monthlyLift = annualLift / 12;
+    var monthsROI = (examCost > 0 && monthlyLift > 0) ? Math.ceil(examCost / monthlyLift) : 999;
+    var sh = (typeof CERT_STUDY_HOURS !== 'undefined' && CERT_STUDY_HOURS[c.tierClass]) || {min:80,max:140};
+    var tags = c.tags || [];
+    var hasDod = tags.some(function(t){return t.indexOf('DoD')>=0;});
+    var hasHR = tags.some(function(t){return t.indexOf('HR filter')>=0;});
+    var hasFree = c.links && c.links.some(function(l){return l.t==='rlf';});
+    var domainBreadth = (c.domains && c.domains.indexOf('All Domains')>=0) ? 5 : (c.domains||[]).length;
+    var score = 0, metrics = {};
+
+    if (tab === 'demand') {
+      score += hasDod ? 30 : 0;
+      score += hasHR ? 25 : 0;
+      score += tags.indexOf('Vendor-neutral') >= 0 ? 10 : 0;
+      score += domainBreadth * 5;
+      score += Math.round(bonusPct * 100);
+      var demandLabel = (hasDod && hasHR) ? 'Very High' : (hasDod || hasHR || bonusPct >= 0.12) ? 'High' : (bonusPct >= 0.09 || domainBreadth >= 3) ? 'Medium' : 'Moderate';
+      metrics = { primary:'Demand: '+demandLabel, secondary:'+'+Math.round(bonusPct*100)+'% salary lift', tertiary:domainBreadth>=4?'All Domains':(c.domains||['–']).join(', ') };
+
+    } else if (tab === 'salary') {
+      score = Math.round(bonusPct * 10000);
+      metrics = { primary:'+'+Math.round(bonusPct*100)+'% salary lift', secondary:'+$'+annualLift.toLocaleString()+'/yr', tertiary:examCost?'$'+examCost.toLocaleString()+' exam':'Cost varies' };
+
+    } else if (tab === 'roi') {
+      score = examCost > 0 ? Math.round(10000 / (monthsROI + 1)) : -1;
+      metrics = { primary:examCost>0?'ROI in ~'+monthsROI+' months':'Cost unknown', secondary:'+'+Math.round(bonusPct*100)+'% salary lift', tertiary:examCost?'$'+examCost.toLocaleString()+' exam':'—' };
+
+    } else if (tab === 'beginner') {
+      if (c.tierClass !== 'tier-entry' && c.tierClass !== 'tier-mid') { score = -1; }
+      else {
+        score += examCost > 0 && examCost <= 200 ? 30 : examCost <= 400 ? 20 : examCost <= 600 ? 10 : 0;
+        score += hasFree ? 20 : 0;
+        score += tags.indexOf('Vendor-neutral') >= 0 ? 15 : 0;
+        score += hasDod ? 15 : 0;
+        score += hasHR ? 10 : 0;
+        score += Math.round((120 - sh.min) / 4);
+        metrics = { primary:sh.min+'–'+sh.max+' study hrs', secondary:hasFree?'✓ Free resources available':'Paid resources', tertiary:examCost?'$'+examCost.toLocaleString()+' exam':'Cost varies' };
+      }
+    }
+    return { key:k, cert:c, score:score, metrics:metrics };
+  }).filter(function(r){return r.score>=0;}).sort(function(a,b){return b.score-a.score;});
+}
+
+function renderCertRankings() {
+  var listEl = document.getElementById('cr-list');
+  if (!listEl) return;
+  var ranked = _rankCerts(_crTab, _crDomain, _crTier);
+  var medals = ['🥇','🥈','🥉'];
+  var tierLabels = {'tier-entry':'Entry','tier-mid':'Mid','tier-senior':'Senior','tier-principal':'Principal','tier-exec':'Exec'};
+  var tierColors = {'tier-entry':'var(--gn)','tier-mid':'var(--lb)','tier-senior':'var(--bl)','tier-principal':'var(--pu)','tier-exec':'var(--am)'};
+
+  if (ranked.length === 0) {
+    listEl.innerHTML = '<p style="color:var(--mt);font-size:.85rem;text-align:center;padding:40px 0;">No certs match this filter combination.</p>';
+    return;
+  }
+  listEl.innerHTML = ranked.map(function(r, i) {
+    var c = r.cert;
+    var rank = i + 1;
+    var medal = i < 3 ? medals[i] : '';
+    var tierColor = tierColors[c.tierClass] || 'var(--mt)';
+    var tierLabel = tierLabels[c.tierClass] || '';
+    var tags = (c.tags||[]).slice(0,3).map(function(t){return '<span class="cr-tag">'+t+'</span>';}).join('');
+    return '<div class="cr-card" onclick="openCert(\''+r.key+'\')">'
+      +'<div class="cr-rank">'+(medal||'<span style="font-size:.75rem;font-family:var(--fm);color:var(--mt);">#'+rank+'</span>')+'</div>'
+      +'<div class="cr-body">'
+      +'<div class="cr-name">'+c.name+'</div>'
+      +'<div class="cr-issuer">'+(c.issuer||'')+'</div>'
+      +'<div class="cr-meta-row"><span class="cr-tier-badge" style="color:'+tierColor+';border-color:'+tierColor+';">'+tierLabel+'</span>'+tags+'</div>'
+      +'</div>'
+      +'<div class="cr-metrics">'
+      +'<div class="cr-metric-primary">'+r.metrics.primary+'</div>'
+      +'<div class="cr-metric-secondary">'+r.metrics.secondary+'</div>'
+      +'<div class="cr-metric-tertiary">'+r.metrics.tertiary+'</div>'
+      +'</div>'
+      +'<div class="cr-arrow">›</div>'
+      +'</div>';
+  }).join('');
+}
+
+function crSetTab(tab, el) {
+  _crTab = tab;
+  document.querySelectorAll('.cr-tab').forEach(function(b){b.classList.remove('active');});
+  if (el) el.classList.add('active');
+  renderCertRankings();
+}
+function crSetDomain(domain, el) {
+  _crDomain = domain;
+  document.querySelectorAll('#cr-domain-chips .cr-chip').forEach(function(b){b.classList.remove('active');});
+  if (el) el.classList.add('active');
+  renderCertRankings();
+}
+function crSetTier(tier, el) {
+  _crTier = tier;
+  document.querySelectorAll('#cr-tier-chips .cr-chip').forEach(function(b){b.classList.remove('active');});
+  if (el) el.classList.add('active');
+  renderCertRankings();
+}
+
+_pageInits['certranks'] = function() {
+  var gate = document.getElementById('cr-login-gate');
+  var content = document.getElementById('cr-content');
+  if (!_currentUser) {
+    if (gate) gate.style.display = 'block';
+    if (content) content.style.display = 'none';
+  } else {
+    if (gate) gate.style.display = 'none';
+    if (content) content.style.display = 'block';
+    _crTab = 'demand'; _crDomain = 'all'; _crTier = 'all';
+    document.querySelectorAll('.cr-tab').forEach(function(b,i){b.classList.toggle('active',i===0);});
+    document.querySelectorAll('#cr-domain-chips .cr-chip').forEach(function(b,i){b.classList.toggle('active',i===0);});
+    document.querySelectorAll('#cr-tier-chips .cr-chip').forEach(function(b,i){b.classList.toggle('active',i===0);});
+    renderCertRankings();
+  }
+};
