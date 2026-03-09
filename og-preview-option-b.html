@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>OG Image — Option B: Bold Headline</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; padding: 40px; background: #0d1117; display: flex; align-items: center; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+
+  .og {
+    width: 1200px;
+    height: 630px;
+    background: #0b1120;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    font-family: 'Space Grotesk', sans-serif;
+    flex-shrink: 0;
+  }
+
+  /* Large teal circle glow — top left */
+  .glow-tl {
+    position: absolute;
+    top: -200px;
+    left: -150px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(13,212,200,.09) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Blue glow — bottom right */
+  .glow-br {
+    position: absolute;
+    bottom: -200px;
+    right: -100px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(77,158,255,.07) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Horizontal rule lines */
+  .rule-top {
+    position: absolute;
+    top: 80px;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(13,212,200,.3) 0%, rgba(13,212,200,.05) 60%, transparent 100%);
+  }
+  .rule-bottom {
+    position: absolute;
+    bottom: 80px;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(13,212,200,.3) 0%, rgba(13,212,200,.05) 60%, transparent 100%);
+  }
+
+  /* Content */
+  .content {
+    position: relative;
+    z-index: 1;
+    padding: 0 90px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .wordmark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    color: #0dd4c8;
+    margin-bottom: 28px;
+  }
+
+  .headline {
+    font-size: 82px;
+    font-weight: 900;
+    line-height: .95;
+    letter-spacing: -.04em;
+    margin-bottom: 28px;
+  }
+  .hl-line1 { color: #dde6f0; display: block; }
+  .hl-line2 {
+    display: block;
+    background: linear-gradient(90deg, #0dd4c8 0%, #4d9eff 60%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .sub {
+    font-size: 20px;
+    color: #7a90a8;
+    line-height: 1.5;
+    max-width: 640px;
+    margin-bottom: 40px;
+  }
+  .sub strong { color: #dde6f0; }
+
+  /* Feature row */
+  .features {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  .feat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .06em;
+    color: #7a90a8;
+  }
+  .feat-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #0dd4c8;
+    flex-shrink: 0;
+  }
+  .feat-sep { color: #1e2d47; font-size: 18px; }
+
+  /* Corner badge */
+  .corner-badge {
+    position: absolute;
+    top: 36px;
+    right: 56px;
+    z-index: 1;
+    background: linear-gradient(135deg, rgba(13,212,200,.12), rgba(77,158,255,.08));
+    border: 1px solid rgba(13,212,200,.25);
+    border-radius: 12px;
+    padding: 10px 18px;
+    text-align: center;
+  }
+  .cb-free {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: #0dd4c8;
+  }
+  .cb-label {
+    font-size: 22px;
+    font-weight: 800;
+    color: #dde6f0;
+    letter-spacing: -.03em;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  /* Bottom URL */
+  .url {
+    position: absolute;
+    bottom: 34px;
+    right: 56px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #3d5166;
+    letter-spacing: .08em;
+    z-index: 1;
+  }
+  .url span { color: #0dd4c8; }
+</style>
+</head>
+<body>
+<div class="og">
+  <div class="glow-tl"></div>
+  <div class="glow-br"></div>
+  <div class="rule-top"></div>
+  <div class="rule-bottom"></div>
+
+  <div class="content">
+    <div class="wordmark">InfoSecDeck</div>
+    <div class="headline">
+      <span class="hl-line1">Your Cybersecurity</span>
+      <span class="hl-line2">Career Command Center</span>
+    </div>
+    <div class="sub">
+      Certs. Domains. Salary data. <strong>AI-powered resume feedback.</strong><br>
+      Everything you need to break in and level up — free.
+    </div>
+    <div class="features">
+      <div class="feat"><div class="feat-dot"></div>15 Security Domains</div>
+      <div class="feat-sep">·</div>
+      <div class="feat"><div class="feat-dot"></div>80+ Certifications</div>
+      <div class="feat-sep">·</div>
+      <div class="feat"><div class="feat-dot"></div>AI Resume Roaster</div>
+      <div class="feat-sep">·</div>
+      <div class="feat"><div class="feat-dot"></div>Career Pivot Advisor</div>
+    </div>
+  </div>
+
+  <div class="corner-badge">
+    <div class="cb-free">Start Free</div>
+    <div class="cb-label">$0</div>
+  </div>
+
+  <div class="url"><span>infosecdeck</span>.com</div>
+</div>
+</body>
+</html>
