@@ -1763,6 +1763,13 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
   border: 1px solid rgba(0,212,200,.22);
 }
 
+.hsc-lottie-wrap {
+  display: flex;
+  justify-content: center;
+  margin: -6px 0 6px;
+  filter: drop-shadow(0 0 18px rgba(0,212,200,.25));
+}
+
 .hsc-headline {
   font-family: var(--fd);
   font-weight: 800;
