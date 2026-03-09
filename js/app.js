@@ -1763,7 +1763,7 @@ async function runPivotAdvisor() {
         mimeType: pivotResumeBase64 ? (pivotResumeFilename && pivotResumeFilename.endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf') : null
       })
     });
-    if (!response.ok) { var eb = await response.json(); if (response.status === 429) { document.getElementById('pivot-loading').style.display='none'; document.getElementById('pivot-submit').disabled=false; _showRateLimitMsg(eb,'Career Pivot Advisor'); return; } throw new Error(eb.error || 'API error ' + response.status); }
+    if (!response.ok) { var eb = await response.json().catch(function(){return{};}); if (response.status === 429) { document.getElementById('pivot-loading').style.display='none'; document.getElementById('pivot-submit').disabled=false; _showRateLimitMsg(eb,'Career Pivot Advisor'); return; } throw new Error(eb.error || eb.msg || eb.message || 'API error ' + response.status); }
     var result = await response.json();
     _updateUsageMeter('pivot', result._usageInfo);
     document.getElementById('pivot-loading').style.display = 'none';
