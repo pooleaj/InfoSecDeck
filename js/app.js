@@ -91,7 +91,19 @@ var JT={
     daily:'Disassembling malware samples using Ghidra and IDA Pro, running sandbox analyses, writing YARA and Sigma detection rules, and publishing technical research for the community.'},
   vm:{title:'Vulnerability Management Analyst',domain:'Security Operations',domainId:'soc',salary:'$80K – $120K',level:'Mid-Level',icon:'🔍',
     desc:'Systematically find, prioritize, and drive remediation of vulnerabilities across the entire enterprise before attackers can discover and exploit them.',
-    daily:'Running Tenable or Qualys scans across the environment, risk-scoring CVEs using CVSS and EPSS, coordinating patch campaigns with engineering teams, and reporting metrics to leadership.'}
+    daily:'Running Tenable or Qualys scans across the environment, risk-scoring CVEs using CVSS and EPSS, coordinating patch campaigns with engineering teams, and reporting metrics to leadership.'},
+  aise:{title:'AI Security Engineer',domain:'AI Security',domainId:'aisec',salary:'$130K – $175K',level:'Mid – Senior',icon:'🤖',
+    desc:'Design and implement security controls for AI/ML pipelines, model serving infrastructure, and training environments — defending against prompt injection, data poisoning, and model theft.',
+    daily:'Running LLM red team eval suites using Garak, reviewing a new RAG pipeline for retrieval poisoning risks, threat modeling an agentic AI feature, and updating the team\'s AI security playbook.'},
+  mlrt:{title:'ML Red Team Researcher',domain:'AI Security',domainId:'aisec',salary:'$140K – $185K',level:'Senior – Principal',icon:'🔬',
+    desc:'Adversarially probe AI models for vulnerabilities including prompt injection, jailbreaks, model extraction, data poisoning, and training data memorization — and document findings with mitigations.',
+    daily:'Designing novel jailbreak attack chains, running automated red team campaigns with PyRIT, writing detailed research reports on model vulnerabilities, and presenting findings to product and leadership.'},
+  aits:{title:'AI Trust & Safety Engineer',domain:'AI Security',domainId:'aisec',salary:'$125K – $170K',level:'Mid – Senior',icon:'🛡️',
+    desc:'Build guardrails, content moderation systems, and safety layers for LLM-powered products deployed at scale — bridging security, product, and policy teams.',
+    daily:'Tuning LLM output classifiers, reviewing edge cases from content moderation queues, designing harm evaluation frameworks, and collaborating with legal and policy on AI risk guidelines.'},
+  mlsec:{title:'MLSecOps Engineer',domain:'AI Security',domainId:'aisec',salary:'$120K – $165K',level:'Mid – Senior',icon:'⚙️',
+    desc:'Integrate security scanning and compliance checks into ML training pipelines and model deployment workflows — managing model artifact integrity and ML supply chain risk.',
+    daily:'Scanning model dependencies for CVEs, implementing artifact signing for model releases, integrating SAST into the ML training workflow, and auditing model access controls in the model registry.'}
 };
 
 // ── quiz state ──
@@ -382,7 +394,16 @@ var CERTS={
   'ccna-sec':{name:'Cisco CCNA Security / CyberOps',issuer:'Cisco · CyberOps Associate · ~$330',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['SOC','Security Eng.'],tags:['Vendor-Specific','Cisco','Networking','SOC'],desc:'Cisco\'s entry-level security certification for network security and SOC roles. CyberOps Associate covers monitoring, detection, analysis, and response workflows in a SOC environment. Strong for candidates in Cisco-heavy network environments.',links:[{t:'rlf',l:'https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/associate/ccna-cyberops.html',tx:'🔗 Cisco CyberOps Associate'}]},
   'ccnp-sec':{name:'Cisco CCNP Security',issuer:'Cisco · Professional level · ~$400 core + $300 concentration',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['Security Eng.'],tags:['Vendor-Specific','Cisco','Network Security','Professional'],desc:'Cisco\'s professional-level network security certification. Core exam covers security architecture, network security, content security, endpoint protection, and secure network access. Concentration exams available in SISE (ISE), SVPN, SNCF, and SAUTO.',links:[{t:'rlf',l:'https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/professional/ccnp-security.html',tx:'🔗 Cisco CCNP Security'}]},
   'cks':{name:'CKS – Certified Kubernetes Security Specialist',issuer:'CNCF / Linux Foundation · ~$395 · Hands-on exam',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['Cloud'],tags:['Vendor-Neutral','CNCF','Kubernetes','Container Security'],desc:'Linux Foundation\'s hands-on Kubernetes security certification. Covers cluster hardening, system hardening, minimizing microservice vulnerabilities, supply chain security, and runtime security with Falco. Requires active CKA (Kubernetes Administrator) cert.',links:[{t:'rlf',l:'https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/',tx:'🔗 CNCF CKS Official'}]},
-  'sc300':{name:'SC-300 – Identity & Access Administrator',issuer:'Microsoft · Exam SC-300 · ~$165',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['IAM'],tags:['IAM Track','Microsoft','Entra ID'],desc:'Most in-demand IAM cert. Covers SSO, conditional access, PIM, identity governance, and entitlement management in Entra ID. Essential for IAM Engineer roles in Microsoft environments.',links:[{t:'rlc',l:'https://www.udemy.com/course/sc-300-microsoft-identity-and-access-administrator/',tx:'📚 Udemy – SC-300 Course'},{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/identity-and-access-administrator/',tx:'🎥 Microsoft Learn (Free)'}]}
+  'sc300':{name:'SC-300 – Identity & Access Administrator',issuer:'Microsoft · Exam SC-300 · ~$165',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['IAM'],tags:['IAM Track','Microsoft','Entra ID'],desc:'Most in-demand IAM cert. Covers SSO, conditional access, PIM, identity governance, and entitlement management in Entra ID. Essential for IAM Engineer roles in Microsoft environments.',links:[{t:'rlc',l:'https://www.udemy.com/course/sc-300-microsoft-identity-and-access-administrator/',tx:'📚 Udemy – SC-300 Course'},{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/identity-and-access-administrator/',tx:'🎥 Microsoft Learn (Free)'}]},
+  // ── AI Security Certs ──
+  'ai-900':{name:'Azure AI Fundamentals (AI-900)',issuer:'Microsoft · Exam AI-900 · ~$165',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['AI Security'],tags:['AI/ML','Microsoft','Azure','Entry-level'],desc:'Entry-level Microsoft certification covering AI and ML concepts, Azure AI services, and responsible AI principles. Foundational step for those entering the AI Security or MLSecOps track in Azure environments.',links:[{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/',tx:'🎥 Microsoft Learn (Free)'}]},
+  'comptia-aiplus':{name:'CompTIA AI+',issuer:'CompTIA · Exam AIO-001 · ~$369',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['AI Security'],tags:['AI/ML','Vendor-Neutral','CompTIA','Responsible AI'],desc:'CompTIA\'s vendor-neutral AI certification covering AI and ML fundamentals, prompt engineering, responsible AI, ethics, and governance. Ideal starting cert for security professionals transitioning into AI Security roles.',links:[{t:'rlf',l:'https://www.comptia.org/certifications/artificial-intelligence',tx:'🔗 CompTIA AI+ Official'}]},
+  'ai-102':{name:'Azure AI Engineer Associate (AI-102)',issuer:'Microsoft · Exam AI-102 · ~$165',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AI Security'],tags:['AI/ML','Microsoft','Azure','LLM','Intermediate'],desc:'Microsoft\'s intermediate AI engineering credential. Covers building and deploying Azure AI solutions including OpenAI integrations, document intelligence, speech, vision, and content safety APIs. Valuable for AI Security engineers in Azure environments.',links:[{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-engineer/',tx:'🎥 Microsoft Learn (Free)'},{t:'rlc',l:'https://www.udemy.com/course/azure-ai-engineer/',tx:'📚 Udemy – AI-102 Course'}]},
+  'aws-ml':{name:'AWS Machine Learning Specialty (MLS-C01)',issuer:'Amazon Web Services · Exam MLS-C01 · ~$300',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AI Security'],tags:['AI/ML','AWS','Cloud','MLOps'],desc:'AWS\'s ML specialty certification covering the ML lifecycle on AWS — data engineering, modeling, deployment, and monitoring using SageMaker. Increasingly required for MLSecOps and AI Security Engineer roles in AWS environments.',links:[{t:'rlf',l:'https://aws.amazon.com/certification/certified-machine-learning-specialty/',tx:'🔗 AWS MLS Official'},{t:'rlc',l:'https://www.udemy.com/course/aws-machine-learning/',tx:'📚 Udemy – AWS ML Specialty'}]},
+  'google-ml':{name:'Google Professional ML Engineer',issuer:'Google Cloud · Exam GPML · ~$200',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AI Security'],tags:['AI/ML','GCP','MLOps','Google Cloud'],desc:'Google Cloud\'s ML engineering certification. Covers designing, building, and deploying scalable ML models on GCP using Vertex AI. Valuable for AI Security and MLSecOps engineers working in Google Cloud environments.',links:[{t:'rlf',l:'https://cloud.google.com/learn/certification/machine-learning-engineer',tx:'🔗 Google Cloud Official'}]},
+  'iso-42001-li':{name:'ISO/IEC 42001 Lead Implementer',issuer:'PECB · AI Management System · ~$500',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['AI Security'],tags:['AI Governance','ISO 42001','GRC','Compliance'],desc:'PECB\'s certification for implementing an AI Management System (AIMS) based on ISO/IEC 42001 — the international standard for responsible AI development and deployment. Essential for GRC professionals handling AI governance, risk, and compliance in regulated industries.',links:[{t:'rlf',l:'https://pecb.com/en/education-and-certification-for-individuals/iso-iec-42001/lead-implementer',tx:'🔗 PECB ISO 42001 LI'}]},
+  'isaca-ai':{name:'ISACA AI Auditing Certificate',issuer:'ISACA · Certificate · ~$395',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['AI Security'],tags:['AI Governance','ISACA','Audit','GRC'],desc:'ISACA\'s certificate program for auditing AI systems and governance frameworks. Covers AI risk assessment, bias evaluation, model explainability, and audit procedures for AI deployments. Designed for GRC, risk, and audit professionals responsible for AI oversight.',links:[{t:'rlf',l:'https://www.isaca.org/credentialing/certificates/certificates-in-emerging-technology',tx:'🔗 ISACA AI Certificate Info'}]},
+  'gaiops':{name:'GIAC AI Security (GAIOPS)',issuer:'GIAC / SANS · ~$979',tier:'Senior (Tier 3–4)',tierClass:'tier-senior',domains:['AI Security'],tags:['AI Security','GIAC','SANS','MLSecOps','Emerging'],desc:'GIAC\'s emerging AI security certification covering offensive and defensive security of AI/ML systems. Addresses prompt injection, model extraction, data poisoning, adversarial ML, and AI pipeline security. For practitioners actively securing LLM and ML workloads.',links:[{t:'rlf',l:'https://www.giac.org/',tx:'🔗 GIAC Official'}]}
 };
 
 // ── CERTS Aliases (HTML badge IDs → canonical CERTS key) ──
@@ -526,22 +547,31 @@ function showDomain(id){
   var jobs=d.jobs.map(function(j){return '<div class="jcard"><div class="jct">'+j.t+'</div><div class="jcl" style="color:'+j.c+'">'+j.s+'</div><div class="jcd">'+j.d+'</div></div>';}).join('');
   var skills=d.skills.map(function(s){return '<div class="ddli">'+s+'</div>';}).join('');
   var tools=d.tools.map(function(t){return '<span class="ddtool">'+t+'</span>';}).join('');
-  var certs=d.certs.map(function(c){var links=c.links.map(function(l){return '<a class="rl '+l.t+'" href="'+l.l+'" target="_blank" rel="noopener">'+l.tx+'</a>';}).join('');return '<div class="citem"><div class="cin">'+c.n+'</div><div class="cii">'+c.i+'</div><div class="cid">'+c.d+'</div><div class="cres"><div class="cresl">Study Resources</div><div class="rlinks">'+links+'</div></div></div>';}).join('');
-  var steps=d.steps.map(function(s,i){return '<div class="step"><div class="stepn">'+(i+1)+'</div><div class="stept">'+s+'</div></div>';}).join('');
+  var certs=d.certs.map(function(c){
+    if(typeof c==='string') return '<div class="citem"><div class="cin">'+c+'</div></div>';
+    var links=(c.links||[]).map(function(l){return '<a class="rl '+l.t+'" href="'+l.l+'" target="_blank" rel="noopener">'+l.tx+'</a>';}).join('');
+    return '<div class="citem"><div class="cin">'+c.n+'</div><div class="cii">'+c.i+'</div><div class="cid">'+c.d+'</div><div class="cres"><div class="cresl">Study Resources</div><div class="rlinks">'+links+'</div></div></div>';
+  }).join('');
+  var steps=(d.steps||[]).map(function(s,i){return '<div class="step"><div class="stepn">'+(i+1)+'</div><div class="stept">'+s+'</div></div>';}).join('');
   var fit=d.fit.map(function(f){return '<span class="pill pfit">'+f+'</span>';}).join('');
   var html='<div class="bbtn" onclick="showPage(\'domains\')">← Back to Domains</div>'
     +'<div class="ddh"><div class="ddhi">'+d.icon+'</div><div class="ddht"><h1>'+d.name+'</h1><div class="ddhtag">'+d.tag+'</div><div class="ddpills"><span class="pill psal">💰 '+d.salary+'</span><span class="pill phot">🔥 '+d.hot+'</span>'+fit+'<span class="pill pno">⚠️ Not ideal if: '+d.no+'</span></div></div></div>'
-    +'<div class="dds"><div class="ddst">Overview</div><div class="ddp">'+d.overview+'</div></div>'
+    +'<div class="dds"><div class="ddst">Overview</div><div class="ddp">'+(d.overview||'')+'</div></div>'
     +'<div class="dds"><div class="ddst">Key Job Titles & Salary Ranges</div><div class="jgrid">'+jobs+'</div></div>'
     +'<div class="dds"><div class="ddst">Core Skills & Knowledge</div><div class="dd2"><div class="ddlist">'+skills+'</div><div><div class="ddst" style="margin-top:0;">Common Tools</div><div class="ddtools">'+tools+'</div></div></div></div>'
     +'<div class="dds"><div class="ddst">Key Certifications & Study Resources</div><div class="clist">'+certs+'</div></div>'
     +'<div class="dds"><div class="ddst">A Day in the Life</div><div class="daybox">'+d.day+'</div></div>'
-    +'<div class="dds"><div class="ddst">How to Break In — 6 Steps</div><div class="steps">'+steps+'</div></div>';
+    +(steps ? '<div class="dds"><div class="ddst">How to Break In — 6 Steps</div><div class="steps">'+steps+'</div></div>' : '');
   document.getElementById('domain-content').innerHTML=html;
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
   document.querySelectorAll('.nl').forEach(function(x){x.classList.remove('active');});
   document.getElementById('page-domain').classList.add('active');
   document.getElementById('nav-domains').classList.add('active');
+  // Push domain-specific hash for shareable URLs
+  var desired = '#domain-' + id;
+  if (window.location.hash !== desired) {
+    history.pushState({ page: 'domain', domainId: id }, '', desired);
+  }
   window.scrollTo(0,0);
 }
 
@@ -3824,7 +3854,11 @@ var CALC_BASE_SAL={
   sa:{min:150000,max:210000},
   cs:{min:125000,max:175000},
   ciso:{min:200000,max:380000},
-  risk:{min:110000,max:150000}
+  risk:{min:110000,max:150000},
+  aise:{min:130000,max:175000},
+  mlrt:{min:140000,max:185000},
+  aits:{min:125000,max:170000},
+  mlsec:{min:120000,max:165000}
 };
 function fmtSal(n){
   return '$'+Math.round(n).toLocaleString('en-US');
@@ -4748,11 +4782,21 @@ showPage = function(p) {
 // Listen for back/forward navigation
 window.addEventListener('popstate', function(e) {
   var p = e.state && e.state.page;
+  var domainId = e.state && e.state.domainId;
   if (!p) {
     var h = window.location.hash.replace('#', '');
-    p = h || 'home';
+    if (h.indexOf('domain-') === 0) {
+      domainId = h.replace('domain-', '');
+      p = 'domain';
+    } else {
+      p = h || 'home';
+    }
   }
-  _origShowPageV15(p); // use original to avoid pushing another history entry
+  if (p === 'domain' && domainId) {
+    showDomain(domainId);
+  } else {
+    _origShowPageV15(p); // use original to avoid pushing another history entry
+  }
   // sync quiz float and DC badge
   var qfb = document.getElementById('quiz-float-btn');
   if (qfb) qfb.style.display = (p === 'home') ? 'flex' : 'none';
@@ -4767,7 +4811,11 @@ window.addEventListener('popstate', function(e) {
     return;
   }
   var h = raw.replace('#', '');
-  if (h && h !== 'home' && document.getElementById('page-' + h)) {
+  // Handle domain-specific deep links (e.g. #domain-iam, #domain-aisec)
+  if (h.indexOf('domain-') === 0) {
+    var domId = h.replace('domain-', '');
+    setTimeout(function() { showDomain(domId); }, 100);
+  } else if (h && h !== 'home' && document.getElementById('page-' + h)) {
     setTimeout(function() { showPage(h); }, 100);
   } else {
     // seed initial history state so back button doesn't exit on first press
@@ -4804,15 +4852,16 @@ D['aisec'] = {
   icon: '🤖',
   name: 'AI Security',
   tag: 'Securing AI/ML systems — the fastest-emerging domain in cybersecurity',
-  salary: '$130K–$180K',
+  salary: '$130K–$185K',
   hot: 'LLM Red Teaming / MLSecOps',
-  fit: ['Curious about AI/ML technology', 'Strong software security background', 'Analytical problem solver', 'Interested in emerging threats'],
-  no: 'Prefer mature, well-defined tooling — this space is still being defined',
+  fit: ['Curious about AI/ML technology', 'Strong software security background', 'Analytical problem solver', 'Comfortable working in ambiguous, rapidly evolving spaces'],
+  no: 'Prefer mature, well-defined tooling and stable frameworks — this domain is still being standardized industry-wide',
+  overview: 'AI Security is the fastest-emerging cybersecurity domain of the decade. As organizations deploy LLMs, ML pipelines, and autonomous AI agents into production, they introduce a new category of risk that traditional security tools were never designed to address. AI Security engineers protect the confidentiality, integrity, and availability of AI systems — defending against prompt injection, model extraction, data poisoning, jailbreaks, and adversarial inputs. On the governance side, practitioners implement the NIST AI Risk Management Framework (AI RMF), navigate the EU AI Act, and build responsible AI programs. The tooling is immature, the playbook is being written in real time, and practitioners with cross-domain backgrounds in software security, MLOps, or red teaming are commanding significant premiums. AI Security is projected to become one of the five largest cybersecurity sub-disciplines by 2028.',
   jobs: [
-    { t: 'AI Security Engineer', s: '$130K–$175K', c: '#38bdf8', d: 'Design and implement security controls for AI/ML pipelines, model serving infrastructure, and training environments.' },
-    { t: 'ML Red Team Researcher', s: '$140K–$185K', c: '#818cf8', d: 'Adversarially probe AI models for vulnerabilities including prompt injection, jailbreaks, model extraction, and data poisoning.' },
-    { t: 'AI Trust & Safety Engineer', s: '$125K–$170K', c: '#38bdf8', d: 'Build guardrails, content moderation systems, and safety layers for LLM-powered products deployed at scale.' },
-    { t: 'MLSecOps Engineer', s: '$120K–$165K', c: '#818cf8', d: 'Integrate security scanning and compliance checks into ML training pipelines and model deployment workflows.' }
+    { t: 'AI Security Engineer', s: '$130K–$175K', c: '#38bdf8', d: 'Design and implement security controls for AI/ML pipelines, model serving infrastructure, and training environments. Threat model LLM applications and enforce secure-by-design AI development practices.' },
+    { t: 'ML Red Team Researcher', s: '$140K–$185K', c: '#818cf8', d: 'Adversarially probe AI models for vulnerabilities including prompt injection, jailbreaks, model extraction, data poisoning, and training data leakage. Produce written findings and mitigations.' },
+    { t: 'AI Trust & Safety Engineer', s: '$125K–$170K', c: '#38bdf8', d: 'Build guardrails, content moderation systems, and safety layers for LLM-powered products deployed at scale. Often bridges product, policy, and security teams.' },
+    { t: 'MLSecOps Engineer', s: '$120K–$165K', c: '#818cf8', d: 'Integrate security scanning and compliance checks into ML training pipelines and model deployment workflows. Manage model versioning security, artifact integrity, and supply chain risk for ML dependencies.' }
   ],
   skills: [
     'Prompt injection and jailbreak techniques',
@@ -4823,11 +4872,40 @@ D['aisec'] = {
     'Secure ML pipeline design (MLflow, Kubeflow)',
     'Python and ML libraries (PyTorch, HuggingFace)',
     'Threat modeling for AI systems',
-    'RAG pipeline security',
-    'Agent and agentic AI security'
+    'RAG pipeline security and retrieval poisoning',
+    'Agent and agentic AI security',
+    'Model supply chain and dependency risk'
   ],
   tools: ['Garak', 'Microsoft PyRIT', 'LangChain', 'LLM Guard', 'PromptBench', 'HuggingFace Evaluate', 'Rebuff', 'Vigil', 'MLflow', 'Weights & Biases'],
-  certs: ['GCIA (adapted)', 'CISSP (AI modules)', 'AI Security Practitioner (emerging)', 'Google Professional ML Engineer', 'AWS ML Specialty'],
+  certs: [
+    {
+      n: 'CompTIA AI+ (AI+)',
+      i: 'CompTIA · AI-001 · ~$369',
+      d: 'Entry-level AI cert covering AI/ML concepts, responsible AI practices, and AI security fundamentals. A solid foundation before specializing.',
+      links: [
+        { t: 'rl-free', l: 'https://www.comptia.org/certifications/artificial-intelligence', tx: '🔗 CompTIA AI+ Official' },
+        { t: 'rl-paid', l: 'https://www.udemy.com/course/comptia-ai-certification/', tx: '📚 Udemy AI+ Course' }
+      ]
+    },
+    {
+      n: 'Microsoft Azure AI Engineer (AI-102)',
+      i: 'Microsoft · AI-102 · ~$165',
+      d: 'Hands-on Azure AI services cert. Covers deploying, securing, and monitoring AI workloads on Azure — valuable for enterprise AI Security roles.',
+      links: [
+        { t: 'rl-free', l: 'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-engineer/', tx: '🎥 Microsoft Learn (Free)' },
+        { t: 'rl-paid', l: 'https://www.udemy.com/course/azure-ai-engineer/', tx: '📚 Udemy AI-102' }
+      ]
+    },
+    {
+      n: 'AWS Machine Learning Specialty (MLS-C01)',
+      i: 'Amazon Web Services · MLS-C01 · ~$300',
+      d: 'Validates expertise in building and securing ML workloads on AWS. Highly valued for cloud-native AI Security engineering roles.',
+      links: [
+        { t: 'rl-free', l: 'https://aws.amazon.com/certification/certified-machine-learning-specialty/', tx: '🔗 AWS Official Info' },
+        { t: 'rl-paid', l: 'https://www.udemy.com/course/aws-machine-learning/', tx: '📚 Udemy AWS ML' }
+      ]
+    }
+  ],
   links: [
     { tx: 'OWASP Top 10 for LLMs', l: 'https://owasp.org/www-project-top-10-for-large-language-model-applications/', t: 'rl-free' },
     { tx: 'NIST AI Risk Management Framework', l: 'https://www.nist.gov/artificial-intelligence', t: 'rl-free' },
@@ -4835,7 +4913,15 @@ D['aisec'] = {
     { tx: 'Garak — LLM Vulnerability Scanner', l: 'https://github.com/NVIDIA/garak', t: 'rl-free' },
     { tx: 'AI Security on Coursera', l: 'https://www.coursera.org/search?query=AI+security', t: 'rl-paid' }
   ],
-  day: 'Your day as an AI Security Engineer: Review a new LLM feature deployment, run prompt injection test suite against the staging model, attend a threat modeling session for the RAG pipeline, review OWASP LLM Top 10 findings in the latest audit, and write a security brief for the product team on emerging jailbreak techniques.'
+  day: 'Your day as an AI Security Engineer: 9 AM stand-up — a product team is shipping a new LLM feature next sprint and needs a security review. You spend the morning running it through a prompt injection test suite using Garak and document three medium-severity findings. After lunch, you join a threat modeling session for the new RAG pipeline. The team hasn\'t considered retrieval poisoning — you flag it and propose a validation layer. End of day: a brief on an emerging jailbreak technique is circulating internally, so you adapt two new test cases for your eval harness.',
+  steps: [
+    'Build Python fundamentals and basic ML literacy — fast.ai\'s "Practical Deep Learning" (free) and the Kaggle ML courses are the best entry points. You don\'t need to become a data scientist, but you need to understand how models are built and deployed.',
+    'Study the OWASP Top 10 for LLMs and the NIST AI Risk Management Framework — both are free. These documents define the threat model for AI systems and will be referenced in every job interview for this domain.',
+    'Build a hands-on red team lab: install Ollama locally to run open-source LLMs, then use Garak and Microsoft PyRIT to probe them for prompt injection, jailbreaks, and data leakage. Document your findings like a pen test report.',
+    'Earn a foundational cert: CompTIA AI+, Microsoft AI-102, or AWS ML Specialty. These signal cross-domain fluency to hiring managers who may not yet know what a "pure AI Security" cert looks like.',
+    'Contribute to open-source AI safety tooling (PyRIT, Garak, LLM Guard) or publish your red team lab findings publicly. GitHub activity is the portfolio in this domain — certifications alone are insufficient.',
+    'Target AI Security Engineer or ML Red Team Researcher roles at AI-native companies, large tech firms with active AI products, or enterprise security teams modernizing their threat models. Salary jumps significantly ($130K–$185K) for practitioners who can bridge traditional security and ML engineering.'
+  ]
 };
 
 // ─── CALENDAR: ADD JAN/FEB 2027 EVENTS ──────────────────
@@ -6061,7 +6147,11 @@ var RADAR_TARGETS = {
   as:   [8, 5, 7, 8, 6, 5],
   ciso: [7, 9, 9, 6, 9, 9],
   ma:   [8, 5, 7, 8, 6, 4],
-  risk: [4, 7, 7, 4, 7, 5]
+  risk: [4, 7, 7, 4, 7, 5],
+  aise: [8, 6, 8, 7, 7, 4],
+  mlrt: [9, 6, 9, 9, 7, 5],
+  aits: [7, 5, 8, 6, 8, 4],
+  mlsec: [7, 6, 7, 7, 6, 4]
 };
 
 var RADAR_ADVICE = {
@@ -7266,3 +7356,275 @@ function _jfaLoadPitch() {
 
 // Init jobs page
 _pageInits.jobs = function() { _jfaLoadPitch(); };
+
+// ── Personalized News Briefing ─────────────────────────────────────────────
+var _newsDomain = 'general';
+var NB_CACHE_KEY = 'isd_briefing';
+var NB_FREE_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24h for free users
+
+function newsDomainPick(el, domain) {
+  _newsDomain = domain;
+  document.querySelectorAll('#news-domain-chips .nb-chip').forEach(function(c) { c.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+function _nbShow(id, show) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = show ? (id === 'news-meta' ? 'flex' : 'block') : 'none';
+}
+
+function _nbTimestamp(isoStr) {
+  try {
+    var d = new Date(isoStr);
+    return 'Generated ' + d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  } catch(e) { return ''; }
+}
+
+function _nbCooldownMsg(generatedAt) {
+  var elapsed = Date.now() - new Date(generatedAt).getTime();
+  var remaining = NB_FREE_INTERVAL_MS - elapsed;
+  if (remaining <= 0) return null;
+  var h = Math.floor(remaining / 3600000);
+  var m = Math.floor((remaining % 3600000) / 60000);
+  return 'Next free refresh in ' + (h > 0 ? h + 'h ' : '') + m + 'm';
+}
+
+function _nbUrgencyClass(urgency) {
+  return { critical: 'nb-urg-critical', high: 'nb-urg-high', medium: 'nb-urg-medium', low: 'nb-urg-low' }[urgency] || 'nb-urg-low';
+}
+
+function renderBriefing(data) {
+  // Intro
+  var intro = document.getElementById('news-intro');
+  var introText = document.getElementById('news-intro-text');
+  if (intro && introText && data.briefing_intro) {
+    introText.textContent = data.briefing_intro;
+    intro.style.display = 'block';
+  }
+
+  // Feed
+  var feed = document.getElementById('news-feed');
+  if (!feed) return;
+  feed.innerHTML = data.articles.map(function(a) {
+    var tags = (a.tags || []).map(function(t) {
+      return '<span class="nb-tag">' + t + '</span>';
+    }).join('');
+    return '<div class="nb-card">'
+      + '<div class="nb-card-top">'
+      +   '<span class="nb-source">' + (a.source || '') + '</span>'
+      +   '<span class="nb-urgency ' + _nbUrgencyClass(a.urgency) + '">' + (a.urgency || 'low') + '</span>'
+      + '</div>'
+      + '<a class="nb-title" href="' + (a.link || '#') + '" target="_blank" rel="noopener">' + a.title + '</a>'
+      + '<p class="nb-summary">' + a.summary + '</p>'
+      + (a.why_it_matters ? '<div class="nb-why"><span class="nb-why-label">Why it matters</span> ' + a.why_it_matters + '</div>' : '')
+      + (tags ? '<div class="nb-tags">' + tags + '</div>' : '')
+      + '</div>';
+  }).join('');
+
+  // Timestamp
+  var ts = document.getElementById('news-ts');
+  if (ts && data.generated_at) ts.textContent = _nbTimestamp(data.generated_at);
+  _nbShow('news-meta', true);
+
+  // Cooldown message for free users
+  if (!data.is_pro) {
+    var msg = _nbCooldownMsg(data.generated_at);
+    var cd = document.getElementById('news-cooldown');
+    if (cd && msg) { cd.textContent = msg; cd.style.display = 'inline'; }
+    _nbShow('news-pro-upsell', true);
+  }
+
+  // Re-enable button
+  var btn = document.getElementById('news-gen-btn');
+  var lbl = document.getElementById('news-gen-label');
+  if (btn) btn.disabled = false;
+  if (lbl) lbl.textContent = 'Refresh Briefing';
+}
+
+function generateBriefing() {
+  if (!_currentUser) {
+    _nbShow('news-auth-gate', true);
+    _nbShow('news-loading', false);
+    return;
+  }
+
+  // Free user cooldown check
+  if (!_isPro()) {
+    var cached = null;
+    try { cached = JSON.parse(localStorage.getItem(NB_CACHE_KEY) || 'null'); } catch(e) {}
+    if (cached && cached.generated_at) {
+      var elapsed = Date.now() - new Date(cached.generated_at).getTime();
+      if (elapsed < NB_FREE_INTERVAL_MS) {
+        // Show cached result
+        _nbShow('news-loading', false);
+        _nbShow('news-error', false);
+        _nbShow('news-auth-gate', false);
+        renderBriefing(cached);
+        return;
+      }
+    }
+  }
+
+  // Show loading
+  _nbShow('news-loading', true);
+  _nbShow('news-error', false);
+  _nbShow('news-intro', false);
+  _nbShow('news-auth-gate', false);
+  _nbShow('news-pro-upsell', false);
+  var feed = document.getElementById('news-feed');
+  if (feed) feed.innerHTML = '';
+  var btn = document.getElementById('news-gen-btn');
+  var lbl = document.getElementById('news-gen-label');
+  if (btn) btn.disabled = true;
+  if (lbl) lbl.textContent = 'Fetching…';
+
+  var p = loadProfile() || {};
+  var certs = [];
+  try {
+    var cp = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
+    certs = Object.keys(cp).filter(function(k) { return cp[k] > 0; }).slice(0, 6);
+  } catch(e) {}
+
+  _sb.auth.getSession().then(function(res) {
+    var token = (res.data && res.data.session) ? res.data.session.access_token : SUPA_KEY;
+    fetch(EDGE_BASE + '/daily-briefing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        domain: _newsDomain,
+        role: p.role || '',
+        certs: certs,
+      }),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _nbShow('news-loading', false);
+      if (data.error) {
+        var errEl = document.getElementById('news-error');
+        if (errEl) { errEl.textContent = 'Error: ' + data.error; errEl.style.display = 'block'; }
+        if (btn) btn.disabled = false;
+        if (lbl) lbl.textContent = 'Try Again';
+        return;
+      }
+      // Cache for free users
+      if (!_isPro()) {
+        try { localStorage.setItem(NB_CACHE_KEY, JSON.stringify(data)); } catch(e) {}
+      }
+      renderBriefing(data);
+    })
+    .catch(function(err) {
+      _nbShow('news-loading', false);
+      var errEl = document.getElementById('news-error');
+      if (errEl) { errEl.textContent = 'Network error. Please check your connection and try again.'; errEl.style.display = 'block'; }
+      if (btn) btn.disabled = false;
+      if (lbl) lbl.textContent = 'Try Again';
+    });
+  });
+}
+
+_pageInits.news = function() {
+  _nbShow('news-error', false);
+  _nbShow('news-intro', false);
+  _nbShow('news-pro-upsell', false);
+
+  // Set domain chip from profile if available
+  var p = loadProfile() || {};
+  if (p.domain) {
+    var chip = document.querySelector('#news-domain-chips .nb-chip[data-domain="' + p.domain + '"]');
+    if (chip) { newsDomainPick(chip, p.domain); }
+  }
+
+  if (!_currentUser) {
+    _nbShow('news-auth-gate', true);
+    _nbShow('news-loading', false);
+    var feed = document.getElementById('news-feed');
+    if (feed) feed.innerHTML = '';
+    return;
+  }
+  _nbShow('news-auth-gate', false);
+
+  // Auto-load: show cached if available, otherwise auto-generate
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem(NB_CACHE_KEY) || 'null'); } catch(e) {}
+  if (cached && cached.generated_at && cached.articles && cached.articles.length) {
+    var elapsed = Date.now() - new Date(cached.generated_at).getTime();
+    if (elapsed < NB_FREE_INTERVAL_MS || _isPro()) {
+      renderBriefing(cached);
+      var lbl = document.getElementById('news-gen-label');
+      if (lbl) lbl.textContent = 'Refresh Briefing';
+      return;
+    }
+  }
+  // No valid cache — auto-generate
+  generateBriefing();
+};
+
+// ─── CAREER LADDER JOB TITLE TOOLTIPS (click-based) ──────
+(function() {
+  function closeAllTips() {
+    document.querySelectorAll('.jc.tip-open').forEach(function(el) {
+      el.classList.remove('tip-open');
+    });
+  }
+
+  function openJcTip(e, el) {
+    e.stopPropagation();
+    var wasOpen = el.classList.contains('tip-open');
+    closeAllTips();
+    if (wasOpen) return;
+
+    var tip = el.querySelector('.tip');
+    if (!tip) return;
+
+    el.classList.add('tip-open');
+
+    var rect = el.getBoundingClientRect();
+    var tipW = 260;
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+
+    // Horizontal position: center over card, clamped to viewport
+    var left = Math.max(8, Math.min(rect.left + rect.width / 2 - tipW / 2, vw - tipW - 8));
+    tip.style.left = left + 'px';
+    tip.style.width = tipW + 'px';
+
+    // Remove old caret if any
+    var oldCaret = tip.querySelector('.tip-caret');
+    if (oldCaret) oldCaret.remove();
+    var caret = document.createElement('span');
+    caret.className = 'tip-caret';
+
+    var spaceAbove = rect.top;
+    var spaceBelow = vh - rect.bottom;
+
+    if (spaceAbove >= 140 || spaceAbove > spaceBelow) {
+      // Show above
+      tip.style.top = (rect.top - 10) + 'px';
+      tip.style.transform = 'translateY(-100%)';
+      caret.classList.add('down');
+      // Caret horizontal alignment relative to tip
+      var caretLeft = (rect.left + rect.width / 2) - left;
+      caret.style.left = Math.max(10, Math.min(caretLeft, tipW - 10)) + 'px';
+      caret.style.transform = 'translateX(-50%)';
+    } else {
+      // Show below
+      tip.style.top = (rect.bottom + 10) + 'px';
+      tip.style.transform = '';
+      caret.classList.add('up');
+      var caretLeft2 = (rect.left + rect.width / 2) - left;
+      caret.style.left = Math.max(10, Math.min(caretLeft2, tipW - 10)) + 'px';
+      caret.style.transform = 'translateX(-50%)';
+    }
+    tip.appendChild(caret);
+  }
+
+  // Delegated click handler for all .jc elements
+  document.addEventListener('click', function(e) {
+    var jc = e.target.closest('.jc');
+    if (jc) {
+      openJcTip(e, jc);
+    } else {
+      closeAllTips();
+    }
+  });
+})();

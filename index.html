@@ -147,6 +147,10 @@
     <div class="ncat" id="ncat-intel">
       <button class="ncbtn" onclick="toggleDrop('intel')">Intel <span class="ncaret"></span></button>
       <div class="ndrop" id="ndrop-intel">
+        <div class="ndi" onclick="showPage('news');closeAllDrops()">
+          <span class="ndi-icon">📰</span>
+          <div class="ndi-text"><span class="ndi-label">My Daily Briefing</span><span class="ndi-desc">AI-personalized cybersecurity news</span></div>
+        </div>
         <div class="ndi" onclick="showPage('threats');closeAllDrops()">
           <span class="ndi-icon">📡</span>
           <div class="ndi-text"><span class="ndi-label">Threat Landscape</span><span class="ndi-desc">Curated news &amp; advisories</span></div>
@@ -761,6 +765,21 @@
           <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('AppSec')">💼 Jobs</button>
         </div>
       </div>
+
+      <div class="dch3 dch3-new" style="--accent:rgba(56,189,248,.3);--glow:rgba(56,189,248,.12);">
+        <div class="dch3-top">
+          <span class="dch3-icon">🤖</span>
+          <div class="dch3-info">
+            <div class="dch3-name" style="color:#38bdf8;">AI Security <span class="dch3-new-badge">New</span></div>
+            <div class="dch3-sal">$130K–$185K</div>
+          </div>
+        </div>
+        <div class="dch3-roles">AI Security Eng · ML Red Team · AI Trust &amp; Safety · MLSecOps Eng</div>
+        <div class="dch3-btns">
+          <button class="dch3-btn-info" onclick="event.stopPropagation();showDomain('aisec')">ⓘ Info</button>
+          <button class="dch3-btn-jobs" onclick="event.stopPropagation();showSalaryFilter('AI Security')">💼 Jobs</button>
+        </div>
+      </div>
     </div>
     <button class="more-jobs-btn" onclick="showSalaryTierFilter('T3', '')">More T3 roles → Salary Guide</button>
   <div class="vc a3"><div class="vl" style="background:linear-gradient(180deg,var(--bl),var(--db));"></div><div class="va" style="border-top:8px solid var(--db);"></div></div>
@@ -962,6 +981,7 @@
         <div class="cdom-hcell"><div class="cdom-hicon">🔴</div><div class="cdom-hname">Offensive Security</div></div>
         <div class="cdom-hcell"><div class="cdom-hicon">📋</div><div class="cdom-hname">GRC & Compliance</div></div>
         <div class="cdom-hcell"><div class="cdom-hicon">🔬</div><div class="cdom-hname">DFIR & Forensics</div></div>
+        <div class="cdom-hcell"><div class="cdom-hicon">🤖</div><div class="cdom-hname">AI Security <span class="col-new">New</span></div></div>
       </div>
     </div>
 
@@ -1017,6 +1037,10 @@
           <span class="cb tier-entry vs" data-full="Cellebrite Certified Operator (CCO)" data-desc="Mobile device forensics entry cert. Cellebrite is the industry standard tool for mobile forensic extraction." onclick="openCert('cco')">CCO</span>
           <span class="cb tier-entry vn" data-full="Blue Team Labs Level 1 (BTL1)" data-desc="Hands-on cert covering DFIR basics, phishing analysis, SIEM, and threat intel. Practical and affordable." onclick="openCert('btl1')">BTL1</span>
           <span class="cb tier-entry vn" data-full="AccessData Certified Examiner (ACE)" data-desc="Entry digital forensics cert for FTK toolkit. Covers evidence acquisition, analysis, and reporting." onclick="openCert('ace')">ACE</span>
+        </div>
+        <div class="cdomain-col">
+          <span class="cb tier-entry vn" data-full="CompTIA AI+" data-desc="CompTIA's vendor-neutral AI certification covering AI/ML fundamentals, responsible AI, ethics, and governance. Entry cert for the AI Security track." onclick="openCert('comptia-aiplus')">AI+</span>
+          <span class="cb tier-entry vs" data-full="Azure AI Fundamentals (AI-900)" data-desc="Microsoft's entry AI cert covering AI/ML concepts, Azure AI services, and responsible AI principles." onclick="openCert('ai-900')">AI-900</span>
         </div>
       </div>
     </div>
@@ -1075,6 +1099,11 @@
           <span class="cb tier-mid vn" data-full="GIAC Certified Forensic Analyst (GCFA)" data-desc="SANS advanced forensics cert. Covers memory forensics, timeline super-analysis, and anti-forensics." onclick="openCert('gcfa')">GCFA</span>
           <span class="cb tier-mid vn" data-full="Certified Reverse Engineering Analyst (CREA)" data-desc="Foundational malware analysis and reverse engineering cert. Assembly, static/dynamic analysis, and decompilation." onclick="openCert('crea')">CREA</span>
         </div>
+        <div class="cdomain-col">
+          <span class="cb tier-mid vs" data-full="Azure AI Engineer Associate (AI-102)" data-desc="Microsoft's intermediate AI engineering cert. Covers Azure OpenAI, document intelligence, content safety, and responsible AI deployment." onclick="openCert('ai-102')">AI-102</span>
+          <span class="cb tier-mid vs" data-full="AWS Machine Learning Specialty (MLS-C01)" data-desc="AWS ML lifecycle cert covering SageMaker, data engineering, model deployment, and monitoring. Valuable for MLSecOps roles." onclick="openCert('aws-ml')">AWS MLS</span>
+          <span class="cb tier-mid vs" data-full="Google Professional ML Engineer" data-desc="Google Cloud ML engineering cert using Vertex AI. Covers model building, deployment, and scaling on GCP." onclick="openCert('google-ml')">GCP ML</span>
+        </div>
       </div>
     </div>
 
@@ -1131,6 +1160,11 @@
           <span class="cb tier-senior vs" data-full="Magnet Certified Forensics Examiner (MCFE)" data-desc="Magnet Axiom platform cert. Covers forensic acquisition, analysis, and reporting using Magnet tools." onclick="openCert('mcfe')">MCFE</span>
           <span class="cb tier-senior vn" data-full="OffSec OSED (Exploit Developer)" data-desc="OffSec's exploit development cert. Stack overflows, SEH, heap spray, and Windows user-mode exploit development." onclick="openCert('osed')">OSED</span>
         </div>
+        <div class="cdomain-col">
+          <span class="cb tier-senior vn" data-full="ISO/IEC 42001 Lead Implementer" data-desc="PECB cert for implementing an AI Management System (AIMS). The international standard for responsible AI governance. Essential for GRC in regulated industries." onclick="openCert('iso-42001-li')">ISO 42001</span>
+          <span class="cb tier-senior vn" data-full="ISACA AI Auditing Certificate" data-desc="ISACA certificate for auditing AI systems. Covers AI risk assessment, bias evaluation, model explainability, and audit procedures." onclick="openCert('isaca-ai')">ISACA AI</span>
+          <span class="cb tier-senior vn" data-full="GIAC AI Security (GAIOPS)" data-desc="GIAC's AI security cert covering prompt injection defense, model extraction, data poisoning, and ML pipeline security." onclick="openCert('gaiops')">GAIOPS</span>
+        </div>
       </div>
     </div>
 
@@ -1182,6 +1216,9 @@
           <span class="cb tier-principal vn" data-full="GIAC Reverse Engineering Malware (GREM)" data-desc="SANS advanced malware analysis cert. Static and dynamic analysis, OLE2, JavaScript deobfuscation." onclick="openCert('grem')">GREM</span>
           <span class="cb tier-principal vn" data-full="GIAC Defending Advanced Threats (GDAT)" data-desc="Advanced threat detection and hunting cert. For senior DFIR and threat intel professionals." onclick="openCert('gdat')">GDAT</span>
         </div>
+        <div class="cdomain-col">
+          <span class="cb-placeholder" style="font-size:11px;color:var(--mt);opacity:.6;padding:4px 0;display:block;">More coming</span>
+        </div>
       </div>
     </div>
 
@@ -1197,6 +1234,7 @@
           <span class="cb tier-exec vs" data-full="EC-Council CCISO (Certified Chief Information Security Officer)" data-desc="The only cert purpose-built for CISOs and aspiring CISOs. Covers all 5 CISO domains: governance, security mgmt, programs, strategy, and finance." onclick="openCert('cciso')">CCISO</span>
           <span class="cb tier-exec vn" data-full="NACD Cyber-Risk Oversight (Board-level)" data-desc="National Association of Corporate Directors cert for board members and CISOs presenting to boards. Non-technical strategic cert." onclick="openCert('nacd')">CISO+</span>
         </div>
+        <div class="cdomain-col"></div>
         <div class="cdomain-col"></div>
         <div class="cdomain-col"></div>
         <div class="cdomain-col"></div>
@@ -2578,6 +2616,72 @@
 <div class="footer">InfoSecDeck · Threat Landscape · Curated external links · InfoSecDeck is not affiliated with these sources</div>
 </div>
 
+<!-- ═══════════════ PERSONALIZED NEWS BRIEFING ═══════════════ -->
+<div class="page" id="page-news">
+<div style="padding:52px 28px 100px;max-width:860px;margin:0 auto;">
+  <div class="ey a1">My Daily Intel</div>
+  <div class="st a2">Personalized News Briefing</div>
+  <p class="ss a3">AI-curated cybersecurity headlines filtered to your domain and role — pulled fresh from top sources and summarized for what matters to you.</p>
+
+  <!-- Domain filter + generate -->
+  <div class="a3" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px;align-items:center;">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;flex:1 1 auto;" id="news-domain-chips">
+      <button class="nb-chip active" data-domain="general" onclick="newsDomainPick(this,'general')">All</button>
+      <button class="nb-chip" data-domain="soc" onclick="newsDomainPick(this,'soc')">SOC</button>
+      <button class="nb-chip" data-domain="cloud" onclick="newsDomainPick(this,'cloud')">Cloud</button>
+      <button class="nb-chip" data-domain="grc" onclick="newsDomainPick(this,'grc')">GRC</button>
+      <button class="nb-chip" data-domain="iam" onclick="newsDomainPick(this,'iam')">IAM</button>
+      <button class="nb-chip" data-domain="appsec" onclick="newsDomainPick(this,'appsec')">AppSec</button>
+      <button class="nb-chip" data-domain="pentest" onclick="newsDomainPick(this,'pentest')">Pentest</button>
+      <button class="nb-chip" data-domain="dfir" onclick="newsDomainPick(this,'dfir')">DFIR</button>
+    </div>
+    <button class="nb-gen-btn" id="news-gen-btn" onclick="generateBriefing()">
+      <span id="news-gen-label">Generate Briefing</span>
+    </button>
+  </div>
+
+  <!-- Status / meta row -->
+  <div id="news-meta" style="display:none;margin-bottom:20px;font-size:.78rem;color:var(--ts);display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+    <span id="news-ts"></span>
+    <span id="news-cooldown" style="color:var(--rd);display:none;"></span>
+  </div>
+
+  <!-- Loading state -->
+  <div id="news-loading" style="display:none;text-align:center;padding:60px 0;">
+    <div class="nb-spinner"></div>
+    <div style="margin-top:16px;color:var(--ts);font-size:.85rem;">Fetching headlines and personalizing your briefing…</div>
+  </div>
+
+  <!-- Error state -->
+  <div id="news-error" style="display:none;background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);border-radius:12px;padding:20px 24px;color:var(--rd);font-size:.88rem;"></div>
+
+  <!-- Login gate -->
+  <div id="news-auth-gate" style="display:none;text-align:center;padding:60px 0;">
+    <div style="font-size:2rem;margin-bottom:12px;">🔒</div>
+    <div style="font-weight:600;margin-bottom:8px;">Sign in to generate your briefing</div>
+    <div style="color:var(--ts);font-size:.88rem;margin-bottom:20px;">Free accounts get one fresh briefing per day. Pro accounts refresh anytime.</div>
+    <button class="nb-gen-btn" onclick="openAuthModal('login')">Sign In / Create Free Account</button>
+  </div>
+
+  <!-- Intro box -->
+  <div id="news-intro" style="display:none;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:14px;padding:20px 24px;margin-bottom:24px;">
+    <div style="font-family:var(--fm);font-size:.48rem;text-transform:uppercase;letter-spacing:.16em;color:var(--bl);margin-bottom:8px;">Today's Threat Landscape</div>
+    <p id="news-intro-text" style="margin:0;font-size:.9rem;line-height:1.6;color:var(--tx);"></p>
+  </div>
+
+  <!-- Articles feed -->
+  <div id="news-feed" style="display:flex;flex-direction:column;gap:16px;"></div>
+
+  <!-- Pro upsell (shown to free users after using daily briefing) -->
+  <div id="news-pro-upsell" style="display:none;margin-top:32px;background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.2);border-radius:14px;padding:24px;text-align:center;">
+    <div style="font-weight:700;margin-bottom:6px;">Want to refresh anytime?</div>
+    <div style="color:var(--ts);font-size:.88rem;margin-bottom:16px;">Free accounts get one briefing per day. Upgrade to Pro for unlimited refreshes and deeper analysis.</div>
+    <button class="nb-gen-btn" onclick="showPage('pricing')">Upgrade to Pro →</button>
+  </div>
+</div>
+<div class="footer">InfoSecDeck · Personalized News Briefing · AI-curated from The Hacker News, Bleeping Computer, The Record & Krebs on Security</div>
+</div>
+
 <!-- ═══════════════ JOB BOARD ═══════════════ -->
 <div class="page" id="page-jobs">
 <div style="padding:52px 28px 100px;max-width:1200px;margin:0 auto;">
@@ -3473,6 +3577,10 @@
           <option value="ciso">CISO</option>
           <option value="ma">Malware Analyst</option>
           <option value="risk">Risk Manager</option>
+          <option value="aise">AI Security Engineer</option>
+          <option value="mlrt">ML Red Team Researcher</option>
+          <option value="aits">AI Trust &amp; Safety Engineer</option>
+          <option value="mlsec">MLSecOps Engineer</option>
         </select>
       </div>
 
@@ -4134,7 +4242,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=36"></script>
+<script src="js/app.js?v=38"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->
