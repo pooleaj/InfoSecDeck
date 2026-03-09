@@ -430,7 +430,7 @@ function _checkAdminRole() {
 function _applyAdminUI() {
   var adminEls = document.querySelectorAll('.admin-only');
   adminEls.forEach(function(el) {
-    el.style.display = _currentUserRole === 'admin' ? '' : 'none';
+    el.style.display = _currentUserRole === 'admin' ? 'block' : 'none';
   });
   if (_currentUserRole === 'admin' && typeof _renderAdminUsage === 'function') {
     _renderAdminUsage();
