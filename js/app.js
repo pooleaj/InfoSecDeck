@@ -5929,3 +5929,1016 @@ _pageInits.roaster = (function(_orig) {
 _pageInits.pivot = (function(_orig) {
   return function() { if (_orig) _orig(); _renderOtpUsage('pivot', 3); };
 })(_pageInits.pivot);
+
+// ─── CERT ROI CALCULATOR (v33) ────────────────────────────────────────────
+var CERT_STUDY_HOURS = {
+  'tier-entry':     {min:40,  max:80},
+  'tier-mid':       {min:80,  max:150},
+  'tier-senior':    {min:120, max:200},
+  'tier-principal': {min:150, max:250},
+  'tier-exec':      {min:100, max:180}
+};
+var CERT_TIER_BONUS = {
+  'tier-entry':     0.06,
+  'tier-mid':       0.09,
+  'tier-senior':    0.12,
+  'tier-principal': 0.15,
+  'tier-exec':      0.18
+};
+function _normCertKey(k) { return k.replace(/-/g,'_'); }
+
+function initCertROI() {
+  var sel = document.getElementById('crt-select');
+  if(!sel || sel.options.length > 1) return;
+  var tierOrder = {'tier-entry':0,'tier-mid':1,'tier-senior':2,'tier-principal':3,'tier-exec':4};
+  var keys = Object.keys(CERTS).sort(function(a,b){
+    var ta = tierOrder[CERTS[a].tierClass] !== undefined ? tierOrder[CERTS[a].tierClass] : 5;
+    var tb = tierOrder[CERTS[b].tierClass] !== undefined ? tierOrder[CERTS[b].tierClass] : 5;
+    if(ta !== tb) return ta - tb;
+    return CERTS[a].name.localeCompare(CERTS[b].name);
+  });
+  keys.forEach(function(k){
+    var opt = document.createElement('option');
+    opt.value = k;
+    var tierLabel = CERTS[k].tier ? CERTS[k].tier.split(' ')[0] : '';
+    opt.textContent = CERTS[k].name + (tierLabel ? ' · ' + tierLabel : '');
+    sel.appendChild(opt);
+  });
+}
+
+function calcCertROI() {
+  var sel     = document.getElementById('crt-select');
+  var results = document.getElementById('crt-results');
+  var detail  = document.getElementById('crt-detail');
+  if(!sel || !sel.value) {
+    if(results) results.style.display = 'none';
+    if(detail)  detail.innerHTML = '';
+    return;
+  }
+  var cert = CERTS[sel.value];
+  if(!cert) return;
+
+  // Exam cost — parse "$NNN" from issuer string
+  var costMatch = cert.issuer ? cert.issuer.match(/\$[\d,]+/) : null;
+  var examCost  = costMatch ? parseInt(costMatch[0].replace(/[$,]/g,'')) : 0;
+
+  // Salary bonus — prefer CERT_BONUSES lookup, fall back to tier estimate
+  var normKey  = _normCertKey(sel.value);
+  var bonusPct = (typeof CERT_BONUSES !== 'undefined' && CERT_BONUSES[normKey])
+               || CERT_TIER_BONUS[cert.tierClass] || 0.07;
+
+  // Study hours by tier
+  var sh = CERT_STUDY_HOURS[cert.tierClass] || {min:80, max:140};
+
+  // ROI math
+  var baseSalary  = 105000;
+  var annualLift  = baseSalary * bonusPct;
+  var monthlyLift = annualLift / 12;
+  var monthsROI   = (examCost > 0 && monthlyLift > 0) ? Math.ceil(examCost / monthlyLift) : 0;
+
+  // Job demand heuristic
+  var tags    = cert.tags || [];
+  var hasDod  = tags.some(function(t){ return t.indexOf('DoD') >= 0; });
+  var hasHR   = tags.some(function(t){ return t.indexOf('HR filter') >= 0; });
+  var domainCount = cert.domains ? cert.domains.length : 1;
+  var demand;
+  if(hasDod && hasHR)                demand = {label:'Very High', cls:'crt-demand-vhigh'};
+  else if(hasDod || hasHR || bonusPct >= 0.12) demand = {label:'High',      cls:'crt-demand-high'};
+  else if(bonusPct >= 0.09 || domainCount >= 3) demand = {label:'Medium',    cls:'crt-demand-med'};
+  else                               demand = {label:'Growing',  cls:'crt-demand-grow'};
+
+  // Render metrics
+  var costEl = document.getElementById('crt-cost');
+  var liftEl = document.getElementById('crt-lift');
+  var roiEl  = document.getElementById('crt-roi');
+  var hrEl   = document.getElementById('crt-hours');
+  var demEl  = document.getElementById('crt-demand');
+  if(costEl) costEl.textContent = examCost > 0 ? ('$' + examCost.toLocaleString()) : 'Varies';
+  if(liftEl) { liftEl.textContent = '+' + Math.round(bonusPct * 100) + '%'; liftEl.className = 'crt-metric-val crt-green'; }
+  if(roiEl)  roiEl.textContent   = monthsROI > 0 ? (monthsROI + ' mo') : 'N/A';
+  if(hrEl)   hrEl.textContent    = sh.min + '\u2013' + sh.max + ' hrs';
+  if(demEl)  { demEl.textContent = demand.label; demEl.className = 'crt-metric-val ' + demand.cls; }
+
+  // Render detail line
+  if(detail) {
+    var liftAmt = Math.round(annualLift / 100) * 100;
+    var roiStr  = monthsROI > 0
+      ? 'recover the exam cost in ~<strong>' + monthsROI + ' months</strong> of salary benefit'
+      : 'exact ROI unavailable (exam cost data missing)';
+    var intro = examCost > 0
+      ? 'At $' + examCost.toLocaleString() + ' exam cost, you\u2019ll ' + roiStr + '.'
+      : 'Exam cost varies \u2014 check the issuer\'s site for current pricing.';
+    detail.innerHTML = '<span class="crt-detail-text">Based on a $105K mid-market baseline \u2014 estimated <strong>+$' + liftAmt.toLocaleString() + '/yr</strong> salary lift. ' + intro + '</span>';
+  }
+  if(results) results.style.display = '';
+}
+
+// Hook into certs page init
+_pageInits.certs = (function(_orig){
+  return function(){ _orig(); initCertROI(); };
+})(_pageInits.certs);
+
+// ─── ROLE READINESS RADAR (v33) ───────────────────────────────────────────
+var RADAR_DIMS = ['tech','certs','domain','handson','comms','exp'];
+var RADAR_DIM_LABELS = ['Technical\nSkills','Certifications','Domain\nKnowledge','Hands-on\nPractice','Communication','Experience'];
+
+// Target scores per role [tech, certs, domain, handson, comms, exp]
+var RADAR_TARGETS = {
+  soc:  [6, 5, 5, 5, 6, 3],
+  de:   [8, 6, 7, 7, 6, 5],
+  ir:   [7, 6, 7, 8, 7, 5],
+  ti:   [6, 5, 8, 6, 8, 4],
+  pt:   [9, 7, 8, 9, 7, 5],
+  rt:   [9, 7, 8, 9, 8, 7],
+  cs:   [8, 7, 7, 8, 6, 5],
+  se:   [8, 6, 7, 7, 6, 5],
+  sa:   [8, 8, 9, 8, 8, 8],
+  iam:  [6, 6, 6, 6, 6, 4],
+  vm:   [7, 5, 6, 6, 6, 4],
+  grc:  [4, 7, 7, 4, 8, 5],
+  as:   [8, 5, 7, 8, 6, 5],
+  ciso: [7, 9, 9, 6, 9, 9],
+  ma:   [8, 5, 7, 8, 6, 4],
+  risk: [4, 7, 7, 4, 7, 5]
+};
+
+var RADAR_ADVICE = {
+  tech: {
+    low: 'Build hands-on skills via TryHackMe, HackTheBox, or a home lab. Focus on tools specific to your target role.',
+    med: 'Deepen expertise in the tools your target role uses daily — Splunk, Burp Suite, Wireshark, etc.',
+    high: 'Strong technical foundation — focus on advanced techniques and breadth of exposure.'
+  },
+  certs: {
+    low: 'Start with CompTIA Security+ or a role-aligned entry cert tracked in your Cert Tracker.',
+    med: 'Pursue an intermediate cert that aligns with your target domain (e.g. CySA+, PNPT, AWS Security).',
+    high: 'Solid cert portfolio — consider expert-level creds like OSCP, CISSP, or GREM.'
+  },
+  domain: {
+    low: 'Study the 15 security domains in the Security Domains Explorer — focus on your target role\'s home domain first.',
+    med: 'Deepen knowledge in the specific domain your target role operates in. Read threat reports, framework docs.',
+    high: 'Broad domain knowledge — now specialize. Depth in 1–2 areas sets you apart.'
+  },
+  handson: {
+    low: 'Set up a home lab, join CTFs (picoCTF, HackTheBox), or contribute to open-source security projects.',
+    med: 'Seek internships, bug bounties, or internal security projects. Real environments beat simulations.',
+    high: 'Strong practical experience — make sure it\'s clearly quantified on your resume.'
+  },
+  comms: {
+    low: 'Practice writing technical write-ups, incident reports, or a security blog. Communication is a force multiplier.',
+    med: 'Develop executive communication: translate technical findings into business risk language.',
+    high: 'Strong communicator — leverage this to lead projects, mentor others, and build your brand.'
+  },
+  exp: {
+    low: 'Adjacent IT roles count — help desk, NOC, or IT admin all build pipeline experience.',
+    med: 'Seek stretch assignments, cross-functional security projects, or a job change into a security-adjacent role.',
+    high: 'Strong experience base — document scope, scale, and business impact on your resume.'
+  }
+};
+
+function _radarAutoPopulateCerts() {
+  try {
+    var prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
+    var done = Object.values(prog).filter(function(v){ return v === 'done'; }).length;
+    var score = done === 0 ? 1 : done === 1 ? 3 : done === 2 ? 5 : done === 3 ? 6 : done <= 5 ? 7 : done <= 8 ? 9 : 10;
+    var el = document.getElementById('rs-certs');
+    if(el && el.value === '5') { el.value = score; }
+  } catch(e) {}
+}
+
+function _radarGetValues() {
+  return RADAR_DIMS.map(function(d) {
+    var el = document.getElementById('rs-' + d);
+    return el ? parseInt(el.value) : 5;
+  });
+}
+
+function _radarPolyPoints(vals, cx, cy, maxR) {
+  return vals.map(function(v, i) {
+    var angle = (i * 60 - 90) * Math.PI / 180;
+    var r = (v / 10) * maxR;
+    return (cx + r * Math.cos(angle)).toFixed(2) + ',' + (cy + r * Math.sin(angle)).toFixed(2);
+  }).join(' ');
+}
+
+function _radarDrawChart(current, target) {
+  var svg = document.getElementById('radar-svg');
+  if(!svg) return;
+  var cx = 200, cy = 200, maxR = 155;
+
+  // Draw grid rings
+  var gridG = document.getElementById('radar-grid');
+  if(gridG) {
+    gridG.innerHTML = '';
+    [2,4,6,8,10].forEach(function(level) {
+      var r = (level / 10) * maxR;
+      var pts = RADAR_DIMS.map(function(_, i) {
+        var ang = (i * 60 - 90) * Math.PI / 180;
+        return (cx + r * Math.cos(ang)).toFixed(2) + ',' + (cy + r * Math.sin(ang)).toFixed(2);
+      }).join(' ');
+      var poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      poly.setAttribute('points', pts);
+      poly.setAttribute('fill', 'none');
+      poly.setAttribute('stroke', level === 10 ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.05)');
+      poly.setAttribute('stroke-width', '1');
+      gridG.appendChild(poly);
+      // Ring label
+      if(level % 4 === 0) {
+        var lx = cx + (r + 2) * Math.cos(-90 * Math.PI / 180);
+        var ly = cy + (r + 2) * Math.sin(-90 * Math.PI / 180);
+        var txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+        txt.setAttribute('x', (lx - 12).toFixed(1));
+        txt.setAttribute('y', (ly + 4).toFixed(1));
+        txt.setAttribute('font-size','8');
+        txt.setAttribute('fill','rgba(255,255,255,.2)');
+        txt.setAttribute('font-family','monospace');
+        txt.textContent = level;
+        gridG.appendChild(txt);
+      }
+    });
+  }
+
+  // Draw axis lines
+  var axesG = document.getElementById('radar-axes');
+  if(axesG) {
+    axesG.innerHTML = '';
+    RADAR_DIMS.forEach(function(_, i) {
+      var ang = (i * 60 - 90) * Math.PI / 180;
+      var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+      line.setAttribute('x2', (cx + maxR * Math.cos(ang)).toFixed(2));
+      line.setAttribute('y2', (cy + maxR * Math.sin(ang)).toFixed(2));
+      line.setAttribute('stroke','rgba(255,255,255,.08)');
+      line.setAttribute('stroke-width','1');
+      axesG.appendChild(line);
+    });
+  }
+
+  // Draw axis labels
+  var labelsG = document.getElementById('radar-labels');
+  if(labelsG) {
+    labelsG.innerHTML = '';
+    RADAR_DIM_LABELS.forEach(function(lbl, i) {
+      var ang = (i * 60 - 90) * Math.PI / 180;
+      var lx = cx + (maxR + 24) * Math.cos(ang);
+      var ly = cy + (maxR + 24) * Math.sin(ang);
+      var anchor = 'middle';
+      if(lx < cx - 5) anchor = 'end';
+      else if(lx > cx + 5) anchor = 'start';
+      var parts = lbl.split('\n');
+      var g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      parts.forEach(function(part, pi) {
+        var txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+        txt.setAttribute('x', lx.toFixed(1));
+        txt.setAttribute('y', (ly + (pi - (parts.length-1)/2) * 11).toFixed(1));
+        txt.setAttribute('text-anchor', anchor);
+        txt.setAttribute('font-size','9.5');
+        txt.setAttribute('fill','rgba(221,230,240,.65)');
+        txt.setAttribute('font-family','inherit');
+        txt.setAttribute('font-weight','600');
+        txt.textContent = part;
+        g.appendChild(txt);
+      });
+      labelsG.appendChild(g);
+    });
+  }
+
+  // Update polygons
+  var tpoly = document.getElementById('radar-target-poly');
+  var cpoly = document.getElementById('radar-current-poly');
+  if(tpoly) tpoly.setAttribute('points', _radarPolyPoints(target, cx, cy, maxR));
+  if(cpoly) cpoly.setAttribute('points', _radarPolyPoints(current, cx, cy, maxR));
+
+  // Dot markers on current polygon
+  var dotsG = document.getElementById('radar-dots');
+  if(dotsG) {
+    dotsG.innerHTML = '';
+    current.forEach(function(v, i) {
+      var ang = (i * 60 - 90) * Math.PI / 180;
+      var r = (v / 10) * maxR;
+      var dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx', (cx + r * Math.cos(ang)).toFixed(2));
+      dot.setAttribute('cy', (cy + r * Math.sin(ang)).toFixed(2));
+      dot.setAttribute('r','4');
+      dot.setAttribute('fill','#0dd4c8');
+      dot.setAttribute('stroke','#0b1120');
+      dot.setAttribute('stroke-width','1.5');
+      dotsG.appendChild(dot);
+    });
+  }
+}
+
+function _radarRenderGaps(current, target) {
+  var container = document.getElementById('radar-gaps');
+  if(!container) return;
+
+  var dimNames = ['Technical Skills','Certifications','Domain Knowledge','Hands-on Practice','Communication','Experience'];
+  var gaps = RADAR_DIMS.map(function(d, i) {
+    return {dim: d, label: dimNames[i], gap: target[i] - current[i], cur: current[i], tgt: target[i]};
+  }).sort(function(a,b){ return b.gap - a.gap; });
+
+  var html = '';
+  gaps.forEach(function(g) {
+    if(g.gap <= 0) {
+      html += '<div class="rg-item rg-met"><span class="rg-icon">✓</span><div class="rg-body"><span class="rg-lbl">' + g.label + '</span><span class="rg-status rg-status-met">Met (' + g.cur + '/' + g.tgt + ')</span></div></div>';
+    } else {
+      var severity = g.gap >= 4 ? 'crit' : g.gap >= 2 ? 'warn' : 'minor';
+      var sevLabel = g.gap >= 4 ? 'Critical gap' : g.gap >= 2 ? 'Important gap' : 'Minor gap';
+      var advice = RADAR_ADVICE[g.dim];
+      var adviceText = g.cur <= 3 ? advice.low : g.cur <= 6 ? advice.med : advice.high;
+      html += '<div class="rg-item rg-' + severity + '">'
+        + '<span class="rg-gap-badge">-' + g.gap + '</span>'
+        + '<div class="rg-body">'
+        + '<div class="rg-top"><span class="rg-lbl">' + g.label + '</span><span class="rg-status rg-status-' + severity + '">' + sevLabel + ' (' + g.cur + '/' + g.tgt + ')</span></div>'
+        + '<p class="rg-advice">' + adviceText + '</p>'
+        + '</div></div>';
+    }
+  });
+  container.innerHTML = html || '<p style="color:var(--mt);font-size:.78rem;">Select a role to see your gap analysis.</p>';
+}
+
+function _radarUpdateSliderLabels(current, target) {
+  RADAR_DIMS.forEach(function(d, i) {
+    var curEl = document.getElementById('rv-' + d);
+    var tgtEl = document.getElementById('rt-' + d);
+    if(curEl) curEl.textContent = current[i];
+    if(tgtEl) tgtEl.textContent = target[i];
+    // Color the current val
+    if(curEl) {
+      curEl.className = 'rsl-cur' + (current[i] >= target[i] ? ' rsl-cur-met' : current[i] >= target[i] - 2 ? ' rsl-cur-close' : ' rsl-cur-gap');
+    }
+  });
+}
+
+function updateRadar() {
+  var roleEl = document.getElementById('radar-role');
+  var role = roleEl ? roleEl.value : 'soc';
+  var target = RADAR_TARGETS[role] || RADAR_TARGETS.soc;
+  var current = _radarGetValues();
+  _radarDrawChart(current, target);
+  _radarUpdateSliderLabels(current, target);
+  _radarRenderGaps(current, target);
+}
+
+function saveRadar() {
+  var roleEl = document.getElementById('radar-role');
+  var role = roleEl ? roleEl.value : 'soc';
+  var vals = _radarGetValues();
+  try {
+    localStorage.setItem('isd_radar', JSON.stringify({role: role, values: vals, savedAt: Date.now()}));
+    var msg = document.getElementById('radar-saved-msg');
+    if(msg) { msg.textContent = 'Saved!'; setTimeout(function(){ msg.textContent=''; }, 2500); }
+  } catch(e) {}
+}
+
+function _radarRestoreState() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('isd_radar') || 'null');
+    if(!saved) return;
+    var roleEl = document.getElementById('radar-role');
+    if(roleEl && saved.role) roleEl.value = saved.role;
+    if(saved.values && saved.values.length === 6) {
+      RADAR_DIMS.forEach(function(d, i) {
+        var el = document.getElementById('rs-' + d);
+        if(el) el.value = saved.values[i];
+      });
+    }
+  } catch(e) {}
+}
+
+function initRadar() {
+  _radarRestoreState();
+  _radarAutoPopulateCerts();
+  updateRadar();
+}
+
+_pageInits.radar = function() { initRadar(); };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// AI MOCK INTERVIEW (v34)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+var _mock = {
+  mode: 'text',
+  role: '',
+  persona: 'technical',
+  difficulty: 'mid',
+  questions: [],
+  qaHistory: [],   // [{question, answer, score, feedback, strengths, improvements, fillerWords, isFollowup}]
+  currentIdx: 0,
+  isFollowup: false,
+  followupQ: null,
+  timer: null,
+  timerLeft: 0,
+  idleWarningShown: false,
+  recognition: null,
+  voiceTranscript: '',
+  isRecording: false
+};
+
+var MOCK_FILLER_WORDS = [
+  'um','uh','like','you know','basically','literally',
+  'right','so','actually','kind of','sort of','i mean'
+];
+
+var MOCK_PERSONAS = {
+  technical: { name: 'Technical Lead', icon: '⚙️' },
+  ciso:      { name: 'CISO',           icon: '🛡️' },
+  hr:        { name: 'HR Screener',    icon: '👤' }
+};
+
+// Timer durations in seconds
+var MOCK_TIMER_SECS = { text: 180, voice: 120, followup: 90 };
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+function initMock() {
+  // Populate role dropdown once
+  var sel = document.getElementById('mock-role');
+  if (!sel || sel.options.length > 1) {
+    selectMockMode(_mock.mode);
+    _updateMockFreeNote();
+    return;
+  }
+  sel.innerHTML = '';
+  var opts = Object.keys(JT).map(function(k){ return {k:k, v:JT[k].title}; });
+  opts.sort(function(a,b){ return a.v.localeCompare(b.v); });
+  opts.forEach(function(r){
+    var o = document.createElement('option');
+    o.value = r.k; o.textContent = r.v;
+    if (r.k === 'soc') o.selected = true;
+    sel.appendChild(o);
+  });
+  selectMockMode(_mock.mode);
+  _updateMockFreeNote();
+}
+
+function _updateMockFreeNote() {
+  var note = document.getElementById('mock-free-note');
+  if (!note) return;
+  if (_isPro()) {
+    note.innerHTML = '<span class="mock-pro-note">✓ Pro — unlimited sessions</span>';
+  } else {
+    note.innerHTML = '<span class="mock-free-info">Free plan includes <strong>1 session</strong>. <a class="mock-upgrade-link" onclick="showPage(\'pricing\')">Upgrade to Pro</a> for unlimited.</span>';
+  }
+}
+
+// ── Mode selection ─────────────────────────────────────────────────────────────
+
+function selectMockMode(mode) {
+  _mock.mode = mode;
+  var tc = document.getElementById('mmc-text');
+  var vc = document.getElementById('mmc-voice');
+  if (tc) tc.classList.toggle('mmc-selected', mode === 'text');
+  if (vc) vc.classList.toggle('mmc-selected', mode === 'voice');
+}
+
+// ── Start interview ────────────────────────────────────────────────────────────
+
+async function startMockInterview() {
+  if (!window._supabaseSession) {
+    if (typeof _showSignInModal === 'function') _showSignInModal();
+    else alert('Please sign in to use AI Mock Interview.');
+    return;
+  }
+
+  var role      = (document.getElementById('mock-role')       || {}).value || 'soc';
+  var persona   = (document.getElementById('mock-persona')    || {}).value || 'technical';
+  var difficulty= (document.getElementById('mock-difficulty') || {}).value || 'mid';
+
+  _mock.role       = role;
+  _mock.persona    = persona;
+  _mock.difficulty = difficulty;
+  _mock.questions  = [];
+  _mock.qaHistory  = [];
+  _mock.currentIdx = 0;
+  _mock.isFollowup = false;
+  _mock.followupQ  = null;
+
+  var btn = document.getElementById('mock-start-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating questions...'; }
+
+  try {
+    var token = window._supabaseSession.access_token;
+    var resp  = await fetch(EDGE_BASE + '/mock-interview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ action: 'start', role: JT[role] ? JT[role].title : role, persona: persona, difficulty: difficulty })
+    });
+    var data = await resp.json();
+
+    if (!resp.ok) {
+      if (data.error === 'free_limit_reached') {
+        _showUpgradePrompt('AI Mock Interview');
+        if (btn) { btn.disabled = false; btn.textContent = 'Start Interview →'; }
+        return;
+      }
+      throw new Error(data.error || 'Failed to generate questions');
+    }
+
+    _mock.questions = data.questions || [];
+    if (!_mock.questions.length) throw new Error('No questions returned');
+
+    _mockTransitionTo('interview');
+    _mockShowQuestion(0, false);
+
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Start Interview →'; }
+    alert('Could not start interview: ' + e.message);
+  }
+}
+
+// ── Screen transitions ─────────────────────────────────────────────────────────
+
+function _mockTransitionTo(screen) {
+  var screens = ['setup', 'interview', 'evaluating', 'scorecard'];
+  screens.forEach(function(s) {
+    var el = document.getElementById('mock-' + s);
+    if (el) el.style.display = (s === screen) ? (s === 'setup' ? 'flex' : 'flex') : 'none';
+  });
+}
+
+// ── Show question ──────────────────────────────────────────────────────────────
+
+function _mockShowQuestion(idx, isFollowup) {
+  var qObj = isFollowup ? _mock.followupQ : _mock.questions[idx];
+  if (!qObj) return;
+  var qText = qObj.question || qObj;
+
+  // Header
+  var qNum = idx + 1;
+  var qNumEl = document.getElementById('mih-q-num');
+  if (qNumEl) qNumEl.textContent = qNum;
+
+  var p = MOCK_PERSONAS[_mock.persona] || MOCK_PERSONAS.technical;
+  var personaEl = document.getElementById('mih-persona');
+  if (personaEl) personaEl.innerHTML = '<span class="mih-persona-icon">' + p.icon + '</span><span class="mih-persona-name">' + p.name + '</span>';
+
+  var modeBadge = document.getElementById('mih-mode-badge');
+  if (modeBadge) modeBadge.textContent = _mock.mode === 'voice' ? '🎤 Voice' : '⌨️ Text';
+
+  // Eyebrow
+  var eyebrow = document.getElementById('mqw-eyebrow');
+  if (eyebrow) {
+    eyebrow.textContent = isFollowup ? 'Follow-up Question' : ('Question ' + qNum + ' of 5');
+    eyebrow.className = 'mqw-eyebrow' + (isFollowup ? ' mqw-eyebrow-followup' : '');
+  }
+
+  // Follow-up banner
+  var banner = document.getElementById('mqw-followup-banner');
+  if (banner) banner.style.display = isFollowup ? 'flex' : 'none';
+
+  // Question text
+  var questionEl = document.getElementById('mqw-question');
+  if (questionEl) questionEl.textContent = qText;
+
+  // Reset answer area
+  if (_mock.mode === 'text') {
+    var taWrap = document.getElementById('mock-text-area');
+    var voiceWrap = document.getElementById('mock-voice-area');
+    if (taWrap)    taWrap.style.display    = 'flex';
+    if (voiceWrap) voiceWrap.style.display = 'none';
+    var ta = document.getElementById('mock-answer-text');
+    if (ta) ta.value = '';
+    var wc = document.getElementById('mat-char-count');
+    if (wc) wc.textContent = '0';
+  } else {
+    var taWrap2 = document.getElementById('mock-text-area');
+    var voiceWrap2 = document.getElementById('mock-voice-area');
+    if (taWrap2)    taWrap2.style.display    = 'none';
+    if (voiceWrap2) voiceWrap2.style.display = 'flex';
+    var trans = document.getElementById('mva-transcript');
+    if (trans) trans.textContent = 'Tap the mic to start speaking...';
+    _mock.voiceTranscript = '';
+    _mock.isRecording = false;
+    var micBtn = document.getElementById('mva-mic-btn');
+    if (micBtn) micBtn.classList.remove('mva-recording');
+    var micLabel = document.getElementById('mva-mic-label');
+    if (micLabel) micLabel.textContent = 'Start Speaking';
+    var fc = document.getElementById('mva-filler-count');
+    if (fc) fc.style.display = 'none';
+    if (_mock.recognition) { try { _mock.recognition.stop(); } catch(e2){} _mock.recognition = null; }
+  }
+
+  // Clear status
+  var status = document.getElementById('mock-eval-status');
+  if (status) { status.textContent = ''; status.className = 'mock-eval-status'; }
+
+  // Start timer
+  _mockStartTimer(isFollowup);
+
+  // TTS in voice mode
+  if (_mock.mode === 'voice') _mockSpeak(qText);
+}
+
+// ── Timer ──────────────────────────────────────────────────────────────────────
+
+function _mockStartTimer(isFollowup) {
+  _mockStopTimer();
+  _mock.timerLeft = isFollowup ? MOCK_TIMER_SECS.followup : MOCK_TIMER_SECS[_mock.mode];
+  _mock.idleWarningShown = false;
+  _mockUpdateTimerDisplay();
+  _mock.timer = setInterval(function() {
+    _mock.timerLeft--;
+    _mockUpdateTimerDisplay();
+    if (_mock.timerLeft === 45 && !_mock.idleWarningShown) {
+      _mock.idleWarningShown = true;
+      var status = document.getElementById('mock-eval-status');
+      if (status) { status.textContent = '⏰ 45 seconds remaining'; status.className = 'mock-eval-status mes-warn'; }
+    }
+    if (_mock.timerLeft <= 0) {
+      _mockStopTimer();
+      submitMockAnswer(true);
+    }
+  }, 1000);
+}
+
+function _mockStopTimer() {
+  if (_mock.timer) { clearInterval(_mock.timer); _mock.timer = null; }
+}
+
+function _mockUpdateTimerDisplay() {
+  var el = document.getElementById('mih-timer');
+  if (!el) return;
+  var m = Math.floor(_mock.timerLeft / 60);
+  var s = _mock.timerLeft % 60;
+  el.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+  el.className = 'mih-timer' +
+    (_mock.timerLeft <= 30 ? ' mih-timer-warn' : _mock.timerLeft <= 60 ? ' mih-timer-caution' : '');
+}
+
+// ── Text answer ────────────────────────────────────────────────────────────────
+
+function mockTextKeyup() {
+  var ta = document.getElementById('mock-answer-text');
+  var wc = document.getElementById('mat-char-count');
+  if (!ta || !wc) return;
+  var words = ta.value.trim().split(/\s+/).filter(function(w){ return w.length > 0; });
+  wc.textContent = words.length;
+}
+
+// ── Voice answer ───────────────────────────────────────────────────────────────
+
+function toggleMockMic() {
+  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    alert('Speech recognition is not supported in this browser.\nPlease use Chrome or Edge, or switch to Text Mode.');
+    return;
+  }
+  if (_mock.isRecording) {
+    _mockStopRecording();
+  } else {
+    _mockStartRecording(SpeechRec);
+  }
+}
+
+function _mockStartRecording(SpeechRec) {
+  _mock.recognition = new SpeechRec();
+  _mock.recognition.continuous = true;
+  _mock.recognition.interimResults = true;
+  _mock.recognition.lang = 'en-US';
+
+  _mock.recognition.onresult = function(event) {
+    var final = '';
+    var interim = '';
+    for (var i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) { final += event.results[i][0].transcript + ' '; }
+      else { interim += event.results[i][0].transcript; }
+    }
+    if (final) _mock.voiceTranscript += final;
+    var trans = document.getElementById('mva-transcript');
+    if (trans) trans.textContent = (_mock.voiceTranscript + interim).trim() || 'Listening...';
+
+    // Live filler word count
+    var fillerCount = _mockCountFillerWords(_mock.voiceTranscript);
+    var fc = document.getElementById('mva-filler-count');
+    var fn = document.getElementById('mva-filler-num');
+    if (fc && fn) {
+      fn.textContent = fillerCount;
+      fc.style.display = fillerCount > 0 ? 'block' : 'none';
+    }
+  };
+
+  _mock.recognition.onerror = function() { _mockStopRecording(); };
+  _mock.recognition.onend = function() {
+    if (_mock.isRecording) { try { _mock.recognition.start(); } catch(e){} }
+  };
+
+  try {
+    _mock.recognition.start();
+    _mock.isRecording = true;
+    var btn = document.getElementById('mva-mic-btn');
+    if (btn) btn.classList.add('mva-recording');
+    var lbl = document.getElementById('mva-mic-label');
+    if (lbl) lbl.textContent = 'Stop Recording';
+  } catch(e) { console.error('[mock] STT start:', e); }
+}
+
+function _mockStopRecording() {
+  _mock.isRecording = false;
+  if (_mock.recognition) { try { _mock.recognition.stop(); } catch(e){} _mock.recognition = null; }
+  var btn = document.getElementById('mva-mic-btn');
+  if (btn) btn.classList.remove('mva-recording');
+  var lbl = document.getElementById('mva-mic-label');
+  if (lbl) lbl.textContent = 'Start Speaking';
+}
+
+function _mockCountFillerWords(text) {
+  var lower = text.toLowerCase();
+  var count = 0;
+  MOCK_FILLER_WORDS.forEach(function(fw) {
+    var re = new RegExp('\\b' + fw.replace(/\s+/g, '\\s+') + '\\b', 'gi');
+    var m = lower.match(re);
+    if (m) count += m.length;
+  });
+  return count;
+}
+
+// ── TTS ────────────────────────────────────────────────────────────────────────
+
+function _mockSpeak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  var utt = new SpeechSynthesisUtterance(text);
+  utt.rate = 0.92;
+  utt.pitch = 1.0;
+  var voices = window.speechSynthesis.getVoices();
+  var pref = voices.find(function(v){ return v.lang.startsWith('en') && v.name.indexOf('Google') === -1; });
+  if (pref) utt.voice = pref;
+  window.speechSynthesis.speak(utt);
+}
+
+// ── Submit answer ──────────────────────────────────────────────────────────────
+
+async function submitMockAnswer(timedOut) {
+  var answer = '';
+  var fillerWordCount = 0;
+
+  if (_mock.mode === 'text') {
+    var ta = document.getElementById('mock-answer-text');
+    answer = ta ? ta.value.trim() : '';
+  } else {
+    if (_mock.isRecording) _mockStopRecording();
+    answer = _mock.voiceTranscript.trim();
+    fillerWordCount = _mockCountFillerWords(answer);
+  }
+
+  if (!answer && !timedOut) {
+    var status = document.getElementById('mock-eval-status');
+    if (status) { status.textContent = '⚠ Please enter an answer before submitting'; status.className = 'mock-eval-status mes-error'; }
+    return;
+  }
+  if (!answer) answer = '[No answer provided — timed out]';
+
+  _mockStopTimer();
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+  _mockTransitionTo('evaluating');
+  var mlText = document.getElementById('ml-text');
+  if (mlText) mlText.textContent = 'Evaluating your answer...';
+
+  try {
+    var currentQ = _mock.isFollowup ? _mock.followupQ : _mock.questions[_mock.currentIdx];
+    var qText = currentQ ? (currentQ.question || currentQ) : '';
+
+    var token = window._supabaseSession.access_token;
+    var resp = await fetch(EDGE_BASE + '/mock-interview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        action: 'evaluate',
+        role: JT[_mock.role] ? JT[_mock.role].title : _mock.role,
+        persona: _mock.persona,
+        difficulty: _mock.difficulty,
+        question: qText,
+        answer: answer,
+        questionType: currentQ ? (currentQ.type || 'technical') : 'technical',
+        isFollowup: _mock.isFollowup,
+        fillerWordCount: fillerWordCount
+      })
+    });
+    var evalData = await resp.json();
+    if (!resp.ok) throw new Error(evalData.error || 'Evaluation failed');
+
+    // Store result
+    _mock.qaHistory.push({
+      question: qText,
+      answer: answer,
+      score: evalData.score || 1,
+      feedback: evalData.feedback || '',
+      strengths: evalData.strengths || [],
+      improvements: evalData.improvements || [],
+      fillerWords: fillerWordCount,
+      isFollowup: _mock.isFollowup
+    });
+
+    // Follow-up if score <= 5 and not already a follow-up
+    if (!_mock.isFollowup && evalData.score <= 5 && evalData.follow_up_question) {
+      _mock.followupQ = { question: evalData.follow_up_question, type: 'followup' };
+      _mock.isFollowup = true;
+      _mockTransitionTo('interview');
+      _mockShowQuestion(_mock.currentIdx, true);
+      return;
+    }
+
+    // Advance to next question
+    _mock.isFollowup = false;
+    _mock.followupQ  = null;
+    _mock.currentIdx++;
+
+    if (_mock.currentIdx < _mock.questions.length) {
+      _mockTransitionTo('interview');
+      _mockShowQuestion(_mock.currentIdx, false);
+    } else {
+      // All done — finalize
+      if (mlText) mlText.textContent = 'Generating your scorecard...';
+      await _mockFinalize();
+    }
+
+  } catch(e) {
+    _mockTransitionTo('interview');
+    var statusEl = document.getElementById('mock-eval-status');
+    if (statusEl) { statusEl.textContent = '⚠ Evaluation failed: ' + e.message; statusEl.className = 'mock-eval-status mes-error'; }
+  }
+}
+
+// ── Finalize ───────────────────────────────────────────────────────────────────
+
+async function _mockFinalize() {
+  try {
+    var token = window._supabaseSession.access_token;
+    var resp = await fetch(EDGE_BASE + '/mock-interview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        action: 'finalize',
+        role: JT[_mock.role] ? JT[_mock.role].title : _mock.role,
+        persona: _mock.persona,
+        difficulty: _mock.difficulty,
+        mode: _mock.mode,
+        qaHistory: _mock.qaHistory
+      })
+    });
+    var sc = await resp.json();
+    if (!resp.ok) throw new Error(sc.error || 'Finalization failed');
+
+    _mockSaveLocalHistory(sc);
+    _mockRenderScorecard(sc);
+    _mockTransitionTo('scorecard');
+
+  } catch(e) {
+    _mockTransitionTo('interview');
+    var statusEl = document.getElementById('mock-eval-status');
+    if (statusEl) { statusEl.textContent = '⚠ Scorecard generation failed: ' + e.message; statusEl.className = 'mock-eval-status mes-error'; }
+  }
+}
+
+// ── Local history (for trend chart) ───────────────────────────────────────────
+
+function _mockSaveLocalHistory(sc) {
+  try {
+    var h = JSON.parse(localStorage.getItem('isd_mock_history') || '[]');
+    h.push({ date: Date.now(), score: sc.overall_score || 0, role: _mock.role, persona: _mock.persona, hire: sc.hire_recommendation });
+    if (h.length > 10) h = h.slice(-10);
+    localStorage.setItem('isd_mock_history', JSON.stringify(h));
+  } catch(e) {}
+}
+
+// ── Render scorecard ───────────────────────────────────────────────────────────
+
+function _mockRenderScorecard(sc) {
+  var hireColors = { 'Strong Hire': '#10e87e', 'Hire': '#0dd4c8', 'Hold': '#f5c842', 'No Hire': '#ff5c5c' };
+  var color = hireColors[sc.hire_recommendation] || '#7a90a8';
+
+  var hireEl = document.getElementById('msc-hire');
+  if (hireEl) hireEl.innerHTML = '<span class="msc-hire-badge" style="background:' + color + '22;color:' + color + ';border-color:' + color + '55">' + (sc.hire_recommendation || 'Reviewed') + '</span>';
+
+  var verdictEl = document.getElementById('msc-verdict');
+  if (verdictEl) verdictEl.textContent = 'Overall Score: ' + (sc.overall_score || 0) + '/10';
+
+  var summaryEl = document.getElementById('msc-summary');
+  if (summaryEl) summaryEl.textContent = sc.summary || '';
+
+  // Dimension scores
+  var dims = sc.dimension_scores || {};
+  var dimLabels = {
+    technical_accuracy: 'Technical Accuracy',
+    depth_detail: 'Depth & Detail',
+    answer_structure: 'Answer Structure',
+    communication_clarity: 'Communication Clarity',
+    confidence: 'Confidence'
+  };
+  var scoresEl = document.getElementById('msc-scores');
+  if (scoresEl) {
+    scoresEl.innerHTML = Object.keys(dims).map(function(k) {
+      var score = dims[k] || 0;
+      var pct = (score / 10) * 100;
+      var bc = score >= 7 ? '#10e87e' : score >= 5 ? '#0dd4c8' : '#f5c842';
+      return '<div class="msc-dim">' +
+        '<div class="msc-dim-header"><span class="msc-dim-label">' + (dimLabels[k] || k) + '</span><span class="msc-dim-score">' + score + '/10</span></div>' +
+        '<div class="msc-dim-bar"><div class="msc-dim-fill" style="width:' + pct + '%;background:' + bc + '"></div></div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // Insights + per-Q breakdown
+  var breakdownEl = document.getElementById('msc-breakdown');
+  if (breakdownEl) {
+    var insightHtml = '';
+    if (sc.top_strength)    insightHtml += '<div class="msc-insight msc-insight-good"><span class="msci-icon">💪</span><div><div class="msci-label">Key Strength</div><div class="msci-text">' + sc.top_strength + '</div></div></div>';
+    if (sc.top_improvement) insightHtml += '<div class="msc-insight msc-insight-improve"><span class="msci-icon">📈</span><div><div class="msci-label">Area to Improve</div><div class="msci-text">' + sc.top_improvement + '</div></div></div>';
+    if (sc.next_session_focus) insightHtml += '<div class="msc-insight msc-insight-focus"><span class="msci-icon">🎯</span><div><div class="msci-label">Study Before Next Session</div><div class="msci-text">' + sc.next_session_focus + '</div></div></div>';
+
+    var qaHtml = '<div class="msc-qa-breakdown"><div class="msc-qa-header">Per-Question Breakdown</div>' +
+      _mock.qaHistory.map(function(qa) {
+        var sc2 = qa.score || 0;
+        var sc2c = sc2 >= 7 ? '#10e87e' : sc2 >= 5 ? '#f5c842' : '#ff5c5c';
+        return '<div class="msc-qa-item">' +
+          '<div class="msc-qa-row"><span class="msc-qa-badge" style="color:' + sc2c + '">' + sc2 + '/10</span><span class="msc-qa-q">' + (qa.isFollowup ? '↩ ' : '') + qa.question + '</span></div>' +
+          '<div class="msc-qa-feedback">' + (qa.feedback || '') + '</div>' +
+          (qa.fillerWords > 0 ? '<div class="msc-qa-fillers">🗣️ ' + qa.fillerWords + ' filler word' + (qa.fillerWords !== 1 ? 's' : '') + ' detected</div>' : '') +
+          '</div>';
+      }).join('') + '</div>';
+
+    breakdownEl.innerHTML = insightHtml + qaHtml;
+  }
+
+  // Trend chart
+  _mockRenderTrend();
+}
+
+// ── Trend chart ────────────────────────────────────────────────────────────────
+
+function _mockRenderTrend() {
+  try {
+    var h = JSON.parse(localStorage.getItem('isd_mock_history') || '[]');
+    if (h.length < 3) return;
+    var trendEl  = document.getElementById('msc-trend');
+    var chartEl  = document.getElementById('msc-trend-chart');
+    if (!trendEl || !chartEl) return;
+    trendEl.style.display = 'block';
+
+    var pts  = h.slice(-6);
+    var W = 320, H = 72, pad = 10;
+    var stepX = pts.length > 1 ? (W - 2*pad) / (pts.length - 1) : 0;
+    var points = pts.map(function(p, i) {
+      var x = pad + i * stepX;
+      var y = H - pad - ((p.score - 1) / 9) * (H - 2*pad);
+      return { x:x, y:y, score:p.score };
+    });
+    var polyline = points.map(function(p){ return p.x + ',' + p.y; }).join(' ');
+
+    var gridLines = [3,5,7].map(function(sv) {
+      var gy = H - pad - ((sv-1)/9)*(H-2*pad);
+      return '<line x1="' + pad + '" y1="' + gy.toFixed(1) + '" x2="' + (W-pad) + '" y2="' + gy.toFixed(1) + '" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+    }).join('');
+
+    var dotLabels = points.map(function(p) {
+      return '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="4" fill="#0dd4c8"/>' +
+        '<text x="' + p.x.toFixed(1) + '" y="' + (p.y - 9).toFixed(1) + '" fill="#dde6f0" font-size="9" text-anchor="middle">' + p.score + '</text>';
+    }).join('');
+
+    var firstScore = pts[0].score, lastScore = pts[pts.length-1].score;
+    var trendMsg = lastScore > firstScore
+      ? '<span class="mtf-up">↑ Improving across ' + pts.length + ' sessions</span>'
+      : lastScore < firstScore
+        ? '<span class="mtf-down">↓ Scores dipped — keep practicing</span>'
+        : '<span class="mtf-flat">→ Consistent performance</span>';
+
+    chartEl.innerHTML =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:72px;">' +
+        gridLines +
+        '<polyline points="' + polyline + '" fill="none" stroke="#0dd4c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        dotLabels +
+      '</svg>' +
+      '<div class="msc-trend-footer">' + trendMsg + '</div>';
+
+  } catch(e) {}
+}
+
+// ── Reset ──────────────────────────────────────────────────────────────────────
+
+function resetMockInterview() {
+  _mockStopTimer();
+  if (_mock.recognition) { try { _mock.recognition.stop(); } catch(e){} _mock.recognition = null; }
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+
+  _mock.questions  = [];
+  _mock.qaHistory  = [];
+  _mock.currentIdx = 0;
+  _mock.isFollowup = false;
+  _mock.followupQ  = null;
+  _mock.voiceTranscript = '';
+  _mock.isRecording = false;
+
+  var btn = document.getElementById('mock-start-btn');
+  if (btn) { btn.disabled = false; btn.textContent = 'Start Interview →'; }
+  _mockTransitionTo('setup');
+}
+
+// ── Page init hook ─────────────────────────────────────────────────────────────
+
+_pageInits.mock = function() {
+  initMock();
+  // If user plan changes, update free note
+  _updateMockFreeNote();
+};

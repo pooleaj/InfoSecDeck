@@ -29,7 +29,7 @@
 <meta name="twitter:image" content="https://infosecdeck.com/og-image.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=32">
+<link rel="stylesheet" href="css/styles.css?v=34">
 </head>
 <body>
 <nav>
@@ -81,6 +81,14 @@
         <div class="ndi" onclick="showPage('career-ladder');closeAllDrops()">
           <span class="ndi-icon">🗺️</span>
           <div class="ndi-text"><span class="ndi-label">My Career Roadmap</span><span class="ndi-desc">Build your personalized career path</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('radar');closeAllDrops()">
+          <span class="ndi-icon">🎯</span>
+          <div class="ndi-text"><span class="ndi-label">Role Readiness Radar</span><span class="ndi-desc">See your gap vs any target role</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('mock');closeAllDrops()">
+          <span class="ndi-icon">🎤</span>
+          <div class="ndi-text"><span class="ndi-label">AI Mock Interview</span><span class="ndi-desc">Practice with AI-powered interviewers</span></div>
         </div>
       </div>
     </div>
@@ -900,6 +908,43 @@
       <div class="cl-item"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--lb);margin-right:4px;vertical-align:middle;"></span>Vendor-neutral</div>
       <div class="cl-item"><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:var(--or);margin-right:4px;vertical-align:middle;"></span>Vendor-specific</div>
     </div>
+  </div>
+
+  <!-- Cert ROI Calculator -->
+  <div class="cert-roi-tool" id="cert-roi-tool">
+    <div class="crt-header">
+      <div class="crt-title-row">
+        <span class="crt-icon">💰</span>
+        <span class="crt-title">Cert ROI Calculator</span>
+        <span class="crt-sub">Estimate salary impact &amp; payback period</span>
+      </div>
+      <select id="crt-select" onchange="calcCertROI()">
+        <option value="">&#x2014; Select a certification &#x2014;</option>
+      </select>
+    </div>
+    <div class="crt-results" id="crt-results" style="display:none">
+      <div class="crt-metric">
+        <div class="crt-metric-val" id="crt-cost">&#x2014;</div>
+        <div class="crt-metric-label">Exam Cost</div>
+      </div>
+      <div class="crt-metric">
+        <div class="crt-metric-val crt-green" id="crt-lift">&#x2014;</div>
+        <div class="crt-metric-label">Salary Boost</div>
+      </div>
+      <div class="crt-metric">
+        <div class="crt-metric-val" id="crt-roi">&#x2014;</div>
+        <div class="crt-metric-label">Months to ROI</div>
+      </div>
+      <div class="crt-metric">
+        <div class="crt-metric-val" id="crt-hours">&#x2014;</div>
+        <div class="crt-metric-label">Study Hours</div>
+      </div>
+      <div class="crt-metric">
+        <div class="crt-metric-val" id="crt-demand">&#x2014;</div>
+        <div class="crt-metric-label">Job Demand</div>
+      </div>
+    </div>
+    <div class="crt-detail" id="crt-detail"></div>
   </div>
 
   <div class="cw-scroll-outer">
@@ -3222,6 +3267,289 @@
 </div>
 </div>
 
+<!-- ═══════════════════════ ROLE READINESS RADAR ═══════════════════════ -->
+<div class="page" id="page-radar">
+<div class="cw">
+  <div class="cert-header a1">
+    <div class="ey">Role Readiness Radar</div>
+    <div class="st">How ready are you — really?</div>
+    <p style="font-size:.78rem;color:var(--mt);line-height:1.6;max-width:600px;margin:0 auto;">Select a target role, rate yourself across 6 dimensions, and see your gap at a glance. Your certs are auto-detected from your tracker.</p>
+  </div>
+
+  <div class="radar-layout">
+    <!-- Left: SVG Chart -->
+    <div class="radar-chart-col">
+      <div class="radar-chart-wrap">
+        <svg id="radar-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Grid rings injected by JS -->
+          <g id="radar-grid"></g>
+          <!-- Axis lines injected by JS -->
+          <g id="radar-axes"></g>
+          <!-- Target polygon -->
+          <polygon id="radar-target-poly" points="" fill="none" stroke="rgba(13,212,200,.35)" stroke-width="1.5" stroke-dasharray="5,4"/>
+          <!-- Current polygon -->
+          <polygon id="radar-current-poly" points="" fill="rgba(13,212,200,.15)" stroke="#0dd4c8" stroke-width="2"/>
+          <!-- Axis labels injected by JS -->
+          <g id="radar-labels"></g>
+          <!-- Dot markers injected by JS -->
+          <g id="radar-dots"></g>
+        </svg>
+      </div>
+      <div class="radar-legend">
+        <div class="rl-item"><span class="rl-dot rl-dot-current"></span>Your Profile</div>
+        <div class="rl-item"><span class="rl-dot rl-dot-target"></span>Role Target</div>
+      </div>
+    </div>
+
+    <!-- Right: Controls -->
+    <div class="radar-controls-col">
+      <div class="radar-role-row">
+        <label class="radar-role-label">Target Role</label>
+        <select id="radar-role" onchange="updateRadar()">
+          <option value="soc">SOC Analyst</option>
+          <option value="de">Detection Engineer</option>
+          <option value="ir">Incident Responder</option>
+          <option value="ti">Threat Intelligence Analyst</option>
+          <option value="pt">Penetration Tester</option>
+          <option value="rt">Red Team Operator</option>
+          <option value="cs">Cloud Security Engineer</option>
+          <option value="se">Security Engineer</option>
+          <option value="sa">Security Architect</option>
+          <option value="iam">IAM Administrator</option>
+          <option value="vm">Vulnerability Manager</option>
+          <option value="grc">GRC Analyst</option>
+          <option value="as">AppSec Engineer</option>
+          <option value="ciso">CISO</option>
+          <option value="ma">Malware Analyst</option>
+          <option value="risk">Risk Manager</option>
+        </select>
+      </div>
+
+      <div class="radar-sliders" id="radar-sliders">
+        <div class="rsl-item">
+          <div class="rsl-header">
+            <span class="rsl-label">🖥️ Technical Skills</span>
+            <span class="rsl-vals"><span class="rsl-cur" id="rv-tech">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-tech">8</span></span>
+          </div>
+          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-tech" data-dim="tech" oninput="updateRadar()">
+          <div class="rsl-hint">Proficiency with security tools, languages, and platforms</div>
+        </div>
+        <div class="rsl-item">
+          <div class="rsl-header">
+            <span class="rsl-label">📜 Certifications</span>
+            <span class="rsl-vals"><span class="rsl-cur" id="rv-certs">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-certs">5</span></span>
+          </div>
+          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-certs" data-dim="certs" oninput="updateRadar()">
+          <div class="rsl-hint">Relevant certifications earned or in progress</div>
+        </div>
+        <div class="rsl-item">
+          <div class="rsl-header">
+            <span class="rsl-label">🗂️ Domain Knowledge</span>
+            <span class="rsl-vals"><span class="rsl-cur" id="rv-domain">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-domain">5</span></span>
+          </div>
+          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-domain" data-dim="domain" oninput="updateRadar()">
+          <div class="rsl-hint">Depth and breadth of cybersecurity domain knowledge</div>
+        </div>
+        <div class="rsl-item">
+          <div class="rsl-header">
+            <span class="rsl-label">🔬 Hands-on Practice</span>
+            <span class="rsl-vals"><span class="rsl-cur" id="rv-handson">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-handson">5</span></span>
+          </div>
+          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-handson" data-dim="handson" oninput="updateRadar()">
+          <div class="rsl-hint">Labs, CTFs, home lab, bug bounty, or real-world practice</div>
+        </div>
+        <div class="rsl-item">
+          <div class="rsl-header">
+            <span class="rsl-label">🗣️ Communication</span>
+            <span class="rsl-vals"><span class="rsl-cur" id="rv-comms">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-comms">6</span></span>
+          </div>
+          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-comms" data-dim="comms" oninput="updateRadar()">
+          <div class="rsl-hint">Writing reports, presenting findings, cross-team collaboration</div>
+        </div>
+        <div class="rsl-item">
+          <div class="rsl-header">
+            <span class="rsl-label">⏱️ Experience</span>
+            <span class="rsl-vals"><span class="rsl-cur" id="rv-exp">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-exp">3</span></span>
+          </div>
+          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-exp" data-dim="exp" oninput="updateRadar()">
+          <div class="rsl-hint">Years of relevant security or adjacent IT experience</div>
+        </div>
+      </div>
+
+      <div class="radar-gaps-wrap">
+        <div class="radar-gaps-label">Gap Analysis</div>
+        <div class="radar-gaps" id="radar-gaps"><!-- populated by JS --></div>
+      </div>
+
+      <div class="radar-actions">
+        <button class="radar-save-btn" onclick="saveRadar()">💾 Save Progress</button>
+        <span class="radar-saved-msg" id="radar-saved-msg"></span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════ MOCK INTERVIEW ═══════════════════════════ -->
+<div class="page" id="page-mock">
+<div class="mock-wrap">
+
+  <!-- ── SCREEN 1: Setup ── -->
+  <div id="mock-setup" class="mock-screen mock-screen-setup">
+    <div class="ey a1">AI Mock Interview</div>
+    <div class="st a2">Practice Under Pressure</div>
+    <p class="mock-desc a3">Get realistic interview questions from Claude-powered interviewers. Each session includes 5 tailored questions — with follow-ups if you need to go deeper.</p>
+
+    <!-- Mode selection -->
+    <div class="mock-mode-grid">
+      <div class="mock-mode-card" id="mmc-text" onclick="selectMockMode('text')">
+        <div class="mmc-badge">Relaxed</div>
+        <div class="mmc-icon">⌨️</div>
+        <div class="mmc-name">Text Mode</div>
+        <div class="mmc-desc">Type your answers at your own pace</div>
+        <ul class="mmc-features">
+          <li>3-minute per question</li>
+          <li>Edit freely before submitting</li>
+          <li>Technical accuracy focus</li>
+        </ul>
+      </div>
+      <div class="mock-mode-card mock-mode-rec" id="mmc-voice" onclick="selectMockMode('voice')">
+        <div class="mmc-badge mmc-badge-rec">⭐ Recommended</div>
+        <div class="mmc-icon">🎤</div>
+        <div class="mmc-name">Voice Mode</div>
+        <div class="mmc-desc">Speak your answers like a real interview</div>
+        <ul class="mmc-features">
+          <li>Interviewer reads questions aloud</li>
+          <li>Filler word detection (um, uh, like…)</li>
+          <li>Communication &amp; confidence scores</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Config row -->
+    <div class="mock-config">
+      <div class="mock-config-row">
+        <div class="mock-config-field">
+          <label class="mcf-label">Target Role</label>
+          <select id="mock-role"><option value="">Loading...</option></select>
+        </div>
+        <div class="mock-config-field">
+          <label class="mcf-label">Interviewer Persona</label>
+          <select id="mock-persona">
+            <option value="technical">⚙️ Technical Lead</option>
+            <option value="ciso">🛡️ CISO</option>
+            <option value="hr">👤 HR Screener</option>
+          </select>
+        </div>
+        <div class="mock-config-field">
+          <label class="mcf-label">Difficulty</label>
+          <select id="mock-difficulty">
+            <option value="entry">Entry Level (0–2 yrs)</option>
+            <option value="mid" selected>Mid Level (3–5 yrs)</option>
+            <option value="senior">Senior Level (6+ yrs)</option>
+          </select>
+        </div>
+      </div>
+      <div class="mock-free-note" id="mock-free-note"></div>
+      <button class="mock-start-btn" id="mock-start-btn" onclick="startMockInterview()">Start Interview →</button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 2: Interview ── -->
+  <div id="mock-interview" class="mock-screen" style="display:none">
+
+    <!-- Header bar -->
+    <div class="mock-int-header">
+      <div class="mih-left">
+        <div class="mih-persona" id="mih-persona"><span class="mih-persona-icon">⚙️</span><span class="mih-persona-name">Technical Lead</span></div>
+        <div class="mih-progress">Question <span id="mih-q-num">1</span> of 5</div>
+      </div>
+      <div class="mih-right">
+        <div class="mih-timer" id="mih-timer">3:00</div>
+        <div class="mih-mode-badge" id="mih-mode-badge">⌨️ Text</div>
+      </div>
+    </div>
+
+    <!-- Question -->
+    <div class="mock-question-wrap">
+      <div class="mqw-eyebrow" id="mqw-eyebrow">Question 1 of 5</div>
+      <div class="mqw-question" id="mqw-question">Loading question...</div>
+      <div class="mqw-followup-banner" id="mqw-followup-banner" style="display:none">
+        <span class="mqfb-label">↩ Follow-up</span>
+        <span id="mqfb-text">The interviewer wants more detail on your previous answer.</span>
+      </div>
+    </div>
+
+    <!-- Text answer area -->
+    <div id="mock-text-area" class="mock-answer-area">
+      <textarea id="mock-answer-text" class="mat-textarea" placeholder="Type your answer here..." onpaste="return false" onkeyup="mockTextKeyup()"></textarea>
+      <div class="mat-meta">
+        <span class="mat-hint">⚠ Paste disabled — type to practice recall</span>
+        <span class="mat-char-count"><span id="mat-char-count">0</span> words</span>
+      </div>
+    </div>
+
+    <!-- Voice answer area -->
+    <div id="mock-voice-area" class="mock-answer-area" style="display:none">
+      <div class="mva-transcript" id="mva-transcript">Tap the mic to start speaking...</div>
+      <div class="mva-controls">
+        <button class="mva-mic-btn" id="mva-mic-btn" onclick="toggleMockMic()">
+          <span class="mva-mic-icon">🎤</span>
+          <span id="mva-mic-label">Start Speaking</span>
+        </button>
+        <div class="mva-filler-count" id="mva-filler-count" style="display:none">
+          <span id="mva-filler-num">0</span> filler words detected
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit row -->
+    <div class="mock-int-actions">
+      <div class="mock-eval-status" id="mock-eval-status"></div>
+      <button class="mock-submit-btn" id="mock-submit-btn" onclick="submitMockAnswer(false)">Submit Answer →</button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN 3: Evaluating / Loading ── -->
+  <div id="mock-evaluating" class="mock-screen mock-loading" style="display:none">
+    <div class="ml-spinner"></div>
+    <div class="ml-text" id="ml-text">Evaluating your answer...</div>
+    <div class="ml-sub">Claude is reviewing your response</div>
+  </div>
+
+  <!-- ── SCREEN 4: Scorecard ── -->
+  <div id="mock-scorecard" class="mock-screen" style="display:none">
+
+    <!-- Hire verdict -->
+    <div class="msc-header">
+      <div class="msc-hire" id="msc-hire"></div>
+      <div class="msc-verdict" id="msc-verdict">Overall Score: 0/10</div>
+      <div class="msc-summary" id="msc-summary"></div>
+    </div>
+
+    <!-- Dimension scores -->
+    <div class="msc-scores" id="msc-scores"></div>
+
+    <!-- Improvement trend (shown if 3+ sessions) -->
+    <div class="msc-trend" id="msc-trend" style="display:none">
+      <div class="msc-trend-label">Your Progress Across Sessions</div>
+      <div class="msc-trend-chart" id="msc-trend-chart"></div>
+    </div>
+
+    <!-- Insights + per-Q breakdown -->
+    <div class="msc-breakdown" id="msc-breakdown"></div>
+
+    <!-- Actions -->
+    <div class="msc-actions">
+      <button class="mock-restart-btn" onclick="resetMockInterview()">↺ Start New Interview</button>
+      <button class="mock-history-btn" onclick="showPage('profile')">View in Profile →</button>
+    </div>
+
+  </div>
+
+</div>
+</div>
+
 <!-- ═══════════════════════════ PRICING ═══════════════════════════ -->
 <div class="page" id="page-pricing">
 <div class="pricing-wrap">
@@ -3295,7 +3623,7 @@
           <li><span class="pg-diamond">&#9670;</span><span>Cert ROI Calculator<span class="pg-pro-sub">Salary lift per certification</span></span></li>
           <li><span class="pg-diamond">&#9670;</span><span>8 ATS-Optimized Templates<span class="pg-pro-sub">SOC, Pen Tester, Cloud, GRC&hellip;</span></span></li>
           <li><span class="pg-diamond">&#9670;</span><span>Skills Gap Visualizer<span class="pg-pro-sub">Current &rarr; target role gap map</span></span></li>
-          <li><span class="pg-diamond">&#9670;</span><span>AI Mock Interview<span class="pg-pro-sub">Text Q&amp;A + feedback, 10/mo</span></span></li>
+          <li><span class="pg-diamond">&#9670;</span><span>AI Mock Interview<span class="pg-pro-sub">Unlimited sessions + voice mode</span></span></li>
           <li><span class="pg-diamond">&#9670;</span><span>Salary Negotiation Scripts<span class="pg-pro-sub">Role-specific playbooks</span></span></li>
           <li><span class="pg-diamond">&#9670;</span><span>Mentor Marketplace<span class="pg-pro-sub">Early access &mdash; coming soon</span></span></li>
           <li><span class="pg-diamond">&#9670;</span><span>Priority Support<span class="pg-pro-sub">Direct response from the team</span></span></li>
@@ -3656,7 +3984,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=32"></script>
+<script src="js/app.js?v=34"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->
