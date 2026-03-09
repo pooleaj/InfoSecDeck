@@ -1763,12 +1763,6 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
   border: 1px solid rgba(0,212,200,.22);
 }
 
-.hsc-lottie-wrap {
-  display: flex;
-  justify-content: center;
-  margin: -6px 0 6px;
-  filter: drop-shadow(0 0 18px rgba(0,212,200,.25));
-}
 
 .hsc-headline {
   font-family: var(--fd);
@@ -3606,12 +3600,9 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 
 /* ─── WELCOME CARD: ANIMATED ILLUSTRATION ────────────────── */
 .hmv-role-anim{
-  display:none;text-align:center;margin:10px 0 6px;
-  min-height:72px;
-}
-.hmv-anim-svg{
-  width:120px;height:72px;
-  filter:drop-shadow(0 4px 16px rgba(0,0,0,.4));
+  display:none;text-align:center;margin:4px 0 2px;
+  min-height:120px;
+  filter:drop-shadow(0 6px 20px rgba(0,0,0,.45));
 }
 
 /* ─── WELCOME CARD: CERTS ROW ───────────────────────────── */
