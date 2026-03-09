@@ -5627,3 +5627,305 @@ window._onPlanLoaded = function(plan) {
 };
 
 _updateUpgradeNavBtn();
+
+// ═══════════════════════════════════════════════════════════════
+// SPRINT 3 — ATS SCANNER, SAVED ANALYSES, USAGE LIMITS, ANALYTICS
+// ═══════════════════════════════════════════════════════════════
+
+// ─── ATS SCANNER ─────────────────────────────────────────────
+var _atsBase64 = null;
+var _atsMime   = null;
+var _atsStepTimers = [];
+
+function atsHandleFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'pdf' && ext !== 'docx') {
+    alert('Only PDF and DOCX files are supported.');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    alert('File is too large. Please upload a file under 5 MB.');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var b64 = e.target.result.split(',')[1];
+    _atsBase64 = b64;
+    _atsMime = file.type || (ext === 'docx' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf');
+    document.getElementById('ats-dz-primary').textContent = file.name;
+    var fi = document.getElementById('ats-file-info');
+    document.getElementById('ats-file-name').textContent = file.name;
+    if (fi) fi.style.display = 'flex';
+    var dz = document.getElementById('ats-dropzone');
+    if (dz) dz.classList.add('ats-dz-loaded');
+  };
+  reader.readAsDataURL(file);
+}
+
+function atsRemoveFile() {
+  _atsBase64 = null;
+  _atsMime = null;
+  var fi = document.getElementById('ats-file-info');
+  if (fi) fi.style.display = 'none';
+  var dz = document.getElementById('ats-dropzone');
+  if (dz) { dz.classList.remove('ats-dz-loaded'); }
+  var p = document.getElementById('ats-dz-primary');
+  if (p) p.textContent = 'Drop resume here or click to upload';
+  var inp = document.getElementById('ats-file');
+  if (inp) inp.value = '';
+}
+
+function atsDragOver(e) { e.preventDefault(); var dz=document.getElementById('ats-dropzone'); if(dz)dz.classList.add('ats-dz-drag'); }
+function atsDragLeave(e) { var dz=document.getElementById('ats-dropzone'); if(dz)dz.classList.remove('ats-dz-drag'); }
+function atsDrop(e) {
+  e.preventDefault();
+  var dz=document.getElementById('ats-dropzone'); if(dz)dz.classList.remove('ats-dz-drag');
+  var file = e.dataTransfer.files[0];
+  if (!file) return;
+  var fakeInput = { files: [file] };
+  atsHandleFile(fakeInput);
+}
+
+function atsUpdateCharCount() {
+  var ta = document.getElementById('ats-jd');
+  var cc = document.getElementById('ats-char-count');
+  if (ta && cc) cc.textContent = ta.value.length.toLocaleString() + ' characters';
+}
+
+async function atsSubmit() {
+  if (!_isPro()) { _showUpgradePrompt('ATS Job Match Scanner'); return; }
+
+  var jd = (document.getElementById('ats-jd') || {}).value || '';
+  if (jd.trim().length < 50) {
+    var errEl = document.getElementById('ats-err');
+    if (errEl) { errEl.textContent = 'Please paste a job description (at least 50 characters).'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  var errEl2 = document.getElementById('ats-err');
+  if (errEl2) errEl2.style.display = 'none';
+
+  var btn = document.getElementById('ats-submit-btn');
+  if (btn) btn.disabled = true;
+
+  document.getElementById('ats-loading').style.display = 'flex';
+  atsAnimSteps();
+
+  var sessionRes = await _sb.auth.getSession();
+  var token = (sessionRes.data && sessionRes.data.session) ? sessionRes.data.session.access_token : SUPA_KEY;
+
+  try {
+    var body = {
+      jobDescription: jd,
+      jobTitle: (document.getElementById('ats-job-title') || {}).value || '',
+    };
+    if (_atsBase64) { body.resumeBase64 = _atsBase64; body.mimeType = _atsMime; }
+
+    var resp = await fetch(EDGE_BASE + '/ats-scanner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(body),
+    });
+
+    atsClearSteps();
+    document.getElementById('ats-loading').style.display = 'none';
+
+    if (!resp.ok) {
+      var eb = await resp.json();
+      throw new Error(eb.error || 'API error ' + resp.status);
+    }
+
+    var result = await resp.json();
+    atsRenderResults(result);
+
+  } catch (err) {
+    atsClearSteps();
+    document.getElementById('ats-loading').style.display = 'none';
+    if (btn) btn.disabled = false;
+    var errEl3 = document.getElementById('ats-err');
+    if (errEl3) { errEl3.textContent = 'Scan failed: ' + (err.message || 'Please try again.'); errEl3.style.display = 'block'; }
+  }
+}
+
+function atsAnimSteps() {
+  var steps = ['ats-s1','ats-s2','ats-s3','ats-s4'];
+  var delays = [0, 3000, 6500, 10000];
+  steps.forEach(function(id, i) {
+    _atsStepTimers.push(setTimeout(function() {
+      steps.forEach(function(s) { var e=document.getElementById(s); if(e)e.classList.remove('active'); });
+      if (i > 0) { var prev=document.getElementById(steps[i-1]); if(prev)prev.classList.add('done'); }
+      var cur = document.getElementById(id); if(cur)cur.classList.add('active');
+    }, delays[i]));
+  });
+}
+function atsClearSteps() { _atsStepTimers.forEach(clearTimeout); _atsStepTimers = []; }
+
+function atsRenderResults(r) {
+  document.getElementById('ats-form-section').style.display = 'none';
+  var results = document.getElementById('ats-results');
+  results.style.display = 'block';
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  var score = Math.max(0, Math.min(100, r.match_score || 0));
+  var circ = 327;
+  var offset = circ - (score / 100) * circ;
+  var col = score >= 70 ? 'var(--gn)' : score >= 55 ? 'var(--lb)' : score >= 40 ? 'var(--am)' : 'var(--or)';
+  var fg = document.getElementById('ats-ring-fg');
+  if (fg) { fg.style.stroke = col; fg.style.strokeDashoffset = offset; }
+
+  var numEl = document.getElementById('ats-ring-num');
+  if (numEl) {
+    numEl.textContent = '0';
+    var target = score; var cur2 = 0; var step2 = Math.ceil(target / 40);
+    var iv = setInterval(function() { cur2 = Math.min(cur2 + step2, target); numEl.textContent = cur2; if (cur2 >= target) clearInterval(iv); }, 30);
+  }
+
+  var mlEl = document.getElementById('ats-match-label'); if (mlEl) mlEl.textContent = r.match_label || '';
+  var vEl  = document.getElementById('ats-verdict');     if (vEl)  vEl.textContent  = r.verdict || '';
+
+  var arEl = document.getElementById('ats-apply-rec');
+  var arClass = { 'Apply Now':'ats-apply-green', 'Apply With Strong Cover Letter':'ats-apply-teal', 'Upskill First (3-6 months)':'ats-apply-amber', 'Not Ready Yet':'ats-apply-red' };
+  if (arEl) { arEl.textContent = r.apply_recommendation || ''; arEl.className = 'ats-apply-rec ' + (arClass[r.apply_recommendation] || 'ats-apply-teal'); }
+
+  var mkEl = document.getElementById('ats-matched-kw');
+  if (mkEl) mkEl.innerHTML = (r.matched_keywords || []).map(function(kw) { return '<span class="ats-kw-tag ats-kw-tag-match">' + kw + '</span>'; }).join('');
+
+  var misEl = document.getElementById('ats-missing-kw');
+  if (misEl) misEl.innerHTML = (r.missing_keywords || []).map(function(kw) { return '<span class="ats-kw-tag ats-kw-tag-miss">' + kw + '</span>'; }).join('');
+
+  var strEl = document.getElementById('ats-strengths');
+  if (strEl) strEl.innerHTML = (r.strengths || []).map(function(s) {
+    return '<div class="ats-strength-item"><span class="ats-str-dot">&#9670;</span><div><div class="ats-str-area">' + s.area + '</div><div class="ats-str-note">' + s.note + '</div></div></div>';
+  }).join('');
+
+  var gapEl = document.getElementById('ats-skill-gaps');
+  if (gapEl) gapEl.innerHTML = (r.skill_gaps || []).map(function(g) {
+    var pClass = { critical:'ats-gap-critical', important:'ats-gap-important', 'nice-to-have':'ats-gap-nice' }[g.importance] || '';
+    return '<div class="ats-gap-item"><span class="ats-gap-badge ' + pClass + '">' + (g.importance || '') + '</span><div><div class="ats-gap-skill">' + g.skill + '</div><div class="ats-gap-note">' + g.note + '</div></div></div>';
+  }).join('');
+
+  var recEl = document.getElementById('ats-recommendations');
+  if (recEl) recEl.innerHTML = (r.recommendations || []).map(function(rec) {
+    var pClass = { high:'ats-rec-high', med:'ats-rec-med', low:'ats-rec-low' }[rec.priority] || '';
+    return '<div class="ats-rec-item"><span class="ats-rec-dot ' + pClass + '"></span><div><div class="ats-rec-action">' + rec.action + '</div><div class="ats-rec-detail">' + (rec.detail || '') + '</div></div></div>';
+  }).join('');
+}
+
+function atsReset() {
+  document.getElementById('ats-form-section').style.display = '';
+  document.getElementById('ats-results').style.display = 'none';
+  var btn = document.getElementById('ats-submit-btn');
+  if (btn) btn.disabled = false;
+  var jd = document.getElementById('ats-jd');
+  if (jd) jd.value = '';
+  atsRemoveFile();
+  var errEl = document.getElementById('ats-err');
+  if (errEl) errEl.style.display = 'none';
+  atsUpdateCharCount();
+}
+
+_pageInits.ats = function() {
+  var gateEl = document.getElementById('ats-pro-gate');
+  if (!_isPro()) {
+    var formSec = document.getElementById('ats-form-section');
+    if (formSec) formSec.style.display = 'none';
+    if (gateEl) {
+      gateEl.style.display = 'block';
+      gateEl.innerHTML = '<div class="pro-page-gate" style="position:relative;margin-bottom:0;">'
+        + '<div class="ppg-lock">&#128274;</div>'
+        + '<div class="ppg-body"><div class="ppg-tag">Pro Feature</div>'
+        + '<div class="ppg-title">ATS Job Match Scanner</div>'
+        + '<div class="ppg-desc">Match any job description to your resume. Get a keyword match score, identify gaps, and receive specific actions to boost your chances before applying.</div></div>'
+        + '<div class="ppg-actions"><button class="ppg-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button></div></div>';
+    }
+  } else {
+    var formSec2 = document.getElementById('ats-form-section');
+    if (formSec2) formSec2.style.display = '';
+    if (gateEl) gateEl.style.display = 'none';
+    atsReset();
+    var ta = document.getElementById('ats-jd');
+    if (ta) ta.oninput = atsUpdateCharCount;
+  }
+};
+
+// ─── SAVED ANALYSES (PROFILE) ──────────────────────────────────
+function loadSavedAnalyses() {
+  if (typeof _currentUser === 'undefined' || !_currentUser) return;
+  if (typeof _sb === 'undefined') return;
+
+  var bodyEl = document.getElementById('saved-analyses-body');
+  if (!bodyEl) return;
+
+  bodyEl.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Loading&hellip;</p>';
+
+  _sb.from('saved_analyses')
+    .select('id, type, title, score, meta, created_at')
+    .eq('user_id', _currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(10)
+    .then(function(res) {
+      if (res.error || !res.data || res.data.length === 0) {
+        bodyEl.innerHTML = '<p style="font-size:.78rem;color:var(--mt);line-height:1.6;">No saved analyses yet. Use <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'roaster\')">Resume Roaster</strong>, <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'pivot\')">Career Pivot Advisor</strong>, or <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'ats\')">ATS Scanner</strong> to generate your first analysis.</p>';
+        return;
+      }
+
+      var typeInfo = {
+        roast: { icon: '🔥', label: 'Resume Roast', page: 'roaster', scoreLabel: 'Score' },
+        pivot: { icon: '🔀', label: 'Career Pivot',  page: 'pivot',   scoreLabel: 'Readiness' },
+        ats:   { icon: '📊', label: 'ATS Scan',      page: 'ats',     scoreLabel: 'Match' },
+      };
+
+      bodyEl.innerHTML = '<div class="sa-list">' + res.data.map(function(item) {
+        var info = typeInfo[item.type] || { icon: '📄', label: item.type, page: 'home', scoreLabel: 'Score' };
+        var scoreHtml = item.score != null ? '<span class="sa-score">' + item.score + '%</span>' : '';
+        var dateStr = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return '<div class="sa-item" onclick="showPage(\'' + info.page + '\')">'
+          + '<span class="sa-type-icon">' + info.icon + '</span>'
+          + '<div class="sa-body"><div class="sa-title">' + (item.title || info.label) + '</div><div class="sa-meta">' + info.label + ' &middot; ' + dateStr + '</div></div>'
+          + scoreHtml + '</div>';
+      }).join('') + '</div>';
+    });
+}
+
+// Wire loadSavedAnalyses into profile page init
+_pageInits.profile = (function(_orig) {
+  return function() {
+    if (_orig) _orig();
+    loadSavedAnalyses();
+  };
+})(_pageInits.profile);
+
+// ─── OTP USAGE COUNTER ────────────────────────────────────────
+function _renderOtpUsage(product, limit) {
+  if (_isPro()) return;
+  var p = {};
+  try { p = JSON.parse(localStorage.getItem('isd_profile') || '{}'); } catch(e) {}
+  var purchases = p.purchases || {};
+  if (!purchases['otp_' + product]) return;
+  var used = purchases['otp_' + product + '_used'] || 0;
+  var remaining = limit - used;
+  var elId = product + '-otp-usage';
+  var existing = document.getElementById(elId);
+  if (!existing) {
+    var container = document.getElementById('page-' + (product === 'roaster' ? 'roaster' : 'pivot'));
+    if (!container) return;
+    var usageEl = document.createElement('div');
+    usageEl.id = elId;
+    usageEl.className = 'otp-usage-banner';
+    container.insertBefore(usageEl, container.firstChild);
+    existing = usageEl;
+  }
+  var color = remaining <= 1 ? 'var(--rd)' : remaining <= 2 ? 'var(--am)' : 'var(--lb)';
+  existing.innerHTML = '<span style="color:' + color + ';font-weight:700;">' + remaining + ' of ' + limit + ' uses remaining</span>'
+    + (remaining === 0 ? ' &mdash; <a onclick="showPage(\'pricing\')" style="color:var(--lb);cursor:pointer;">Upgrade to Pro for unlimited</a>' : '');
+}
+
+_pageInits.roaster = (function(_orig) {
+  return function() { if (_orig) _orig(); _renderOtpUsage('roaster', 5); };
+})(_pageInits.roaster);
+
+_pageInits.pivot = (function(_orig) {
+  return function() { if (_orig) _orig(); _renderOtpUsage('pivot', 3); };
+})(_pageInits.pivot);

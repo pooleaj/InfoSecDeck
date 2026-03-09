@@ -97,6 +97,13 @@ Respond with ONLY valid JSON, no markdown:
       else throw new Error('Failed to parse response');
     }
 
+    // Fire-and-forget analytics
+    supabaseAdmin.from('feature_events').insert({
+      user_id: user.id,
+      event: 'interview_ai_used',
+      meta: { jobTitle },
+    }).catch(e => console.error('[interview-ai] analytics error:', e));
+
     console.log(`[interview-ai] userId=${user.id} role=${jobTitle}`);
 
     return new Response(JSON.stringify(result), {

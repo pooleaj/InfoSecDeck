@@ -2,6 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno
 import JSZip from 'https://esm.sh/jszip@3?target=deno';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
+const OTP_LIMIT = 3; // OTP users get 3 pivot analyses
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -49,16 +50,28 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+
     const { data: profile } = await supabaseAdmin
       .from('profiles').select('plan, purchases').eq('id', user.id).maybeSingle();
 
     const isPro = profile?.plan === 'pro';
-    const hasOtp = !!(profile?.purchases as Record<string, boolean>)?.otp_pivot;
+    const purchases = (profile?.purchases || {}) as Record<string, unknown>;
+    const hasOtp = !!purchases.otp_pivot;
 
     if (!isPro && !hasOtp) {
       return new Response(JSON.stringify({ error: 'Pro or Career Pivot access required' }), {
         status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Usage limit check for OTP users
+    if (!isPro && hasOtp) {
+      const used = (purchases.otp_pivot_used as number) || 0;
+      if (used >= OTP_LIMIT) {
+        return new Response(JSON.stringify({ error: `Usage limit reached (${OTP_LIMIT} pivot analyses included with your purchase). Upgrade to Pro for unlimited access.` }), {
+          status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     const { fromTitle, toTitle, expLabel, resumeBase64, mimeType } = await req.json();
@@ -145,9 +158,38 @@ Rules: 3-6 transferable skills, 3-5 gaps, 2-4 certifications in priority order, 
       else throw new Error('Failed to parse response: ' + raw.slice(0, 200));
     }
 
+    const used = (purchases.otp_pivot_used as number) || 0;
+
+    // Fire-and-forget: save result + increment usage + log analytics
+    Promise.all([
+      supabaseAdmin.from('saved_analyses').insert({
+        user_id: user.id,
+        type: 'pivot',
+        title: `${fromTitle} → ${toTitle}`,
+        score: result.readiness,
+        result,
+        meta: { fromTitle, toTitle, expLabel, hasResume: !!resumeBase64 },
+      }),
+      ...((!isPro && hasOtp) ? [
+        supabaseAdmin.from('profiles').update({
+          purchases: { ...purchases, otp_pivot_used: used + 1 },
+        }).eq('id', user.id),
+      ] : []),
+      supabaseAdmin.from('feature_events').insert({
+        user_id: user.id,
+        event: 'pivot_completed',
+        meta: { fromTitle, toTitle, readiness: result.readiness, is_otp: !isPro && hasOtp, uses_remaining: !isPro && hasOtp ? OTP_LIMIT - used - 1 : null },
+      }),
+    ]).catch(e => console.error('[career-pivot] post-success error:', e));
+
     console.log(`[career-pivot] userId=${user.id} from=${fromTitle} to=${toTitle} readiness=${result.readiness}`);
 
-    return new Response(JSON.stringify(result), {
+    const responsePayload = {
+      ...result,
+      ...(!isPro && hasOtp ? { _usesRemaining: OTP_LIMIT - used - 1 } : {}),
+    };
+
+    return new Response(JSON.stringify(responsePayload), {
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
 

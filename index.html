@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>InfoSecDeck — Cybersecurity Career Guide</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=23">
+<link rel="stylesheet" href="css/styles.css?v=32">
 </head>
 <body>
 <nav>
@@ -103,6 +103,10 @@
         <div class="ndi" onclick="showPage('resume');closeAllDrops()">
           <span class="ndi-icon">📄</span>
           <div class="ndi-text"><span class="ndi-label">Resume Templates</span><span class="ndi-desc">Role-specific templates &amp; tips</span></div>
+        </div>
+        <div class="ndi" onclick="showPage('ats');closeAllDrops()">
+          <span class="ndi-icon">📊</span>
+          <div class="ndi-text"><span class="ndi-label">ATS Job Match Scanner <span class="ndi-pro-badge">Pro</span></span><span class="ndi-desc">Match your resume to any job description</span></div>
         </div>
       </div>
     </div>
@@ -3015,6 +3019,14 @@
     </div>
   </div>
 
+  <!-- Saved AI Analyses -->
+  <div class="profile-section" id="saved-analyses-section">
+    <div class="profile-section-hd">Saved AI Analyses</div>
+    <div id="saved-analyses-body">
+      <p style="font-size:.78rem;color:var(--mt);line-height:1.6;">Your Resume Roaster, Career Pivot, and ATS Scan results are automatically saved here.</p>
+    </div>
+  </div>
+
   <!-- Career Quiz Results -->
   <div class="profile-section" id="pqs-section">
     <div class="profile-section-hd">Career Quiz Results
@@ -3037,6 +3049,151 @@
   </div>
 
   </div><!-- /profile-auth-content -->
+
+</div>
+</div>
+
+<!-- ═══════════════════════════ ATS SCANNER ═══════════════════════════ -->
+<div class="page" id="page-ats">
+<div style="padding:52px 28px 100px;max-width:900px;margin:0 auto;">
+  <div class="ey a1">Pro Feature</div>
+  <div class="st a2">ATS Job Match Scanner</div>
+  <p class="page-sub a3">Paste a job description and upload your resume. Get a match score, keyword gaps, and specific actions to boost your chances before applying.</p>
+
+  <!-- Pro Gate -->
+  <div id="ats-pro-gate" style="display:none;margin-bottom:32px;"></div>
+
+  <!-- Input Section -->
+  <div id="ats-form-section">
+    <div class="ats-grid">
+      <!-- Left: Job Description -->
+      <div class="ats-panel">
+        <div class="ats-panel-hd">
+          <span class="ats-panel-icon">📋</span>
+          <div>
+            <div class="ats-panel-title">Job Description</div>
+            <div class="ats-panel-sub">Paste the full job posting</div>
+          </div>
+        </div>
+        <div class="ats-field">
+          <input type="text" id="ats-job-title" class="ats-input" placeholder="Job title (optional, e.g. SOC Analyst II)" maxlength="80">
+        </div>
+        <textarea id="ats-jd" class="ats-textarea" placeholder="Paste the full job description here — requirements, responsibilities, qualifications..." rows="14"></textarea>
+        <div class="ats-char-count" id="ats-char-count">0 characters</div>
+      </div>
+
+      <!-- Right: Resume -->
+      <div class="ats-panel">
+        <div class="ats-panel-hd">
+          <span class="ats-panel-icon">📄</span>
+          <div>
+            <div class="ats-panel-title">Your Resume <span class="ats-optional">optional</span></div>
+            <div class="ats-panel-sub">Upload for personalized match scoring</div>
+          </div>
+        </div>
+        <div class="ats-dropzone" id="ats-dropzone" onclick="document.getElementById('ats-file').click()" ondragover="atsDragOver(event)" ondragleave="atsDragLeave(event)" ondrop="atsDrop(event)">
+          <input type="file" id="ats-file" accept=".pdf,.docx" style="display:none" onchange="atsHandleFile(this)">
+          <div class="ats-dz-icon">⬆</div>
+          <div class="ats-dz-primary" id="ats-dz-primary">Drop resume here or click to upload</div>
+          <div class="ats-dz-sub">PDF or DOCX — max 5 MB</div>
+          <div class="ats-file-badges">
+            <span class="ats-type-badge">PDF</span>
+            <span class="ats-type-badge">DOCX</span>
+          </div>
+        </div>
+        <div id="ats-file-info" style="display:none" class="ats-file-info">
+          <span class="ats-file-icon">📎</span>
+          <span id="ats-file-name">resume.pdf</span>
+          <button class="ats-file-remove" onclick="atsRemoveFile()">✕</button>
+        </div>
+        <div class="ats-no-resume-note">
+          No resume? We'll analyze the job description and tell you what skills to highlight.
+        </div>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div style="text-align:center;margin-top:28px;">
+      <div id="ats-err" class="ats-err" style="display:none"></div>
+      <button class="ats-submit-btn" id="ats-submit-btn" onclick="atsSubmit()">
+        <span>&#9670; Scan Job Match</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="ats-loading" class="ats-loading" style="display:none">
+    <div class="ats-loading-ring"></div>
+    <div class="ats-loading-steps">
+      <div class="ats-step" id="ats-s1">Parsing job description&hellip;</div>
+      <div class="ats-step" id="ats-s2">Extracting ATS keywords&hellip;</div>
+      <div class="ats-step" id="ats-s3">Comparing against your resume&hellip;</div>
+      <div class="ats-step" id="ats-s4">Generating recommendations&hellip;</div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="ats-results" style="display:none">
+
+    <!-- Score Header -->
+    <div class="ats-score-card">
+      <div class="ats-ring-wrap">
+        <svg class="ats-ring-svg" viewBox="0 0 120 120">
+          <circle class="ats-ring-bg" cx="60" cy="60" r="52" fill="none" stroke-width="8"/>
+          <circle class="ats-ring-fg" id="ats-ring-fg" cx="60" cy="60" r="52" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="327" stroke-dashoffset="327" transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="ats-ring-center">
+          <div class="ats-ring-num" id="ats-ring-num">0</div>
+          <div class="ats-ring-pct">%</div>
+          <div class="ats-ring-lbl">match</div>
+        </div>
+      </div>
+      <div class="ats-score-info">
+        <div class="ats-match-label" id="ats-match-label"></div>
+        <div class="ats-verdict" id="ats-verdict"></div>
+        <div class="ats-apply-rec" id="ats-apply-rec"></div>
+      </div>
+    </div>
+
+    <!-- Keywords Grid -->
+    <div class="ats-kw-section">
+      <div class="ats-kw-col">
+        <div class="ats-kw-hd ats-kw-match">
+          <span>&#10003;</span> Matched Keywords
+        </div>
+        <div class="ats-kw-list" id="ats-matched-kw"></div>
+      </div>
+      <div class="ats-kw-col">
+        <div class="ats-kw-hd ats-kw-miss">
+          <span>&#9679;</span> Missing Keywords
+        </div>
+        <div class="ats-kw-list" id="ats-missing-kw"></div>
+      </div>
+    </div>
+
+    <!-- Strengths + Gaps two-col -->
+    <div class="ats-two-col">
+      <div class="ats-card">
+        <div class="ats-card-hd">Strengths</div>
+        <div id="ats-strengths"></div>
+      </div>
+      <div class="ats-card">
+        <div class="ats-card-hd">Skill Gaps</div>
+        <div id="ats-skill-gaps"></div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="ats-card" style="margin-top:20px;">
+      <div class="ats-card-hd">Action Items</div>
+      <div id="ats-recommendations"></div>
+    </div>
+
+    <!-- Retry -->
+    <div style="text-align:center;margin-top:28px;">
+      <button class="ats-retry-btn" onclick="atsReset()">&#8635; Scan Another Job</button>
+    </div>
+  </div>
 
 </div>
 </div>
@@ -3475,7 +3632,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=31"></script>
+<script src="js/app.js?v=32"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->
