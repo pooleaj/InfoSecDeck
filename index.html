@@ -1647,6 +1647,7 @@
     <p class="roaster-sub">Upload your cybersecurity resume, pick your target role, and get a brutally honest AI score with actionable feedback — powered by Claude.</p>
   </div>
 
+  <div id="roaster-usage-meter" style="display:none;margin-bottom:16px;"></div>
   <div id="roaster-form-section">
     <div class="upload-card a2">
       <div class="sec-label">Step 1 — Upload Your Resume</div>
@@ -2786,6 +2787,7 @@
   <div class="jobs-col-label a2">Will I Get This Job?</div>
   <p class="jobs-col-desc a3">Paste a job description for an honest AI fit assessment — before you spend time applying.</p>
   <!-- Will I Get This Job? Analyzer -->
+  <div id="jfa-usage-meter" style="display:none;margin-bottom:12px;"></div>
   <div class="jfa-tool a3" id="jfa-tool">
     <div class="jfa-header">
       <div class="jfa-icon">🎯</div>
@@ -2793,7 +2795,6 @@
         <div class="jfa-title">Will I Get This Job?</div>
         <div class="jfa-subtitle">Honest AI assessment of your fit — before you spend time applying</div>
       </div>
-      <span class="pro-lock-badge">🔒 Pro</span>
     </div>
     <div class="jfa-form">
       <div class="jfa-field">
@@ -2960,6 +2961,7 @@
   <div class="st a2">Career Domain Pivot Advisor</div>
   <p class="ss a3">Thinking about switching cybersecurity domains? Tell us where you are and where you want to go — we'll map the gap and give you a practical action plan. Add your resume for a personalized assessment.</p>
 
+  <div id="pivot-usage-meter" style="display:none;margin-bottom:16px;"></div>
   <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:16px;padding:32px;margin-bottom:24px;">
     <!-- Q1: Current role -->
     <div class="pivot-field">
@@ -3373,6 +3375,16 @@
     </div>
   </div>
 
+  <!-- Admin Usage Panel (admin-only, hidden for regular users) -->
+  <div class="profile-section admin-only" id="admin-usage-section" style="display:none;">
+    <div class="profile-section-hd" style="display:flex;align-items:center;gap:10px;">
+      <span>🛡️ Admin — AI Feature Usage</span>
+    </div>
+    <div id="admin-usage-panel">
+      <p style="font-size:.78rem;color:var(--mt);">Loading&hellip;</p>
+    </div>
+  </div>
+
   </div><!-- /profile-auth-content -->
 
 </div>
@@ -3385,8 +3397,9 @@
   <div class="st a2">ATS Job Match Scanner</div>
   <p class="page-sub a3">Paste a job description and upload your resume. Get a match score, keyword gaps, and specific actions to boost your chances before applying.</p>
 
-  <!-- Pro Gate -->
+  <!-- Sign-in Gate / Usage Meter -->
   <div id="ats-pro-gate" style="display:none;margin-bottom:32px;"></div>
+  <div id="ats-usage-meter" style="display:none;margin-bottom:16px;"></div>
 
   <!-- Input Section -->
   <div id="ats-form-section">
@@ -4243,7 +4256,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=38"></script>
+<script src="js/app.js?v=39"></script>
 <script src="js/auth.js?v=20"></script>
 
 <!-- AUTH MODAL -->

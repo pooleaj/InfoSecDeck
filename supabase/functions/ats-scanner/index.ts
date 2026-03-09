@@ -2,6 +2,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno
 import JSZip from 'https://esm.sh/jszip@3?target=deno';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
+const FREE_LIMIT = 3;  // Free users: 3 scans/month
+const PRO_LIMIT = 30;  // Pro users: 30 scans/month
+const FEATURE = 'ats';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -45,7 +48,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Pro-only feature
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -54,10 +56,28 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabaseAdmin
       .from('profiles').select('plan').eq('id', user.id).maybeSingle();
 
-    if (profile?.plan !== 'pro') {
-      return new Response(JSON.stringify({ error: 'Pro subscription required' }), {
-        status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
-      });
+    const isPro = profile?.plan === 'pro';
+
+    // Monthly rate limit
+    const monthKey = new Date().toISOString().slice(0, 7);
+    const { data: usageRow } = await supabaseAdmin
+      .from('feature_usage')
+      .select('count')
+      .eq('user_id', user.id)
+      .eq('feature', FEATURE)
+      .eq('month_key', monthKey)
+      .maybeSingle();
+
+    const currentCount = (usageRow?.count as number) || 0;
+    const limit = isPro ? PRO_LIMIT : FREE_LIMIT;
+
+    if (currentCount >= limit) {
+      return new Response(JSON.stringify({
+        error: 'rate_limit_exceeded',
+        limit,
+        used: currentCount,
+        plan: isPro ? 'pro' : 'free',
+      }), { status: 429, headers: { ...CORS, 'Content-Type': 'application/json' } });
     }
 
     const { jobDescription, jobTitle, resumeBase64, mimeType } = await req.json();
@@ -97,6 +117,25 @@ Rules:
 - match_score: 30-60 is typical; 70+ is strong; 85+ is exceptional
 - Be SPECIFIC to the actual job description and resume content provided`;
 
+    // Helper to increment usage and return response
+    async function returnWithUsage(result: Record<string, unknown>, meta: Record<string, unknown>): Promise<Response> {
+      const newCount = currentCount + 1;
+      const title = (jobTitle as string) || 'ATS Scan';
+      Promise.all([
+        supabaseAdmin.from('saved_analyses').insert({ user_id: user.id, type: 'ats', title, score: result.match_score, result, meta }),
+        supabaseAdmin.from('feature_usage').upsert({
+          user_id: user.id, feature: FEATURE, month_key: monthKey,
+          count: newCount, updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,feature,month_key' }),
+        supabaseAdmin.from('feature_events').insert({ user_id: user.id, event: 'ats_scan_completed', meta: { match_score: result.match_score, ...meta } }),
+      ]).catch(e => console.error('[ats-scanner] post-success error:', e));
+
+      return new Response(JSON.stringify({
+        ...result,
+        _usageInfo: { used: newCount, limit, remaining: limit - newCount },
+      }), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+    }
+
     // Build message content
     let resumeSection = '';
     const hasResume = !!resumeBase64;
@@ -116,17 +155,8 @@ Rules:
 
         const claudeResp = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': ANTHROPIC_API_KEY,
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-6',
-            max_tokens: 2048,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: messageContent }],
-          }),
+          headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2048, system: systemPrompt, messages: [{ role: 'user', content: messageContent }] }),
         });
 
         if (!claudeResp.ok) {
@@ -142,14 +172,8 @@ Rules:
         try { result = JSON.parse(cleaned); }
         catch { const m = raw.match(/\{[\s\S]*\}/); if (m) result = JSON.parse(m[0]); else throw new Error('Failed to parse response'); }
 
-        const title = jobTitle || 'ATS Scan';
-        Promise.all([
-          supabaseAdmin.from('saved_analyses').insert({ user_id: user.id, type: 'ats', title, score: result.match_score, result, meta: { jobTitle, hasResume: true, fileType: 'pdf' } }),
-          supabaseAdmin.from('feature_events').insert({ user_id: user.id, event: 'ats_scan_completed', meta: { match_score: result.match_score, has_resume: true } }),
-        ]).catch(e => console.error('[ats-scanner] post-success error:', e));
-
         console.log(`[ats-scanner] userId=${user.id} score=${result.match_score} hasResume=true pdf`);
-        return new Response(JSON.stringify(result), { headers: { ...CORS, 'Content-Type': 'application/json' } });
+        return returnWithUsage(result, { jobTitle, hasResume: true, fileType: 'pdf' });
       }
     }
 
@@ -158,17 +182,8 @@ Rules:
 
     const claudeResp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2048,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userMsg }],
-      }),
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 2048, system: systemPrompt, messages: [{ role: 'user', content: userMsg }] }),
     });
 
     if (!claudeResp.ok) {
@@ -185,23 +200,13 @@ Rules:
     catch { const m = raw.match(/\{[\s\S]*\}/); if (m) result = JSON.parse(m[0]); else throw new Error('Failed to parse response: ' + raw.slice(0, 200)); }
 
     const isDocxFile = hasResume && mimeType && mimeType.includes('wordprocessingml');
-    const title = jobTitle || 'ATS Scan';
-    Promise.all([
-      supabaseAdmin.from('saved_analyses').insert({ user_id: user.id, type: 'ats', title, score: result.match_score, result, meta: { jobTitle, hasResume, fileType: isDocxFile ? 'docx' : 'none' } }),
-      supabaseAdmin.from('feature_events').insert({ user_id: user.id, event: 'ats_scan_completed', meta: { match_score: result.match_score, has_resume: hasResume } }),
-    ]).catch(e => console.error('[ats-scanner] post-success error:', e));
-
     console.log(`[ats-scanner] userId=${user.id} score=${result.match_score} hasResume=${hasResume}`);
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-    });
+    return returnWithUsage(result, { jobTitle, hasResume, fileType: isDocxFile ? 'docx' : 'none' });
 
   } catch (err) {
     console.error('[ats-scanner] error:', err);
     return new Response(JSON.stringify({ error: (err as Error).message || 'Scan failed' }), {
-      status: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
+      status: 500, headers: { ...CORS, 'Content-Type': 'application/json' },
     });
   }
 });

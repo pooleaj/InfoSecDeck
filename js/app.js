@@ -1215,7 +1215,7 @@ function rShowErr(title,msg){
 }
 
 async function rSubmit(){
-  if (!_isPro() && !_hasOtpAccess('roaster')) { _showUpgradePrompt('Resume Roaster'); return; }
+  if (!window._supabaseSession) { if (typeof _showSignInModal === 'function') _showSignInModal(); return; }
   document.getElementById('r-err').classList.remove('show');
   if(!rBase64){rShowErr('No file','Please upload your resume first.');return;}
   var domain=document.getElementById('r-domain').value;
@@ -1238,8 +1238,9 @@ async function rSubmit(){
   var token=(sessionRes.data&&sessionRes.data.session)?sessionRes.data.session.access_token:SUPA_KEY;
   try{
     var resp=await fetch(EDGE_BASE+'/resume-roaster',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({resumeBase64:rBase64,mimeType:rMime,domain:domain,tier:tier,jobTitle:jobTitle,intensity:intensity})});
-    if(!resp.ok){var eb=await resp.json();throw new Error(eb.error||'API error '+resp.status);}
+    if(!resp.ok){var eb=await resp.json();if(resp.status===429){rClearSteps();document.getElementById('r-loading').classList.remove('show');document.getElementById('r-submit-btn').disabled=false;_showRateLimitMsg(eb,'Resume Roaster');return;}throw new Error(eb.error||'API error '+resp.status);}
     var result=await resp.json();
+    _updateUsageMeter('roaster', result._usageInfo);
     rClearSteps();
     document.getElementById('r-loading').classList.remove('show');
     rRenderResults(result,domain,tier);
@@ -1728,7 +1729,7 @@ function handlePivotResume(input) {
 }
 
 async function runPivotAdvisor() {
-  if (!_isPro() && !_hasOtpAccess('pivot')) { _showUpgradePrompt('Career Pivot Advisor'); return; }
+  if (!window._supabaseSession) { if (typeof _showSignInModal === 'function') _showSignInModal(); return; }
   var fromTitle = document.getElementById('pivot-from').value.trim();
   var toTitle = document.getElementById('pivot-to').value.trim();
   
@@ -1762,8 +1763,9 @@ async function runPivotAdvisor() {
         mimeType: pivotResumeBase64 ? (pivotResumeFilename && pivotResumeFilename.endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf') : null
       })
     });
-    if (!response.ok) { var eb = await response.json(); throw new Error(eb.error || 'API error ' + response.status); }
+    if (!response.ok) { var eb = await response.json(); if (response.status === 429) { document.getElementById('pivot-loading').style.display='none'; document.getElementById('pivot-submit').disabled=false; _showRateLimitMsg(eb,'Career Pivot Advisor'); return; } throw new Error(eb.error || 'API error ' + response.status); }
     var result = await response.json();
+    _updateUsageMeter('pivot', result._usageInfo);
     document.getElementById('pivot-loading').style.display = 'none';
     document.getElementById('pivot-submit').disabled = false;
     renderPivotResults(result, fromTitle, toTitle, !!pivotResumeBase64);
@@ -5783,7 +5785,7 @@ function atsUpdateCharCount() {
 }
 
 async function atsSubmit() {
-  if (!_isPro()) { _showUpgradePrompt('ATS Job Match Scanner'); return; }
+  if (!window._supabaseSession) { if (typeof _showSignInModal === 'function') _showSignInModal(); return; }
 
   var jd = (document.getElementById('ats-jd') || {}).value || '';
   if (jd.trim().length < 50) {
@@ -5822,10 +5824,12 @@ async function atsSubmit() {
 
     if (!resp.ok) {
       var eb = await resp.json();
+      if (resp.status === 429) { _showRateLimitMsg(eb, 'ATS Scanner'); if (btn) btn.disabled = false; return; }
       throw new Error(eb.error || 'API error ' + resp.status);
     }
 
     var result = await resp.json();
+    _updateUsageMeter('ats', result._usageInfo);
     atsRenderResults(result);
 
   } catch (err) {
@@ -5916,25 +5920,25 @@ function atsReset() {
 
 _pageInits.ats = function() {
   var gateEl = document.getElementById('ats-pro-gate');
-  if (!_isPro()) {
-    var formSec = document.getElementById('ats-form-section');
+  var formSec = document.getElementById('ats-form-section');
+  if (!window._supabaseSession) {
     if (formSec) formSec.style.display = 'none';
     if (gateEl) {
       gateEl.style.display = 'block';
       gateEl.innerHTML = '<div class="pro-page-gate" style="position:relative;margin-bottom:0;">'
         + '<div class="ppg-lock">&#128274;</div>'
-        + '<div class="ppg-body"><div class="ppg-tag">Pro Feature</div>'
+        + '<div class="ppg-body"><div class="ppg-tag">Sign In Required</div>'
         + '<div class="ppg-title">ATS Job Match Scanner</div>'
-        + '<div class="ppg-desc">Match any job description to your resume. Get a keyword match score, identify gaps, and receive specific actions to boost your chances before applying.</div></div>'
-        + '<div class="ppg-actions"><button class="ppg-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button></div></div>';
+        + '<div class="ppg-desc">Sign in to access the ATS scanner. Free accounts get 3 scans per month. Pro accounts get 30 per month.</div></div>'
+        + '<div class="ppg-actions"><button class="ppg-btn" onclick="openAuthModal(\'signin\')">Sign In &rarr;</button></div></div>';
     }
   } else {
-    var formSec2 = document.getElementById('ats-form-section');
-    if (formSec2) formSec2.style.display = '';
+    if (formSec) formSec.style.display = '';
     if (gateEl) gateEl.style.display = 'none';
     atsReset();
     var ta = document.getElementById('ats-jd');
     if (ta) ta.oninput = atsUpdateCharCount;
+    _renderUsageMeter('ats', 'ats-usage-meter');
   }
 };
 
@@ -6011,12 +6015,142 @@ function _renderOtpUsage(product, limit) {
 }
 
 _pageInits.roaster = (function(_orig) {
-  return function() { if (_orig) _orig(); _renderOtpUsage('roaster', 5); };
+  return function() { if (_orig) _orig(); _renderOtpUsage('roaster', 5); _renderUsageMeter('roaster', 'roaster-usage-meter'); };
 })(_pageInits.roaster);
 
 _pageInits.pivot = (function(_orig) {
-  return function() { if (_orig) _orig(); _renderOtpUsage('pivot', 3); };
+  return function() { if (_orig) _orig(); _renderOtpUsage('pivot', 3); _renderUsageMeter('pivot', 'pivot-usage-meter'); };
 })(_pageInits.pivot);
+
+_pageInits.jobfit = (function(_orig) {
+  return function() { if (_orig) _orig(); _renderUsageMeter('jobfit', 'jfa-usage-meter'); };
+})(_pageInits.jobfit || null);
+
+// ─── MONTHLY USAGE METER ─────────────────────────────────────────────────
+var _usageMeterCache = {};
+
+function _renderUsageMeter(feature, elId) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  if (!window._supabaseSession || typeof _sb === 'undefined') { el.style.display = 'none'; return; }
+
+  var cached = _usageMeterCache[feature];
+  if (cached && cached.ts && (Date.now() - cached.ts) < 30000) {
+    _drawUsageMeter(el, feature, cached.used, cached.limit);
+    return;
+  }
+
+  var isPro = _isPro();
+  var limit = isPro ? 30 : 3;
+  var monthKey = new Date().toISOString().slice(0, 7);
+
+  _sb.from('feature_usage')
+    .select('count')
+    .eq('user_id', _currentUser.id)
+    .eq('feature', feature)
+    .eq('month_key', monthKey)
+    .maybeSingle()
+    .then(function(res) {
+      var used = (res.data && res.data.count) ? res.data.count : 0;
+      _usageMeterCache[feature] = { used: used, limit: limit, ts: Date.now() };
+      _drawUsageMeter(el, feature, used, limit);
+    })
+    .catch(function() { el.style.display = 'none'; });
+}
+
+function _drawUsageMeter(el, feature, used, limit) {
+  el.style.display = '';
+  var remaining = Math.max(0, limit - used);
+  var pct = Math.min(100, Math.round((used / limit) * 100));
+  var color = remaining === 0 ? 'var(--rd)' : remaining <= Math.ceil(limit * 0.2) ? 'var(--am)' : 'var(--gn)';
+  var planLabel = _isPro() ? 'Pro' : 'Free';
+  el.innerHTML = '<div class="usage-meter-wrap">'
+    + '<div class="usage-meter-top">'
+    + '<span class="usage-meter-label">' + planLabel + ' · ' + used + ' / ' + limit + ' uses this month</span>'
+    + (remaining === 0
+        ? '<a class="usage-meter-upgrade" onclick="showPage(\'pricing\')" style="cursor:pointer;">Upgrade for more &rarr;</a>'
+        : '<span class="usage-meter-remaining" style="color:' + color + ';">' + remaining + ' remaining</span>')
+    + '</div>'
+    + '<div class="usage-meter-bar-bg"><div class="usage-meter-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>'
+    + '</div>';
+}
+
+function _updateUsageMeter(feature, usageInfo) {
+  if (!usageInfo) return;
+  _usageMeterCache[feature] = { used: usageInfo.used, limit: usageInfo.limit, ts: Date.now() };
+  var featureElMap = { roaster: 'roaster-usage-meter', pivot: 'pivot-usage-meter', ats: 'ats-usage-meter', jobfit: 'jfa-usage-meter' };
+  var elId = featureElMap[feature];
+  var el = elId ? document.getElementById(elId) : null;
+  if (el) _drawUsageMeter(el, feature, usageInfo.used, usageInfo.limit);
+}
+
+function _showRateLimitMsg(errData, featureName) {
+  var plan = errData.plan || 'free';
+  var limit = errData.limit || (plan === 'pro' ? 30 : 3);
+  var msg = plan === 'pro'
+    ? 'You\'ve reached your Pro limit of ' + limit + ' ' + featureName + ' runs this month. Resets on the 1st.'
+    : 'You\'ve used all ' + limit + ' free ' + featureName + ' runs this month. Upgrade to Pro for 30/month.';
+  showToast(msg);
+  if (plan !== 'pro') { setTimeout(function() { showPage('pricing'); }, 2500); }
+}
+
+// ─── ADMIN USAGE PANEL ────────────────────────────────────────────────────
+function _renderAdminUsage() {
+  var el = document.getElementById('admin-usage-panel');
+  if (!el || !window._supabaseSession) return;
+
+  el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Loading usage data&hellip;</p>';
+
+  var token = window._supabaseSession.access_token;
+  fetch(EDGE_BASE + '/admin-usage', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  }).then(function(r) { return r.json(); }).then(function(data) {
+    if (data.error) { el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Error: ' + data.error + '</p>'; return; }
+
+    var users = data.users || [];
+    var totals = data.totals || {};
+
+    var monthParts = (data.month || '').split('-');
+    var monthLabel = monthParts.length === 2
+      ? new Date(Number(monthParts[0]), Number(monthParts[1]) - 1).toLocaleString('default', {month:'long', year:'numeric'})
+      : data.month;
+
+    if (users.length === 0) {
+      el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">No AI feature usage recorded for ' + monthLabel + '.</p>';
+      return;
+    }
+
+    var html = '<div class="au-header"><strong style="color:var(--lb);">AI Feature Usage — ' + monthLabel + '</strong>'
+      + '<span class="au-totals">Totals: Roaster ' + (totals.roaster||0) + ' · Pivot ' + (totals.pivot||0) + ' · ATS ' + (totals.ats||0) + ' · JobFit ' + (totals.jobfit||0) + '</span></div>'
+      + '<div class="au-table-wrap"><table class="au-table">'
+      + '<thead><tr><th>User</th><th>Plan</th><th>Roaster</th><th>Pivot</th><th>ATS</th><th>Job Fit</th><th>Total</th></tr></thead><tbody>';
+
+    users.forEach(function(u) {
+      var planBadge = u.plan === 'pro' ? '<span class="au-pro">Pro</span>' : '<span class="au-free">Free</span>';
+      html += '<tr>'
+        + '<td class="au-email">' + (u.username ? '<strong>' + u.username + '</strong><br>' : '') + '<span style="color:var(--mt);font-size:.72rem;">' + u.email + '</span></td>'
+        + '<td>' + planBadge + '</td>'
+        + '<td class="au-num">' + u.roaster + '</td>'
+        + '<td class="au-num">' + u.pivot + '</td>'
+        + '<td class="au-num">' + u.ats + '</td>'
+        + '<td class="au-num">' + u.jobfit + '</td>'
+        + '<td class="au-num au-total">' + u.total + '</td>'
+        + '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+    el.innerHTML = html;
+  }).catch(function(err) {
+    el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Failed to load usage data.</p>';
+  });
+}
+
+_pageInits.profile = (function(_orig) {
+  return function() {
+    if (_orig) _orig();
+    if (typeof isAdmin === 'function' && isAdmin()) _renderAdminUsage();
+  };
+})(_pageInits.profile);
 
 // ─── CERT ROI CALCULATOR (v33) ────────────────────────────────────────────
 var CERT_STUDY_HOURS = {
@@ -7179,7 +7313,6 @@ function copySNGScript() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function analyzeJobFit() {
-  if (!_isPro()) { _showUpgradePrompt('Job Fit Analyzer'); return; }
   if (!window._supabaseSession) { if (typeof _showSignInModal === 'function') _showSignInModal(); return; }
 
   var jd    = ((document.getElementById('jfa-jd')    || {}).value || '').trim();
@@ -7201,7 +7334,8 @@ async function analyzeJobFit() {
       body: JSON.stringify({ job_description: jd, experience_years: exp, certs_level: certs, elevator_pitch: pitch })
     });
     var data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || 'Analysis failed');
+    if (!resp.ok) { if (resp.status === 429) { _showRateLimitMsg(data, 'Job Fit Analyzer'); return; } throw new Error(data.error || 'Analysis failed'); }
+    _updateUsageMeter('jobfit', data._usageInfo);
     _renderJobFit(data);
   } catch(e) {
     alert('Analysis failed: ' + e.message);

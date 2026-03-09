@@ -2,7 +2,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno
 import JSZip from 'https://esm.sh/jszip@3?target=deno';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
-const OTP_LIMIT = 5; // OTP users get 5 roasts
+const OTP_LIMIT = 5;   // OTP one-time purchase users get 5 roasts total
+const FREE_LIMIT = 3;  // Free users: 3 roasts/month
+const PRO_LIMIT = 30;  // Pro users: 30 roasts/month
+const FEATURE = 'roaster';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -58,19 +61,38 @@ Deno.serve(async (req) => {
     const purchases = (profile?.purchases || {}) as Record<string, unknown>;
     const hasOtp = !!purchases.otp_roaster;
 
-    if (!isPro && !hasOtp) {
-      return new Response(JSON.stringify({ error: 'Pro or Resume Roaster access required' }), {
-        status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Usage limit check for OTP users
+    // OTP users: governed by their fixed OTP allotment, not monthly limits
     if (!isPro && hasOtp) {
-      const used = (purchases.otp_roaster_used as number) || 0;
-      if (used >= OTP_LIMIT) {
-        return new Response(JSON.stringify({ error: `Usage limit reached (${OTP_LIMIT} roasts included with your purchase). Upgrade to Pro for unlimited access.` }), {
+      const otpUsed = (purchases.otp_roaster_used as number) || 0;
+      if (otpUsed >= OTP_LIMIT) {
+        return new Response(JSON.stringify({ error: `Usage limit reached (${OTP_LIMIT} roasts included with your purchase). Upgrade to Pro for more access.` }), {
           status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
         });
+      }
+    }
+
+    // Monthly rate limit for Pro and Free users (skip for OTP users)
+    const monthKey = new Date().toISOString().slice(0, 7);
+    let currentCount = 0;
+    if (!hasOtp) {
+      const { data: usageRow } = await supabaseAdmin
+        .from('feature_usage')
+        .select('count')
+        .eq('user_id', user.id)
+        .eq('feature', FEATURE)
+        .eq('month_key', monthKey)
+        .maybeSingle();
+
+      currentCount = (usageRow?.count as number) || 0;
+      const limit = isPro ? PRO_LIMIT : FREE_LIMIT;
+
+      if (currentCount >= limit) {
+        return new Response(JSON.stringify({
+          error: 'rate_limit_exceeded',
+          limit,
+          used: currentCount,
+          plan: isPro ? 'pro' : 'free',
+        }), { status: 429, headers: { ...CORS, 'Content-Type': 'application/json' } });
       }
     }
 
@@ -162,10 +184,11 @@ Rules: 5-8 feedback items, 5-8 actions. Be SPECIFIC to the actual resume content
       else throw new Error('Failed to parse Claude response: ' + raw.slice(0, 200));
     }
 
-    const used = (purchases.otp_roaster_used as number) || 0;
-
     // Fire-and-forget: save result + increment usage + log analytics
     const saveTitle = `${domain} — ${tier}${jobTitle ? ` (${jobTitle})` : ''}`;
+    const otpUsed = (purchases.otp_roaster_used as number) || 0;
+    const limit = isPro ? PRO_LIMIT : FREE_LIMIT;
+
     Promise.all([
       // Save analysis
       supabaseAdmin.from('saved_analyses').insert({
@@ -176,26 +199,38 @@ Rules: 5-8 feedback items, 5-8 actions. Be SPECIFIC to the actual resume content
         result,
         meta: { domain, tier, jobTitle: jobTitle || null, intensity, fileType: isDocx ? 'docx' : 'pdf' },
       }),
-      // Increment OTP usage count (only for OTP users, not Pro)
+      // Increment OTP usage (OTP users only)
       ...((!isPro && hasOtp) ? [
         supabaseAdmin.from('profiles').update({
-          purchases: { ...purchases, otp_roaster_used: used + 1 },
+          purchases: { ...purchases, otp_roaster_used: otpUsed + 1 },
         }).eq('id', user.id),
       ] : []),
-      // Log analytics event
+      // Increment monthly usage (non-OTP users)
+      ...(!hasOtp ? [
+        supabaseAdmin.from('feature_usage').upsert({
+          user_id: user.id,
+          feature: FEATURE,
+          month_key: monthKey,
+          count: currentCount + 1,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,feature,month_key' }),
+      ] : []),
+      // Log analytics
       supabaseAdmin.from('feature_events').insert({
         user_id: user.id,
         event: 'roast_completed',
-        meta: { domain, tier, score: result.score, is_otp: !isPro && hasOtp, uses_remaining: !isPro && hasOtp ? OTP_LIMIT - used - 1 : null },
+        meta: { domain, tier, score: result.score, is_otp: !isPro && hasOtp },
       }),
     ]).catch(e => console.error('[resume-roaster] post-success error:', e));
 
     console.log(`[resume-roaster] userId=${user.id} score=${result.score} type=${isDocx ? 'docx' : 'pdf'}`);
 
-    // Return result + usage info for OTP users
+    const newCount = hasOtp ? null : currentCount + 1;
     const responsePayload = {
       ...result,
-      ...(!isPro && hasOtp ? { _usesRemaining: OTP_LIMIT - used - 1 } : {}),
+      _usageInfo: hasOtp
+        ? { otp: true, remaining: OTP_LIMIT - otpUsed - 1, limit: OTP_LIMIT }
+        : { used: newCount, limit, remaining: limit - (newCount as number) },
     };
 
     return new Response(JSON.stringify(responsePayload), {

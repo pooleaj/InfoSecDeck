@@ -1,6 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
+const FREE_LIMIT = 3;  // Free users: 3 analyses/month
+const PRO_LIMIT = 30;  // Pro users: 30 analyses/month
+const FEATURE = 'jobfit';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -54,10 +57,28 @@ Deno.serve(async (req) => {
     const { data: profile } = await supabaseAdmin
       .from('profiles').select('plan').eq('id', user.id).maybeSingle();
 
-    if (profile?.plan !== 'pro') {
-      return new Response(JSON.stringify({ error: 'Pro subscription required' }), {
-        status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
-      });
+    const isPro = profile?.plan === 'pro';
+
+    // Monthly rate limit
+    const monthKey = new Date().toISOString().slice(0, 7);
+    const { data: usageRow } = await supabaseAdmin
+      .from('feature_usage')
+      .select('count')
+      .eq('user_id', user.id)
+      .eq('feature', FEATURE)
+      .eq('month_key', monthKey)
+      .maybeSingle();
+
+    const currentCount = (usageRow?.count as number) || 0;
+    const limit = isPro ? PRO_LIMIT : FREE_LIMIT;
+
+    if (currentCount >= limit) {
+      return new Response(JSON.stringify({
+        error: 'rate_limit_exceeded',
+        limit,
+        used: currentCount,
+        plan: isPro ? 'pro' : 'free',
+      }), { status: 429, headers: { ...CORS, 'Content-Type': 'application/json' } });
     }
 
     const body = await req.json() as {
@@ -148,15 +169,26 @@ ${job_description.slice(0, 3000)}`;
     catch { const m = raw.match(/\{[\s\S]*\}/); if (m) result = JSON.parse(m[0]); else throw new Error('Failed to parse response'); }
 
     const typedResult = result as Record<string, unknown>;
+    const newCount = currentCount + 1;
 
-    supabaseAdmin.from('feature_events').insert({
-      user_id: user.id,
-      event: 'job_fit_analyzed',
-      meta: { fit_score: typedResult.fit_score, fit_label: typedResult.fit_label, experience_years, certs_level },
-    }).catch(() => {});
+    // Fire-and-forget: increment usage + log analytics
+    Promise.all([
+      supabaseAdmin.from('feature_usage').upsert({
+        user_id: user.id, feature: FEATURE, month_key: monthKey,
+        count: newCount, updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,feature,month_key' }),
+      supabaseAdmin.from('feature_events').insert({
+        user_id: user.id,
+        event: 'job_fit_analyzed',
+        meta: { fit_score: typedResult.fit_score, fit_label: typedResult.fit_label, experience_years, certs_level },
+      }),
+    ]).catch(() => {});
 
     console.log(`[job-fit-analyzer] userId=${user.id} fit_score=${typedResult.fit_score} label=${typedResult.fit_label}`);
-    return new Response(JSON.stringify(result), {
+    return new Response(JSON.stringify({
+      ...result,
+      _usageInfo: { used: newCount, limit, remaining: limit - newCount },
+    }), {
       headers: { ...CORS, 'Content-Type': 'application/json' },
     });
 

@@ -2,7 +2,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2?target=deno
 import JSZip from 'https://esm.sh/jszip@3?target=deno';
 
 const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY')!;
-const OTP_LIMIT = 3; // OTP users get 3 pivot analyses
+const OTP_LIMIT = 3;   // OTP one-time purchase users get 3 pivot analyses total
+const FREE_LIMIT = 3;  // Free users: 3 analyses/month
+const PRO_LIMIT = 30;  // Pro users: 30 analyses/month
+const FEATURE = 'pivot';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -58,19 +61,38 @@ Deno.serve(async (req) => {
     const purchases = (profile?.purchases || {}) as Record<string, unknown>;
     const hasOtp = !!purchases.otp_pivot;
 
-    if (!isPro && !hasOtp) {
-      return new Response(JSON.stringify({ error: 'Pro or Career Pivot access required' }), {
-        status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Usage limit check for OTP users
+    // OTP users: governed by their fixed OTP allotment, not monthly limits
     if (!isPro && hasOtp) {
-      const used = (purchases.otp_pivot_used as number) || 0;
-      if (used >= OTP_LIMIT) {
-        return new Response(JSON.stringify({ error: `Usage limit reached (${OTP_LIMIT} pivot analyses included with your purchase). Upgrade to Pro for unlimited access.` }), {
+      const otpUsed = (purchases.otp_pivot_used as number) || 0;
+      if (otpUsed >= OTP_LIMIT) {
+        return new Response(JSON.stringify({ error: `Usage limit reached (${OTP_LIMIT} pivot analyses included with your purchase). Upgrade to Pro for more access.` }), {
           status: 403, headers: { ...CORS, 'Content-Type': 'application/json' },
         });
+      }
+    }
+
+    // Monthly rate limit for Pro and Free users (skip for OTP users)
+    const monthKey = new Date().toISOString().slice(0, 7);
+    let currentCount = 0;
+    if (!hasOtp) {
+      const { data: usageRow } = await supabaseAdmin
+        .from('feature_usage')
+        .select('count')
+        .eq('user_id', user.id)
+        .eq('feature', FEATURE)
+        .eq('month_key', monthKey)
+        .maybeSingle();
+
+      currentCount = (usageRow?.count as number) || 0;
+      const limit = isPro ? PRO_LIMIT : FREE_LIMIT;
+
+      if (currentCount >= limit) {
+        return new Response(JSON.stringify({
+          error: 'rate_limit_exceeded',
+          limit,
+          used: currentCount,
+          plan: isPro ? 'pro' : 'free',
+        }), { status: 429, headers: { ...CORS, 'Content-Type': 'application/json' } });
       }
     }
 
@@ -158,7 +180,8 @@ Rules: 3-6 transferable skills, 3-5 gaps, 2-4 certifications in priority order, 
       else throw new Error('Failed to parse response: ' + raw.slice(0, 200));
     }
 
-    const used = (purchases.otp_pivot_used as number) || 0;
+    const otpUsed = (purchases.otp_pivot_used as number) || 0;
+    const limit = isPro ? PRO_LIMIT : FREE_LIMIT;
 
     // Fire-and-forget: save result + increment usage + log analytics
     Promise.all([
@@ -170,23 +193,37 @@ Rules: 3-6 transferable skills, 3-5 gaps, 2-4 certifications in priority order, 
         result,
         meta: { fromTitle, toTitle, expLabel, hasResume: !!resumeBase64 },
       }),
+      // Increment OTP usage (OTP users only)
       ...((!isPro && hasOtp) ? [
         supabaseAdmin.from('profiles').update({
-          purchases: { ...purchases, otp_pivot_used: used + 1 },
+          purchases: { ...purchases, otp_pivot_used: otpUsed + 1 },
         }).eq('id', user.id),
+      ] : []),
+      // Increment monthly usage (non-OTP users)
+      ...(!hasOtp ? [
+        supabaseAdmin.from('feature_usage').upsert({
+          user_id: user.id,
+          feature: FEATURE,
+          month_key: monthKey,
+          count: currentCount + 1,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,feature,month_key' }),
       ] : []),
       supabaseAdmin.from('feature_events').insert({
         user_id: user.id,
         event: 'pivot_completed',
-        meta: { fromTitle, toTitle, readiness: result.readiness, is_otp: !isPro && hasOtp, uses_remaining: !isPro && hasOtp ? OTP_LIMIT - used - 1 : null },
+        meta: { fromTitle, toTitle, readiness: result.readiness, is_otp: !isPro && hasOtp },
       }),
     ]).catch(e => console.error('[career-pivot] post-success error:', e));
 
     console.log(`[career-pivot] userId=${user.id} from=${fromTitle} to=${toTitle} readiness=${result.readiness}`);
 
+    const newCount = hasOtp ? null : currentCount + 1;
     const responsePayload = {
       ...result,
-      ...(!isPro && hasOtp ? { _usesRemaining: OTP_LIMIT - used - 1 } : {}),
+      _usageInfo: hasOtp
+        ? { otp: true, remaining: OTP_LIMIT - otpUsed - 1, limit: OTP_LIMIT }
+        : { used: newCount, limit, remaining: limit - (newCount as number) },
     };
 
     return new Response(JSON.stringify(responsePayload), {
