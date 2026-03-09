@@ -5921,7 +5921,7 @@ function atsReset() {
 _pageInits.ats = function() {
   var gateEl = document.getElementById('ats-pro-gate');
   var formSec = document.getElementById('ats-form-section');
-  if (!window._supabaseSession) {
+  if (!_currentUser) {
     if (formSec) formSec.style.display = 'none';
     if (gateEl) {
       gateEl.style.display = 'block';
@@ -6032,7 +6032,7 @@ var _usageMeterCache = {};
 function _renderUsageMeter(feature, elId) {
   var el = document.getElementById(elId);
   if (!el) return;
-  if (!window._supabaseSession || typeof _sb === 'undefined') { el.style.display = 'none'; return; }
+  if (!_currentUser || typeof _sb === 'undefined') { el.style.display = 'none'; return; }
 
   var cached = _usageMeterCache[feature];
   if (cached && cached.ts && (Date.now() - cached.ts) < 30000) {
@@ -6097,7 +6097,7 @@ function _showRateLimitMsg(errData, featureName) {
 // ─── ADMIN USAGE PANEL ────────────────────────────────────────────────────
 function _renderAdminUsage() {
   var el = document.getElementById('admin-usage-panel');
-  if (!el || !window._supabaseSession) return;
+  if (!el || !_currentUser || !window._supabaseSession) return;
 
   el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Loading usage data&hellip;</p>';
 

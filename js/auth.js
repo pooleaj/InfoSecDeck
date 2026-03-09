@@ -9,6 +9,7 @@ var _currentUser = null;
 _sb.auth.getSession().then(function(res) {
   if (res.data && res.data.session) {
     _currentUser = res.data.session.user;
+    window._supabaseSession = res.data.session;
     _syncFromDB();
   }
   _updateAuthUI();
@@ -16,6 +17,7 @@ _sb.auth.getSession().then(function(res) {
 
 _sb.auth.onAuthStateChange(function(event, session) {
   _currentUser = session ? session.user : null;
+  window._supabaseSession = session || null;
   _updateAuthUI();
   if (event === 'SIGNED_IN') {
     _syncFromDB();
@@ -430,6 +432,9 @@ function _applyAdminUI() {
   adminEls.forEach(function(el) {
     el.style.display = _currentUserRole === 'admin' ? '' : 'none';
   });
+  if (_currentUserRole === 'admin' && typeof _renderAdminUsage === 'function') {
+    _renderAdminUsage();
+  }
 }
 
 function isAdmin() { return _currentUserRole === 'admin'; }
