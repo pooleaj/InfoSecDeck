@@ -1,11 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="6" fill="#0a0e1a"/>
-  <!-- Shield outline -->
-  <path d="M16 4 L26 8 L26 18 Q26 26 16 30 Q6 26 6 18 L6 8 Z" fill="none" stroke="#4d9eff" stroke-width="1.5"/>
-  <!-- Lock body -->
-  <rect x="12" y="16" width="8" height="6" rx="1.5" fill="#4d9eff"/>
-  <!-- Lock shackle -->
-  <path d="M13.5 16 V14 Q13.5 11.5 16 11.5 Q18.5 11.5 18.5 14 V16" fill="none" stroke="#4d9eff" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- Keyhole dot -->
-  <circle cx="16" cy="19" r="1" fill="#0a0e1a"/>
+  <defs>
+    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0dd4c8"/>
+      <stop offset="100%" stop-color="#4d9eff"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="6" fill="#0b1120"/>
+  <path d="M16 4 L26 8 L26 18 Q26 26 16 30 Q6 26 6 18 L6 8 Z" fill="none" stroke="url(#lg)" stroke-width="1.5"/>
+  <rect x="12" y="16" width="8" height="6" rx="1.5" fill="url(#lg)"/>
+  <path d="M13.5 16 V14 Q13.5 11.5 16 11.5 Q18.5 11.5 18.5 14 V16" fill="none" stroke="url(#lg)" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="16" cy="19" r="1" fill="#0b1120"/>
 </svg>
