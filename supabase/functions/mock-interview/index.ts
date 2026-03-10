@@ -240,22 +240,17 @@ Hire thresholds: 8+ avg → Strong Hire; 6–7.9 → Hire; 4–5.9 → Hold; <4 
 
       const result = await callClaude(system, `Full Q&A:\n\n${historyText}`, 1024) as Record<string, unknown>;
 
-      // Persist to saved_analyses and feature_events
-      Promise.all([
-        supabaseAdmin.from('saved_analyses').insert({
-          user_id: user.id,
-          type: 'interview',
-          title: `${role} Mock Interview (${persona}, ${difficulty})`,
-          score: result.overall_score,
-          result: { ...result, qaHistory, mode, difficulty },
-          meta: { role, persona, difficulty, mode, avgScore },
-        }),
-        supabaseAdmin.from('feature_events').insert({
-          user_id: user.id,
-          event: 'mock_interview_completed',
-          meta: { role, persona, difficulty, mode, overall_score: result.overall_score, avg_score: avgScore },
-        }),
-      ]).catch(e => console.error('[mock-interview] post-finalize error:', e));
+      // Persist to saved_analyses
+      supabaseAdmin.from('saved_analyses').insert({
+        user_id: user.id,
+        type: 'interview',
+        title: `${role} Mock Interview (${persona}, ${difficulty})`,
+        score: result.overall_score,
+        result: { ...result, qaHistory, mode, difficulty },
+        meta: { role, persona, difficulty, mode, avgScore },
+      }).then(({ error }) => {
+        if (error) console.error('[mock-interview] saved_analyses insert error:', error.message);
+      });
 
       console.log(`[mock-interview] userId=${user.id} role=${role} score=${result.overall_score} mode=${mode}`);
       return new Response(JSON.stringify(result), {

@@ -6472,19 +6472,20 @@ function loadSavedAnalyses() {
     .limit(10)
     .then(function(res) {
       if (res.error || !res.data || res.data.length === 0) {
-        bodyEl.innerHTML = '<p style="font-size:.78rem;color:var(--mt);line-height:1.6;">No saved analyses yet. Use <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'roaster\')">Resume Roaster</strong>, <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'pivot\')">Career Pivot Advisor</strong>, or <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'ats\')">ATS Scanner</strong> to generate your first analysis.</p>';
+        bodyEl.innerHTML = '<p style="font-size:.78rem;color:var(--mt);line-height:1.6;">No saved analyses yet. Use <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'roaster\')">Resume Roaster</strong>, <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'pivot\')">Career Pivot Advisor</strong>, <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'ats\')">ATS Scanner</strong>, or <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'mock\')">AI Mock Interview</strong> to generate your first analysis.</p>';
         return;
       }
 
       var typeInfo = {
-        roast: { icon: '🔥', label: 'Resume Roast', page: 'roaster', scoreLabel: 'Score' },
-        pivot: { icon: '🔀', label: 'Career Pivot',  page: 'pivot',   scoreLabel: 'Readiness' },
-        ats:   { icon: '📊', label: 'ATS Scan',      page: 'ats',     scoreLabel: 'Match' },
+        roast:     { icon: '🔥', label: 'Resume Roast',    page: 'roaster', scoreLabel: 'Score',      pct: true },
+        pivot:     { icon: '🔀', label: 'Career Pivot',    page: 'pivot',   scoreLabel: 'Readiness',  pct: true },
+        ats:       { icon: '📊', label: 'ATS Scan',        page: 'ats',     scoreLabel: 'Match',      pct: true },
+        interview: { icon: '🎤', label: 'Mock Interview',  page: 'mock',    scoreLabel: 'Score',      pct: false },
       };
 
       bodyEl.innerHTML = '<div class="sa-list">' + res.data.map(function(item) {
-        var info = typeInfo[item.type] || { icon: '📄', label: item.type, page: 'home', scoreLabel: 'Score' };
-        var scoreHtml = item.score != null ? '<span class="sa-score">' + item.score + '%</span>' : '';
+        var info = typeInfo[item.type] || { icon: '📄', label: item.type, page: 'home', scoreLabel: 'Score', pct: true };
+        var scoreHtml = item.score != null ? '<span class="sa-score">' + item.score + (info.pct ? '%' : '/10') + '</span>' : '';
         var dateStr = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         return '<div class="sa-item" onclick="showPage(\'' + info.page + '\')">'
           + '<span class="sa-type-icon">' + info.icon + '</span>'
