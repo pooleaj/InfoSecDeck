@@ -5842,10 +5842,17 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .cr-arrow{color:var(--mt);font-size:1.3rem;flex-shrink:0;padding-left:4px;}
 @media(max-width:640px){.cr-metrics{display:none;}.cr-rank{min-width:28px;font-size:1.1rem;}.cr-tabs{gap:6px;}.cr-tab{font-size:.72rem;padding:6px 12px;}}
 
-/* ── v44: Salary Calculator — role-aware cert list ── */
+/* ── v45: Salary Calculator — cert search & add ── */
 .sc-cert-pct{color:var(--gn);font-size:.72rem;margin-left:2px;}
-.sc-more-toggle{display:block;margin-top:10px;font-size:.75rem;color:var(--lb);background:none;border:none;cursor:pointer;padding:0;user-select:none;text-align:left;}
-.sc-more-toggle:hover{text-decoration:underline;}
-.sc-more-certs{margin-top:6px;}
-.sc-cert-search{width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:.78rem;margin-bottom:8px;box-sizing:border-box;}
-.sc-more-list{display:flex;flex-wrap:wrap;gap:8px;}
+.sc-cert-search-wrap{position:relative;margin-top:10px;}
+.sc-cert-search{width:100%;padding:7px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:.78rem;box-sizing:border-box;}
+.sc-cert-search:focus{outline:none;border-color:rgba(77,158,255,.5);}
+.sc-cert-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--sf);border:1px solid var(--bd);border-radius:8px;z-index:300;max-height:220px;overflow-y:auto;display:none;box-shadow:0 4px 20px rgba(0,0,0,.3);}
+.sc-cert-dropdown.open{display:block;}
+.sc-cert-dd-item{padding:8px 12px;cursor:pointer;font-size:.76rem;display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--bd2);}
+.sc-cert-dd-item:last-child{border-bottom:none;}
+.sc-cert-dd-item:hover{background:var(--sf2);}
+.sc-cert-dd-empty{padding:10px 12px;font-size:.76rem;color:var(--mt);}
+.sc-cert-remove{background:none;border:none;color:var(--mt);cursor:pointer;font-size:.8rem;padding:0 2px;margin-left:4px;line-height:1;flex-shrink:0;}
+.sc-cert-remove:hover{color:var(--rd);}
+.sc-cert-added-chip{border-color:rgba(77,158,255,.3);background:rgba(77,158,255,.06);}

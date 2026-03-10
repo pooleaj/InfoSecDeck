@@ -3878,11 +3878,8 @@ function calcSalary(){
   var expM=EXP_MULT[expKey]||1.0;
   var locM=LOC_MULT[locKey]||1.0;
   var certBonus=0;
-  var _cw=(typeof CERT_ROLE_WEIGHTS!=='undefined'&&roleKey&&CERT_ROLE_WEIGHTS[roleKey])||{};
-  document.querySelectorAll('#sc-cert-bonuses input:checked').forEach(function(cb){
-    var base=CERT_BONUSES[cb.value]||0;
-    var w=_cw[cb.value]!==undefined?_cw[cb.value]:0.5;
-    certBonus+=base*w;
+  document.querySelectorAll('#sc-cert-bonuses input:checked,#sc-cert-added input:checked').forEach(function(cb){
+    certBonus+=parseFloat(cb.dataset.bonus||'0');
   });
   var totalM=expM*locM*(1+certBonus);
   var adjMin=Math.round(baseMin*totalM/1000)*1000;
@@ -7951,53 +7948,138 @@ var _ALL_SALARY_CERTS = [
   ['masters',"Master's Degree"],['phd','PhD']
 ];
 
+// ─── v45: Cert Search & Add ───────────────────────────────────────────────────
+var _salaryTopCertKeys = {};
+
+function _salCertBonus(certKey, roleKey) {
+  var normKey = certKey.replace(/-/g,'_');
+  var base = CERT_BONUSES[normKey] || 0;
+  if (!base && typeof CERTS !== 'undefined' && CERTS[certKey]) {
+    base = (CERT_TIER_BONUS && CERT_TIER_BONUS[CERTS[certKey].tierClass]) || 0.06;
+  }
+  var weights = (CERT_ROLE_WEIGHTS && roleKey && CERT_ROLE_WEIGHTS[roleKey]) || {};
+  var w = weights[normKey] !== undefined ? weights[normKey] : 0.5;
+  return base * w;
+}
+
+var _salaryCurrentRole = '';
 function _buildCertList(roleKey) {
+  _salaryCurrentRole = roleKey || '';
   var el = document.getElementById('sc-cert-bonuses');
   if (!el) return;
-  // Preserve checked state
   var checked = {};
   el.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
     if (cb.checked) checked[cb.value] = true;
   });
+  var addedEl = document.getElementById('sc-cert-added');
+  if (addedEl) addedEl.innerHTML = '';
   var weights = (CERT_ROLE_WEIGHTS && roleKey && CERT_ROLE_WEIGHTS[roleKey]) || {};
   var scored = _ALL_SALARY_CERTS.map(function(c) {
     var base = CERT_BONUSES[c[0]] || 0;
     var w = weights[c[0]] !== undefined ? weights[c[0]] : 0.5;
-    return {key: c[0], label: c[1], pct: Math.round(base * w * 100)};
+    var bonus = base * w;
+    return {key: c[0], label: c[1], bonus: bonus, pct: Math.round(bonus * 100)};
   }).sort(function(a, b) { return b.pct - a.pct; });
   var top = scored.slice(0, 10);
-  var more = scored.slice(10);
-  function mkCb(item) {
-    return '<label class="sc-cert-cb"><input type="checkbox" value="' + item.key + '"'
+  _salaryTopCertKeys = {};
+  top.forEach(function(t) { _salaryTopCertKeys[t.key] = true; });
+  el.innerHTML = top.map(function(item) {
+    return '<label class="sc-cert-cb"><input type="checkbox" value="' + item.key + '" data-bonus="' + item.bonus + '"'
       + (checked[item.key] ? ' checked' : '') + ' onchange="calcSalary()"> '
       + item.label + ' <span class="sc-cert-pct">(+' + item.pct + '%)</span></label>';
+  }).join('');
+  // Inject added-certs container + search UI (once)
+  if (!document.getElementById('sc-cert-search-wrap')) {
+    var addedDiv = document.createElement('div');
+    addedDiv.id = 'sc-cert-added';
+    addedDiv.className = 'sc-cert-bonuses';
+    addedDiv.style.marginTop = '6px';
+    el.parentNode.insertBefore(addedDiv, el.nextSibling);
+    var wrap = document.createElement('div');
+    wrap.id = 'sc-cert-search-wrap';
+    wrap.className = 'sc-cert-search-wrap';
+    wrap.innerHTML = '<input type="text" class="sc-cert-search" id="sc-cert-searchbox" placeholder="Search for more Certifications..." autocomplete="off">'
+      + '<div class="sc-cert-dropdown" id="sc-cert-dropdown"></div>';
+    addedDiv.parentNode.insertBefore(wrap, addedDiv.nextSibling);
+    document.getElementById('sc-cert-searchbox').addEventListener('input', function() {
+      _salarySearchInput(this);
+    });
+    document.getElementById('sc-cert-searchbox').addEventListener('focus', function() {
+      _salarySearchInput(this);
+    });
+  } else {
+    var sb = document.getElementById('sc-cert-searchbox');
+    if (sb) sb.value = '';
+    var dd = document.getElementById('sc-cert-dropdown');
+    if (dd) { dd.innerHTML = ''; dd.classList.remove('open'); }
   }
-  var html = top.map(mkCb).join('');
-  if (more.length > 0) {
-    html += '<button type="button" class="sc-more-toggle" onclick="_toggleMoreCerts(this)">+ Show more certifications ('
-      + more.length + ')</button>';
-    html += '<div class="sc-more-certs" style="display:none">'
-      + '<input type="text" class="sc-cert-search" placeholder="Search certifications..." oninput="_filterMoreCerts(this)">'
-      + '<div class="sc-more-list">' + more.map(mkCb).join('') + '</div>'
+}
+
+
+function _salarySearchInput(el) {
+  var roleKey = _salaryCurrentRole;
+  var q = el.value.trim().toLowerCase();
+  var dd = document.getElementById('sc-cert-dropdown');
+  if (!dd) return;
+  if (q.length < 1) { dd.innerHTML = ''; dd.classList.remove('open'); return; }
+  var addedKeys = {};
+  var addedEl = document.getElementById('sc-cert-added');
+  if (addedEl) addedEl.querySelectorAll('input').forEach(function(cb) { addedKeys[cb.value] = true; });
+  var results = [];
+  if (typeof CERTS !== 'undefined') {
+    Object.keys(CERTS).forEach(function(k) {
+      if (_salaryTopCertKeys[k] || addedKeys[k]) return;
+      var c = CERTS[k];
+      if (!c || !c.name) return;
+      if (c.name.toLowerCase().indexOf(q) < 0 && k.toLowerCase().indexOf(q) < 0) return;
+      var bonus = _salCertBonus(k, roleKey);
+      results.push({key: k, name: c.name, bonus: bonus, pct: Math.round(bonus * 100)});
+    });
+  }
+  results.sort(function(a, b) { return b.pct - a.pct; });
+  results = results.slice(0, 8);
+  if (results.length === 0) {
+    dd.innerHTML = '<div class="sc-cert-dd-empty">No certifications found</div>';
+    dd.classList.add('open');
+    return;
+  }
+  dd.innerHTML = results.map(function(r) {
+    var safeName = r.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="sc-cert-dd-item" onclick="_salaryAddCert(\'' + r.key + '\',\'' + safeName + '\',' + r.bonus + ')">'
+      + '<span>' + r.name + '</span>'
+      + '<span class="sc-cert-pct">(+' + r.pct + '%)</span>'
       + '</div>';
+  }).join('');
+  dd.classList.add('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#sc-cert-search-wrap')) {
+    var dd = document.getElementById('sc-cert-dropdown');
+    if (dd) { dd.innerHTML = ''; dd.classList.remove('open'); }
   }
-  el.innerHTML = html;
+});
+
+function _salaryAddCert(key, name, bonusDecimal) {
+  var container = document.getElementById('sc-cert-added');
+  if (!container) return;
+  if (container.querySelector('input[value="' + key + '"]')) return;
+  var pct = Math.round(bonusDecimal * 100);
+  var chip = document.createElement('label');
+  chip.className = 'sc-cert-cb sc-cert-added-chip';
+  chip.innerHTML = '<input type="checkbox" checked value="' + key + '" data-bonus="' + bonusDecimal + '" onchange="calcSalary()">'
+    + ' ' + name + ' <span class="sc-cert-pct">(+' + pct + '%)</span>'
+    + ' <button type="button" class="sc-cert-remove" onclick="event.preventDefault();_salaryRemoveCert(this)">&#x2715;</button>';
+  container.appendChild(chip);
+  var sb = document.getElementById('sc-cert-searchbox');
+  if (sb) sb.value = '';
+  var dd = document.getElementById('sc-cert-dropdown');
+  if (dd) { dd.innerHTML = ''; dd.classList.remove('open'); }
+  calcSalary();
 }
 
-function _toggleMoreCerts(btn) {
-  var panel = btn.nextElementSibling;
-  var isOpen = panel.style.display !== 'none';
-  panel.style.display = isOpen ? 'none' : 'block';
-  btn.textContent = isOpen
-    ? btn.textContent.replace('\u2212 Hide', '+ Show')
-    : btn.textContent.replace('+ Show', '\u2212 Hide');
-}
-
-function _filterMoreCerts(input) {
-  var q = input.value.toLowerCase();
-  var list = input.parentElement.querySelector('.sc-more-list');
-  if (!list) return;
-  list.querySelectorAll('.sc-cert-cb').forEach(function(cb) {
-    cb.style.display = cb.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
-  });
+function _salaryRemoveCert(btn) {
+  var chip = btn.closest('.sc-cert-added-chip');
+  if (chip) chip.remove();
+  calcSalary();
 }
