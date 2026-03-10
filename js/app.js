@@ -1486,6 +1486,7 @@ function rAnimSteps(){
 function rClearSteps(){rStepTimers.forEach(clearTimeout);rStepTimers=[];}
 
 function rRenderResults(r,domain,tier){
+  var isPro=_isPro()||_hasOtpAccess('roaster');
   document.getElementById('r-results').classList.add('show');
   document.getElementById('r-results').scrollIntoView({behavior:'smooth',block:'start'});
   var score=Math.max(0,Math.min(100,r.score||0));
@@ -1500,16 +1501,42 @@ function rRenderResults(r,domain,tier){
   var sEl=document.getElementById('r-summary');if(sEl)sEl.textContent=r.summary||'';
   var metaEl=document.getElementById('r-meta-pills');
   if(metaEl)metaEl.innerHTML=['🎯 '+domain.split('(')[0].trim(),'📊 '+(tier.split('—')[1]||tier).split('(')[0].trim()].map(function(t){return '<span class="r-meta-pill">'+t+'</span>';}).join('');
-  var dc=function(s){return s>=80?'var(--gn)':s>=65?'var(--lb)':s>=50?'var(--am)':s>=35?'var(--or)':'var(--rd)';};
-  var dg=document.getElementById('r-dims-grid');
-  if(dg)dg.innerHTML=(r.dimensions||[]).map(function(d){var s=d.score||0;var c=dc(s);return '<div class="r-dim"><div class="r-dim-hdr"><div class="r-dim-name">'+d.name+'</div><div class="r-dim-score" style="color:'+c+'">'+s+'/100</div></div><div class="r-dim-bar"><div class="r-dim-fill" data-t="'+s+'%" style="width:0;background:'+c+';"></div></div><div class="r-dim-note">'+d.note+'</div></div>';}).join('');
-  setTimeout(function(){document.querySelectorAll('.r-dim-fill').forEach(function(el){el.style.width=el.getAttribute('data-t');});},200);
-  var tm={'critical':'⚠️ Critical','warning':'🔶 Warning','tip':'💡 Tip','strength':'✅ Strength'};
-  var fl=document.getElementById('r-fb-list');
-  if(fl)fl.innerHTML=(r.feedback||[]).map(function(f){var t=f.type||'tip';var q=f.quote?'<div class="r-fb-quote">"'+f.quote+'"</div>':'';return '<div class="r-fb-item '+t+'"><div class="r-fb-hdr"><span class="r-fb-badge">'+tm[t]+'</span><div class="r-fb-title">'+f.title+'</div></div><div class="r-fb-body">'+f.body+'</div>'+q+'</div>';}).join('');
-  var pl={'high':'🔴 High','med':'🟡 Med','low':'🔵 Low'};
-  var al=document.getElementById('r-action-list');
-  if(al)al.innerHTML=(r.actions||[]).map(function(a,i){var p=a.priority||'med';return '<div class="r-action"><div class="r-action-n">'+(i+1)+'</div><div class="r-action-txt">'+a.text+'</div><div class="r-action-pri '+p+'">'+pl[p]+'</div></div>';}).join('');
+  // Remove any previous lock block
+  var prevLock=document.getElementById('r-pro-locked-block');
+  if(prevLock) prevLock.remove();
+  var dimsWrap=document.querySelector('.r-dims');
+  var fbWrap=document.querySelector('.r-fb-card');
+  var actWrap=document.querySelector('.r-actions-card');
+  if(isPro){
+    if(dimsWrap) dimsWrap.style.display='';
+    if(fbWrap) fbWrap.style.display='';
+    if(actWrap) actWrap.style.display='';
+    var dc=function(s){return s>=80?'var(--gn)':s>=65?'var(--lb)':s>=50?'var(--am)':s>=35?'var(--or)':'var(--rd)';};
+    var dg=document.getElementById('r-dims-grid');
+    if(dg)dg.innerHTML=(r.dimensions||[]).map(function(d){var s=d.score||0;var c=dc(s);return '<div class="r-dim"><div class="r-dim-hdr"><div class="r-dim-name">'+d.name+'</div><div class="r-dim-score" style="color:'+c+'">'+s+'/100</div></div><div class="r-dim-bar"><div class="r-dim-fill" data-t="'+s+'%" style="width:0;background:'+c+';"></div></div><div class="r-dim-note">'+d.note+'</div></div>';}).join('');
+    setTimeout(function(){document.querySelectorAll('.r-dim-fill').forEach(function(el){el.style.width=el.getAttribute('data-t');});},200);
+    var tm={'critical':'⚠️ Critical','warning':'🔶 Warning','tip':'💡 Tip','strength':'✅ Strength'};
+    var fl=document.getElementById('r-fb-list');
+    if(fl)fl.innerHTML=(r.feedback||[]).map(function(f){var t=f.type||'tip';var q=f.quote?'<div class="r-fb-quote">"'+f.quote+'"</div>':'';return '<div class="r-fb-item '+t+'"><div class="r-fb-hdr"><span class="r-fb-badge">'+tm[t]+'</span><div class="r-fb-title">'+f.title+'</div></div><div class="r-fb-body">'+f.body+'</div>'+q+'</div>';}).join('');
+    var pl={'high':'🔴 High','med':'🟡 Med','low':'🔵 Low'};
+    var al=document.getElementById('r-action-list');
+    if(al)al.innerHTML=(r.actions||[]).map(function(a,i){var p=a.priority||'med';return '<div class="r-action"><div class="r-action-n">'+(i+1)+'</div><div class="r-action-txt">'+a.text+'</div><div class="r-action-pri '+p+'">'+pl[p]+'</div></div>';}).join('');
+  } else {
+    if(dimsWrap) dimsWrap.style.display='none';
+    if(fbWrap) fbWrap.style.display='none';
+    if(actWrap) actWrap.style.display='none';
+    var lockDiv=document.createElement('div');
+    lockDiv.id='r-pro-locked-block';
+    lockDiv.className='r-pro-locked';
+    lockDiv.innerHTML='<div class="rpl-icon">🔒</div>'
+      +'<div class="rpl-heading">Unlock Your Full Roast</div>'
+      +'<div class="rpl-desc">Pro includes your <strong>6-dimension score breakdown</strong>, '+(r.feedback||[]).length+' detailed feedback items, and '+(r.actions||[]).length+' priority action steps.</div>'
+      +'<div class="rpl-cta-row"><button class="rpl-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button>'
+      +'<span class="upsell-divider">or</span>'
+      +'<button class="rpl-otp" onclick="startOtpCheckout(\'roaster\')">One-time roast &mdash; $7.99</button></div>';
+    var retryRow=document.querySelector('#r-results .r-retry-row');
+    if(retryRow) retryRow.parentNode.insertBefore(lockDiv,retryRow);
+  }
 }
 
 function rReset(){
@@ -2226,6 +2253,7 @@ async function runPivotAdvisor() {
 }
 
 function renderPivotResults(r, fromTitle, toTitle, hasResume) {
+  var isPro = _isPro() || _hasOtpAccess('pivot');
   var el = document.getElementById('pivot-results');
   el.style.display = 'block';
   el.scrollIntoView({behavior:'smooth', block:'start'});
@@ -2243,7 +2271,7 @@ function renderPivotResults(r, fromTitle, toTitle, hasResume) {
   var metaEl = document.getElementById('pv-meta-pills');
   if (metaEl) metaEl.innerHTML = (hasResume ? '<span class="pv-meta-pill pv-pill-resume">Personalized</span>' : '<span class="pv-meta-pill">General Plan</span>') + '<span class="pv-meta-pill">' + (r.timeline || '') + '</span>';
 
-  // Transferable skills
+  // Transferable skills (always shown)
   var strMap = {strong:'var(--gn)', moderate:'var(--lb)', partial:'var(--am)'};
   var trEl = document.getElementById('pv-transferable');
   if (trEl) trEl.innerHTML = (r.transferable || []).map(function(t) {
@@ -2251,33 +2279,60 @@ function renderPivotResults(r, fromTitle, toTitle, hasResume) {
     return '<div class="pv-skill-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+t.skill+'</div><div class="pv-skill-note">'+t.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+t.strength+'</div></div>';
   }).join('');
 
-  // Gaps
-  var priMap = {critical:'var(--rd)', important:'var(--or)', 'nice-to-have':'var(--lb)'};
-  var gapEl = document.getElementById('pv-gaps');
-  if (gapEl) gapEl.innerHTML = (r.gaps || []).map(function(g) {
-    var c = priMap[g.priority] || 'var(--mt)';
-    return '<div class="pv-gap-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+g.area+'</div><div class="pv-skill-note">'+g.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+g.priority+'</div></div>';
-  }).join('');
+  // Remove any previous lock block
+  var prevPivotLock = document.getElementById('pv-pro-locked-block');
+  if (prevPivotLock) prevPivotLock.remove();
 
-  // Certifications
-  var certEl = document.getElementById('pv-certs');
-  if (certEl) certEl.innerHTML = (r.certifications || []).map(function(c) {
-    return '<div class="pv-cert-item"><div class="pv-cert-order">'+c.order+'</div><div class="pv-cert-body"><div class="pv-cert-name">'+c.name+'</div><div class="pv-cert-why">'+c.why+'</div></div><div class="pv-cert-timeline">'+c.timeline+'</div></div>';
-  }).join('');
+  var gapCard   = document.getElementById('pv-gaps')   ? document.getElementById('pv-gaps').closest('.pv-card')   : null;
+  var certCard  = document.getElementById('pv-certs')  ? document.getElementById('pv-certs').closest('.pv-card')  : null;
+  var phaseCard = document.getElementById('pv-phases') ? document.getElementById('pv-phases').closest('.pv-card') : null;
+  var stepsCard = document.getElementById('pv-steps')  ? document.getElementById('pv-steps').closest('.pv-card')  : null;
 
-  // Timeline phases
-  var tlEl = document.getElementById('pv-timeline-total'); if (tlEl) tlEl.textContent = r.timeline || '';
-  var phEl = document.getElementById('pv-phases');
-  if (phEl) phEl.innerHTML = (r.phases || []).map(function(p, i) {
-    return '<div class="pv-phase"><div class="pv-phase-dot"></div><div class="pv-phase-body"><div class="pv-phase-name">'+p.name+'</div><div class="pv-phase-dur">'+p.duration+'</div><div class="pv-phase-focus">'+p.focus+'</div></div></div>';
-  }).join('');
+  if (isPro) {
+    [gapCard, certCard, phaseCard, stepsCard].forEach(function(c){ if(c) c.style.display=''; });
 
-  // First steps
-  var stpEl = document.getElementById('pv-steps');
-  if (stpEl) stpEl.innerHTML = (r.steps || []).map(function(s, i) {
-    var tw = s.timeframe === 'this week' ? 'var(--gn)' : 'var(--lb)';
-    return '<div class="pv-step"><div class="pv-step-n">'+(i+1)+'</div><div class="pv-step-body"><div class="pv-step-action">'+s.action+'</div><div class="pv-step-detail">'+s.detail+'</div></div><div class="pv-step-when" style="color:'+tw+'">'+s.timeframe+'</div></div>';
-  }).join('');
+    // Gaps
+    var priMap = {critical:'var(--rd)', important:'var(--or)', 'nice-to-have':'var(--lb)'};
+    var gapEl = document.getElementById('pv-gaps');
+    if (gapEl) gapEl.innerHTML = (r.gaps || []).map(function(g) {
+      var c = priMap[g.priority] || 'var(--mt)';
+      return '<div class="pv-gap-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+g.area+'</div><div class="pv-skill-note">'+g.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+g.priority+'</div></div>';
+    }).join('');
+
+    // Certifications
+    var certEl = document.getElementById('pv-certs');
+    if (certEl) certEl.innerHTML = (r.certifications || []).map(function(c) {
+      return '<div class="pv-cert-item"><div class="pv-cert-order">'+c.order+'</div><div class="pv-cert-body"><div class="pv-cert-name">'+c.name+'</div><div class="pv-cert-why">'+c.why+'</div></div><div class="pv-cert-timeline">'+c.timeline+'</div></div>';
+    }).join('');
+
+    // Timeline phases
+    var tlEl = document.getElementById('pv-timeline-total'); if (tlEl) tlEl.textContent = r.timeline || '';
+    var phEl = document.getElementById('pv-phases');
+    if (phEl) phEl.innerHTML = (r.phases || []).map(function(p, i) {
+      return '<div class="pv-phase"><div class="pv-phase-dot"></div><div class="pv-phase-body"><div class="pv-phase-name">'+p.name+'</div><div class="pv-phase-dur">'+p.duration+'</div><div class="pv-phase-focus">'+p.focus+'</div></div></div>';
+    }).join('');
+
+    // First steps
+    var stpEl = document.getElementById('pv-steps');
+    if (stpEl) stpEl.innerHTML = (r.steps || []).map(function(s, i) {
+      var tw = s.timeframe === 'this week' ? 'var(--gn)' : 'var(--lb)';
+      return '<div class="pv-step"><div class="pv-step-n">'+(i+1)+'</div><div class="pv-step-body"><div class="pv-step-action">'+s.action+'</div><div class="pv-step-detail">'+s.detail+'</div></div><div class="pv-step-when" style="color:'+tw+'">'+s.timeframe+'</div></div>';
+    }).join('');
+  } else {
+    [gapCard, certCard, phaseCard, stepsCard].forEach(function(c){ if(c) c.style.display='none'; });
+    var pvLock = document.createElement('div');
+    pvLock.id = 'pv-pro-locked-block';
+    pvLock.className = 'r-pro-locked';
+    pvLock.innerHTML = '<div class="rpl-icon">🔒</div>'
+      + '<div class="rpl-heading">Unlock Your Full Pivot Plan</div>'
+      + '<div class="rpl-desc">Pro reveals your <strong>skill gaps</strong>, a <strong>personalized cert path</strong>, '
+      + 'a <strong>'+(r.timeline||'')+'  transition timeline</strong>, and your <strong>first '+(r.steps||[]).length+' action steps</strong>.</div>'
+      + '<div class="rpl-cta-row"><button class="rpl-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button>'
+      + '<span class="upsell-divider">or</span>'
+      + '<button class="rpl-otp" onclick="startOtpCheckout(\'pivot\')">One-time plan &mdash; $9.99</button></div>';
+    var pvRetryRow = document.querySelector('#pivot-results .r-retry-row');
+    if (pvRetryRow) pvRetryRow.parentNode.insertBefore(pvLock, pvRetryRow);
+  }
 }
 
 function pivotReset() {
