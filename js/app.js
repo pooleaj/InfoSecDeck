@@ -4047,7 +4047,7 @@ function renderCalendar(typeFilter,freeOnly){
   var groups={};
   filtered.forEach(function(e){
     var d=new Date(e.date+'T12:00:00');
-    var key=d.getFullYear()+'-'+(d.getMonth()+1);
+    var key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
     var label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
     if(!groups[key])groups[key]={label:label,events:[]};
     groups[key].events.push(e);
@@ -4495,7 +4495,7 @@ function renderCalendar(typeFilter,freeOnly){
   var groups={};
   filtered.forEach(function(e){
     var d=new Date(e.date+'T12:00:00');
-    var key=d.getFullYear()+'-'+(d.getMonth()+1);
+    var key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
     var label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
     if(!groups[key])groups[key]={label:label,events:[]};
     groups[key].events.push(e);
