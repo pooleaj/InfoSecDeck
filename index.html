@@ -2366,244 +2366,111 @@
 <div style="padding:52px 28px 100px;max-width:960px;margin:0 auto;">
   <div class="ey a1">Hands-On Practice</div>
   <div class="st a2">Home Lab Guide</div>
-  <p class="ss a3">Build your own cybersecurity practice environment from scratch. Click any lab card to open a full step-by-step guide.</p>
+  <p class="ss a3">Build your own cybersecurity practice environment from scratch. Click any lab card to open the full step-by-step guide.</p>
 
   <!-- Lab Cards Grid -->
   <div class="a3" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;">
 
     <!-- Card 1: Virtualization -->
-    <div class="lab-card" onclick="toggleLabGuide('lab-virt')" style="--lab-color:rgba(16,232,126,.25);--lab-border:rgba(16,232,126,.35);">
+    <div class="lab-card" onclick="showHomelabDetail('lab-virt')" style="--lab-color:rgba(16,232,126,.25);--lab-border:rgba(16,232,126,.35);">
       <div class="lab-card-icon">🖥️</div>
       <div class="lab-card-body">
         <div class="lab-card-title">Foundation: Virtualization</div>
         <div class="lab-card-sub">Start here — everything else runs on top</div>
         <div class="lab-card-tags"><span class="lab-tag">All Roles</span><span class="lab-tag">Required First</span></div>
       </div>
-      <div class="lab-card-open" id="lab-virt-toggle">View Guide <span>&#9660;</span></div>
+      <div class="lab-card-open">View Lab →</div>
     </div>
 
     <!-- Card 2: Defensive / SIEM -->
-    <div class="lab-card" onclick="toggleLabGuide('lab-siem')" style="--lab-color:rgba(34,211,238,.2);--lab-border:rgba(34,211,238,.35);">
+    <div class="lab-card" onclick="showHomelabDetail('lab-siem')" style="--lab-color:rgba(34,211,238,.2);--lab-border:rgba(34,211,238,.35);">
       <div class="lab-card-icon">🛡️</div>
       <div class="lab-card-body">
         <div class="lab-card-title">Defensive Lab: SIEM + Detection</div>
         <div class="lab-card-sub">SOC Analyst, DFIR, Security Engineer</div>
         <div class="lab-card-tags"><span class="lab-tag">Blue Team</span><span class="lab-tag">Splunk / Wazuh</span></div>
       </div>
-      <div class="lab-card-open" id="lab-siem-toggle">View Guide <span>&#9660;</span></div>
+      <div class="lab-card-open">View Lab →</div>
     </div>
 
     <!-- Card 3: Offensive -->
-    <div class="lab-card" onclick="toggleLabGuide('lab-offensive')" style="--lab-color:rgba(240,93,120,.18);--lab-border:rgba(240,93,120,.35);">
+    <div class="lab-card" onclick="showHomelabDetail('lab-offensive')" style="--lab-color:rgba(240,93,120,.18);--lab-border:rgba(240,93,120,.35);">
       <div class="lab-card-icon">🔴</div>
       <div class="lab-card-body">
         <div class="lab-card-title">Offensive Lab: Attack Practice</div>
         <div class="lab-card-sub">Penetration Tester, Red Team Operator</div>
         <div class="lab-card-tags"><span class="lab-tag">Red Team</span><span class="lab-tag">Kali / Metasploit</span></div>
       </div>
-      <div class="lab-card-open" id="lab-offensive-toggle">View Guide <span>&#9660;</span></div>
+      <div class="lab-card-open">View Lab →</div>
     </div>
 
     <!-- Card 4: Active Directory -->
-    <div class="lab-card" onclick="toggleLabGuide('lab-ad')" style="--lab-color:rgba(107,159,255,.18);--lab-border:rgba(107,159,255,.35);">
+    <div class="lab-card" onclick="showHomelabDetail('lab-ad')" style="--lab-color:rgba(107,159,255,.18);--lab-border:rgba(107,159,255,.35);">
       <div class="lab-card-icon">🏢</div>
       <div class="lab-card-body">
         <div class="lab-card-title">Active Directory Lab</div>
         <div class="lab-card-sub">Essential for most enterprise security roles</div>
         <div class="lab-card-tags"><span class="lab-tag">IAM</span><span class="lab-tag">Windows Server</span></div>
       </div>
-      <div class="lab-card-open" id="lab-ad-toggle">View Guide <span>&#9660;</span></div>
+      <div class="lab-card-open">View Lab →</div>
     </div>
 
     <!-- Card 5: Cloud Lab -->
-    <div class="lab-card" onclick="toggleLabGuide('lab-cloud')" style="--lab-color:rgba(251,191,36,.15);--lab-border:rgba(251,191,36,.35);">
+    <div class="lab-card" onclick="showHomelabDetail('lab-cloud')" style="--lab-color:rgba(251,191,36,.15);--lab-border:rgba(251,191,36,.35);">
       <div class="lab-card-icon">☁️</div>
       <div class="lab-card-body">
         <div class="lab-card-title">Cloud Lab: AWS / Azure</div>
         <div class="lab-card-sub">Cloud Security Engineer, Architect</div>
         <div class="lab-card-tags"><span class="lab-tag">Cloud</span><span class="lab-tag">AWS / Azure</span></div>
       </div>
-      <div class="lab-card-open" id="lab-cloud-toggle">View Guide <span>&#9660;</span></div>
+      <div class="lab-card-open">View Lab →</div>
+    </div>
+
+    <!-- Card 6: IDS/IPS -->
+    <div class="lab-card" onclick="showHomelabDetail('lab-ids')" style="--lab-color:rgba(251,146,60,.2);--lab-border:rgba(251,146,60,.35);">
+      <div class="lab-card-icon">🚨</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">IDS/IPS Lab: Threat Detection</div>
+        <div class="lab-card-sub">Detect attacks in real time with Suricata and Zeek</div>
+        <div class="lab-card-tags"><span class="lab-tag">Blue Team</span><span class="lab-tag">Suricata / Zeek</span></div>
+      </div>
+      <div class="lab-card-open">View Lab →</div>
+    </div>
+
+    <!-- Card 7: Malware Analysis -->
+    <div class="lab-card" onclick="showHomelabDetail('lab-malware')" style="--lab-color:rgba(192,38,211,.18);--lab-border:rgba(192,38,211,.35);">
+      <div class="lab-card-icon">🦠</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Malware Analysis Lab</div>
+        <div class="lab-card-sub">Safely detonate and analyze malicious samples</div>
+        <div class="lab-card-tags"><span class="lab-tag">DFIR</span><span class="lab-tag">Reverse Engineering</span></div>
+      </div>
+      <div class="lab-card-open">View Lab →</div>
+    </div>
+
+    <!-- Card 8: Web App Pentesting -->
+    <div class="lab-card" onclick="showHomelabDetail('lab-webapp')" style="--lab-color:rgba(20,184,166,.2);--lab-border:rgba(20,184,166,.35);">
+      <div class="lab-card-icon">🌐</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Web App Pentesting Lab</div>
+        <div class="lab-card-sub">Practice OWASP Top 10 attacks safely</div>
+        <div class="lab-card-tags"><span class="lab-tag">AppSec</span><span class="lab-tag">Burp Suite</span></div>
+      </div>
+      <div class="lab-card-open">View Lab →</div>
+    </div>
+
+    <!-- Card 9: Container Security -->
+    <div class="lab-card" onclick="showHomelabDetail('lab-container')" style="--lab-color:rgba(14,165,233,.2);--lab-border:rgba(14,165,233,.35);">
+      <div class="lab-card-icon">📦</div>
+      <div class="lab-card-body">
+        <div class="lab-card-title">Container Security Lab</div>
+        <div class="lab-card-sub">Scan, monitor, and attack Docker and Kubernetes</div>
+        <div class="lab-card-tags"><span class="lab-tag">Cloud / DevSecOps</span><span class="lab-tag">Docker</span></div>
+      </div>
+      <div class="lab-card-open">View Lab →</div>
     </div>
 
   </div><!-- end grid -->
-
-  <!-- ─── GUIDE: Virtualization ─── -->
-  <div class="lab-guide" id="lab-virt" style="display:none;">
-    <div class="lg-header" style="border-color:rgba(16,232,126,.4);">
-      <span class="lg-icon">🖥️</span>
-      <div><div class="lg-title">Foundation: Virtualization Setup</div><div class="lg-sub">Install your hypervisor before building any other lab</div></div>
-    </div>
-    <div class="lg-diagram">
-      <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
-        <rect x="10" y="10" width="540" height="100" rx="10" fill="rgba(16,232,126,.07)" stroke="rgba(16,232,126,.3)" stroke-width="1.5"/>
-        <text x="280" y="30" text-anchor="middle" fill="rgba(16,232,126,.7)" font-family="monospace" font-size="11">Your Physical Machine (Host OS)</text>
-        <rect x="30" y="45" width="140" height="50" rx="6" fill="rgba(16,232,126,.12)" stroke="rgba(16,232,126,.4)" stroke-width="1"/>
-        <text x="100" y="68" text-anchor="middle" fill="#10e87e" font-family="monospace" font-size="10">VM 1</text>
-        <text x="100" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Kali Linux</text>
-        <rect x="210" y="45" width="140" height="50" rx="6" fill="rgba(34,211,238,.1)" stroke="rgba(34,211,238,.35)" stroke-width="1"/>
-        <text x="280" y="68" text-anchor="middle" fill="#0dd4c8" font-family="monospace" font-size="10">VM 2</text>
-        <text x="280" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Windows Server</text>
-        <rect x="390" y="45" width="140" height="50" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.35)" stroke-width="1"/>
-        <text x="460" y="68" text-anchor="middle" fill="#4d9eff" font-family="monospace" font-size="10">VM 3</text>
-        <text x="460" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Security Onion</text>
-        <text x="170" y="74" text-anchor="middle" fill="rgba(255,255,255,.3)" font-family="monospace" font-size="14">|</text>
-        <text x="350" y="74" text-anchor="middle" fill="rgba(255,255,255,.3)" font-family="monospace" font-size="14">|</text>
-      </svg>
-    </div>
-    <div class="lg-steps">
-      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Check your hardware</div><div class="lg-step-desc">You need at least <strong>16GB RAM</strong> (8GB minimum, 2–3 VMs at once requires 16GB+). <strong>CPU:</strong> enable virtualization (Intel VT-x / AMD-V) in BIOS. <strong>Disk:</strong> 100GB+ free for VMs.</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Install a hypervisor</div><div class="lg-step-desc">Choose one: <strong>VMware Workstation Pro</strong> (now free for personal use — best performance) or <strong>VirtualBox</strong> (free, open source, cross-platform). Download from official sites only.</div><div class="lg-cmd">VMware: broadcom.com/support/vmware-by-broadcom<br>VirtualBox: virtualbox.org</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Create your first VM: Kali Linux</div><div class="lg-step-desc">Download the Kali pre-built VMware or VirtualBox image from kali.org. Import it directly — no manual install needed. Allocate 4GB RAM, 2 CPUs, 60GB disk.</div><div class="lg-cmd">kali.org/get-kali/ → Virtual Machine Images</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Set up networking</div><div class="lg-step-desc">Create a <strong>Host-Only network adapter</strong> for isolated lab traffic between VMs. Use <strong>NAT</strong> for internet access when updating tools. Never put vulnerable VMs on your main network.</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Take snapshots</div><div class="lg-step-desc">Before starting any lab exercise, take a snapshot of every VM. After breaking something (you will), just revert. This is the #1 habit that separates efficient lab users from frustrated ones.</div></div></div>
-    </div>
-    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">VMware Workstation Pro</span><span class="lg-tool-tag">VirtualBox</span><span class="lg-tool-tag">Kali Linux</span></div>
-  </div>
-
-  <!-- ─── GUIDE: SIEM + Detection ─── -->
-  <div class="lab-guide" id="lab-siem" style="display:none;">
-    <div class="lg-header" style="border-color:rgba(34,211,238,.4);">
-      <span class="lg-icon">🛡️</span>
-      <div><div class="lg-title">Defensive Lab: SIEM + Detection Engineering</div><div class="lg-sub">Build a real detection environment with log collection, correlation, and alerting</div></div>
-    </div>
-    <div class="lg-diagram">
-      <svg viewBox="0 0 560 130" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
-        <rect x="10" y="10" width="115" height="50" rx="7" fill="rgba(34,211,238,.1)" stroke="rgba(34,211,238,.3)" stroke-width="1"/>
-        <text x="67" y="33" text-anchor="middle" fill="#0dd4c8" font-family="monospace" font-size="10">Windows VM</text>
-        <text x="67" y="49" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">+ Sysmon</text>
-        <rect x="10" y="75" width="115" height="50" rx="7" fill="rgba(34,211,238,.08)" stroke="rgba(34,211,238,.25)" stroke-width="1"/>
-        <text x="67" y="98" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="10">Linux VM</text>
-        <text x="67" y="114" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Syslog Agent</text>
-        <line x1="125" y1="35" x2="200" y2="55" stroke="rgba(34,211,238,.4)" stroke-width="1.5" stroke-dasharray="4"/>
-        <line x1="125" y1="100" x2="200" y2="70" stroke="rgba(34,211,238,.3)" stroke-width="1.5" stroke-dasharray="4"/>
-        <rect x="200" y="40" width="140" height="60" rx="8" fill="rgba(34,211,238,.14)" stroke="rgba(34,211,238,.5)" stroke-width="1.5"/>
-        <text x="270" y="65" text-anchor="middle" fill="#0dd4c8" font-family="monospace" font-size="11" font-weight="bold">SIEM</text>
-        <text x="270" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Splunk / Wazuh</text>
-        <line x1="340" y1="70" x2="400" y2="70" stroke="rgba(255,180,0,.5)" stroke-width="1.5"/>
-        <rect x="400" y="45" width="140" height="50" rx="7" fill="rgba(255,180,0,.1)" stroke="rgba(255,180,0,.3)" stroke-width="1"/>
-        <text x="470" y="68" text-anchor="middle" fill="#f5c842" font-family="monospace" font-size="10">Alerts &amp; Dashboards</text>
-        <text x="470" y="83" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Detection Rules</text>
-      </svg>
-    </div>
-    <div class="lg-steps">
-      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Set up a Windows VM (log source)</div><div class="lg-step-desc">Use a free <strong>Windows 10/11 evaluation ISO</strong> from Microsoft or use Windows Server 2022 (180-day eval). This will be your primary log-generating machine.</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Deploy Sysmon for rich telemetry</div><div class="lg-step-desc">Sysmon adds deep Windows event logging: process creation, network connections, file hashes, registry changes. Use the <strong>SwiftOnSecurity sysmon-config</strong> — the community standard configuration.</div><div class="lg-cmd">winget install Sysinternals.Sysmon<br>sysmon64.exe -accepteula -i sysmonconfig.xml</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Install Splunk Free (SIEM)</div><div class="lg-step-desc">Splunk Free gives 500MB/day of indexing — plenty for lab use. Install on your host or a dedicated Linux VM. Create a new index called "lab".</div><div class="lg-cmd">splunk.com/download → Free Trial → Install<br>splunk start<br># Navigate to localhost:8000</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Forward Windows logs to Splunk</div><div class="lg-step-desc">Install the <strong>Splunk Universal Forwarder</strong> on your Windows VM. Configure it to forward Security, System, Application event logs plus Sysmon (Event ID 1, 3, 7, 11).</div><div class="lg-cmd"># inputs.conf on Windows forwarder:<br>[WinEventLog://Microsoft-Windows-Sysmon/Operational]<br>[WinEventLog://Security]</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Write your first detection rule</div><div class="lg-step-desc">Create a saved search in Splunk that alerts when PowerShell is launched by a non-admin process — a common attacker technique. This is your first real detection engineering exercise.</div><div class="lg-cmd">index=lab EventCode=1 Image="*powershell.exe"<br>ParentImage!="*explorer.exe"<br>| alert if count &gt; 0</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Alternative: Try Wazuh (free open-source)</div><div class="lg-step-desc"><strong>Wazuh</strong> is a free, full-featured SIEM+XDR stack. Easier to deploy than Splunk for beginners. Includes pre-built MITRE ATT&CK correlation rules, FIM, and vulnerability scanning out of the box.</div><div class="lg-cmd">wazuh.com → OVA image → Import to VMware/VBox</div></div></div>
-    </div>
-    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">Splunk Free</span><span class="lg-tool-tag">Sysmon</span><span class="lg-tool-tag">Wazuh</span><span class="lg-tool-tag">Security Onion</span><span class="lg-tool-tag">Universal Forwarder</span></div>
-  </div>
-
-  <!-- ─── GUIDE: Offensive ─── -->
-  <div class="lab-guide" id="lab-offensive" style="display:none;">
-    <div class="lg-header" style="border-color:rgba(240,93,120,.4);">
-      <span class="lg-icon">🔴</span>
-      <div><div class="lg-title">Offensive Lab: Attack Practice</div><div class="lg-sub">Set up a safe, isolated environment to practice penetration testing techniques</div></div>
-    </div>
-    <div class="lg-diagram">
-      <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
-        <rect x="10" y="20" width="130" height="80" rx="8" fill="rgba(240,93,120,.12)" stroke="rgba(240,93,120,.4)" stroke-width="1.5"/>
-        <text x="75" y="50" text-anchor="middle" fill="#f05d78" font-family="monospace" font-size="11" font-weight="bold">Attacker</text>
-        <text x="75" y="68" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Kali Linux</text>
-        <text x="75" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">192.168.56.10</text>
-        <rect x="215" y="30" width="130" height="60" rx="7" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
-        <text x="280" y="58" text-anchor="middle" fill="#dde6f0" font-family="monospace" font-size="10">Host-Only</text>
-        <text x="280" y="74" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">192.168.56.0/24</text>
-        <rect x="420" y="20" width="130" height="80" rx="8" fill="rgba(249,115,22,.1)" stroke="rgba(249,115,22,.35)" stroke-width="1.5"/>
-        <text x="485" y="50" text-anchor="middle" fill="#ff8c42" font-family="monospace" font-size="11" font-weight="bold">Target</text>
-        <text x="485" y="68" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Metasploitable 3</text>
-        <text x="485" y="84" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">192.168.56.20</text>
-        <line x1="140" y1="60" x2="215" y2="60" stroke="rgba(240,93,120,.5)" stroke-width="2" marker-end="url(#arrow)"/>
-        <line x1="345" y1="60" x2="420" y2="60" stroke="rgba(240,93,120,.5)" stroke-width="2"/>
-        <text x="183" y="52" fill="#f05d78" font-family="monospace" font-size="9">scan/exploit</text>
-      </svg>
-    </div>
-    <div class="lg-steps">
-      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Install Kali Linux (attacker VM)</div><div class="lg-step-desc">Download the pre-built Kali VM image from kali.org. Import to VMware or VirtualBox. Kali includes Nmap, Metasploit, Burp Suite, Wireshark, Hydra, and hundreds of other tools pre-installed. Update immediately.</div><div class="lg-cmd">sudo apt update &amp;&amp; sudo apt full-upgrade -y</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Set up a vulnerable target VM</div><div class="lg-step-desc"><strong>Metasploitable 3</strong> — Intentionally vulnerable Ubuntu/Windows VMs. Built specifically for Metasploit practice. Also try <strong>VulnHub</strong> machines for CTF-style challenges.</div><div class="lg-cmd">github.com/rapid7/metasploitable3<br># or download pre-built from vulnhub.com</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Configure isolated Host-Only networking</div><div class="lg-step-desc">Put both VMs on the same Host-Only adapter (VMnet1 in VMware). This creates an isolated network — no internet access for target, preventing accidental exposure. Never put vulnerable VMs on NAT or bridged mode.</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Run your first Nmap scan</div><div class="lg-step-desc">Discover the target and enumerate open ports. Use this exact methodology for every engagement: ping sweep → port scan → service detection → OS fingerprint.</div><div class="lg-cmd">nmap -sn 192.168.56.0/24          # discover hosts<br>nmap -sV -sC -O 192.168.56.20     # full scan<br>nmap -p- --min-rate 5000 TARGET   # all ports</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Practice web application attacks with DVWA</div><div class="lg-step-desc">Deploy <strong>DVWA (Damn Vulnerable Web App)</strong> via Docker on your Kali VM. Practice SQL injection, XSS, CSRF, command injection, and file upload vulnerabilities at adjustable difficulty levels.</div><div class="lg-cmd">docker run -d -p 80:80 vulnerables/web-dvwa<br># Browse to http://localhost/login.php</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Progress to TryHackMe and HackTheBox</div><div class="lg-step-desc">After you're comfortable with local VMs, level up with <strong>TryHackMe</strong> (guided paths, beginner-friendly) and <strong>HackTheBox</strong> (realistic machines, OSCP prep). Both have free tiers.</div></div></div>
-    </div>
-    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">Kali Linux</span><span class="lg-tool-tag">Metasploit</span><span class="lg-tool-tag">Nmap</span><span class="lg-tool-tag">Burp Suite</span><span class="lg-tool-tag">DVWA</span><span class="lg-tool-tag">VulnHub</span></div>
-  </div>
-
-  <!-- ─── GUIDE: Active Directory ─── -->
-  <div class="lab-guide" id="lab-ad" style="display:none;">
-    <div class="lg-header" style="border-color:rgba(107,159,255,.4);">
-      <span class="lg-icon">🏢</span>
-      <div><div class="lg-title">Active Directory Lab</div><div class="lg-sub">Build a realistic enterprise environment for IAM, red team, and detection practice</div></div>
-    </div>
-    <div class="lg-diagram">
-      <svg viewBox="0 0 560 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
-        <rect x="180" y="10" width="200" height="55" rx="8" fill="rgba(107,159,255,.14)" stroke="rgba(107,159,255,.45)" stroke-width="1.5"/>
-        <text x="280" y="35" text-anchor="middle" fill="#82b8ff" font-family="monospace" font-size="11" font-weight="bold">Domain Controller</text>
-        <text x="280" y="52" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Windows Server 2022 | lab.local</text>
-        <line x1="175" y1="75" x2="100" y2="105" stroke="rgba(107,159,255,.35)" stroke-width="1.5"/>
-        <line x1="280" y1="65" x2="280" y2="95" stroke="rgba(107,159,255,.35)" stroke-width="1.5"/>
-        <line x1="385" y1="75" x2="460" y2="105" stroke="rgba(107,159,255,.35)" stroke-width="1.5"/>
-        <rect x="30" y="100" width="140" height="35" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.3)" stroke-width="1"/>
-        <text x="100" y="116" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Win 10/11 Client</text>
-        <text x="100" y="128" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">alice@lab.local</text>
-        <rect x="210" y="100" width="140" height="35" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.3)" stroke-width="1"/>
-        <text x="280" y="116" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">Kali Linux (attacker)</text>
-        <text x="280" y="128" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">BloodHound / Mimikatz</text>
-        <rect x="390" y="100" width="140" height="35" rx="6" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.3)" stroke-width="1"/>
-        <text x="460" y="116" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="9">SIEM VM</text>
-        <text x="460" y="128" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">Splunk / Wazuh</text>
-      </svg>
-    </div>
-    <div class="lg-steps">
-      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Download Windows Server 2022 evaluation</div><div class="lg-step-desc">Microsoft offers free 180-day evaluation ISOs. No license key required. Create a new VM: 4GB RAM, 2 CPUs, 60GB disk. Install Server Core or Desktop Experience.</div><div class="lg-cmd">microsoft.com/en-us/evalcenter/evaluate-windows-server-2022</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Promote to Domain Controller</div><div class="lg-step-desc">Install the AD DS role and promote the server to a Domain Controller. Use domain name <code>lab.local</code>. This will install DNS automatically.</div><div class="lg-cmd">Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools<br>Install-ADDSForest -DomainName "lab.local"</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Add a Windows 10/11 client VM</div><div class="lg-step-desc">Create a second VM with Windows 10/11 evaluation. Join it to the <code>lab.local</code> domain. Create 3–5 standard domain users and 1–2 admin accounts. This mirrors a real enterprise environment.</div><div class="lg-cmd">Add-Computer -DomainName "lab.local" -Restart</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Create deliberate misconfigurations for practice</div><div class="lg-step-desc">These are the real learning exercises: set a user with <code>adminCount=1</code>, enable unconstrained delegation on a computer, add a user to Domain Admins incorrectly, use a weak Service Account password (for Kerberoasting practice).</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Attack with BloodHound (from Kali VM)</div><div class="lg-step-desc">Run <strong>BloodHound</strong> with SharpHound collector to map all AD relationships. Identify attack paths to Domain Admin. This teaches both offense (how attackers escalate) and defense (what to harden).</div><div class="lg-cmd">python3 bloodhound.py -u alice -p Password1 -d lab.local -c All</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Detect the attacks in your SIEM</div><div class="lg-step-desc">Enable advanced audit policies on the DC. Forward Security event logs to Splunk/Wazuh. Write detection rules for: Kerberoasting (Event 4769), Pass-the-Hash (Event 4624 LogonType 3), BloodHound enumeration (4662 repeated ACL access).</div></div></div>
-    </div>
-    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">Windows Server 2022</span><span class="lg-tool-tag">BloodHound</span><span class="lg-tool-tag">Mimikatz</span><span class="lg-tool-tag">Impacket</span><span class="lg-tool-tag">PowerView</span></div>
-  </div>
-
-  <!-- ─── GUIDE: Cloud Lab ─── -->
-  <div class="lab-guide" id="lab-cloud" style="display:none;">
-    <div class="lg-header" style="border-color:rgba(251,191,36,.4);">
-      <span class="lg-icon">☁️</span>
-      <div><div class="lg-title">Cloud Lab: AWS + Azure Free Tier</div><div class="lg-sub">Practice real cloud security skills without any upfront cost</div></div>
-    </div>
-    <div class="lg-diagram">
-      <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;display:block;margin:0 auto;">
-        <rect x="10" y="15" width="255" height="90" rx="10" fill="rgba(251,191,36,.07)" stroke="rgba(251,191,36,.3)" stroke-width="1.5"/>
-        <text x="137" y="38" text-anchor="middle" fill="rgba(251,191,36,.8)" font-family="monospace" font-size="10" font-weight="bold">AWS Free Tier</text>
-        <rect x="25" y="50" width="100" height="40" rx="5" fill="rgba(251,191,36,.12)" stroke="rgba(251,191,36,.25)" stroke-width="1"/>
-        <text x="75" y="68" text-anchor="middle" fill="#f5c842" font-family="monospace" font-size="9">IAM / S3 / VPC</text>
-        <text x="75" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">GuardDuty / Config</text>
-        <rect x="145" y="50" width="105" height="40" rx="5" fill="rgba(251,191,36,.09)" stroke="rgba(251,191,36,.2)" stroke-width="1"/>
-        <text x="197" y="68" text-anchor="middle" fill="#f5c842" font-family="monospace" font-size="9">CloudTrail / Logs</text>
-        <text x="197" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">CloudWatch</text>
-        <rect x="295" y="15" width="255" height="90" rx="10" fill="rgba(77,158,255,.07)" stroke="rgba(77,158,255,.3)" stroke-width="1.5"/>
-        <text x="422" y="38" text-anchor="middle" fill="rgba(77,158,255,.8)" font-family="monospace" font-size="10" font-weight="bold">Azure Free Account</text>
-        <rect x="310" y="50" width="100" height="40" rx="5" fill="rgba(77,158,255,.1)" stroke="rgba(77,158,255,.25)" stroke-width="1"/>
-        <text x="360" y="68" text-anchor="middle" fill="#4d9eff" font-family="monospace" font-size="9">Entra ID / Defender</text>
-        <text x="360" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">Sentinel SIEM</text>
-        <rect x="430" y="50" width="105" height="40" rx="5" fill="rgba(77,158,255,.07)" stroke="rgba(77,158,255,.2)" stroke-width="1"/>
-        <text x="482" y="68" text-anchor="middle" fill="#4d9eff" font-family="monospace" font-size="9">Key Vault / NSGs</text>
-        <text x="482" y="82" text-anchor="middle" fill="#94a3b8" font-family="monospace" font-size="8">Policy / Blueprints</text>
-      </svg>
-    </div>
-    <div class="lg-steps">
-      <div class="lg-step"><div class="lg-step-n">1</div><div class="lg-step-body"><div class="lg-step-title">Create an AWS Free Tier account</div><div class="lg-step-desc">AWS Free Tier gives 12 months of free services including EC2 (750 hrs/month), S3 (5GB), CloudTrail, and more. Set up billing alerts immediately — accidental charges happen to beginners.</div><div class="lg-cmd">aws.amazon.com/free<br>aws budgets create-budget --budget-name "lab" --amount 5</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">2</div><div class="lg-step-body"><div class="lg-step-title">Harden your AWS root account (Day 1)</div><div class="lg-step-desc">Never use root for daily work. Create an IAM user with least-privilege policies. Enable MFA on root and all IAM users. This is the first thing every cloud security interviewer will ask about.</div><div class="lg-cmd">aws iam create-virtual-mfa-device<br>aws iam enable-mfa-device --user-name admin --serial-number ARN</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">3</div><div class="lg-step-body"><div class="lg-step-title">Enable CloudTrail + GuardDuty</div><div class="lg-step-desc"><strong>CloudTrail</strong> logs every API call in your account — the equivalent of an audit log. <strong>GuardDuty</strong> is AWS's built-in threat detection (free 30-day trial). Enable both in every region you use.</div><div class="lg-cmd">aws cloudtrail create-trail --name lab-trail --s3-bucket-name lab-logs<br>aws guardduty create-detector --enable</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">4</div><div class="lg-step-body"><div class="lg-step-title">Practice CloudGoat (intentionally vulnerable AWS)</div><div class="lg-step-desc"><strong>CloudGoat</strong> by Rhino Security Labs is the "Metasploitable for AWS." It deploys misconfigured environments for attack/defense practice: privilege escalation, S3 data exfil, lambda abuse, and more.</div><div class="lg-cmd">git clone https://github.com/RhinoSecurityLabs/cloudgoat<br>pip3 install -r requirements.txt<br>./cloudgoat.py create iam_privesc_by_attachment</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">5</div><div class="lg-step-body"><div class="lg-step-title">Set up Azure free account + Microsoft Sentinel</div><div class="lg-step-desc">Azure gives $200 credit + 12 months of free services. Enable <strong>Microsoft Sentinel</strong> (cloud SIEM) and <strong>Defender for Cloud</strong>. Connect your Azure activity logs. Sentinel uses KQL for queries — a critical skill for Azure security jobs.</div><div class="lg-cmd">portal.azure.com → Microsoft Sentinel → Create workspace<br>az sentinel onboarding-state create -g lab-rg -w lab-workspace</div></div></div>
-      <div class="lg-step"><div class="lg-step-n">6</div><div class="lg-step-body"><div class="lg-step-title">Use Prowler for cloud security auditing</div><div class="lg-step-desc"><strong>Prowler</strong> is a free open-source cloud security assessment tool. Run it against your AWS account to identify misconfigurations and benchmark against CIS controls. Great for interview talking points.</div><div class="lg-cmd">pip3 install prowler<br>prowler aws --compliance cis_2.0_aws</div></div></div>
-    </div>
-    <div class="lg-tools"><span class="lg-tools-lbl">Tools Used:</span><span class="lg-tool-tag">AWS Free Tier</span><span class="lg-tool-tag">Azure Free</span><span class="lg-tool-tag">CloudGoat</span><span class="lg-tool-tag">Prowler</span><span class="lg-tool-tag">Microsoft Sentinel</span><span class="lg-tool-tag">GuardDuty</span></div>
-  </div>
 
 </div>
 <!-- NordVPN Banner -->
@@ -2618,6 +2485,12 @@
   <a class="nvpn-cta" href="https://nordvpn.com/" target="_blank" rel="noopener sponsored">Get NordVPN &rarr;</a>
 </div>
 <div class="footer">InfoSecDeck · Home Lab Guide · All tools listed are free or have free tiers unless noted</div>
+</div>
+
+<!-- ═══════════════ HOMELAB DETAIL ═══════════════ -->
+<div class="page" id="page-homelab-detail">
+  <div style="padding:52px 28px 100px;max-width:960px;margin:0 auto;" id="homelab-detail-content"></div>
+  <div class="footer">InfoSecDeck · Home Lab Guide · All tools listed are free or have free tiers unless noted</div>
 </div>
 
 <!-- ═══════════════ GLOSSARY ═══════════════ -->
@@ -4321,7 +4194,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=45"></script>
+<script src="js/app.js?v=46"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->

@@ -1403,7 +1403,7 @@ function setActiveNav(pageId) {
   var pageToNav = {
     home:'home', ladder:'career', domains:'career', domain:'career',
     salary:'career', interview:'career', pivot:'career', quiz:'career',
-    certs:'learn', training:'learn', homelab:'learn', glossary:'learn',
+    certs:'learn', training:'learn', homelab:'learn', 'homelab-detail':'learn', glossary:'learn',
     roaster:'tools', games:'tools', tools:'tools', resume:'tools',
     threats:'intel', jobs:'intel', calendar:'intel',
     blog:'community', reviews:'community', about:'community', stories:'community',
@@ -1447,28 +1447,257 @@ document.addEventListener('click', function(e){
 
 
 // ══════════ HOME LAB GUIDE ══════════
-function toggleLabGuide(id){
-  var guide=document.getElementById(id);
-  if(!guide)return;
-  var toggleEl=document.getElementById(id+'-toggle');
-  var cardEl=guide.previousElementSibling;// search up for lab-card
-  // find parent lab-card by traversing up
-  var parent=guide;
-  // toggle visibility
-  var isOpen=guide.style.display!=='none'&&guide.style.display!=='';
-  if(isOpen){
-    guide.style.display='none';
-    if(toggleEl)toggleEl.innerHTML='View Guide <span>&#9660;</span>';
-    // find the corresponding card and remove open class
-    var card=document.querySelector('[onclick="toggleLabGuide(\''+id+'\')"]');
-    if(card)card.classList.remove('open');
-  } else {
-    guide.style.display='block';
-    if(toggleEl)toggleEl.innerHTML='Close Guide <span>&#9650;</span>';
-    var card=document.querySelector('[onclick="toggleLabGuide(\''+id+'\')"]');
-    if(card)card.classList.add('open');
-    setTimeout(function(){guide.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
+var HOMELAB_LABS = {
+  'lab-virt': {
+    icon: '🖥️', color: 'rgba(16,232,126,1)', colorMuted: 'rgba(16,232,126,.15)',
+    title: 'Foundation: Virtualization',
+    sub: 'Set up your isolated practice environment — this is the foundation for every other lab',
+    tags: ['All Roles', 'Required First'],
+    difficulty: 'Beginner', time: '2–3 hours',
+    steps: [
+      { title: 'Check hardware requirements', desc: 'You need at least 16GB RAM (32GB recommended), a CPU with VT-x/AMD-V virtualization support (check in BIOS), and 100GB+ of free disk space. An SSD is strongly preferred for performance.', cmd: '' },
+      { title: 'Install a hypervisor', desc: 'VMware Workstation Pro is now free for personal use — download it from vmware.com. VirtualBox is a solid free alternative. VMware generally offers better networking options for security labs.', cmd: '# VMware Workstation Pro: vmware.com/products/workstation-pro\n# VirtualBox: virtualbox.org' },
+      { title: 'Create your Kali Linux VM', desc: 'Download the pre-built Kali VMware/VirtualBox image from kali.org — it saves hours vs. a manual install. Allocate 4GB RAM and 60GB disk to start. Enable 3D acceleration if available.', cmd: '# Pre-built VM: kali.org/get-kali/#kali-virtual-machines\n# Default credentials: kali / kali (change immediately)' },
+      { title: 'Set up networking modes', desc: 'Use Host-Only networking to isolate your attack lab from the internet. Use NAT when you need internet access for updates. Create a dedicated Host-Only adapter (e.g., 192.168.56.0/24) that only your VMs share.', cmd: '# VMware: Edit → Virtual Network Editor → Add Host-Only\n# VirtualBox: File → Host Network Manager → Create' },
+      { title: 'Take snapshots before every lab', desc: 'Snapshots are your safety net — they let you instantly revert a VM to a clean state after a lab exercise. Take a "clean" snapshot right after setup, before you install anything else.', cmd: '# VMware: VM → Snapshot → Take Snapshot\n# VirtualBox: Machine → Take Snapshot\n# Name it: "Clean - [date]"' },
+    ],
+    tools: ['VMware Workstation Pro', 'VirtualBox', 'Kali Linux'],
+    resources: [
+      { label: 'Kali Linux VMs', url: 'https://www.kali.org/get-kali/#kali-virtual-machines' },
+      { label: 'VirtualBox (free)', url: 'https://www.virtualbox.org/' },
+    ],
+  },
+  'lab-siem': {
+    icon: '🛡️', color: 'rgba(34,211,238,1)', colorMuted: 'rgba(34,211,238,.15)',
+    title: 'Defensive Lab: SIEM + Detection',
+    sub: 'Build a blue team detection lab with Splunk or Wazuh',
+    tags: ['Blue Team', 'Splunk / Wazuh'],
+    difficulty: 'Intermediate', time: '4–6 hours',
+    steps: [
+      { title: 'Set up a Windows VM (log source)', desc: 'Create a Windows 10/11 VM — this will be your log source. Use an evaluation license from Microsoft (free for 90 days). Allocate 4GB RAM and 60GB disk. Join it to the same Host-Only network as your Kali VM.', cmd: '# Windows 10 Eval: microsoft.com/en-us/evalcenter/\n# Shared folder with Kali for easy file transfer' },
+      { title: 'Deploy Sysmon for rich Windows telemetry', desc: 'Sysmon captures process creation, network connections, file hashes, and more — far richer than default Windows event logs. Use the SwiftOnSecurity config, the gold standard for detection coverage.', cmd: '# Download Sysmon: sysinternals.com\n# SwiftOnSecurity config:\ngit clone https://github.com/SwiftOnSecurity/sysmon-config\nSysmon64.exe -accepteula -i sysmon-config/sysmonconfig-export.xml' },
+      { title: 'Install Splunk Free (500MB/day)', desc: 'Download Splunk Enterprise with the free license tier — it indexes 500MB/day, more than enough for a lab. Install it on a dedicated Linux VM or your main machine. Enable the web interface on port 8000.', cmd: '# Download: splunk.com/en_us/download/splunk-enterprise.html\n# After install:\n/opt/splunk/bin/splunk start\n# Access: http://localhost:8000' },
+      { title: 'Forward Windows logs to Splunk', desc: 'Install the Splunk Universal Forwarder on your Windows VM. Configure it to send Security, System, Application, and Sysmon event logs to your Splunk instance.', cmd: '# On Windows VM: download Universal Forwarder from splunk.com\n# Add inputs in inputs.conf:\n[WinEventLog://Security]\nindex = main\n[WinEventLog://Microsoft-Windows-Sysmon/Operational]\nindex = main' },
+      { title: 'Write your first detection rule', desc: 'Search Splunk for suspicious activity — start with PowerShell launched from a non-admin process. Splunk Search Processing Language (SPL) is the skill to develop here.', cmd: 'index=main source="WinEventLog:Microsoft-Windows-Sysmon/Operational"\nEventCode=1 Image="*\\powershell.exe"\n| table _time, User, ParentImage, CommandLine' },
+      { title: 'Alternative: Try Wazuh (free open-source SIEM+XDR)', desc: 'Wazuh is a powerful free alternative to Splunk — no data limits. It includes an agent, manager, and dashboard. Great for learning if the 500MB Splunk limit is an issue.', cmd: '# Wazuh quickstart (Docker):\ncurl -sO https://packages.wazuh.com/4.7/wazuh-install.sh\nbash ./wazuh-install.sh -a' },
+    ],
+    tools: ['Splunk Free', 'Sysmon', 'Wazuh', 'Security Onion', 'Universal Forwarder'],
+    resources: [
+      { label: 'Splunk Fundamentals (free training)', url: 'https://www.splunk.com/en_us/training/free-courses/splunk-fundamentals-1.html' },
+      { label: 'Wazuh Quickstart', url: 'https://documentation.wazuh.com/current/quickstart.html' },
+      { label: 'SwiftOnSecurity Sysmon Config', url: 'https://github.com/SwiftOnSecurity/sysmon-config' },
+    ],
+  },
+  'lab-offensive': {
+    icon: '🔴', color: 'rgba(240,93,120,1)', colorMuted: 'rgba(240,93,120,.15)',
+    title: 'Offensive Lab: Attack Practice',
+    sub: 'Build an isolated red team lab with Kali Linux and vulnerable targets',
+    tags: ['Red Team', 'Kali / Metasploit'],
+    difficulty: 'Intermediate', time: '3–5 hours',
+    steps: [
+      { title: 'Install Kali Linux', desc: 'Use the pre-built Kali VMware/VirtualBox image. Kali comes with 600+ security tools pre-installed. Update immediately after install.', cmd: 'sudo apt update && sudo apt full-upgrade -y\n# Update tool database:\nsudo apt install kali-tools-top10 -y' },
+      { title: 'Set up Metasploitable 3 (intentionally vulnerable target)', desc: 'Metasploitable 3 is a deliberately vulnerable Windows/Linux VM — perfect for practicing exploits legally. Alternatively, download pre-built vulnerable VMs from VulnHub.', cmd: '# Metasploitable 3 (requires Vagrant + VirtualBox):\ngit clone https://github.com/rapid7/metasploitable3\ncd metasploitable3 && vagrant up\n# Or simpler: download a VulnHub VM (vulnhub.com)' },
+      { title: 'Configure Host-Only networking (isolated lab)', desc: 'CRITICAL: Both Kali and your target VM must be on a Host-Only network with NO internet access. This prevents accidental attacks outside your lab. Use the 192.168.56.0/24 range.', cmd: '# Verify isolation from Kali:\nip addr  # note your Host-Only IP\nping google.com  # should FAIL if properly isolated' },
+      { title: 'Run your first Nmap scan', desc: 'Nmap is the foundation of network reconnaissance. Start with a ping sweep, then do service/version detection on your target.', cmd: '# Ping sweep (find live hosts):\nnmap -sn 192.168.56.0/24\n# Port + service scan:\nnmap -sV -sC -O 192.168.56.20\n# Output to file:\nnmap -sV 192.168.56.20 -oA nmap-results' },
+      { title: 'Practice web vulnerabilities with DVWA', desc: 'DVWA (Damn Vulnerable Web Application) runs in Docker and lets you practice SQL injection, XSS, CSRF, file upload vulnerabilities, and more — with difficulty levels.', cmd: 'docker run --rm -it -p 80:80 vulnerables/web-dvwa\n# Access: http://localhost\n# Login: admin / password → click "Create / Reset Database"' },
+      { title: 'Progress to TryHackMe and HackTheBox', desc: 'Once comfortable with your local lab, practice on structured platforms with guided rooms (TryHackMe) or unguided challenges (HackTheBox). These platforms also track your progress for your resume.', cmd: '# TryHackMe: tryhackme.com (great for beginners)\n# HackTheBox: hackthebox.com (more advanced)\n# OSCP prep: OffSec\'s Proving Grounds (offsec.com/labs/)' },
+    ],
+    tools: ['Kali Linux', 'Metasploit', 'Nmap', 'Burp Suite', 'DVWA', 'VulnHub'],
+    resources: [
+      { label: 'TryHackMe', url: 'https://tryhackme.com/' },
+      { label: 'HackTheBox', url: 'https://www.hackthebox.com/' },
+      { label: 'VulnHub', url: 'https://www.vulnhub.com/' },
+    ],
+  },
+  'lab-ad': {
+    icon: '🏢', color: 'rgba(107,159,255,1)', colorMuted: 'rgba(107,159,255,.15)',
+    title: 'Active Directory Lab',
+    sub: 'Build an AD environment to practice attacks and detections',
+    tags: ['IAM', 'Windows Server'],
+    difficulty: 'Intermediate', time: '5–7 hours',
+    steps: [
+      { title: 'Download Windows Server 2022 evaluation', desc: 'Microsoft offers a free 180-day evaluation of Windows Server 2022 — more than enough for a lab. Download the ISO and create a VM with 4GB RAM and 60GB disk.', cmd: '# Download: microsoft.com/en-us/evalcenter/evaluate-windows-server-2022\n# ISO → create VM in VMware/VirtualBox\n# Allocate: 4GB RAM, 60GB disk, 2 vCPUs' },
+      { title: 'Promote to Domain Controller', desc: 'Install Active Directory Domain Services (AD DS) and promote the server to a domain controller for your lab domain (e.g., lab.local). This is the central auth server all other machines will join.', cmd: '# PowerShell (run as Admin on the server):\nInstall-WindowsFeature AD-Domain-Services -IncludeManagementTools\nInstall-ADDSForest -DomainName "lab.local" -InstallDNS\n# Server will reboot — log in as LAB\\Administrator' },
+      { title: 'Add Windows client VM and domain users', desc: 'Create a Windows 10/11 client VM and join it to your lab.local domain. Create 3–5 normal user accounts and 1–2 domain admin accounts — this gives you realistic targets for attacks.', cmd: '# On client VM (after joining domain):\n# Join: Settings → System → About → "Join a domain"\n# PowerShell on DC to create users:\nNew-ADUser -Name "jsmith" -AccountPassword (ConvertTo-SecureString "Password1!" -AsPlainText -Force) -Enabled $true' },
+      { title: 'Create deliberate misconfigurations', desc: 'Intentionally misconfigure AD to make it vulnerable — this mirrors real-world environments. Add a user with adminCount=1, set up unconstrained delegation, create a weak Service Account SPN for Kerberoasting.', cmd: '# Create a Kerberoastable service account:\nNew-ADUser -Name "svc_sql" -ServicePrincipalNames "MSSQLSvc/sqlserver.lab.local:1433"\n# Enable unconstrained delegation on a computer:\nSet-ADComputer -Identity "WIN10CLIENT" -TrustedForDelegation $true' },
+      { title: 'Attack with BloodHound from Kali', desc: 'BloodHound maps attack paths through AD using graph theory. Run SharpHound from the Windows client to collect data, then visualize attack paths in BloodHound on Kali.', cmd: '# On Kali: install BloodHound\npip3 install bloodhound\nneo4j start\nbloodhound &\n# On Windows client (download SharpHound):\n.\\SharpHound.exe -c All --OutputDirectory C:\\Temp\n# Import ZIP into BloodHound → Find Shortest Paths to Domain Admin' },
+      { title: 'Detect the attacks in your SIEM', desc: 'After practicing attacks, pivot to your SIEM and hunt for the detections. Look for Event ID 4769 (Kerberoasting), 4624 LogonType 3 (pass-the-hash), and 4662 (BloodHound LDAP queries).', cmd: '# Splunk: search for Kerberoasting indicators:\nindex=main EventCode=4769 TicketEncryptionType=0x17\n| table _time, Account_Name, Service_Name, Client_Address' },
+    ],
+    tools: ['Windows Server 2022', 'BloodHound', 'Mimikatz', 'Impacket', 'PowerView'],
+    resources: [
+      { label: 'Windows Server 2022 Eval', url: 'https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2022' },
+      { label: 'BloodHound CE', url: 'https://github.com/SpecterOps/BloodHound' },
+      { label: 'AD Attack & Defense (GitHub)', url: 'https://github.com/infosecn1nja/AD-Attack-Defense' },
+    ],
+  },
+  'lab-cloud': {
+    icon: '☁️', color: 'rgba(251,191,36,1)', colorMuted: 'rgba(251,191,36,.15)',
+    title: 'Cloud Lab: AWS / Azure',
+    sub: 'Practice cloud security with AWS Free Tier and Azure Free Account',
+    tags: ['Cloud', 'AWS / Azure'],
+    difficulty: 'Intermediate', time: '3–5 hours',
+    steps: [
+      { title: 'Create AWS Free Tier account', desc: 'AWS Free Tier gives you 12 months of free services (EC2, S3, RDS, Lambda, and more). Set up a billing alert immediately at $5 to avoid surprise charges — it\'s easy to accidentally leave resources running.', cmd: '# After account creation:\n# Billing → Budgets → Create Budget → $5 threshold alert\n# Enable Cost Explorer to monitor spending\n# aws.amazon.com/free' },
+      { title: 'Harden root account immediately', desc: 'NEVER use the root account for daily work. Create an IAM admin user, enable MFA on the root account, and delete root access keys if they exist. This mirrors real security best practice.', cmd: '# AWS CLI (configure IAM user):\naws configure\naws iam create-user --user-name admin-user\naws iam attach-user-policy --user-name admin-user \\\n  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess' },
+      { title: 'Enable CloudTrail + GuardDuty', desc: 'CloudTrail logs every API call in your account — essential for security monitoring. GuardDuty uses ML to detect threats like cryptomining, compromised credentials, and unusual behavior. Both have free tiers.', cmd: '# Enable via console (recommended) or CLI:\naws cloudtrail create-trail --name my-trail --s3-bucket-name my-cloudtrail-bucket\naws cloudtrail start-logging --name my-trail\naws guardduty create-detector --enable' },
+      { title: 'Practice with CloudGoat (misconfigured AWS)', desc: 'CloudGoat is Rhino Security\'s intentionally vulnerable AWS environment. It teaches you to exploit common misconfigurations — over-permissive IAM, exposed credentials, S3 misconfigurations — safely.', cmd: '# Install CloudGoat:\npip3 install cloudgoat\ncg configure\ncg create [scenario-name]\n# Scenarios: wrong_permissions, iam_privesc_by_rollback, cloud_breach_s3\n# github.com/RhinoSecurityLabs/cloudgoat' },
+      { title: 'Set up Azure free account + Microsoft Sentinel', desc: 'Azure gives $200 in credits for 30 days + 12 months of free services. Microsoft Sentinel is a cloud-native SIEM — connect it to your Azure resources and practice KQL threat hunting queries.', cmd: '# Azure CLI:\naz login\naz group create --name SecurityLab --location eastus\n# Deploy Sentinel workspace:\naz monitor log-analytics workspace create --resource-group SecurityLab --workspace-name my-sentinel' },
+      { title: 'Use Prowler for cloud security auditing', desc: 'Prowler runs 300+ security checks against CIS Benchmarks, NIST, SOC2, and GDPR frameworks. Run it against your AWS account to find misconfigured resources — it\'s the tool cloud security engineers actually use.', cmd: 'pip3 install prowler\nprowler aws --profile default\n# Run specific framework:\nprowler aws --compliance cis_1.4_aws\n# Output HTML report:\nprowler aws -M html' },
+    ],
+    tools: ['AWS Free Tier', 'Azure Free', 'CloudGoat', 'Prowler', 'Microsoft Sentinel', 'GuardDuty'],
+    resources: [
+      { label: 'AWS Free Tier', url: 'https://aws.amazon.com/free/' },
+      { label: 'CloudGoat (GitHub)', url: 'https://github.com/RhinoSecurityLabs/cloudgoat' },
+      { label: 'Prowler (GitHub)', url: 'https://github.com/prowler-cloud/prowler' },
+    ],
+  },
+  'lab-ids': {
+    icon: '🚨', color: 'rgba(251,146,60,1)', colorMuted: 'rgba(251,146,60,.15)',
+    title: 'IDS/IPS Lab: Threat Detection',
+    sub: 'Detect attacks in real time with Suricata and Zeek',
+    tags: ['Blue Team', 'Suricata / Zeek'],
+    difficulty: 'Intermediate', time: '3–4 hours',
+    steps: [
+      { title: 'Install Suricata on Ubuntu VM', desc: 'Suricata is the leading open-source IDS/IPS — it inspects network traffic against rules to detect attacks, malware, and policy violations. Install it on a fresh Ubuntu 22.04 VM.', cmd: 'sudo add-apt-repository ppa:oisf/suricata-stable\nsudo apt-get update\nsudo apt-get install -y suricata\nsuricata --build-info  # verify install' },
+      { title: 'Configure network interface', desc: 'Set your network interface to promiscuous mode so Suricata can inspect all traffic passing through — not just traffic destined for this host. This is how a real IDS sensor works.', cmd: 'sudo ip link set eth0 promisc on\n# Start Suricata in IDS mode:\nsudo suricata -c /etc/suricata/suricata.yaml -i eth0 -D\n# Verify it\'s running:\nps aux | grep suricata' },
+      { title: 'Apply Emerging Threats ruleset', desc: 'The Emerging Threats Open ruleset is free and covers thousands of known threats. suricata-update downloads and applies it automatically. Update rules daily in production.', cmd: 'sudo suricata-update\n# List enabled rule sources:\nsudo suricata-update list-enabled-sources\n# Reload rules without restart:\nsudo suricatasc -c reload-rules' },
+      { title: 'Generate test traffic to trigger alerts', desc: 'From your Kali VM on the same network, run Nmap against the Suricata host and curl a known-bad test URL. This should immediately trigger IDS alerts.', cmd: '# From Kali:\nnmap -sV 192.168.56.30\ncurl http://testmynids.us/uid/index.html\n# The testmynids URL triggers ET rules on purpose' },
+      { title: 'Analyze Suricata alerts', desc: 'Suricata writes alerts to fast.log (human-readable) and eve.json (machine-readable, rich metadata). Learn to parse eve.json with jq — this is the format SIEMs ingest.', cmd: 'tail -f /var/log/suricata/fast.log\n# Parse eve.json for alerts:\ncat /var/log/suricata/eve.json | jq \'select(.event_type=="alert") | {ts:.timestamp, sig:.alert.signature, src:.src_ip}\'' },
+      { title: 'Add Zeek for network metadata analysis', desc: 'Zeek (formerly Bro) doesn\'t write alerts — it writes rich metadata logs (conn.log, dns.log, http.log, ssl.log). This is perfect for threat hunting when you don\'t know what you\'re looking for yet.', cmd: 'sudo apt-get install -y zeek\n# Add Zeek to PATH:\nexport PATH=/opt/zeek/bin:$PATH\n# Run against live interface:\nzeek -i eth0\n# Or analyze a PCAP:\nzeek -r capture.pcap' },
+    ],
+    tools: ['Suricata', 'Zeek', 'Emerging Threats Rules', 'Wireshark'],
+    resources: [
+      { label: 'Suricata Docs', url: 'https://suricata.readthedocs.io/' },
+      { label: 'Zeek.org', url: 'https://zeek.org/' },
+      { label: 'Emerging Threats Rules', url: 'https://rules.emergingthreats.net/' },
+    ],
+  },
+  'lab-malware': {
+    icon: '🦠', color: 'rgba(192,38,211,1)', colorMuted: 'rgba(192,38,211,.15)',
+    title: 'Malware Analysis Lab',
+    sub: 'Safely detonate and analyze malicious samples',
+    tags: ['DFIR', 'Reverse Engineering'],
+    difficulty: 'Advanced', time: '4–5 hours',
+    steps: [
+      { title: 'Set up FlareVM (Windows analysis VM)', desc: 'FlareVM by Mandiant/Google is a Windows VM pre-loaded with 50+ reverse engineering tools (IDA Free, x64dbg, PE Studio, FLOSS, and more). Run on a fresh Windows 10 evaluation VM.', cmd: '# On a fresh Windows 10 VM, run PowerShell as Admin:\nSet-ExecutionPolicy Unrestricted -Force\n# Download installer:\n(New-Object Net.WebClient).DownloadFile("https://raw.githubusercontent.com/mandiant/flare-vm/main/install.ps1", "$env:TEMP\\install.ps1")\n.\\$env:TEMP\\install.ps1' },
+      { title: 'Install REMnux (Linux malware toolkit)', desc: 'REMnux is a dedicated Ubuntu-based distro for analyzing malware on Linux — includes tools for PDF/Office macro analysis, memory forensics, network emulation, and more.', cmd: 'curl -O https://remnux.org/get-remnux.sh\nbash get-remnux.sh\n# Or download the pre-built VM from remnux.org' },
+      { title: 'CRITICAL: Isolate networking completely', desc: 'Set BOTH VMs to Host-Only adapter with NO internet access. Real malware WILL try to call home. This step is non-negotiable. Verify internet access fails from the analysis VM before detonating anything.', cmd: '# In VMware/VirtualBox: set both VMs to Host-Only\n# Verify from FlareVM:\npython -c "import urllib.request; urllib.request.urlopen(\'http://google.com\')" \n# Should FAIL — if it succeeds, fix networking first' },
+      { title: 'Configure dynamic analysis tools', desc: 'Before detonating a sample, set up your monitoring tools: Process Monitor (captures all system activity), Wireshark (network captures), and Regshot (takes before/after registry snapshots). Start them all BEFORE running the sample.', cmd: '# All included in FlareVM:\n# 1. Start Regshot → Take 1st shot\n# 2. Start Wireshark → Capture on all interfaces\n# 3. Start ProcMon with capture enabled\n# 4. THEN run the malware sample' },
+      { title: 'Analyze a safe test sample', desc: 'Start with the EICAR test file (triggers AV but is completely harmless) or download known-malware samples from MalwareBazaar for educational analysis. Always verify the hash against the database first.', cmd: '# EICAR test string — saves as harmless .com file:\necho "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*" > eicar.com\n# MalwareBazaar (download samples safely):\n# bazaar.abuse.ch → search by tag or family' },
+      { title: 'Write an incident report', desc: 'The final step is documentation — exactly what a DFIR analyst does. Capture: initial SHA256 hash, file type, behaviors observed (processes spawned, files created, registry keys modified, network connections attempted), IOCs, and your verdict.', cmd: '# Report template:\n# 1. File info (hash, type, size, first seen)\n# 2. Static analysis (strings, imports, PE headers)\n# 3. Dynamic behavior (processes, files, registry, network)\n# 4. IOCs (IPs, domains, file paths, hashes)\n# 5. Verdict (malware family, risk level)' },
+    ],
+    tools: ['FlareVM', 'REMnux', 'Process Monitor', 'Wireshark', 'MalwareBazaar', 'x64dbg'],
+    resources: [
+      { label: 'FlareVM (GitHub)', url: 'https://github.com/mandiant/flare-vm' },
+      { label: 'REMnux', url: 'https://remnux.org/' },
+      { label: 'MalwareBazaar', url: 'https://bazaar.abuse.ch/' },
+    ],
+  },
+  'lab-webapp': {
+    icon: '🌐', color: 'rgba(20,184,166,1)', colorMuted: 'rgba(20,184,166,.15)',
+    title: 'Web App Pentesting Lab',
+    sub: 'Practice OWASP Top 10 attacks in a safe environment',
+    tags: ['AppSec', 'Burp Suite'],
+    difficulty: 'Intermediate', time: '2–3 hours',
+    steps: [
+      { title: 'Deploy OWASP Juice Shop via Docker', desc: 'Juice Shop is the most modern vulnerable web app — it covers all OWASP Top 10 vulnerabilities plus more. Running it in Docker takes 30 seconds and requires no configuration.', cmd: 'docker pull bkimminich/juice-shop\ndocker run --rm -p 3000:3000 bkimminich/juice-shop\n# Open: http://localhost:3000\n# Hint system built-in: click the ? icon for clues' },
+      { title: 'Configure Burp Suite Community as proxy', desc: 'Burp Suite sits between your browser and the server, intercepting and allowing modification of every request. Download the free Community edition and install the CA cert in Firefox.', cmd: '# Start Burp: open Burp Suite → Proxy → Options → port 8080\n# In Firefox: Preferences → Network → Manual Proxy → 127.0.0.1:8080\n# Install Burp CA: browse to http://burpsuite → download cacert.der\n# Firefox: Preferences → Certificates → Import' },
+      { title: 'Intercept and modify HTTP requests', desc: 'Enable Intercept in Burp Proxy. Browse Juice Shop — every request is now captured. Practice modifying parameters, changing user IDs, and replaying requests with Burp Repeater.', cmd: '# In Burp Proxy tab: turn Intercept ON\n# Browse to Juice Shop → login page\n# Observe the POST request to /rest/user/login\n# Forward to Repeater (Ctrl+R) and modify manually' },
+      { title: 'Find and exploit SQL injection', desc: 'SQL injection in the login form bypasses authentication entirely. This is the most common critical vulnerability in web apps — understanding it is essential for both attackers and defenders.', cmd: '# In the email field, enter:\n\' OR 1=1--\n# This terminates the SQL query early and bypasses authentication\n# In Burp Repeater, modify the JSON body:\n{"email":"admin@juice-sh.op\'--","password":"anything"}' },
+      { title: 'Practice XSS and IDOR vulnerabilities', desc: 'Cross-Site Scripting (XSS) injects malicious scripts into web pages viewed by other users. IDOR (Insecure Direct Object Reference) lets you access other users\' data by changing an ID in the URL.', cmd: '# XSS in search bar:\n<iframe src="javascript:alert(`xss`)>">\n# IDOR in API:\n# Login, then change user ID in:\nGET /rest/user/whoami\n# Change basket ID in:\nGET /api/BasketItems/1 → try /api/BasketItems/2' },
+      { title: 'Progress to structured web security learning', desc: 'PortSwigger Web Security Academy offers free, hands-on labs covering every web vulnerability. It\'s the most comprehensive free web security training available — used by professionals.', cmd: '# PortSwigger Web Academy (free):\n# portswigger.net/web-security\n# After Juice Shop, try:\ndocker run -it -p 8080:8080 -p 9090:9090 webgoat/webgoat\n# WebGoat: http://localhost:8080/WebGoat' },
+    ],
+    tools: ['OWASP Juice Shop', 'Burp Suite Community', 'Docker', 'WebGoat', 'DVWA'],
+    resources: [
+      { label: 'PortSwigger Web Academy (free)', url: 'https://portswigger.net/web-security' },
+      { label: 'Juice Shop (GitHub)', url: 'https://github.com/juice-shop/juice-shop' },
+      { label: 'Burp Suite Community', url: 'https://portswigger.net/burp/communitydownload' },
+    ],
+  },
+  'lab-container': {
+    icon: '📦', color: 'rgba(14,165,233,1)', colorMuted: 'rgba(14,165,233,.15)',
+    title: 'Container Security Lab',
+    sub: 'Scan, monitor, and attack Docker and Kubernetes deployments',
+    tags: ['Cloud / DevSecOps', 'Docker'],
+    difficulty: 'Intermediate', time: '3–4 hours',
+    steps: [
+      { title: 'Install Docker Desktop', desc: 'Docker Desktop includes the Docker Engine, CLI, and Docker Compose. It\'s the fastest way to run containers locally on Mac/Windows. Enable it and verify with a test container.', cmd: '# Download: docker.com/products/docker-desktop\n# Verify install:\ndocker --version\ndocker run hello-world\n# Enable Kubernetes in Docker Desktop settings (for step 5)' },
+      { title: 'Deploy a vulnerable container (DVWA)', desc: 'DVWA (Damn Vulnerable Web Application) runs in Docker and lets you practice web attacks in a controlled environment. It\'s your intentionally vulnerable target.', cmd: 'docker run --rm -it -p 80:80 vulnerables/web-dvwa\n# Access: http://localhost\n# Login: admin / password\n# Click "Create / Reset Database" on first run\n# Set security level to "Low" to start' },
+      { title: 'Scan images with Trivy', desc: 'Trivy is the industry-standard open-source container vulnerability scanner used by DevSecOps teams worldwide. It scans images for CVEs in OS packages and application libraries.', cmd: '# Install Trivy:\nbrew install trivy  # macOS\n# Or: apt-get install trivy  # Linux\n\n# Scan your DVWA container:\ntrivy image vulnerables/web-dvwa\n\n# Scan a common base image:\ntrivy image nginx:latest\ntrivy image python:3.9-alpine' },
+      { title: 'Set up Falco for runtime threat detection', desc: 'Falco is the "container SIEM" — it monitors syscalls in real time and alerts on suspicious behavior (shell spawned in container, sensitive file read, privilege escalation, etc.).', cmd: 'docker run --rm -i -t --privileged \\\n  -v /var/run/docker.sock:/host/var/run/docker.sock \\\n  -v /proc:/host/proc:ro \\\n  falcosecurity/falco:latest falco\n# In another terminal, exec into DVWA container:\ndocker exec -it <container_id> /bin/bash\n# Falco will alert on the shell spawn' },
+      { title: 'Set up Kubernetes with minikube', desc: 'minikube runs a local single-node Kubernetes cluster. Use it to practice RBAC policies, network policies, and pod security — the same controls used in production cloud environments.', cmd: '# Install minikube: minikube.sigs.k8s.io\nminikube start\nkubectl get nodes\n\n# Deploy a test workload:\nkubectl create deployment nginx --image=nginx\nkubectl expose deployment nginx --port=80 --type=NodePort\nminikube service nginx' },
+      { title: 'Audit RBAC permissions and cluster security', desc: 'kubectl-who-can shows which subjects can perform a given action — great for finding over-permissive RBAC. kube-hunter actively scans your cluster for vulnerabilities from an attacker\'s perspective.', cmd: '# Install kubectl-who-can:\nkubectl krew install who-can\nkubectl who-can get pods --all-namespaces\nkubectl who-can create clusterrolebindings\n\n# Install and run kube-hunter:\npip3 install kube-hunter\nkube-hunter --pod  # runs from inside the cluster' },
+    ],
+    tools: ['Docker', 'Trivy', 'Falco', 'minikube', 'kubectl', 'kube-hunter'],
+    resources: [
+      { label: 'Trivy (GitHub)', url: 'https://github.com/aquasecurity/trivy' },
+      { label: 'Falco', url: 'https://falco.org/' },
+      { label: 'minikube Docs', url: 'https://minikube.sigs.k8s.io/docs/' },
+    ],
+  },
+};
+
+function showHomelabDetail(id) {
+  var lab = HOMELAB_LABS[id];
+  if (!lab) return;
+
+  var stepsHtml = lab.steps.map(function(s, i) {
+    return '<div class="hld-step">'
+      + '<div class="hld-step-n" style="background:' + lab.colorMuted + ';color:' + lab.color + '">' + (i + 1) + '</div>'
+      + '<div class="hld-step-body">'
+      + '<div class="hld-step-title">' + s.title + '</div>'
+      + '<div class="hld-step-desc">' + s.desc + '</div>'
+      + (s.cmd ? '<pre class="lg-cmd">' + s.cmd + '</pre>' : '')
+      + '</div></div>';
+  }).join('');
+
+  var toolsHtml = lab.tools.map(function(t) {
+    return '<span class="lg-tool-tag">' + t + '</span>';
+  }).join('');
+
+  var resourcesHtml = (lab.resources || []).map(function(r) {
+    return '<a class="hld-resource" href="' + r.url + '" target="_blank" rel="noopener">' + r.label + ' →</a>';
+  }).join('');
+
+  var labKeys = Object.keys(HOMELAB_LABS);
+  var idx = labKeys.indexOf(id);
+  var prevKey = idx > 0 ? labKeys[idx - 1] : null;
+  var nextKey = idx < labKeys.length - 1 ? labKeys[idx + 1] : null;
+  var prevHtml = prevKey ? '<button class="hld-nav-btn" onclick="showHomelabDetail(\'' + prevKey + '\')">← ' + HOMELAB_LABS[prevKey].title + '</button>' : '<span></span>';
+  var nextHtml = nextKey ? '<button class="hld-nav-btn" onclick="showHomelabDetail(\'' + nextKey + '\')">' + HOMELAB_LABS[nextKey].title + ' →</button>' : '<span></span>';
+
+  var html = '<div class="bbtn" onclick="showPage(\'homelab\')">← Back to Home Lab Guide</div>'
+    + '<div class="hld-header">'
+    + '<div class="hld-icon" style="color:' + lab.color + '">' + lab.icon + '</div>'
+    + '<div class="hld-header-text">'
+    + '<h1 class="hld-title">' + lab.title + '</h1>'
+    + '<div class="hld-sub">' + lab.sub + '</div>'
+    + '<div class="hld-pills">'
+    + '<span class="hld-pill" style="background:' + lab.colorMuted + ';color:' + lab.color + '">⏱ ' + lab.time + '</span>'
+    + '<span class="hld-pill hld-diff-' + lab.difficulty.toLowerCase() + '">' + lab.difficulty + '</span>'
+    + lab.tags.map(function(t) { return '<span class="lab-tag">' + t + '</span>'; }).join('')
+    + '</div></div></div>'
+    + '<div class="hld-steps">' + stepsHtml + '</div>'
+    + '<div class="hld-footer">'
+    + '<div class="hld-section-label">Tools Used</div>'
+    + '<div class="lg-tools" style="padding:0 0 16px;">' + toolsHtml + '</div>'
+    + (resourcesHtml ? '<div class="hld-section-label">Resources</div><div class="hld-resources">' + resourcesHtml + '</div>' : '')
+    + '</div>'
+    + '<div class="hld-nav">' + prevHtml + nextHtml + '</div>';
+
+  document.getElementById('homelab-detail-content').innerHTML = html;
+
+  document.querySelectorAll('.page').forEach(function(x) { x.classList.remove('active'); x.style.display = ''; });
+  document.querySelectorAll('.nl').forEach(function(x) { x.classList.remove('active'); });
+  var pg = document.getElementById('page-homelab-detail');
+  if (pg) { pg.classList.add('active'); pg.style.display = 'block'; }
+  setActiveNav('homelab-detail');
+
+  var desired = '#homelab-' + id;
+  if (window.location.hash !== desired) {
+    history.pushState({ page: 'homelab-detail', labId: id }, '', desired);
   }
+  window.scrollTo(0, 0);
 }
 
 // ══════════ GLOSSARY ══════════
@@ -3712,6 +3941,7 @@ var _pageInits={
   resume:function(){var g=document.getElementById('resume-grid');var d=document.getElementById('resume-detail');if(d)d.style.display='none';if(g){g.style.display='';renderResumeTemplates();}},
   stories:function(){renderStories();},
   profile:function(){initProfile();},
+  'homelab-detail':function(){},
 };
 
 // Trigger DC float on first load
@@ -4784,17 +5014,23 @@ showPage = function(p) {
 window.addEventListener('popstate', function(e) {
   var p = e.state && e.state.page;
   var domainId = e.state && e.state.domainId;
+  var labId = e.state && e.state.labId;
   if (!p) {
     var h = window.location.hash.replace('#', '');
     if (h.indexOf('domain-') === 0) {
       domainId = h.replace('domain-', '');
       p = 'domain';
+    } else if (h.indexOf('homelab-') === 0) {
+      labId = h.replace('homelab-', '');
+      p = 'homelab-detail';
     } else {
       p = h || 'home';
     }
   }
   if (p === 'domain' && domainId) {
     showDomain(domainId);
+  } else if (p === 'homelab-detail' && labId) {
+    showHomelabDetail(labId);
   } else {
     _origShowPageV15(p); // use original to avoid pushing another history entry
   }
@@ -4816,6 +5052,9 @@ window.addEventListener('popstate', function(e) {
   if (h.indexOf('domain-') === 0) {
     var domId = h.replace('domain-', '');
     setTimeout(function() { showDomain(domId); }, 100);
+  } else if (h.indexOf('homelab-') === 0) {
+    var hlId = h.replace('homelab-', '');
+    setTimeout(function() { if (HOMELAB_LABS[hlId]) showHomelabDetail(hlId); else showPage('homelab'); }, 100);
   } else if (h && h !== 'home' && document.getElementById('page-' + h)) {
     setTimeout(function() { showPage(h); }, 100);
   } else {
