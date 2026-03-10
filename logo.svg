@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background -->
+  <rect width="400" height="400" rx="40" fill="#0a0e1a"/>
+  <!-- Gradient -->
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4d9eff"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield -->
+  <path d="M200 60 L300 100 L300 210 Q300 300 200 340 Q100 300 100 210 L100 100 Z" fill="none" stroke="url(#g)" stroke-width="8" stroke-linejoin="round"/>
+  <!-- Lock body -->
+  <rect x="170" y="185" width="60" height="50" rx="10" fill="url(#g)"/>
+  <!-- Lock shackle -->
+  <path d="M180 185 V165 Q180 140 200 140 Q220 140 220 165 V185" fill="none" stroke="url(#g)" stroke-width="9" stroke-linecap="round"/>
+  <!-- Keyhole -->
+  <circle cx="200" cy="207" r="8" fill="#0a0e1a"/>
+  <rect x="196" y="207" width="8" height="14" rx="2" fill="#0a0e1a"/>
+  <!-- Wordmark -->
+  <text x="200" y="375" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="-0.5">InfoSecDeck</text>
+</svg>
