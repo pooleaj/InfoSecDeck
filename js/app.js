@@ -1152,14 +1152,234 @@ function renderPhishFinal(){
 }
 
 function switchGame(g){
-  ['ctf','packet','phish'].forEach(function(id){
-    document.getElementById('game-'+id).classList.toggle('active',id===g);
-    document.getElementById('gtab-'+id).classList.toggle('active',id===g);
+  ['ctf','packet','phish','attack','logs','ir'].forEach(function(id){
+    var gp=document.getElementById('game-'+id);
+    var gt=document.getElementById('gtab-'+id);
+    if(gp) gp.classList.toggle('active',id===g);
+    if(gt) gt.classList.toggle('active',id===g);
   });
   if(g==='phish' && phState.answers.length===0) initPhish();
+  if(g==='attack' && atkState.answers.length===0) initAttackMapper();
+  if(g==='logs' && logState.answers.length===0) initLogAnalysis();
+  if(g==='ir' && irState.answers.length===0) initIR();
 }
 
 initPhish();
+
+// ══════════ MITRE ATT&CK MAPPER ══════════
+var attackScenarios=[
+  {id:0,scenario:'The attacker registers a domain nearly identical to the victim company\'s domain (paypa1.com vs paypal.com) and sends credential-harvesting emails.',answer:0,options:['T1566.002 – Spear Phishing Link / Initial Access','T1078 – Valid Accounts / Defense Evasion','T1059 – Command Scripting / Execution','T1110 – Brute Force / Credential Access'],explain:'Typosquatting + phishing link = T1566.002, under Initial Access tactic.',xp:100},
+  {id:1,scenario:'After gaining a foothold, the attacker runs "net user /domain" and "net group /domain" on the compromised workstation.',answer:1,options:['T1059.001 – PowerShell / Execution','T1069 – Permission Groups Discovery / Discovery','T1021 – Remote Services / Lateral Movement','T1082 – System Information Discovery / Discovery'],explain:'Querying domain users and groups = T1069 Permission Groups Discovery.',xp:100},
+  {id:2,scenario:'The malware checks in with its C2 server every 300 seconds using HTTPS to a cloud service that also hosts legitimate traffic.',answer:2,options:['T1071.001 – Web Protocols / Command and Control','T1105 – Ingress Tool Transfer / Command and Control','T1071.004 – DNS / Command and Control','T1568 – Dynamic Resolution / C2'],explain:'HTTPS C2 blended with legitimate cloud traffic = T1071.001 Web Protocols C2, a common defense-evasion technique.',xp:150},
+  {id:3,scenario:'The attacker dumps the LSASS process memory to extract plaintext credentials and NTLM hashes from active sessions.',answer:3,options:['T1003.003 – NTDS / Credential Access','T1110.002 – Password Cracking / Credential Access','T1021.002 – SMB/Windows Admin Shares / Lateral Movement','T1003.001 – LSASS Memory / Credential Access'],explain:'Dumping LSASS memory is T1003.001 OS Credential Dumping: LSASS Memory — a classic Mimikatz technique.',xp:150},
+  {id:4,scenario:'An attacker adds a scheduled task named "WindowsUpdateCheck" that runs a payload every morning at 8AM.',answer:1,options:['T1055 – Process Injection / Defense Evasion','T1053.005 – Scheduled Task / Persistence','T1547.001 – Registry Run Keys / Persistence','T1078 – Valid Accounts / Persistence'],explain:'Scheduled task = T1053.005 Scheduled Task/Job. A top persistence mechanism because it survives reboots and looks legitimate.',xp:100},
+  {id:5,scenario:'The attacker exfiltrates 12GB of data by encoding it in DNS TXT record queries to a domain they control.',answer:0,options:['T1048.003 – Exfiltration Over Unencrypted Protocol','T1020 – Automated Exfiltration / Exfiltration','T1041 – Exfiltration Over C2 Channel','T1071.004 – DNS / C2'],explain:'DNS exfiltration = T1048.003. DNS is rarely inspected deeply, making it a popular covert channel for data theft.',xp:200},
+  {id:6,scenario:'Attackers deploy ransomware that encrypts all files and deletes Volume Shadow Copies to prevent recovery.',answer:2,options:['T1486 – Data Encrypted for Impact / Impact','T1490 – Inhibit System Recovery / Defense Evasion','Both T1486 + T1490 are correct — this scenario uses two techniques','T1561 – Disk Wipe / Impact'],explain:'Ransomware = T1486 (encryption) + T1490 (shadow copy deletion). Both techniques work together in a single ransomware campaign.',xp:200},
+  {id:7,scenario:'A threat actor sends a fake invoice PDF to an employee. When opened, the PDF silently installs a trojan using a known Acrobat vulnerability.',answer:1,options:['T1566.001 – Spear Phishing Attachment','T1203 – Exploitation for Client Execution','T1204.002 – Malicious File / Execution','T1091 – Replication Through Removable Media'],explain:'Exploiting a client-side Acrobat vulnerability = T1203. The phishing was the delivery, but the technique is exploitation of the PDF reader.',xp:150},
+];
+var atkState={current:0,score:0,answers:[],done:false};
+
+function initAttackMapper(){
+  atkState={current:0,score:0,answers:[],done:false};
+  renderAttackMapper();
+}
+function renderAttackMapper(){
+  var panel=document.getElementById('game-attack');
+  if(!panel) return;
+  if(atkState.done){renderAttackFinal();return;}
+  var s=attackScenarios[atkState.current];
+  var opts=s.options.map(function(o,i){
+    return '<button class="atk-option" onclick="answerAttack('+i+')">'+ o +'</button>';
+  }).join('');
+  panel.querySelector('#atk-inner').innerHTML=
+    '<div class="atk-progress">Scenario '+(atkState.current+1)+' of '+attackScenarios.length+'</div>'
+    +'<div class="atk-scenario"><div class="atk-scenario-label">🎯 Attack Scenario</div><div class="atk-scenario-text">'+s.scenario+'</div></div>'
+    +'<div class="atk-options">'+opts+'</div>'
+    +'<div id="atk-feedback" class="atk-feedback" style="display:none"></div>';
+}
+function answerAttack(idx){
+  var s=attackScenarios[atkState.current];
+  var correct=idx===s.answer;
+  if(correct) atkState.score+=s.xp;
+  atkState.answers.push(correct);
+  var fb=document.getElementById('atk-feedback');
+  if(fb){
+    fb.style.display='';
+    fb.className='atk-feedback '+(correct?'correct':'wrong');
+    fb.innerHTML=(correct?'✅ Correct! ':'❌ Incorrect. ')+'<strong>'+s.options[s.answer]+'</strong><br><span>'+s.explain+'</span>'
+      +'<button class="atk-next-btn" onclick="nextAttack()">'+(atkState.current<attackScenarios.length-1?'Next Scenario →':'See Results')+'</button>';
+    document.querySelectorAll('.atk-option').forEach(function(b){b.disabled=true;});
+  }
+}
+function nextAttack(){
+  atkState.current++;
+  if(atkState.current>=attackScenarios.length) atkState.done=true;
+  renderAttackMapper();
+}
+function renderAttackFinal(){
+  var correct=atkState.answers.filter(Boolean).length;
+  var pct=Math.round(correct/attackScenarios.length*100);
+  var grade=pct>=90?'ATT&CK Expert 🔴':pct>=75?'Threat Hunter 🟠':pct>=60?'Analyst 🟡':'Apprentice 🔵';
+  document.getElementById('atk-inner').innerHTML=
+    '<div class="ph-final">'
+    +'<div class="ph-grade">'+grade+'</div>'
+    +'<div class="ph-score-big">'+pct+'%</div>'
+    +'<div class="ph-score-sub">'+correct+' of '+attackScenarios.length+' correct &middot; '+atkState.score+' XP earned</div>'
+    +'<button class="ctf-submit" style="margin-top:16px" onclick="initAttackMapper()">Play Again</button>'
+    +'</div>';
+}
+
+// ══════════ LOG ANALYSIS CHALLENGE ══════════
+var logCases=[
+  {id:0,title:'Web Server Auth Logs',log:'[2026-03-09 03:17:01] FAILED login for admin from 45.33.12.91\n[2026-03-09 03:17:02] FAILED login for admin from 45.33.12.91\n[2026-03-09 03:17:03] FAILED login for root from 45.33.12.91\n[2026-03-09 03:17:04] FAILED login for administrator from 45.33.12.91\n[2026-03-09 03:17:05] FAILED login for user from 45.33.12.91\n[2026-03-09 03:17:06] FAILED login for test from 45.33.12.91\n[2026-03-09 03:17:07] FAILED login for admin from 45.33.12.91\n[2026-03-09 03:17:08] SUCCESS login for admin from 45.33.12.91',options:['SQL Injection Attack','Credential Stuffing / Brute Force','Directory Traversal','DNS Tunneling'],answer:1,explain:'Rapid sequential login attempts from a single IP using common usernames = brute force / credential stuffing. The 8-second window (7 failures then success) confirms automated tooling. Detection rule: >5 failed logins from 1 IP in 60 seconds.',difficulty:'Beginner'},
+  {id:1,title:'Apache Web Server Access Log',log:'192.168.10.5 - - [09/Mar/2026:14:22:01] "GET /products.php?id=1 HTTP/1.1" 200 4521\n192.168.10.5 - - [09/Mar/2026:14:22:03] "GET /products.php?id=1\' HTTP/1.1" 500 312\n192.168.10.5 - - [09/Mar/2026:14:22:05] "GET /products.php?id=1+AND+1=1-- HTTP/1.1" 200 4521\n192.168.10.5 - - [09/Mar/2026:14:22:07] "GET /products.php?id=1+AND+1=2-- HTTP/1.1" 200 118\n192.168.10.5 - - [09/Mar/2026:14:22:09] "GET /products.php?id=1+UNION+SELECT+null,username,password+FROM+users-- HTTP/1.1" 200 8842',options:['Blind SQL Injection (Boolean-based)','Cross-Site Scripting (XSS)','Path Traversal','Server-Side Request Forgery (SSRF)'],answer:0,explain:'The AND 1=1 vs AND 1=2 test (different response sizes: 4521 vs 118 bytes) is the hallmark of boolean-based blind SQL injection. The attacker probes the DB structure before the UNION SELECT to extract credentials.',difficulty:'Intermediate'},
+  {id:2,title:'Windows Security Event Log',log:'Event 4624 - Logon Type 3 (Network): CORP\\svc-backup from 10.0.1.45 [DC01]\nEvent 4624 - Logon Type 3 (Network): CORP\\svc-backup from 10.0.1.45 [FS01]\nEvent 4624 - Logon Type 3 (Network): CORP\\svc-backup from 10.0.1.45 [HR-PC01]\nEvent 4624 - Logon Type 3 (Network): CORP\\svc-backup from 10.0.1.45 [EXEC-PC01]\nEvent 4624 - Logon Type 3 (Network): CORP\\svc-backup from 10.0.1.45 [CFO-PC01]\nEvent 4688 - Process Created: cmd.exe → net use \\\\192.168.1.10\\C$ (PsExec)\nEvent 7045 - New Service Installed: "WindowsUpdateSvc" on EXEC-PC01',options:['Ransomware Staging','Lateral Movement via Pass-the-Hash','DNS Poisoning Attack','Privilege Escalation via Token Impersonation'],answer:1,explain:'Network logons (Type 3) using svc-backup credentials across multiple hosts from a single source, followed by PsExec and a suspicious new service = classic lateral movement via Pass-the-Hash/Pass-the-Ticket.',difficulty:'Intermediate'},
+  {id:3,title:'DNS Query Logs (Recursive Resolver)',log:'2026-03-09 02:13:01 client 192.168.1.22: query "aGVsbG8gd29ybGQ.c2data.evil.xyz" TXT\n2026-03-09 02:13:06 client 192.168.1.22: query "dGhpcyBpcyBh.c2data.evil.xyz" TXT\n2026-03-09 02:13:11 client 192.168.1.22: query "c2VjcmV0.c2data.evil.xyz" TXT\n2026-03-09 02:13:16 client 192.168.1.22: query "bWVzc2FnZQ.c2data.evil.xyz" TXT\n2026-03-09 02:13:21 client 192.168.1.22: query "dG8gc3RlYWw.c2data.evil.xyz" TXT',options:['DDoS Amplification Attack','Command & Control via DNS Tunneling','Zone Transfer Attempt (AXFR)','Subdomain Enumeration'],answer:1,explain:'Base64-encoded subdomains queried at regular 5-second intervals = DNS tunneling for C2 communication. The data is encoded in subdomain labels to bypass firewalls that allow DNS. Detection: high-entropy subdomain names + regular timing intervals.',difficulty:'Advanced'},
+  {id:4,title:'Firewall / Proxy Logs',log:'2026-03-09 08:14:22 ALLOW TCP 10.0.0.55:49234 → 203.0.113.45:443 HTTPS 512B\n2026-03-09 08:24:22 ALLOW TCP 10.0.0.55:49235 → 203.0.113.45:443 HTTPS 512B\n2026-03-09 08:34:22 ALLOW TCP 10.0.0.55:49236 → 203.0.113.45:443 HTTPS 512B\n2026-03-09 08:44:22 ALLOW TCP 10.0.0.55:49237 → 203.0.113.45:443 HTTPS 512B\n2026-03-09 08:54:22 ALLOW TCP 10.0.0.55:49238 → 203.0.113.45:443 HTTPS 512B\n[Pattern continues: exactly every 600 seconds, 512 bytes each, same destination IP]',options:['Data Exfiltration via HTTPS','C2 Beaconing (Scheduled Check-in)','Port Scanning / Reconnaissance','Credential Harvesting'],answer:1,explain:'Perfectly timed connections every 600 seconds (10 minutes) with identical payload sizes = C2 beacon. Malware "checks in" with its command-and-control server on a schedule. Look for: regular timing, consistent bytes, rare/unknown external IP.',difficulty:'Advanced'},
+];
+var logState={current:0,score:0,answers:[],done:false};
+
+function initLogAnalysis(){
+  logState={current:0,score:0,answers:[],done:false};
+  renderLogAnalysis();
+}
+function renderLogAnalysis(){
+  var panel=document.getElementById('game-logs');
+  if(!panel) return;
+  if(logState.done){renderLogFinal();return;}
+  var c=logCases[logState.current];
+  var diffCls='log-diff-'+c.difficulty.toLowerCase();
+  var opts=c.options.map(function(o,i){
+    return '<button class="atk-option" onclick="answerLog('+i+')">'+ o +'</button>';
+  }).join('');
+  panel.querySelector('#log-inner').innerHTML=
+    '<div class="atk-progress">Case '+(logState.current+1)+' of '+logCases.length+'</div>'
+    +'<div class="log-case-title">'+c.title+'<span class="log-difficulty '+diffCls+'">'+c.difficulty+'</span></div>'
+    +'<div class="log-terminal">'+c.log+'</div>'
+    +'<div class="atk-options">'+opts+'</div>'
+    +'<div id="log-feedback" class="atk-feedback" style="display:none"></div>';
+}
+function answerLog(idx){
+  var c=logCases[logState.current];
+  var correct=idx===c.answer;
+  if(correct) logState.score+=100;
+  logState.answers.push(correct);
+  var fb=document.getElementById('log-feedback');
+  if(fb){
+    fb.style.display='';
+    fb.className='atk-feedback '+(correct?'correct':'wrong');
+    fb.innerHTML=(correct?'✅ Correct! ':'❌ Incorrect. ')+'<strong>'+c.options[c.answer]+'</strong><br><span>'+c.explain+'</span>'
+      +'<button class="atk-next-btn" onclick="nextLog()">'+(logState.current<logCases.length-1?'Next Case →':'See Results')+'</button>';
+    document.querySelectorAll('#log-inner .atk-option').forEach(function(b){b.disabled=true;});
+  }
+}
+function nextLog(){
+  logState.current++;
+  if(logState.current>=logCases.length) logState.done=true;
+  renderLogAnalysis();
+}
+function renderLogFinal(){
+  var correct=logState.answers.filter(Boolean).length;
+  var pct=Math.round(correct/logCases.length*100);
+  var grade=pct>=90?'SOC Lead 🔴':pct>=75?'Senior Analyst 🟠':pct>=60?'Analyst 🟡':'Trainee 🔵';
+  document.getElementById('log-inner').innerHTML=
+    '<div class="ph-final">'
+    +'<div class="ph-grade">'+grade+'</div>'
+    +'<div class="ph-score-big">'+pct+'%</div>'
+    +'<div class="ph-score-sub">'+correct+' of '+logCases.length+' cases correct &middot; '+logState.score+' XP earned</div>'
+    +'<button class="ctf-submit" style="margin-top:16px" onclick="initLogAnalysis()">Play Again</button>'
+    +'</div>';
+}
+
+// ══════════ INCIDENT RESPONSE SIMULATOR ══════════
+var irScenarios=[
+  {id:0,title:'🔴 Active Ransomware',sub:'A user calls the helpdesk — files are encrypted and a ransom note appeared on their screen. You\'re the incident commander.',
+    stages:[
+      {prompt:'Your immediate first step?',options:['Disconnect the workstation from the network immediately','Run antivirus scan on the affected machine','Email all employees about the incident','Pay the ransom to restore files quickly'],answer:0,phase:'Contain',explain:'Isolation is the #1 priority. Every second the endpoint stays connected, ransomware can spread laterally to file shares and other endpoints via SMB. Disconnect first — investigate second.'},
+      {prompt:'The endpoint is isolated. Now what?',options:['Reimage the machine immediately','Identify the patient zero and timeline using EDR forensics','Restore from backup and close the ticket','Negotiate with the ransomware operator'],answer:1,phase:'Identify',explain:'Before you eradicate anything, you need the full picture: when did infection start? What credentials were used? Which other systems beaconed to the same C2? EDR telemetry answers these questions.'},
+      {prompt:'Forensics shows the attacker accessed the environment for 14 days. What\'s the correct recovery order?',options:['Restore backups → reset all AD passwords → patch the entry point → monitor','Reset AD passwords → eradicate malware from all systems → restore clean backups → monitor for 30 days','Reimage all systems immediately → restore backups → done','Pay ransom → get decryptor → restore → done'],answer:1,phase:'Recover',explain:'You must eradicate the attacker\'s presence BEFORE restoring — otherwise you\'re restoring into a compromised environment. And AD password resets come first to cut off credential-based re-entry.'},
+    ]},
+  {id:1,title:'🟠 Business Email Compromise',sub:'Finance receives a wire transfer request from the "CEO" for $187,000. They\'ve already processed half of it. A second transfer is pending.',
+    stages:[
+      {prompt:'The transfer is already partially sent. First action?',options:['Call the bank immediately to attempt a SWIFT recall','Email the "CEO" to ask if the request is legitimate','Quietly investigate without alerting anyone','Reverse the transfer internally in your finance system'],answer:0,phase:'Contain',explain:'Speed is everything — banks have a narrow window to recall wires (often <24 hours). Call your bank and the receiving bank immediately. In real BEC cases, money recovery rates drop to near zero after 24 hours.'},
+      {prompt:'Bank recall is in progress. The attacker may still have email access. Next step?',options:['Reset the impersonated CEO account and review all email forwarding rules','Monitor the account and wait to see if more transfers are requested','Disable the entire email domain to be safe','Inform employees via email that BEC occurred'],answer:0,phase:'Eradicate',explain:'Check for hidden mail forwarding rules (attackers use these to stay in the loop after password resets), inbox rules, and OAuth app grants. These are often left behind as persistence mechanisms.'},
+      {prompt:'After securing the account, how do you prevent this from happening again?',options:['Require out-of-band verbal confirmation for all wire transfers above a threshold','Trust email verification alone since BEC is rare','Require only that the CFO approves all transfers','Add a CAPTCHA to the email system'],answer:0,phase:'Lessons Learned',explain:'Out-of-band verification (phone call to a known number, NOT the one in the email) is the #1 BEC control. Dual approval for large transfers adds a second layer. This is the FBI and CISA\'s top recommendation.'},
+    ]},
+  {id:2,title:'🟡 Suspicious Insider Activity',sub:'A UEBA alert fires: a data analyst is downloading 3x their normal volume of files from the data warehouse at 11 PM — files outside their normal scope.',
+    stages:[
+      {prompt:'Alert fires at 11 PM. What do you do first?',options:['Immediately terminate the employee\'s account','Quietly monitor and log all activity without alerting the employee','Call the employee and ask them about the download','Escalate to HR and Legal before taking any technical action'],answer:3,phase:'Identify',explain:'Insider threat investigations have serious legal implications. Before taking action, loop in HR, Legal, and ideally a People leader. Acting unilaterally can create wrongful termination exposure if you\'re wrong.'},
+      {prompt:'Legal and HR are looped in. They ask you for preservation evidence. What do you preserve?',options:['Just the files that were downloaded','All logs: UEBA alerts, DLP events, auth logs, email headers, endpoint activity, and a forensic copy of relevant systems','Only the UEBA alert — that\'s sufficient','Nothing yet — wait for HR to decide if this is worth investigating'],answer:1,phase:'Identify',explain:'Chain of custody matters. Preserve EVERYTHING before any action touches the systems. Courts have strict requirements for digital evidence — if you miss logs now, you may not be able to act on the findings later.'},
+      {prompt:'Evidence preserved. Analyst confirms it\'s unauthorized. What\'s the remediation order?',options:['Disable account → revoke all API tokens and OAuth grants → DLP scan to confirm what was exfiltrated → determine if data left the company perimeter','Fire the employee first, then revoke access','Just disable their account and call it done','Publish a company-wide announcement about the incident'],answer:0,phase:'Eradicate',explain:'Access revocation must be comprehensive — AD account, VPN, cloud console, API keys, and any OAuth grants to third-party apps. Then confirm if data actually left the perimeter (DLP, proxy, email gateway). That determines whether you have a reportable breach.'},
+    ]},
+];
+var irState={scenario:0,stage:0,score:0,answers:[],done:false};
+
+function initIR(){
+  irState={scenario:0,stage:0,score:0,answers:[],done:false};
+  renderIR();
+}
+function renderIR(){
+  var panel=document.getElementById('game-ir');
+  if(!panel) return;
+  if(irState.done){renderIRFinal();return;}
+  var sc=irScenarios[irState.scenario];
+  var st=sc.stages[irState.stage];
+  var totalStages=irScenarios.reduce(function(a,s){return a+s.stages.length;},0);
+  var doneCount=irScenarios.slice(0,irState.scenario).reduce(function(a,s){return a+s.stages.length;},0)+irState.stage;
+  var dots=Array.from({length:totalStages},function(_,i){
+    var cls=i<doneCount?'ir-dot done-correct':i===doneCount?'ir-dot current':'ir-dot';
+    return '<div class="'+cls+'"></div>';
+  }).join('');
+  var opts=st.options.map(function(o,i){
+    return '<button class="atk-option" onclick="answerIR('+i+')">'+ o +'</button>';
+  }).join('');
+  panel.querySelector('#ir-inner').innerHTML=
+    '<div class="ir-progress">'+dots+'</div>'
+    +'<div class="ir-scenario-header"><div class="ir-scenario-title">'+sc.title+'</div><div class="ir-scenario-sub">'+sc.sub+'</div></div>'
+    +'<div class="ir-stage-label">Stage '+(irState.stage+1)+' of '+sc.stages.length+' &middot; Decision</div>'
+    +'<div class="atk-scenario"><div class="atk-scenario-text" style="font-weight:600">'+st.prompt+'</div></div>'
+    +'<div class="atk-options">'+opts+'</div>'
+    +'<div id="ir-feedback" class="atk-feedback" style="display:none"></div>';
+}
+function answerIR(idx){
+  var sc=irScenarios[irState.scenario];
+  var st=sc.stages[irState.stage];
+  var correct=idx===st.answer;
+  if(correct) irState.score+=100;
+  irState.answers.push(correct);
+  var fb=document.getElementById('ir-feedback');
+  if(fb){
+    fb.style.display='';
+    fb.className='atk-feedback '+(correct?'correct':'wrong');
+    var isLast=irState.stage===sc.stages.length-1&&irState.scenario===irScenarios.length-1;
+    fb.innerHTML=(correct?'✅ Correct! ':'❌ Incorrect. ')+'<span class="ir-phase-pill">'+st.phase+'</span><br><span>'+st.explain+'</span>'
+      +'<button class="atk-next-btn" onclick="nextIRStage()">'+(isLast?'See Final Score':'Next Decision →')+'</button>';
+    document.querySelectorAll('#ir-inner .atk-option').forEach(function(b){b.disabled=true;});
+  }
+}
+function nextIRStage(){
+  var sc=irScenarios[irState.scenario];
+  irState.stage++;
+  if(irState.stage>=sc.stages.length){
+    irState.scenario++;
+    irState.stage=0;
+    if(irState.scenario>=irScenarios.length) irState.done=true;
+  }
+  renderIR();
+}
+function renderIRFinal(){
+  var total=irScenarios.reduce(function(a,s){return a+s.stages.length;},0);
+  var correct=irState.answers.filter(Boolean).length;
+  var pct=Math.round(correct/total*100);
+  var grade=pct>=90?'Incident Commander 🔴':pct>=75?'Senior IR Lead 🟠':pct>=60?'IR Analyst 🟡':'IR Trainee 🔵';
+  document.getElementById('ir-inner').innerHTML=
+    '<div class="ph-final">'
+    +'<div class="ph-grade">'+grade+'</div>'
+    +'<div class="ph-score-big">'+pct+'%</div>'
+    +'<div class="ph-score-sub">'+correct+' of '+total+' decisions correct &middot; '+irState.score+' XP earned</div>'
+    +'<button class="ctf-submit" style="margin-top:16px" onclick="initIR()">Play Again</button>'
+    +'</div>';
+}
 
 // ══════════ RESUME ROASTER JS ══════════
 var rFile=null, rBase64=null, rMime=null;
