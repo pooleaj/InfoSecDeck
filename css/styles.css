@@ -5841,3 +5841,11 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .cr-metric-tertiary{font-size:.68rem;color:var(--mt);}
 .cr-arrow{color:var(--mt);font-size:1.3rem;flex-shrink:0;padding-left:4px;}
 @media(max-width:640px){.cr-metrics{display:none;}.cr-rank{min-width:28px;font-size:1.1rem;}.cr-tabs{gap:6px;}.cr-tab{font-size:.72rem;padding:6px 12px;}}
+
+/* ── v44: Salary Calculator — role-aware cert list ── */
+.sc-cert-pct{color:var(--gn);font-size:.72rem;margin-left:2px;}
+.sc-more-toggle{display:block;margin-top:10px;font-size:.75rem;color:var(--lb);background:none;border:none;cursor:pointer;padding:0;user-select:none;text-align:left;}
+.sc-more-toggle:hover{text-decoration:underline;}
+.sc-more-certs{margin-top:6px;}
+.sc-cert-search{width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:.78rem;margin-bottom:8px;box-sizing:border-box;}
+.sc-more-list{display:flex;flex-direction:column;gap:4px;}

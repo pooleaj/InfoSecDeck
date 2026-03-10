@@ -3878,7 +3878,12 @@ function calcSalary(){
   var expM=EXP_MULT[expKey]||1.0;
   var locM=LOC_MULT[locKey]||1.0;
   var certBonus=0;
-  document.querySelectorAll('#sc-cert-bonuses input:checked').forEach(function(cb){certBonus+=(CERT_BONUSES[cb.value]||0);});
+  var _cw=(typeof CERT_ROLE_WEIGHTS!=='undefined'&&roleKey&&CERT_ROLE_WEIGHTS[roleKey])||{};
+  document.querySelectorAll('#sc-cert-bonuses input:checked').forEach(function(cb){
+    var base=CERT_BONUSES[cb.value]||0;
+    var w=_cw[cb.value]!==undefined?_cw[cb.value]:0.5;
+    certBonus+=base*w;
+  });
   var totalM=expM*locM*(1+certBonus);
   var adjMin=Math.round(baseMin*totalM/1000)*1000;
   var adjMax=Math.round(baseMax*totalM/1000)*1000;
@@ -3924,11 +3929,8 @@ function initSalaryCalc(){
     var locs=[['remote','Remote / National Avg'],['sf','San Francisco Bay Area (+28%)'],['nyc','New York City (+22%)'],['seattle','Seattle (+18%)'],['dc','Washington D.C. (+16%)'],['boston','Boston (+14%)'],['austin','Austin (+9%)'],['chicago','Chicago (+5%)'],['southwest','Southwest (-8%)'],['midwest','Midwest (-10%)'],['southeast','Southeast (-13%)']];
     locs.forEach(function(l){var o=document.createElement('option');o.value=l[0];o.textContent=l[1];locEl.appendChild(o);});
   }
-  var cbEl=document.getElementById('sc-cert-bonuses');
-  if(cbEl){
-    var pc=[['cissp','CISSP (+15%)'],['cism','CISM (+12%)'],['aws_sec','AWS Security Specialty (+15%)'],['ccsp','CCSP (+12%)'],['oscp','OSCP (+14%)'],['cisa','CISA (+10%)'],['crisc','CRISC (+11%)'],['azure_sec','AZ-500 Azure Security (+10%)'],['gcp_sec','GCP Security Engineer (+10%)'],['gpen','GPEN (+9%)'],['gcih','GCIH (+8%)'],['gcfa','GCFA (+9%)'],['masters','Master\'s Degree (+12%)'],['phd','Ph.D. (+8%)']];
-    cbEl.innerHTML=pc.map(function(c){return '<label class="sc-cert-cb"><input type="checkbox" value="'+c[0]+'" onchange="calcSalary()"> '+c[1]+'</label>';}).join('');
-  }
+  // Build initial cert list (no role selected yet — default weights)
+  _buildCertList('');
   calcSalary();
 }
 // Also update exp multipliers for correct labels
@@ -7916,3 +7918,86 @@ _pageInits['certranks'] = function() {
     renderCertRankings();
   }
 };
+
+// ─── v44: Salary Dynamic % by Job Title ──────────────────────────────────────
+var CERT_ROLE_WEIGHTS = {
+  soc:   {gcih:1.0,gcfa:1.0,gcfe:0.75,gpen:0.75,cissp:0.75,cism:0.5,aws_sec:0.5,azure_sec:0.5,gcp_sec:0.5,oscp:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  de:    {gcih:1.0,gcfa:1.0,gcfe:1.0,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,gpen:0.75,cissp:0.75,cism:0.5,oscp:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  ir:    {gcih:1.0,gcfa:1.0,gcfe:1.0,gpen:0.75,cissp:0.75,cism:0.5,aws_sec:0.5,azure_sec:0.5,gcp_sec:0.5,oscp:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  ti:    {gcfa:1.0,gcfe:1.0,gcih:0.75,gpen:0.75,cissp:0.75,oscp:0.5,cism:0.5,aws_sec:0.5,azure_sec:0.5,gcp_sec:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  ma:    {gcfa:1.0,gcfe:1.0,gcih:0.75,gpen:0.5,oscp:0.5,cissp:0.5,cism:0.5,aws_sec:0.5,azure_sec:0.5,gcp_sec:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  pt:    {oscp:1.0,gpen:1.0,gcih:0.75,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,gcfa:0.75,gcfe:0.75,cissp:0.5,cism:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  rt:    {oscp:1.0,gpen:1.0,gcih:0.75,gcfa:0.75,gcfe:0.75,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,cissp:0.5,cism:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  as:    {aws_sec:1.0,azure_sec:1.0,gcp_sec:1.0,oscp:0.75,ccsp:0.75,gpen:0.75,cissp:0.75,gcih:0.5,gcfa:0.5,gcfe:0.5,cism:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  iam:   {cissp:1.0,azure_sec:1.0,aws_sec:0.75,gcp_sec:0.75,cism:0.75,ccsp:0.75,crisc:0.5,cisa:0.5,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5,masters:0.75,phd:0.75},
+  vm:    {cissp:0.75,gpen:0.75,oscp:0.75,gcih:0.75,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,gcfa:0.5,gcfe:0.5,cism:0.5,ccsp:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  grc:   {cissp:1.0,cism:1.0,cisa:1.0,crisc:1.0,ccsp:0.75,masters:0.75,phd:0.75,aws_sec:0.5,azure_sec:0.5,gcp_sec:0.5,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5},
+  se:    {aws_sec:1.0,azure_sec:1.0,gcp_sec:1.0,cissp:0.75,ccsp:0.75,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5,cism:0.5,cisa:0.5,crisc:0.5,masters:0.75,phd:0.75},
+  sa:    {cissp:1.0,cism:1.0,ccsp:1.0,masters:1.0,phd:1.0,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,crisc:0.75,cisa:0.75,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5},
+  cs:    {aws_sec:1.0,ccsp:1.0,azure_sec:1.0,gcp_sec:1.0,cissp:0.75,cism:0.5,masters:0.75,phd:0.75,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5,cisa:0.5,crisc:0.5},
+  ciso:  {cissp:1.0,cism:1.0,cisa:1.0,crisc:1.0,masters:1.0,phd:1.0,ccsp:0.75,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5},
+  risk:  {crisc:1.0,cisa:1.0,cissp:0.75,cism:0.75,masters:0.75,phd:0.75,ccsp:0.5,aws_sec:0.5,azure_sec:0.5,gcp_sec:0.5,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5},
+  aise:  {aws_sec:1.0,azure_sec:1.0,gcp_sec:1.0,cissp:0.75,masters:0.75,phd:1.0,ccsp:0.75,oscp:0.5,gpen:0.5,cism:0.5,cisa:0.5,crisc:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5},
+  mlrt:  {oscp:0.75,gpen:0.75,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,masters:1.0,phd:1.0,cissp:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5,cism:0.5,cisa:0.5,crisc:0.5,ccsp:0.5},
+  aits:  {masters:1.0,phd:1.0,cissp:0.75,cism:0.75,aws_sec:0.75,azure_sec:0.75,gcp_sec:0.75,ccsp:0.5,cisa:0.5,crisc:0.5,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5},
+  mlsec: {aws_sec:1.0,azure_sec:1.0,gcp_sec:1.0,cissp:0.5,masters:0.75,phd:0.75,ccsp:0.75,cism:0.5,cisa:0.5,crisc:0.5,oscp:0.5,gpen:0.5,gcih:0.5,gcfa:0.5,gcfe:0.5}
+};
+
+var _ALL_SALARY_CERTS = [
+  ['cissp','CISSP'],['cism','CISM'],['aws_sec','AWS Security Specialty'],
+  ['ccsp','CCSP'],['oscp','OSCP'],['cisa','CISA'],['crisc','CRISC'],
+  ['azure_sec','Azure Security (AZ-500)'],['gcp_sec','GCP Security Engineer'],
+  ['gpen','GPEN'],['gcih','GCIH'],['gcfa','GCFA'],['gcfe','GCFE'],
+  ['masters',"Master's Degree"],['phd','PhD']
+];
+
+function _buildCertList(roleKey) {
+  var el = document.getElementById('sc-cert-bonuses');
+  if (!el) return;
+  // Preserve checked state
+  var checked = {};
+  el.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
+    if (cb.checked) checked[cb.value] = true;
+  });
+  var weights = (CERT_ROLE_WEIGHTS && roleKey && CERT_ROLE_WEIGHTS[roleKey]) || {};
+  var scored = _ALL_SALARY_CERTS.map(function(c) {
+    var base = CERT_BONUSES[c[0]] || 0;
+    var w = weights[c[0]] !== undefined ? weights[c[0]] : 0.5;
+    return {key: c[0], label: c[1], pct: Math.round(base * w * 100)};
+  }).sort(function(a, b) { return b.pct - a.pct; });
+  var top = scored.slice(0, 10);
+  var more = scored.slice(10);
+  function mkCb(item) {
+    return '<label class="sc-cert-cb"><input type="checkbox" value="' + item.key + '"'
+      + (checked[item.key] ? ' checked' : '') + ' onchange="calcSalary()"> '
+      + item.label + ' <span class="sc-cert-pct">(+' + item.pct + '%)</span></label>';
+  }
+  var html = top.map(mkCb).join('');
+  if (more.length > 0) {
+    html += '<button type="button" class="sc-more-toggle" onclick="_toggleMoreCerts(this)">+ Show more certifications ('
+      + more.length + ')</button>';
+    html += '<div class="sc-more-certs" style="display:none">'
+      + '<input type="text" class="sc-cert-search" placeholder="Search certifications..." oninput="_filterMoreCerts(this)">'
+      + '<div class="sc-more-list">' + more.map(mkCb).join('') + '</div>'
+      + '</div>';
+  }
+  el.innerHTML = html;
+}
+
+function _toggleMoreCerts(btn) {
+  var panel = btn.nextElementSibling;
+  var isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  btn.textContent = isOpen
+    ? btn.textContent.replace('\u2212 Hide', '+ Show')
+    : btn.textContent.replace('+ Show', '\u2212 Hide');
+}
+
+function _filterMoreCerts(input) {
+  var q = input.value.toLowerCase();
+  var list = input.parentElement.querySelector('.sc-more-list');
+  if (!list) return;
+  list.querySelectorAll('.sc-cert-cb').forEach(function(cb) {
+    cb.style.display = cb.textContent.toLowerCase().indexOf(q) >= 0 ? '' : 'none';
+  });
+}
