@@ -1507,24 +1507,23 @@ function rRenderResults(r,domain,tier){
   var dimsWrap=document.querySelector('.r-dims');
   var fbWrap=document.querySelector('.r-fb-card');
   var actWrap=document.querySelector('.r-actions-card');
-  if(isPro){
-    if(dimsWrap) dimsWrap.style.display='';
-    if(fbWrap) fbWrap.style.display='';
-    if(actWrap) actWrap.style.display='';
-    var dc=function(s){return s>=80?'var(--gn)':s>=65?'var(--lb)':s>=50?'var(--am)':s>=35?'var(--or)':'var(--rd)';};
-    var dg=document.getElementById('r-dims-grid');
-    if(dg)dg.innerHTML=(r.dimensions||[]).map(function(d){var s=d.score||0;var c=dc(s);return '<div class="r-dim"><div class="r-dim-hdr"><div class="r-dim-name">'+d.name+'</div><div class="r-dim-score" style="color:'+c+'">'+s+'/100</div></div><div class="r-dim-bar"><div class="r-dim-fill" data-t="'+s+'%" style="width:0;background:'+c+';"></div></div><div class="r-dim-note">'+d.note+'</div></div>';}).join('');
-    setTimeout(function(){document.querySelectorAll('.r-dim-fill').forEach(function(el){el.style.width=el.getAttribute('data-t');});},200);
-    var tm={'critical':'⚠️ Critical','warning':'🔶 Warning','tip':'💡 Tip','strength':'✅ Strength'};
-    var fl=document.getElementById('r-fb-list');
-    if(fl)fl.innerHTML=(r.feedback||[]).map(function(f){var t=f.type||'tip';var q=f.quote?'<div class="r-fb-quote">"'+f.quote+'"</div>':'';return '<div class="r-fb-item '+t+'"><div class="r-fb-hdr"><span class="r-fb-badge">'+tm[t]+'</span><div class="r-fb-title">'+f.title+'</div></div><div class="r-fb-body">'+f.body+'</div>'+q+'</div>';}).join('');
-    var pl={'high':'🔴 High','med':'🟡 Med','low':'🔵 Low'};
-    var al=document.getElementById('r-action-list');
-    if(al)al.innerHTML=(r.actions||[]).map(function(a,i){var p=a.priority||'med';return '<div class="r-action"><div class="r-action-n">'+(i+1)+'</div><div class="r-action-txt">'+a.text+'</div><div class="r-action-pri '+p+'">'+pl[p]+'</div></div>';}).join('');
-  } else {
-    if(dimsWrap) dimsWrap.style.display='none';
-    if(fbWrap) fbWrap.style.display='none';
-    if(actWrap) actWrap.style.display='none';
+  if(isPro) localStorage.removeItem('isd_pending_roaster');
+  // Always show and render Pro sections — blur for free users
+  if(dimsWrap){dimsWrap.style.display='';dimsWrap.classList.toggle('r-pro-blurred',!isPro);}
+  if(fbWrap){fbWrap.style.display='';fbWrap.classList.toggle('r-pro-blurred',!isPro);}
+  if(actWrap){actWrap.style.display='';actWrap.classList.toggle('r-pro-blurred',!isPro);}
+  var dc=function(s){return s>=80?'var(--gn)':s>=65?'var(--lb)':s>=50?'var(--am)':s>=35?'var(--or)':'var(--rd)';};
+  var dg=document.getElementById('r-dims-grid');
+  if(dg)dg.innerHTML=(r.dimensions||[]).map(function(d){var s=d.score||0;var c=dc(s);return '<div class="r-dim"><div class="r-dim-hdr"><div class="r-dim-name">'+d.name+'</div><div class="r-dim-score" style="color:'+c+'">'+s+'/100</div></div><div class="r-dim-bar"><div class="r-dim-fill" data-t="'+s+'%" style="width:0;background:'+c+';"></div></div><div class="r-dim-note">'+d.note+'</div></div>';}).join('');
+  setTimeout(function(){document.querySelectorAll('.r-dim-fill').forEach(function(el){el.style.width=el.getAttribute('data-t');});},200);
+  var tm={'critical':'⚠️ Critical','warning':'🔶 Warning','tip':'💡 Tip','strength':'✅ Strength'};
+  var fl=document.getElementById('r-fb-list');
+  if(fl)fl.innerHTML=(r.feedback||[]).map(function(f){var t=f.type||'tip';var q=f.quote?'<div class="r-fb-quote">"'+f.quote+'"</div>':'';return '<div class="r-fb-item '+t+'"><div class="r-fb-hdr"><span class="r-fb-badge">'+tm[t]+'</span><div class="r-fb-title">'+f.title+'</div></div><div class="r-fb-body">'+f.body+'</div>'+q+'</div>';}).join('');
+  var pl={'high':'🔴 High','med':'🟡 Med','low':'🔵 Low'};
+  var al=document.getElementById('r-action-list');
+  if(al)al.innerHTML=(r.actions||[]).map(function(a,i){var p=a.priority||'med';return '<div class="r-action"><div class="r-action-n">'+(i+1)+'</div><div class="r-action-txt">'+a.text+'</div><div class="r-action-pri '+p+'">'+pl[p]+'</div></div>';}).join('');
+  if(!isPro){
+    localStorage.setItem('isd_pending_roaster', JSON.stringify({r:r,domain:domain,tier:tier}));
     var lockDiv=document.createElement('div');
     lockDiv.id='r-pro-locked-block';
     lockDiv.className='r-pro-locked';
@@ -1534,8 +1533,7 @@ function rRenderResults(r,domain,tier){
       +'<div class="rpl-cta-row"><button class="rpl-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button>'
       +'<span class="upsell-divider">or</span>'
       +'<button class="rpl-otp" onclick="startOtpCheckout(\'roaster\')">One-time roast &mdash; $7.99</button></div>';
-    var retryRow=document.querySelector('#r-results .r-retry-row');
-    if(retryRow) retryRow.parentNode.insertBefore(lockDiv,retryRow);
+    if(dimsWrap) dimsWrap.parentNode.insertBefore(lockDiv,dimsWrap);
   }
 }
 
@@ -1549,6 +1547,12 @@ function rReset(){
 }
 
 // ══════════ BLOG JS ══════════
+var _dbPosts = [];
+var _TAG_COLORS = {
+  'Site Update':'var(--bl)','Certifications':'var(--gn)','Career Paths':'var(--lb)',
+  'Resume & Job Search':'var(--or)','Career Advice':'var(--pu)','News':'var(--rd)','Article':'var(--mt)'
+};
+
 var POSTS = {
   'welcome': {
     title: 'Welcome to InfoSecDeck — What We\'re Building and Why',
@@ -1583,14 +1587,16 @@ var POSTS = {
 };
 
 function openPost(id){
-  var post = POSTS[id];
+  var post = _dbPosts.find(function(p){return p.slug===id;}) || POSTS[id];
   if(!post) return;
   var modal = document.getElementById('blog-modal');
   var content = document.getElementById('blog-post-content');
   if(!modal || !content) return;
-  content.innerHTML = '<div style="font-family:var(--fm);font-size:.54rem;text-transform:uppercase;letter-spacing:.16em;color:var(--bl);margin-bottom:10px;">'+post.tag+' · '+post.date+'</div>'
-    + '<h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:20px;">'+post.title+'</h2>'
-    + '<div style="font-size:.85rem;color:#94a3b8;line-height:1.85;">'+post.body+'</div>';
+  var dateLabel = post.date_label || post.date || '';
+  var tag = post.tag || '';
+  content.innerHTML = '<div style="font-family:var(--fm);font-size:.54rem;text-transform:uppercase;letter-spacing:.16em;color:var(--bl);margin-bottom:10px;">'+tag+' · '+dateLabel+'</div>'
+    + '<h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:20px;">'+(post.title||'')+'</h2>'
+    + '<div style="font-size:.85rem;color:#94a3b8;line-height:1.85;">'+(post.body||'')+'</div>';
   modal.style.display = 'block';
   document.body.style.overflow = 'hidden';
 }
@@ -1599,6 +1605,136 @@ function closePost(){
   var modal = document.getElementById('blog-modal');
   if(modal) modal.style.display = 'none';
   document.body.style.overflow = '';
+}
+
+function _renderBlogGrid() {
+  var el = document.getElementById('blog-grid');
+  if (!el) return;
+  var staticCards = Object.keys(POSTS).map(function(k){ return {slug:k,_static:true,title:POSTS[k].title,date_label:POSTS[k].date,tag:POSTS[k].tag}; });
+  var dbSlugs = _dbPosts.map(function(p){return p.slug;});
+  var fallback = staticCards.filter(function(p){ return dbSlugs.indexOf(p.slug)===-1; });
+  var all = _dbPosts.concat(fallback);
+  if (!all.length) { el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px 0;color:var(--mt);font-size:.82rem;">No posts yet.</div>'; return; }
+  el.innerHTML = all.map(function(p) {
+    var col = _TAG_COLORS[p.tag] || 'var(--mt)';
+    return '<div class="blog-card" onclick="openPost(\''+p.slug+'\')">'
+      +'<div class="bc-tag" style="color:'+col+';">'+p.tag+'</div>'
+      +'<div class="bc-title">'+p.title+'</div>'
+      +'<div class="bc-meta"><span>'+(p.date_label||p.date||'')+'</span></div>'
+      +'</div>';
+  }).join('')
+  +'<div class="blog-card" style="border-style:dashed;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;">'
+  +'<div style="font-size:1.6rem;">✍️</div><div style="font-weight:700;font-size:.88rem;">More posts coming soon</div>'
+  +'<div style="font-size:.74rem;color:var(--mt);">We publish weekly.</div>'
+  +'<span class="gll-link" onclick="showPage(\'reviews\')" style="margin-top:4px;">💬 Suggest a Topic</span></div>';
+}
+
+_pageInits.blog = function() {
+  if (!window._sb) { _renderBlogGrid(); return; }
+  _sb.from('blog_posts').select('*').eq('published',true).order('created_at',{ascending:false}).then(function(res) {
+    if (!res.error && res.data) _dbPosts = res.data;
+    _renderBlogGrid();
+  });
+};
+
+function _renderBlogAdminPanel() {
+  var el = document.getElementById('admin-blog-panel');
+  if (!el || !window._sb) return;
+  el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Loading…</p>';
+  _sb.from('blog_posts').select('*').order('created_at',{ascending:false}).then(function(res) {
+    if (res.error) { el.innerHTML = '<p style="color:var(--rd);font-size:.78rem;">Error: '+res.error.message+'</p>'; return; }
+    var posts = res.data || [];
+    if (!posts.length) { el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">No posts yet. Click "+ New Post" to create one.</p>'; return; }
+    el.innerHTML = posts.map(function(p) {
+      return '<div class="abp-row">'
+        +'<div class="abp-info"><div class="abp-title">'+p.title+'</div>'
+        +'<div class="abp-meta">'+p.date_label+' · '+p.tag+' · '+(p.published?'<span style="color:var(--gn);">Published</span>':'<span style="color:var(--mt);">Draft</span>')+'</div></div>'
+        +'<div class="abp-actions">'
+        +'<button onclick="openBlogEditor(\''+p.id+'\')" class="abp-btn">Edit</button>'
+        +'<button onclick="deleteBlogPost(\''+p.id+'\',\''+p.title.replace(/'/g,"\\'")+'\')" class="abp-btn abp-btn-del">Delete</button>'
+        +'</div></div>';
+    }).join('');
+  });
+}
+
+function openBlogEditor(id) {
+  var modal = document.getElementById('blog-edit-modal');
+  if (!modal) return;
+  document.getElementById('bee-post-id').value = '';
+  document.getElementById('bee-title').value = '';
+  document.getElementById('bee-slug').value = '';
+  document.getElementById('bee-date').value = '';
+  document.getElementById('bee-tag').value = '';
+  document.getElementById('bee-body').value = '';
+  document.getElementById('bee-published').checked = true;
+  document.getElementById('bee-modal-title').textContent = 'New Post';
+  document.getElementById('bee-save-btn').textContent = 'Save Post';
+  if (id) {
+    _sb.from('blog_posts').select('*').eq('id',id).maybeSingle().then(function(res) {
+      if (res.data) {
+        var p = res.data;
+        document.getElementById('bee-post-id').value = p.id;
+        document.getElementById('bee-title').value = p.title;
+        document.getElementById('bee-slug').value = p.slug;
+        document.getElementById('bee-date').value = p.date_label;
+        document.getElementById('bee-tag').value = p.tag;
+        document.getElementById('bee-body').value = p.body;
+        document.getElementById('bee-published').checked = !!p.published;
+        document.getElementById('bee-modal-title').textContent = 'Edit Post';
+      }
+    });
+  }
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeBlogEditor() {
+  var modal = document.getElementById('blog-edit-modal');
+  if (modal) modal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function _beeAutoSlug() {
+  var titleEl = document.getElementById('bee-title');
+  var slugEl  = document.getElementById('bee-slug');
+  if (!titleEl || !slugEl) return;
+  slugEl.value = titleEl.value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+}
+
+function saveBlogPost() {
+  var id         = document.getElementById('bee-post-id').value.trim();
+  var title      = document.getElementById('bee-title').value.trim();
+  var slug       = document.getElementById('bee-slug').value.trim();
+  var date_label = document.getElementById('bee-date').value.trim();
+  var tag        = document.getElementById('bee-tag').value.trim();
+  var body       = document.getElementById('bee-body').value.trim();
+  var published  = document.getElementById('bee-published').checked;
+  if (!title || !slug || !date_label || !body) { showToast('Please fill in all required fields.'); return; }
+  var btn = document.getElementById('bee-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  var record = {slug:slug,title:title,date_label:date_label,tag:tag||'Article',body:body,published:published,updated_at:new Date().toISOString()};
+  var op = id ? _sb.from('blog_posts').update(record).eq('id',id) : _sb.from('blog_posts').insert(record);
+  op.then(function(res) {
+    btn.disabled = false; btn.textContent = 'Save Post';
+    if (res.error) { showToast('Error: '+res.error.message); return; }
+    showToast(id ? 'Post updated!' : 'Post published!');
+    closeBlogEditor();
+    _renderBlogAdminPanel();
+    _sb.from('blog_posts').select('*').eq('published',true).order('created_at',{ascending:false}).then(function(r){
+      if (!r.error && r.data) { _dbPosts = r.data; _renderBlogGrid(); }
+    });
+  });
+}
+
+function deleteBlogPost(id, title) {
+  if (!confirm('Delete "'+title+'"? This cannot be undone.')) return;
+  _sb.from('blog_posts').delete().eq('id',id).then(function(res) {
+    if (res.error) { showToast('Error: '+res.error.message); return; }
+    showToast('Post deleted.');
+    _renderBlogAdminPanel();
+    _dbPosts = _dbPosts.filter(function(p){return p.id!==id;});
+    _renderBlogGrid();
+  });
 }
 
 // ══════════ MEGA-MENU DROPDOWNS ══════════
@@ -2271,7 +2407,37 @@ function renderPivotResults(r, fromTitle, toTitle, hasResume) {
   var metaEl = document.getElementById('pv-meta-pills');
   if (metaEl) metaEl.innerHTML = (hasResume ? '<span class="pv-meta-pill pv-pill-resume">Personalized</span>' : '<span class="pv-meta-pill">General Plan</span>') + '<span class="pv-meta-pill">' + (r.timeline || '') + '</span>';
 
-  // Transferable skills (always shown)
+  // Remove any previous lock block
+  var prevPivotLock = document.getElementById('pv-pro-locked-block');
+  if (prevPivotLock) prevPivotLock.remove();
+
+  var trCard    = document.getElementById('pv-transferable') ? document.getElementById('pv-transferable').closest('.pv-card') : null;
+  var gapCard   = document.getElementById('pv-gaps')   ? document.getElementById('pv-gaps').closest('.pv-card')   : null;
+  var certCard  = document.getElementById('pv-certs')  ? document.getElementById('pv-certs').closest('.pv-card')  : null;
+  var phaseCard = document.getElementById('pv-phases') ? document.getElementById('pv-phases').closest('.pv-card') : null;
+  var stepsCard = document.getElementById('pv-steps')  ? document.getElementById('pv-steps').closest('.pv-card')  : null;
+
+  // Free: insert lock block before transferable skills, blur everything from there down
+  if (!isPro) {
+    localStorage.setItem('isd_pending_pivot', JSON.stringify({r:r,fromTitle:fromTitle,toTitle:toTitle,hasResume:hasResume}));
+    [trCard, gapCard, certCard, phaseCard, stepsCard].forEach(function(c){ if(c){ c.style.display=''; c.classList.add('r-pro-blurred'); } });
+    var pvLock = document.createElement('div');
+    pvLock.id = 'pv-pro-locked-block';
+    pvLock.className = 'r-pro-locked';
+    pvLock.innerHTML = '<div class="rpl-icon">🔒</div>'
+      + '<div class="rpl-heading">Unlock Your Full Pivot Plan</div>'
+      + '<div class="rpl-desc">Pro reveals your <strong>skill gaps</strong>, a <strong>personalized cert path</strong>, '
+      + 'a <strong>'+(r.timeline||'')+' transition timeline</strong>, and your <strong>first '+(r.steps||[]).length+' action steps</strong>.</div>'
+      + '<div class="rpl-cta-row"><button class="rpl-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button>'
+      + '<span class="upsell-divider">or</span>'
+      + '<button class="rpl-otp" onclick="startOtpCheckout(\'pivot\')">One-time plan &mdash; $9.99</button></div>';
+    if (trCard) trCard.parentNode.insertBefore(pvLock, trCard);
+  } else {
+    localStorage.removeItem('isd_pending_pivot');
+    [trCard, gapCard, certCard, phaseCard, stepsCard].forEach(function(c){ if(c){ c.style.display=''; c.classList.remove('r-pro-blurred'); } });
+  }
+
+  // Always render transferable skills
   var strMap = {strong:'var(--gn)', moderate:'var(--lb)', partial:'var(--am)'};
   var trEl = document.getElementById('pv-transferable');
   if (trEl) trEl.innerHTML = (r.transferable || []).map(function(t) {
@@ -2279,60 +2445,30 @@ function renderPivotResults(r, fromTitle, toTitle, hasResume) {
     return '<div class="pv-skill-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+t.skill+'</div><div class="pv-skill-note">'+t.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+t.strength+'</div></div>';
   }).join('');
 
-  // Remove any previous lock block
-  var prevPivotLock = document.getElementById('pv-pro-locked-block');
-  if (prevPivotLock) prevPivotLock.remove();
+  // Always render Pro sections (blurred for free via classes above)
+  var priMap = {critical:'var(--rd)', important:'var(--or)', 'nice-to-have':'var(--lb)'};
+  var gapEl = document.getElementById('pv-gaps');
+  if (gapEl) gapEl.innerHTML = (r.gaps || []).map(function(g) {
+    var c = priMap[g.priority] || 'var(--mt)';
+    return '<div class="pv-gap-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+g.area+'</div><div class="pv-skill-note">'+g.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+g.priority+'</div></div>';
+  }).join('');
 
-  var gapCard   = document.getElementById('pv-gaps')   ? document.getElementById('pv-gaps').closest('.pv-card')   : null;
-  var certCard  = document.getElementById('pv-certs')  ? document.getElementById('pv-certs').closest('.pv-card')  : null;
-  var phaseCard = document.getElementById('pv-phases') ? document.getElementById('pv-phases').closest('.pv-card') : null;
-  var stepsCard = document.getElementById('pv-steps')  ? document.getElementById('pv-steps').closest('.pv-card')  : null;
+  var certEl = document.getElementById('pv-certs');
+  if (certEl) certEl.innerHTML = (r.certifications || []).map(function(c) {
+    return '<div class="pv-cert-item"><div class="pv-cert-order">'+c.order+'</div><div class="pv-cert-body"><div class="pv-cert-name">'+c.name+'</div><div class="pv-cert-why">'+c.why+'</div></div><div class="pv-cert-timeline">'+c.timeline+'</div></div>';
+  }).join('');
 
-  if (isPro) {
-    [gapCard, certCard, phaseCard, stepsCard].forEach(function(c){ if(c) c.style.display=''; });
+  var tlEl = document.getElementById('pv-timeline-total'); if (tlEl) tlEl.textContent = r.timeline || '';
+  var phEl = document.getElementById('pv-phases');
+  if (phEl) phEl.innerHTML = (r.phases || []).map(function(p, i) {
+    return '<div class="pv-phase"><div class="pv-phase-dot"></div><div class="pv-phase-body"><div class="pv-phase-name">'+p.name+'</div><div class="pv-phase-dur">'+p.duration+'</div><div class="pv-phase-focus">'+p.focus+'</div></div></div>';
+  }).join('');
 
-    // Gaps
-    var priMap = {critical:'var(--rd)', important:'var(--or)', 'nice-to-have':'var(--lb)'};
-    var gapEl = document.getElementById('pv-gaps');
-    if (gapEl) gapEl.innerHTML = (r.gaps || []).map(function(g) {
-      var c = priMap[g.priority] || 'var(--mt)';
-      return '<div class="pv-gap-item"><div class="pv-skill-dot" style="background:'+c+'"></div><div><div class="pv-skill-name">'+g.area+'</div><div class="pv-skill-note">'+g.note+'</div></div><div class="pv-skill-badge" style="color:'+c+'">'+g.priority+'</div></div>';
-    }).join('');
-
-    // Certifications
-    var certEl = document.getElementById('pv-certs');
-    if (certEl) certEl.innerHTML = (r.certifications || []).map(function(c) {
-      return '<div class="pv-cert-item"><div class="pv-cert-order">'+c.order+'</div><div class="pv-cert-body"><div class="pv-cert-name">'+c.name+'</div><div class="pv-cert-why">'+c.why+'</div></div><div class="pv-cert-timeline">'+c.timeline+'</div></div>';
-    }).join('');
-
-    // Timeline phases
-    var tlEl = document.getElementById('pv-timeline-total'); if (tlEl) tlEl.textContent = r.timeline || '';
-    var phEl = document.getElementById('pv-phases');
-    if (phEl) phEl.innerHTML = (r.phases || []).map(function(p, i) {
-      return '<div class="pv-phase"><div class="pv-phase-dot"></div><div class="pv-phase-body"><div class="pv-phase-name">'+p.name+'</div><div class="pv-phase-dur">'+p.duration+'</div><div class="pv-phase-focus">'+p.focus+'</div></div></div>';
-    }).join('');
-
-    // First steps
-    var stpEl = document.getElementById('pv-steps');
-    if (stpEl) stpEl.innerHTML = (r.steps || []).map(function(s, i) {
-      var tw = s.timeframe === 'this week' ? 'var(--gn)' : 'var(--lb)';
-      return '<div class="pv-step"><div class="pv-step-n">'+(i+1)+'</div><div class="pv-step-body"><div class="pv-step-action">'+s.action+'</div><div class="pv-step-detail">'+s.detail+'</div></div><div class="pv-step-when" style="color:'+tw+'">'+s.timeframe+'</div></div>';
-    }).join('');
-  } else {
-    [gapCard, certCard, phaseCard, stepsCard].forEach(function(c){ if(c) c.style.display='none'; });
-    var pvLock = document.createElement('div');
-    pvLock.id = 'pv-pro-locked-block';
-    pvLock.className = 'r-pro-locked';
-    pvLock.innerHTML = '<div class="rpl-icon">🔒</div>'
-      + '<div class="rpl-heading">Unlock Your Full Pivot Plan</div>'
-      + '<div class="rpl-desc">Pro reveals your <strong>skill gaps</strong>, a <strong>personalized cert path</strong>, '
-      + 'a <strong>'+(r.timeline||'')+'  transition timeline</strong>, and your <strong>first '+(r.steps||[]).length+' action steps</strong>.</div>'
-      + '<div class="rpl-cta-row"><button class="rpl-btn" onclick="showPage(\'pricing\')">Upgrade to Pro &rarr;</button>'
-      + '<span class="upsell-divider">or</span>'
-      + '<button class="rpl-otp" onclick="startOtpCheckout(\'pivot\')">One-time plan &mdash; $9.99</button></div>';
-    var pvRetryRow = document.querySelector('#pivot-results .r-retry-row');
-    if (pvRetryRow) pvRetryRow.parentNode.insertBefore(pvLock, pvRetryRow);
-  }
+  var stpEl = document.getElementById('pv-steps');
+  if (stpEl) stpEl.innerHTML = (r.steps || []).map(function(s, i) {
+    var tw = s.timeframe === 'this week' ? 'var(--gn)' : 'var(--lb)';
+    return '<div class="pv-step"><div class="pv-step-n">'+(i+1)+'</div><div class="pv-step-body"><div class="pv-step-action">'+s.action+'</div><div class="pv-step-detail">'+s.detail+'</div></div><div class="pv-step-when" style="color:'+tw+'">'+s.timeframe+'</div></div>';
+  }).join('');
 }
 
 function pivotReset() {
@@ -6026,10 +6162,17 @@ function _updateProBadge() {
 (function() {
   var search = window.location.search;
   if (search.indexOf('checkout=success') !== -1) {
-    history.replaceState({}, '', window.location.pathname + '#pro-welcome');
-    setTimeout(function() {
-      showPage('pro-welcome');
-    }, 1200);
+    window._fromCheckout = true;
+    var _pRoaster = localStorage.getItem('isd_pending_roaster');
+    var _pPivot   = localStorage.getItem('isd_pending_pivot');
+    if (_pRoaster || _pPivot) {
+      var _pendingPage = _pRoaster ? 'roaster' : 'pivot';
+      history.replaceState({}, '', window.location.pathname + '#' + _pendingPage);
+      setTimeout(function(){ showPage(_pendingPage); }, 300);
+    } else {
+      history.replaceState({}, '', window.location.pathname + '#pro-welcome');
+      setTimeout(function(){ showPage('pro-welcome'); }, 1200);
+    }
   } else if (search.indexOf('checkout=canceled') !== -1) {
     history.replaceState({}, '', window.location.pathname + '#pricing');
     setTimeout(function() {
@@ -6282,6 +6425,26 @@ var _origOnPlanLoaded = window._onPlanLoaded;
 window._onPlanLoaded = function(plan) {
   if (_origOnPlanLoaded) _origOnPlanLoaded(plan);
   _updateInlineUpsells();
+  if (!window._fromCheckout) return;
+  var _pr = localStorage.getItem('isd_pending_roaster');
+  var _pp = localStorage.getItem('isd_pending_pivot');
+  if (_pr && (plan === 'pro' || _hasOtpAccess('roaster'))) {
+    try {
+      var _pd = JSON.parse(_pr);
+      localStorage.removeItem('isd_pending_roaster');
+      window._fromCheckout = false;
+      rRenderResults(_pd.r, _pd.domain, _pd.tier);
+      showToast('Your full roast is now unlocked!');
+    } catch(e) {}
+  } else if (_pp && (plan === 'pro' || _hasOtpAccess('pivot'))) {
+    try {
+      var _pd2 = JSON.parse(_pp);
+      localStorage.removeItem('isd_pending_pivot');
+      window._fromCheckout = false;
+      renderPivotResults(_pd2.r, _pd2.fromTitle, _pd2.toTitle, _pd2.hasResume);
+      showToast('Your full pivot plan is now unlocked!');
+    } catch(e) {}
+  }
 };
 
 _updateUpgradeNavBtn();
@@ -6727,7 +6890,10 @@ function _renderAdminUsage() {
 _pageInits.profile = (function(_orig) {
   return function() {
     if (_orig) _orig();
-    if (typeof isAdmin === 'function' && isAdmin()) _renderAdminUsage();
+    if (typeof isAdmin === 'function' && isAdmin()) {
+      _renderAdminUsage();
+      _renderBlogAdminPanel();
+    }
   };
 })(_pageInits.profile);
 

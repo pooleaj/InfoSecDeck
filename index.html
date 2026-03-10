@@ -1956,51 +1956,9 @@
     </div>
   </div>
 
-  <!-- Blog post grid -->
+  <!-- Blog post grid — rendered dynamically by _renderBlogGrid() -->
   <div class="a4" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:40px;" id="blog-grid">
-
-    <div class="blog-card" onclick="openPost('cert-roadmap-2025')">
-      <div class="bc-tag" style="color:var(--gn);">Certifications</div>
-      <div class="bc-title">The 2025 Cybersecurity Cert Roadmap: What's Changed, What's New</div>
-      <div class="bc-preview">CompTIA updated Security+, ISACA revised CISM, and OffSec dropped the OSCP update. Here's what actually changed and what it means for your study plan.</div>
-      <div class="bc-meta"><span>Jan 2026</span><span>6 min read</span></div>
-    </div>
-
-    <div class="blog-card" onclick="openPost('iam-hottest')">
-      <div class="bc-tag" style="color:var(--lb);">Career Paths</div>
-      <div class="bc-title">Why IAM Is the Hottest Cybersecurity Domain You're Probably Ignoring</div>
-      <div class="bc-preview">Everyone wants to be a pentester. Meanwhile, IAM engineers are commanding $160K+ and companies can't hire them fast enough. Here's why.</div>
-      <div class="bc-meta"><span>Jan 2026</span><span>7 min read</span></div>
-    </div>
-
-    <div class="blog-card" onclick="openPost('resume-mistakes')">
-      <div class="bc-tag" style="color:var(--or);">Resume & Job Search</div>
-      <div class="bc-title">The 7 Resume Mistakes That Get Cybersecurity Candidates Rejected</div>
-      <div class="bc-preview">After reviewing hundreds of cybersecurity resumes with our Resume Roaster, these are the most common reasons great candidates get screened out before the phone call.</div>
-      <div class="bc-meta"><span>Feb 2026</span><span>5 min read</span></div>
-    </div>
-
-    <div class="blog-card" onclick="openPost('no-degree')">
-      <div class="bc-tag" style="color:var(--pu);">Career Advice</div>
-      <div class="bc-title">Degree vs. Certs vs. Bootcamp: What Actually Gets You Hired in 2025</div>
-      <div class="bc-preview">We analyzed 1,200 cybersecurity job postings to answer the question everyone is asking. The answer isn't what most bootcamps will tell you.</div>
-      <div class="bc-meta"><span>Feb 2026</span><span>9 min read</span></div>
-    </div>
-
-    <div class="blog-card" onclick="openPost('soc-path')">
-      <div class="bc-tag" style="color:var(--rd);">Career Paths</div>
-      <div class="bc-title">From Zero to SOC Analyst: A 12-Month Roadmap</div>
-      <div class="bc-preview">A month-by-month guide for someone starting from scratch. We cover what to study, what to build in your home lab, and exactly which certs to get — and in what order.</div>
-      <div class="bc-meta"><span>Dec 2025</span><span>12 min read</span></div>
-    </div>
-
-    <div class="blog-card" style="border-style:dashed;cursor:default;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;">
-      <div style="font-size:1.6rem;">✍️</div>
-      <div style="font-weight:700;font-size:.88rem;">More posts coming soon</div>
-      <div style="font-size:.74rem;color:var(--mt);">We publish weekly. Leave a review or suggestion on the Reviews page.</div>
-      <span class="gll-link" onclick="showPage('reviews')" style="margin-top:4px;">💬 Suggest a Topic</span>
-    </div>
-
+    <div style="grid-column:1/-1;text-align:center;padding:32px 0;color:var(--mt);font-size:.82rem;">Loading posts…</div>
   </div>
 
   <!-- Post modal -->
@@ -3374,6 +3332,18 @@
     </div>
   </div>
 
+  <!-- Admin Blog Panel (admin-only, hidden for regular users) -->
+  <div class="profile-section admin-only" id="admin-blog-section" style="display:none;">
+    <div class="profile-section-hd" style="display:flex;align-items:center;gap:10px;">
+      <span>✍️ Admin — Blog Posts</span>
+      <button onclick="openBlogEditor(null)" style="margin-left:auto;font-size:.72rem;padding:3px 10px;border-radius:6px;border:1px solid var(--bl);background:rgba(77,158,255,.08);color:var(--bl);cursor:pointer;font-weight:700;">+ New Post</button>
+      <button onclick="_renderBlogAdminPanel()" style="font-size:.72rem;padding:3px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--c2);color:var(--ft);cursor:pointer;">↻ Refresh</button>
+    </div>
+    <div id="admin-blog-panel">
+      <p style="font-size:.78rem;color:var(--mt);">Loading&hellip;</p>
+    </div>
+  </div>
+
   </div><!-- /profile-auth-content -->
 
 </div>
@@ -4245,7 +4215,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=51"></script>
+<script src="js/app.js?v=54"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->
@@ -4554,6 +4524,26 @@
     }
   }
 </script>
+
+<!-- Blog post editor modal -->
+<div id="blog-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(5,8,16,.92);z-index:10600;overflow-y:auto;padding:40px 20px;">
+  <div style="max-width:760px;margin:0 auto;background:var(--sf);border:1px solid var(--bd2);border-radius:20px;padding:32px;position:relative;">
+    <button onclick="closeBlogEditor()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:8px;color:var(--mt);cursor:pointer;padding:6px 12px;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;">✕ Close</button>
+    <div style="font-size:1rem;font-weight:800;margin-bottom:20px;" id="bee-modal-title">New Post</div>
+    <input type="hidden" id="bee-post-id">
+    <div class="bee-field"><label class="bee-label">Title</label><input class="bee-input" id="bee-title" placeholder="Post title…" oninput="_beeAutoSlug()"></div>
+    <div class="bee-field"><label class="bee-label">Slug <span style="font-weight:400;color:var(--mt)">(URL key — lowercase, hyphens)</span></label><input class="bee-input" id="bee-slug" placeholder="my-post-slug"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="bee-field"><label class="bee-label">Date Label</label><input class="bee-input" id="bee-date" placeholder="March 2026"></div>
+      <div class="bee-field"><label class="bee-label">Tag</label><input class="bee-input" id="bee-tag" placeholder="Career Advice"></div>
+    </div>
+    <div class="bee-field"><label class="bee-label">Body <span style="font-weight:400;color:var(--mt)">(HTML)</span></label><textarea class="bee-textarea" id="bee-body" rows="14" placeholder="<p>Your post content here…</p>"></textarea></div>
+    <div style="display:flex;align-items:center;gap:14px;margin-top:4px;">
+      <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--mt);cursor:pointer;"><input type="checkbox" id="bee-published" checked style="accent-color:var(--bl);"> Published</label>
+      <button onclick="saveBlogPost()" style="margin-left:auto;padding:9px 22px;background:linear-gradient(135deg,var(--bl),var(--pu));color:#fff;border:none;border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;" id="bee-save-btn">Save Post</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
