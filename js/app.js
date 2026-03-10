@@ -3638,26 +3638,26 @@ function filterRoadmap(domain){
 
 // ─── F8: TOOL ENCYCLOPEDIA ───────────────────────────────
 var TOOLS=[
-  {name:'Splunk Enterprise',vendor:'Splunk',cat:'SIEM',desc:'Industry-leading SIEM for log aggregation, correlation, and alerting at enterprise scale.',tier:'paid',tags:['siem','logs','dashboards'],domains:['soc','eng']},
+  {name:'Splunk Enterprise',vendor:'Splunk',cat:'SIEM',desc:'Industry-leading SIEM for log aggregation, correlation, and alerting at enterprise scale.',tier:'paid',tags:['siem','logs','dashboards'],domains:['soc','eng'],badge:'industry-standard'},
   {name:'Microsoft Sentinel',vendor:'Microsoft',cat:'SIEM',desc:'Cloud-native SIEM on Azure with built-in AI/ML threat detection and Microsoft ecosystem integration.',tier:'paid',tags:['siem','azure','cloud'],domains:['soc','cloud']},
   {name:'IBM QRadar',vendor:'IBM',cat:'SIEM',desc:'Enterprise SIEM with advanced correlation engine, behavioral analytics, and network flow analysis.',tier:'paid',tags:['siem','enterprise'],domains:['soc']},
   {name:'Elastic SIEM',vendor:'Elastic',cat:'SIEM',desc:'Open-source-foundation SIEM built on the Elastic Stack. Highly flexible with strong community support.',tier:'freemium',tags:['siem','open-source','elastic'],domains:['soc','eng']},
   {name:'LogRhythm SIEM',vendor:'LogRhythm',cat:'SIEM',desc:'Integrated SIEM, UEBA, and SOAR platform with automated threat detection and response workflows.',tier:'paid',tags:['siem','ueba','soar'],domains:['soc']},
   {name:'Exabeam',vendor:'Exabeam',cat:'SIEM',desc:'UEBA-driven SIEM with behavior-based threat detection using machine learning baselines.',tier:'paid',tags:['siem','ueba','ml'],domains:['soc']},
   {name:'Chronicle SIEM',vendor:'Google',cat:'SIEM',desc:'Google Cloud-native SIEM with massive scale telemetry ingestion and YARA-L detection rules.',tier:'paid',tags:['siem','cloud','google'],domains:['soc']},
-  {name:'CrowdStrike Falcon',vendor:'CrowdStrike',cat:'EDR',desc:'Cloud-native EDR with AI-powered threat detection, threat hunting, and Falcon OverWatch MDR service.',tier:'paid',tags:['edr','cloud','ai'],domains:['soc','eng']},
+  {name:'CrowdStrike Falcon',vendor:'CrowdStrike',cat:'EDR',desc:'Cloud-native EDR with AI-powered threat detection, threat hunting, and Falcon OverWatch MDR service.',tier:'paid',tags:['edr','cloud','ai'],domains:['soc','eng'],badge:'industry-standard'},
   {name:'SentinelOne',vendor:'SentinelOne',cat:'EDR',desc:'Autonomous AI-powered EDR with rollback capability and built-in SOAR response automation.',tier:'paid',tags:['edr','ai','autonomous'],domains:['soc','eng']},
   {name:'Carbon Black',vendor:'VMware',cat:'EDR',desc:'Behavioral EDR leveraging unfiltered endpoint telemetry for investigation and threat hunting.',tier:'paid',tags:['edr','behavioral'],domains:['soc']},
   {name:'Microsoft Defender for Endpoint',vendor:'Microsoft',cat:'EDR',desc:'Enterprise EDR deeply integrated with Microsoft 365 and Azure. Included in M365 E5 licensing.',tier:'paid',tags:['edr','microsoft','integrated'],domains:['soc','cloud']},
   {name:'Cortex XDR',vendor:'Palo Alto Networks',cat:'EDR',desc:'XDR platform correlating endpoint, network, and cloud data for unified threat detection.',tier:'paid',tags:['edr','xdr'],domains:['soc','cloud']},
-  {name:'Tenable Nessus',vendor:'Tenable',cat:'Vulnerability Scanner',desc:'World\'s most widely deployed vulnerability scanner with comprehensive CVE plugin library.',tier:'freemium',tags:['vuln','scanner','cve'],domains:['eng','soc']},
+  {name:'Tenable Nessus',vendor:'Tenable',cat:'Vulnerability Scanner',desc:'World\'s most widely deployed vulnerability scanner with comprehensive CVE plugin library.',tier:'freemium',tags:['vuln','scanner','cve'],domains:['eng','soc'],badge:'industry-standard'},
   {name:'Qualys VMDR',vendor:'Qualys',cat:'Vulnerability Scanner',desc:'Cloud-based VM with asset discovery, risk prioritization, and patch orchestration.',tier:'paid',tags:['vuln','cloud'],domains:['eng','soc']},
-  {name:'OpenVAS / Greenbone',vendor:'Greenbone',cat:'Vulnerability Scanner',desc:'Open-source vulnerability scanner with large NVT feed. Foundation of many enterprise VM programs.',tier:'open-source',tags:['vuln','open-source','free'],domains:['eng','soc']},
+  {name:'OpenVAS / Greenbone',vendor:'Greenbone',cat:'Vulnerability Scanner',desc:'Open-source vulnerability scanner with large NVT feed. Foundation of many enterprise VM programs.',tier:'open-source',tags:['vuln','open-source','free'],domains:['eng','soc'],badge:'top-pick'},
   {name:'Rapid7 InsightVM',vendor:'Rapid7',cat:'Vulnerability Scanner',desc:'Risk-based VM with live dashboards, remediation workflow, and InsightIDR integration.',tier:'paid',tags:['vuln','risk-based'],domains:['eng','soc']},
-  {name:'Trivy',vendor:'Aqua Security',cat:'Vulnerability Scanner',desc:'Fast open-source scanner for container images, filesystems, and IaC. Essential for DevSecOps.',tier:'open-source',tags:['containers','iac','devsecops'],domains:['appsec','cloud']},
+  {name:'Trivy',vendor:'Aqua Security',cat:'Vulnerability Scanner',desc:'Fast open-source scanner for container images, filesystems, and IaC. Essential for DevSecOps.',tier:'open-source',tags:['containers','iac','devsecops'],domains:['appsec','cloud'],badge:'top-pick'},
   {name:'Nikto',vendor:'Open Source',cat:'Vulnerability Scanner',desc:'Open-source web server scanner checking for dangerous files, outdated software, and misconfigurations.',tier:'open-source',tags:['web','scanner','open-source'],domains:['appsec','red']},
-  {name:'Metasploit Framework',vendor:'Rapid7',cat:'Pentest',desc:'World\'s most used penetration testing framework with 2,000+ exploit modules and payloads.',tier:'freemium',tags:['exploit','pentest','framework'],domains:['red','soc']},
-  {name:'Burp Suite',vendor:'PortSwigger',cat:'Pentest',desc:'Leading web application security testing platform with intercepting proxy, scanner, and extensions.',tier:'freemium',tags:['web','proxy','appsec'],domains:['appsec','red']},
+  {name:'Metasploit Framework',vendor:'Rapid7',cat:'Pentest',desc:'World\'s most used penetration testing framework with 2,000+ exploit modules and payloads.',tier:'freemium',tags:['exploit','pentest','framework'],domains:['red','soc'],badge:'industry-standard'},
+  {name:'Burp Suite',vendor:'PortSwigger',cat:'Pentest',desc:'Leading web application security testing platform with intercepting proxy, scanner, and extensions.',tier:'freemium',tags:['web','proxy','appsec'],domains:['appsec','red'],badge:'top-pick'},
   {name:'Nmap',vendor:'Open Source',cat:'Pentest',desc:'Network discovery and security auditing — detects open ports, services, OS, and firewall rules.',tier:'open-source',tags:['network','scan','discovery'],domains:['red','soc','eng']},
   {name:'BloodHound',vendor:'SpecterOps',cat:'Pentest',desc:'Active Directory attack path mapping using graph theory. Essential for pentest and defense.',tier:'open-source',tags:['ad','attack-path','graph'],domains:['red','iam']},
   {name:'Cobalt Strike',vendor:'HelpSystems',cat:'Pentest',desc:'Advanced adversary simulation and red team platform. Widely used for authorized red team operations.',tier:'paid',tags:['c2','red-team'],domains:['red']},
@@ -3669,56 +3669,79 @@ var TOOLS=[
   {name:'FTK Imager',vendor:'AccessData',cat:'Forensics',desc:'Forensic disk imaging tool creating exact sector-by-sector copies while preserving evidence integrity.',tier:'free',tags:['forensics','imaging','disk'],domains:['forensics']},
   {name:'Cellebrite UFED',vendor:'Cellebrite',cat:'Forensics',desc:'Industry-standard mobile device forensics platform used by law enforcement worldwide.',tier:'paid',tags:['mobile','forensics'],domains:['forensics']},
   {name:'x64dbg',vendor:'Open Source',cat:'Forensics',desc:'Open-source x64/x32 Windows debugger for malware analysis and reverse engineering.',tier:'open-source',tags:['debugger','reversing','windows'],domains:['forensics']},
-  {name:'MISP',vendor:'CIRCL',cat:'Threat Intel',desc:'Open-source threat intelligence platform for sharing IOCs and threat data across organizations.',tier:'open-source',tags:['ti','ioc','sharing'],domains:['soc','forensics']},
+  {name:'MISP',vendor:'CIRCL',cat:'Threat Intel',desc:'Open-source threat intelligence platform for sharing IOCs and threat data across organizations.',tier:'open-source',tags:['ti','ioc','sharing'],domains:['soc','forensics'],badge:'top-pick'},
   {name:'OpenCTI',vendor:'Filigran',cat:'Threat Intel',desc:'Open-source cyber threat intelligence platform with STIX/TAXII support and rich visualization.',tier:'open-source',tags:['ti','stix','graph'],domains:['soc','forensics']},
   {name:'VirusTotal',vendor:'Google',cat:'Threat Intel',desc:'Free file/URL/hash analysis aggregating results from 70+ antivirus engines and security tools.',tier:'freemium',tags:['ti','ioc','malware'],domains:['soc','forensics']},
   {name:'Shodan',vendor:'Shodan',cat:'Threat Intel',desc:'Internet-facing device search engine. Essential for external attack surface discovery and OSINT.',tier:'freemium',tags:['osint','recon','iot'],domains:['soc','red']},
   {name:'AlienVault OTX',vendor:'AT&T Cybersecurity',cat:'Threat Intel',desc:'Community-powered threat intel platform with real-time IOC feeds and pulse subscriptions.',tier:'free',tags:['ti','ioc','community'],domains:['soc']},
-  {name:'Wiz',vendor:'Wiz',cat:'Cloud Security',desc:'CNAPP providing agentless cloud security posture management and workload protection.',tier:'paid',tags:['cloud','cnapp','cspm'],domains:['cloud']},
+  {name:'Wiz',vendor:'Wiz',cat:'Cloud Security',desc:'CNAPP providing agentless cloud security posture management and workload protection.',tier:'paid',tags:['cloud','cnapp','cspm'],domains:['cloud'],badge:'trending'},
   {name:'Prisma Cloud',vendor:'Palo Alto Networks',cat:'Cloud Security',desc:'Comprehensive CNAPP with CSPM, CWPP, IAM security for multi-cloud environments.',tier:'paid',tags:['cloud','cnapp','multicloud'],domains:['cloud']},
   {name:'AWS Security Hub',vendor:'Amazon',cat:'Cloud Security',desc:'Unified AWS security posture view aggregating findings from GuardDuty, Inspector, and Macie.',tier:'paid',tags:['aws','cloud','posture'],domains:['cloud']},
   {name:'Prowler',vendor:'Open Source',cat:'Cloud Security',desc:'Open-source AWS, Azure, and GCP security assessment tool checking against CIS Benchmarks.',tier:'open-source',tags:['cloud','cis','audit'],domains:['cloud','grc']},
   {name:'ScoutSuite',vendor:'NCC Group',cat:'Cloud Security',desc:'Multi-cloud security auditing tool assessing configurations against security best practices.',tier:'open-source',tags:['cloud','audit','multicloud'],domains:['cloud']},
-  {name:'CyberArk PAM',vendor:'CyberArk',cat:'IAM',desc:'Leading PAM platform for securing, rotating, and auditing privileged credentials.',tier:'paid',tags:['pam','privileged','credentials'],domains:['iam']},
-  {name:'Okta',vendor:'Okta',cat:'IAM',desc:'Cloud-based identity platform providing SSO, MFA, and lifecycle management for enterprise apps.',tier:'paid',tags:['sso','mfa','identity'],domains:['iam']},
+  {name:'CyberArk PAM',vendor:'CyberArk',cat:'IAM',desc:'Leading PAM platform for securing, rotating, and auditing privileged credentials.',tier:'paid',tags:['pam','privileged','credentials'],domains:['iam'],badge:'industry-standard'},
+  {name:'Okta',vendor:'Okta',cat:'IAM',desc:'Cloud-based identity platform providing SSO, MFA, and lifecycle management for enterprise apps.',tier:'paid',tags:['sso','mfa','identity'],domains:['iam'],badge:'industry-standard'},
   {name:'SailPoint IdentityIQ',vendor:'SailPoint',cat:'IAM',desc:'Enterprise identity governance for access certification, provisioning, and separation of duties.',tier:'paid',tags:['iga','governance','provisioning'],domains:['iam']},
   {name:'HashiCorp Vault',vendor:'HashiCorp',cat:'IAM',desc:'Secrets management platform for securely storing and accessing API keys, passwords, and certs.',tier:'freemium',tags:['secrets','vault','infrastructure'],domains:['iam','cloud','appsec']},
   {name:'BeyondTrust',vendor:'BeyondTrust',cat:'IAM',desc:'PAM and privileged remote access platform focusing on least privilege enforcement.',tier:'paid',tags:['pam','least-privilege','remote'],domains:['iam']},
-  {name:'Wireshark',vendor:'Open Source',cat:'Network Analysis',desc:'World\'s most popular network protocol analyzer for capturing and browsing network traffic.',tier:'open-source',tags:['network','pcap','protocol'],domains:['soc','forensics','eng']},
+  {name:'Wireshark',vendor:'Open Source',cat:'Network Analysis',desc:'World\'s most popular network protocol analyzer for capturing and browsing network traffic.',tier:'open-source',tags:['network','pcap','protocol'],domains:['soc','forensics','eng'],badge:'industry-standard'},
   {name:'Zeek (Bro)',vendor:'Open Source',cat:'Network Analysis',desc:'Powerful network analysis framework generating structured logs of network behavior.',tier:'open-source',tags:['ndr','logs','network'],domains:['soc','eng']},
   {name:'Suricata',vendor:'OISF',cat:'Network Analysis',desc:'High-performance open-source IDS/IPS/NSM engine with multi-threading and protocol analysis.',tier:'open-source',tags:['ids','ips','nids'],domains:['soc','eng']},
   {name:'Snort',vendor:'Cisco',cat:'Network Analysis',desc:'Original open-source IDS/IPS with extensive community rule sets (ET Open, VRT).',tier:'open-source',tags:['ids','ips','snort'],domains:['soc','eng']},
   {name:'OWASP ZAP',vendor:'OWASP',cat:'AppSec',desc:'Free open-source DAST tool for finding vulnerabilities in web apps. Great for CI/CD integration.',tier:'open-source',tags:['dast','web','owasp'],domains:['appsec']},
-  {name:'Snyk',vendor:'Snyk',cat:'AppSec',desc:'Developer-first platform for finding vulnerabilities in code, dependencies, containers, and IaC.',tier:'freemium',tags:['sca','iac','devsecops'],domains:['appsec','cloud']},
+  {name:'Snyk',vendor:'Snyk',cat:'AppSec',desc:'Developer-first platform for finding vulnerabilities in code, dependencies, containers, and IaC.',tier:'freemium',tags:['sca','iac','devsecops'],domains:['appsec','cloud'],badge:'trending'},
   {name:'SonarQube',vendor:'SonarSource',cat:'AppSec',desc:'SAST platform with code quality and security vulnerability detection for CI/CD pipelines.',tier:'freemium',tags:['sast','code-quality','ci-cd'],domains:['appsec']},
-  {name:'Semgrep',vendor:'Semgrep',cat:'AppSec',desc:'Fast open-source static analysis supporting 30+ languages with customizable security rules.',tier:'freemium',tags:['sast','open-source','rules'],domains:['appsec']},
+  {name:'Semgrep',vendor:'Semgrep',cat:'AppSec',desc:'Fast open-source static analysis supporting 30+ languages with customizable security rules.',tier:'freemium',tags:['sast','open-source','rules'],domains:['appsec'],badge:'top-pick'},
   {name:'Checkmarx',vendor:'Checkmarx',cat:'AppSec',desc:'Enterprise SAST/SCA platform with deep code analysis and developer IDE integration.',tier:'paid',tags:['sast','sca','enterprise'],domains:['appsec']},
   {name:'ServiceNow GRC',vendor:'ServiceNow',cat:'GRC',desc:'Enterprise GRC for risk management, policy management, and compliance automation at scale.',tier:'paid',tags:['grc','risk','compliance'],domains:['grc']},
   {name:'RSA Archer',vendor:'RSA',cat:'GRC',desc:'Comprehensive GRC platform for risk management, compliance tracking, and business continuity.',tier:'paid',tags:['grc','risk','archer'],domains:['grc']},
-  {name:'Drata',vendor:'Drata',cat:'GRC',desc:'Automated compliance platform for SOC 2, ISO 27001, HIPAA, and GDPR with continuous monitoring.',tier:'paid',tags:['compliance','automation','soc2'],domains:['grc']},
+  {name:'Drata',vendor:'Drata',cat:'GRC',desc:'Automated compliance platform for SOC 2, ISO 27001, HIPAA, and GDPR with continuous monitoring.',tier:'paid',tags:['compliance','automation','soc2'],domains:['grc'],badge:'trending'},
   {name:'Vanta',vendor:'Vanta',cat:'GRC',desc:'Automated security and compliance platform streamlining SOC 2, HIPAA, ISO 27001 certification.',tier:'paid',tags:['compliance','automation'],domains:['grc']},
-  {name:'Ghidra',vendor:'NSA',cat:'Malware Analysis',desc:'Free and open-source reverse engineering tool from NSA with powerful binary analysis and decompiler.',tier:'open-source',tags:['reversing','re','nsa'],domains:['forensics']},
+  {name:'Ghidra',vendor:'NSA',cat:'Malware Analysis',desc:'Free and open-source reverse engineering tool from NSA with powerful binary analysis and decompiler.',tier:'open-source',tags:['reversing','re','nsa'],domains:['forensics'],badge:'top-pick'},
   {name:'IDA Pro',vendor:'Hex-Rays',cat:'Malware Analysis',desc:'Industry-standard disassembler and debugger for professional reverse engineering and malware analysis.',tier:'paid',tags:['reversing','disassembler','professional'],domains:['forensics']},
   {name:'Cuckoo Sandbox',vendor:'Open Source',cat:'Malware Analysis',desc:'Automated malware analysis system executing samples in an isolated environment and reporting behavior.',tier:'open-source',tags:['sandbox','dynamic','behavior'],domains:['forensics']},
-  {name:'ANY.RUN',vendor:'ANY.RUN',cat:'Malware Analysis',desc:'Interactive online malware sandbox with real-time process monitoring and network traffic analysis.',tier:'freemium',tags:['sandbox','online','interactive'],domains:['forensics','soc']},
+  {name:'ANY.RUN',vendor:'ANY.RUN',cat:'Malware Analysis',desc:'Interactive online malware sandbox with real-time process monitoring and network traffic analysis.',tier:'freemium',tags:['sandbox','online','interactive'],domains:['forensics','soc'],badge:'trending'},
   {name:'REMnux',vendor:'SANS',cat:'Malware Analysis',desc:'Linux distribution purpose-built for reverse-engineering and analyzing malware samples.',tier:'free',tags:['linux','distro','reversing'],domains:['forensics']},
   {name:'Radare2',vendor:'Open Source',cat:'Malware Analysis',desc:'Advanced CLI reverse engineering framework for binary analysis, patching, and debugging.',tier:'open-source',tags:['reversing','cli','binary'],domains:['forensics']},
+  // SOAR
+  {name:'Splunk SOAR',vendor:'Splunk',cat:'SOAR',desc:'Automate incident response workflows with playbooks and 300+ app integrations. Industry-leading SOAR platform.',tier:'paid',tags:['Playbooks','Automation','IR','Splunk'],domains:['soc','eng'],badge:'industry-standard'},
+  {name:'Palo Alto XSOAR',vendor:'Palo Alto Networks',cat:'SOAR',desc:'Formerly Demisto. Unified platform for security orchestration with ML-enhanced playbooks and case management.',tier:'paid',tags:['Playbooks','Case Mgmt','Automation','IR'],domains:['soc','eng']},
+  {name:'IBM QRadar SOAR',vendor:'IBM',cat:'SOAR',desc:'Automates incident response and compliance workflows, integrating tightly with QRadar SIEM for end-to-end SOC automation.',tier:'paid',tags:['IR','Compliance','Automation','IBM'],domains:['soc','grc']},
+  {name:'Shuffle',vendor:'Shuffle Security',cat:'SOAR',desc:'Open-source SOAR built for the community. Docker-based, drag-and-drop workflow builder with 800+ app integrations.',tier:'open-source',tags:['Open Source','Workflows','Automation','Community'],domains:['soc','eng'],badge:'top-pick'},
+  {name:'Swimlane',vendor:'Swimlane',cat:'SOAR',desc:'Low-code SOAR platform focused on high-volume alert triage and ROI measurement with detailed reporting dashboards.',tier:'paid',tags:['Low-Code','Alert Triage','Reporting','ROI'],domains:['soc']},
+  // Deception
+  {name:'Thinkst Canary',vendor:'Thinkst',cat:'Deception',desc:'Deploy fake servers, files, and credentials across your network. Any interaction triggers an instant high-fidelity alert with zero false positives.',tier:'paid',tags:['Honeytokens','Detection','Easy Deploy','Zero FP'],domains:['soc','eng'],badge:'top-pick'},
+  {name:'Canarytokens',vendor:'Thinkst',cat:'Deception',desc:'Free web service to create honey tokens — URLs, Word docs, DNS names — that fire alerts when opened by attackers.',tier:'free',tags:['Free','Honeytokens','URLs','Files'],domains:['soc','eng'],badge:'trending'},
+  {name:'OpenCanary',vendor:'Thinkst',cat:'Deception',desc:'Open-source multi-protocol honeypot daemon. Simulates SSH, HTTP, FTP, RDP services and logs all interactions.',tier:'open-source',tags:['Open Source','Multi-Protocol','SSH','RDP'],domains:['soc','eng']},
+  {name:'HoneyDB',vendor:'HoneyDB',cat:'Deception',desc:'Community honeypot network aggregating attack data from thousands of sensors. API access to attacker IPs, credentials, and payloads.',tier:'freemium',tags:['Community','Threat Intel','API','Attacker Data'],domains:['soc','intel']},
+  // DLP
+  {name:'Microsoft Purview',vendor:'Microsoft',cat:'DLP',desc:'Unified data governance and DLP platform integrated into M365. Classifies and protects sensitive data across endpoints, cloud, and email.',tier:'paid',tags:['M365','Data Classification','Endpoint','Cloud'],domains:['grc','cloud'],badge:'industry-standard'},
+  {name:'Symantec DLP',vendor:'Broadcom',cat:'DLP',desc:'Enterprise-grade DLP covering endpoint, network, and cloud. Deep content inspection with policy templates for PCI, HIPAA, GDPR.',tier:'paid',tags:['Enterprise','Endpoint','Network','Compliance'],domains:['grc','eng']},
+  {name:'Forcepoint DLP',vendor:'Forcepoint',cat:'DLP',desc:'Risk-adaptive DLP that adjusts enforcement based on user behavior and risk score. Strong insider threat detection capabilities.',tier:'paid',tags:['Insider Threat','Risk-Adaptive','Behavior','UEBA'],domains:['grc','soc']},
+  {name:'Nightfall AI',vendor:'Nightfall',cat:'DLP',desc:'Cloud-native DLP using ML to detect PII, secrets, and sensitive data in SaaS apps like Slack, GitHub, Google Drive, and Jira.',tier:'freemium',tags:['Cloud-Native','ML','SaaS','API'],domains:['cloud','grc'],badge:'trending'},
 ];
-var _toolFilter='';var _toolCat='All';
+var _toolFilter='';var _toolCat='All';var _toolBadge='';
 function initTools(){
   var catSel=document.getElementById('tf-cat');
   if(catSel&&!catSel.dataset.init){
     catSel.dataset.init='1';
-    var cats=['All','SIEM','EDR','Vulnerability Scanner','Pentest','Forensics','Threat Intel','Cloud Security','IAM','Network Analysis','AppSec','GRC','Malware Analysis'];
+    var cats=['All','SIEM','EDR','Vulnerability Scanner','Pentest','Forensics','Threat Intel','Cloud Security','IAM','Network Analysis','AppSec','GRC','Malware Analysis','SOAR','Deception','DLP'];
     cats.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
   }
-  renderTools('',_toolCat);
+  renderTools('',_toolCat,_toolBadge);
 }
 function filterTools(){
   var q=(document.getElementById('tf-search')&&document.getElementById('tf-search').value)||'';
   var cat=(document.getElementById('tf-cat')&&document.getElementById('tf-cat').value)||'All';
   _toolFilter=q;_toolCat=cat;
-  renderTools(q,cat);
+  renderTools(q,cat,_toolBadge);
+}
+function setToolBadge(badge){
+  _toolBadge=badge;
+  document.querySelectorAll('.tbf-chip').forEach(function(c){
+    c.classList.toggle('active',c.getAttribute('onclick').indexOf("'"+badge+"'")>-1);
+  });
+  renderTools(_toolFilter,_toolCat,_toolBadge);
 }
 function renderTools(q,cat){
   var grid=document.getElementById('tools-grid');
@@ -4328,31 +4351,49 @@ var TOOL_URLS={
   'AWS Security Hub':'https://aws.amazon.com/security-hub/',
   'Prowler':'https://github.com/prowler-cloud/prowler',
   'REMnux':'https://remnux.org/',
-  'Radare2':'https://rada.re/n/'
+  'Radare2':'https://rada.re/n/',
+  'Splunk SOAR':'https://www.splunk.com/en_us/products/soar.html',
+  'Palo Alto XSOAR':'https://www.paloaltonetworks.com/cortex/xsoar',
+  'IBM QRadar SOAR':'https://www.ibm.com/products/qradar-soar',
+  'Shuffle':'https://shuffler.io/',
+  'Swimlane':'https://swimlane.com/',
+  'Thinkst Canary':'https://canary.tools/',
+  'Canarytokens':'https://canarytokens.org/',
+  'OpenCanary':'https://github.com/thinkst/opencanary',
+  'HoneyDB':'https://honeydb.io/',
+  'Microsoft Purview':'https://www.microsoft.com/en-us/security/business/microsoft-purview',
+  'Symantec DLP':'https://www.broadcom.com/products/cybersecurity/information-protection/data-loss-prevention',
+  'Forcepoint DLP':'https://www.forcepoint.com/product/dlp-data-loss-prevention',
+  'Nightfall AI':'https://www.nightfall.ai/'
 };
 if(typeof TOOLS!=='undefined'){
   TOOLS.forEach(function(t){if(!t.url&&TOOL_URLS[t.name])t.url=TOOL_URLS[t.name];});
 }
 })();
 
-// Patch renderTools to make cards clickable
-function renderTools(q,cat){
+// v48: renderTools with badge support
+function renderTools(q,cat,badge){
   var grid=document.getElementById('tools-grid');
   if(!grid)return;
-  q=(q||'').toLowerCase();cat=cat||'All';
+  q=(q||'').toLowerCase();cat=cat||'All';badge=badge||'';
   var filtered=TOOLS.filter(function(t){
     var matchCat=(cat==='All'||t.cat===cat);
-    var matchQ=!q||(t.name.toLowerCase().indexOf(q)>-1)||(t.desc.toLowerCase().indexOf(q)>-1)||(t.vendor.toLowerCase().indexOf(q)>-1)||((t.tags||[]).some(function(tg){return tg.indexOf(q)>-1;}));
-    return matchCat&&matchQ;
+    var matchQ=!q||(t.name.toLowerCase().indexOf(q)>-1)||(t.desc.toLowerCase().indexOf(q)>-1)||(t.vendor.toLowerCase().indexOf(q)>-1)||((t.tags||[]).some(function(tg){return tg.toLowerCase().indexOf(q)>-1;}));
+    var matchBadge=!badge||t.badge===badge;
+    return matchCat&&matchQ&&matchBadge;
   });
   var tierColors={paid:'#f05d78',freemium:'#f5c842',free:'#10e87e','open-source':'#4d9eff'};
+  var badgeMeta={'industry-standard':{label:'Industry Standard',icon:'🏆',color:'#f5c842'},'top-pick':{label:'Top Pick',icon:'⭐',color:'#4d9eff'},'trending':{label:'Trending',icon:'🔥',color:'#fb923c'}};
   grid.innerHTML=filtered.length?filtered.map(function(t){
-    var clickHandler=t.url?'onclick="window.open(\''+t.url+'\',\'_blank\')"':'' ;
+    var clickHandler=t.url?'onclick="window.open(\''+t.url+'\',\'_blank\')"':'';
     var linkInd=t.url?'<span class="tc-ext-link">↗</span>':'';
+    var bm=t.badge&&badgeMeta[t.badge];
+    var badgeHtml=bm?'<span class="tc-badge" style="background:'+bm.color+'18;color:'+bm.color+'">'+bm.icon+' '+bm.label+'</span>':'';
     return '<div class="tool-card tool-card-link" '+clickHandler+' '+(t.url?'title="Visit '+t.name+' website"':'')+' style="'+(t.url?'cursor:pointer;':'')+'">'
       +'<div class="tc-head"><span class="tc-name">'+t.name+linkInd+'</span><span class="tc-tier-badge" style="background:'+tierColors[t.tier]+'22;color:'+tierColors[t.tier]+'">'+t.tier+'</span></div>'
       +'<div class="tc-vendor">'+t.vendor+' &middot; <span class="tc-cat-tag">'+t.cat+'</span></div>'
       +'<div class="tc-desc">'+t.desc+'</div>'
+      +(badgeHtml?'<div>'+badgeHtml+'</div>':'')
       +'<div class="tc-tags">'+(t.tags||[]).slice(0,4).map(function(tg){return '<span class="tc-tag">'+tg+'</span>';}).join('')+'</div>'
       +'</div>';
   }).join(''):'<div class="tools-no-results">No tools match your search.</div>';

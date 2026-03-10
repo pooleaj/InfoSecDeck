@@ -2314,6 +2314,12 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .tc-tags{display:flex;flex-wrap:wrap;gap:5px;}
 .tc-tag{font-family:var(--fm);font-size:.55rem;color:var(--dm);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:2px 7px;}
 .tools-no-results{grid-column:1/-1;text-align:center;color:var(--mt);font-size:.85rem;padding:40px;}
+/* v48: badge chips + badge filter */
+.tc-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:.67rem;font-weight:700;margin-bottom:6px;letter-spacing:.01em;}
+.tools-badge-filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+.tbf-chip{padding:5px 14px;border-radius:20px;font-size:.75rem;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:none;color:var(--mt);transition:all .15s;}
+.tbf-chip.active{background:rgba(77,158,255,.12);border-color:rgba(77,158,255,.4);color:var(--bl);}
+.tbf-chip:hover:not(.active){border-color:rgba(77,158,255,.25);color:var(--tx);}
 
 /* ─── CTF & CONFERENCE CALENDAR ──────────────────────── */
 .cal-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
