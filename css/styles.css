@@ -5848,4 +5848,4 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .sc-more-toggle:hover{text-decoration:underline;}
 .sc-more-certs{margin-top:6px;}
 .sc-cert-search{width:100%;padding:6px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font-size:.78rem;margin-bottom:8px;box-sizing:border-box;}
-.sc-more-list{display:flex;flex-direction:column;gap:4px;}
+.sc-more-list{display:flex;flex-wrap:wrap;gap:8px;}
