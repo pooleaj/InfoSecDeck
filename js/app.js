@@ -8892,3 +8892,404 @@ function _salaryRemoveCert(btn) {
   if (chip) chip.remove();
   calcSalary();
 }
+
+// ══════════════════════════════════════════════════════════════════
+// v58 — FEATURE REQUESTS & ISSUES (feedback page)
+// ══════════════════════════════════════════════════════════════════
+
+var _fbType         = 'feature'; // 'feature' | 'issue'
+var _fbItems        = [];
+var _fbUserVotes    = {};        // { itemId: 1 | -1 | 0 }
+var _fbOpenComments = {};        // { itemId: true }
+
+// ── Page init ──────────────────────────────────────────────────────
+_pageInits['feedback'] = function() {
+  _fbType = 'feature';
+  document.getElementById('fb-tab-feature').classList.add('active');
+  document.getElementById('fb-tab-issue').classList.remove('active');
+  var fw = document.getElementById('fb-form-wrap');
+  if (fw) fw.style.display = 'none';
+  _fbOpenComments = {};
+  fbLoadItems();
+};
+
+// ── Type toggle ────────────────────────────────────────────────────
+function fbSetType(type) {
+  _fbType = type;
+  document.getElementById('fb-tab-feature').classList.toggle('active', type === 'feature');
+  document.getElementById('fb-tab-issue').classList.toggle('active', type === 'issue');
+  var lbl = document.getElementById('fb-form-type-label');
+  if (lbl) lbl.textContent = type === 'feature' ? 'Submit a Feature Request' : 'Report an Issue / Bug';
+  fbLoadItems();
+}
+
+// ── Load items from Supabase ───────────────────────────────────────
+function fbLoadItems() {
+  var listEl = document.getElementById('fb-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="fb-loading">Loading\u2026</div>';
+
+  var statusFilter = (document.getElementById('fb-status-filter') || {}).value || '';
+  var sort         = (document.getElementById('fb-sort') || {}).value || 'score';
+
+  var q = _sb.from('feedback_with_votes').select('*').eq('type', _fbType);
+  if (statusFilter) q = q.eq('status', statusFilter);
+
+  q.then(function(r) {
+    if (r.error) { listEl.innerHTML = '<div class="fb-empty">Error loading items. Please try again.</div>'; return; }
+    var items = r.data || [];
+    // Sort client-side
+    items.sort(function(a, b) {
+      if (sort === 'score') return (b.score - a.score) || (new Date(b.created_at) - new Date(a.created_at));
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+    _fbItems = items;
+
+    // Fetch user's votes if logged in
+    if (_currentUser) {
+      var ids = items.map(function(i) { return i.id; });
+      if (ids.length === 0) { fbRenderList(); return; }
+      _sb.from('feedback_votes').select('item_id,vote').eq('user_id', _currentUser.id).in('item_id', ids).then(function(vr) {
+        _fbUserVotes = {};
+        if (vr.data) vr.data.forEach(function(v) { _fbUserVotes[v.item_id] = v.vote; });
+        fbRenderList();
+      });
+    } else {
+      _fbUserVotes = {};
+      fbRenderList();
+    }
+  });
+}
+
+// ── Render list ────────────────────────────────────────────────────
+function fbRenderList() {
+  var listEl = document.getElementById('fb-list');
+  if (!listEl) return;
+  if (!_fbItems.length) {
+    var label = _fbType === 'feature' ? 'feature request' : 'issue';
+    listEl.innerHTML = '<div class="fb-empty">No ' + label + 's yet \u2014 be the first to submit!</div>';
+    return;
+  }
+  listEl.innerHTML = _fbItems.map(function(item) { return fbItemCard(item); }).join('');
+}
+
+// ── Item card HTML ─────────────────────────────────────────────────
+function fbItemCard(item) {
+  var score   = parseInt(item.score) || 0;
+  var uv      = _fbUserVotes[item.id] || 0;
+  var upCls   = uv === 1  ? ' fb-voted-up'   : '';
+  var dnCls   = uv === -1 ? ' fb-voted-down' : '';
+  var body    = _escFb(item.body || '');
+  var bodyTrunc = body.length > 200 ? body.slice(0, 200) + '\u2026' : body;
+  var cc      = parseInt(item.comment_count) || 0;
+  var statusHtml = '<span class="fb-status-badge fb-status-' + _escFb(item.status) + '">' + _fbStatusLabel(item.status) + '</span>';
+  var typeHtml   = '<span class="fb-type-chip ' + _escFb(item.type) + '">' + (item.type === 'feature' ? '\u2728 Feature' : '\uD83D\uDC1B Issue') + '</span>';
+  var expanded   = _fbOpenComments[item.id] ? '' : 'style="display:none"';
+  return '<div class="fb-item" id="fb-item-' + _escFb(item.id) + '">'
+    + '<div class="fb-item-vote-col">'
+    +   '<button class="fb-upvote' + upCls + '" onclick="fbVote(\'' + _escFb(item.id) + '\',1)" title="Upvote">\u25B2</button>'
+    +   '<div class="fb-score" id="fb-score-' + _escFb(item.id) + '">' + score + '</div>'
+    +   '<button class="fb-downvote' + dnCls + '" onclick="fbVote(\'' + _escFb(item.id) + '\',-1)" title="Downvote">\u25BC</button>'
+    + '</div>'
+    + '<div class="fb-item-main">'
+    +   '<div class="fb-item-header">'
+    +     '<div class="fb-item-title">' + _escFb(item.title) + '</div>'
+    +     statusHtml
+    +   '</div>'
+    +   '<div class="fb-item-meta">'
+    +     typeHtml
+    +     '<span class="fb-meta-sep">&middot;</span>'
+    +     '<span class="fb-meta-author">' + _escFb(item.user_name || 'Anonymous') + '</span>'
+    +     '<span class="fb-meta-sep">&middot;</span>'
+    +     '<span class="fb-meta-date">' + _fbTimeAgo(item.created_at) + '</span>'
+    +   '</div>'
+    + (bodyTrunc ? '<div class="fb-item-body">' + bodyTrunc + '</div>' : '')
+    +   '<div class="fb-item-footer">'
+    +     '<button class="fb-expand-btn" id="fb-expand-' + _escFb(item.id) + '" onclick="fbToggleComments(\'' + _escFb(item.id) + '\')">'
+    +       '\uD83D\uDCAC ' + cc + ' comment' + (cc !== 1 ? 's' : '') + ((_fbOpenComments[item.id]) ? ' \u25B2 Collapse' : ' \u25BC Expand')
+    +     '</button>'
+    +   '</div>'
+    +   '<div class="fb-comments-wrap" id="fb-cmts-' + _escFb(item.id) + '" ' + expanded + '>'
+    +     '<div class="fb-comment-list" id="fb-clist-' + _escFb(item.id) + '"></div>'
+    +     fbCommentForm(item.id)
+    +   '</div>'
+    + '</div>'
+    + '</div>';
+}
+
+function _fbStatusLabel(s) {
+  return {open:'Open','in-progress':'In Progress',completed:'Completed',closed:'Closed'}[s] || s;
+}
+
+function _fbTimeAgo(iso) {
+  if (!iso) return '';
+  var diff = Date.now() - new Date(iso).getTime();
+  var mins = Math.floor(diff/60000), hrs = Math.floor(mins/60), days = Math.floor(hrs/24);
+  if (mins < 2)  return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  if (hrs  < 24) return hrs  + 'h ago';
+  if (days < 30) return days + 'd ago';
+  return new Date(iso).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+}
+
+function _escFb(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ── Voting ─────────────────────────────────────────────────────────
+function fbVote(itemId, dir) {
+  if (!_currentUser) { fbShowLoginGate(); return; }
+
+  var prev = _fbUserVotes[itemId] || 0;
+
+  // Optimistic update
+  var scoreEl = document.getElementById('fb-score-' + itemId);
+  var card    = document.getElementById('fb-item-' + itemId);
+  var upBtn   = card && card.querySelector('.fb-upvote');
+  var dnBtn   = card && card.querySelector('.fb-downvote');
+
+  function applyVoteClasses(v) {
+    if (!upBtn || !dnBtn) return;
+    upBtn.classList.toggle('fb-voted-up',   v === 1);
+    dnBtn.classList.toggle('fb-voted-down', v === -1);
+  }
+
+  var newVote;
+  if (prev === dir) {
+    // Unvote
+    newVote = 0;
+    _fbUserVotes[itemId] = 0;
+    applyVoteClasses(0);
+    if (scoreEl) scoreEl.textContent = (parseInt(scoreEl.textContent) - dir);
+    _sb.from('feedback_votes').delete().eq('item_id', itemId).eq('user_id', _currentUser.id).then(function(r) {
+      if (r.error) { _fbUserVotes[itemId] = prev; applyVoteClasses(prev); if(scoreEl) scoreEl.textContent=(parseInt(scoreEl.textContent)+dir); showToast('Vote error. Try again.'); }
+      else _fbRefreshScore(itemId);
+    });
+  } else if (prev === 0) {
+    // New vote
+    newVote = dir;
+    _fbUserVotes[itemId] = dir;
+    applyVoteClasses(dir);
+    if (scoreEl) scoreEl.textContent = (parseInt(scoreEl.textContent) + dir);
+    _sb.from('feedback_votes').insert({item_id:itemId, user_id:_currentUser.id, vote:dir}).then(function(r) {
+      if (r.error) { _fbUserVotes[itemId] = 0; applyVoteClasses(0); if(scoreEl) scoreEl.textContent=(parseInt(scoreEl.textContent)-dir); showToast('Vote error. Try again.'); }
+      else _fbRefreshScore(itemId);
+    });
+  } else {
+    // Flip vote
+    newVote = dir;
+    _fbUserVotes[itemId] = dir;
+    applyVoteClasses(dir);
+    if (scoreEl) scoreEl.textContent = (parseInt(scoreEl.textContent) + dir * 2);
+    _sb.from('feedback_votes').update({vote:dir}).eq('item_id', itemId).eq('user_id', _currentUser.id).then(function(r) {
+      if (r.error) { _fbUserVotes[itemId] = prev; applyVoteClasses(prev); if(scoreEl) scoreEl.textContent=(parseInt(scoreEl.textContent)-dir*2); showToast('Vote error. Try again.'); }
+      else _fbRefreshScore(itemId);
+    });
+  }
+}
+
+function _fbRefreshScore(itemId) {
+  _sb.from('feedback_with_votes').select('score').eq('id', itemId).single().then(function(r) {
+    if (!r.error && r.data) {
+      var el = document.getElementById('fb-score-' + itemId);
+      if (el) el.textContent = r.data.score;
+    }
+  });
+}
+
+// ── Login gate ─────────────────────────────────────────────────────
+function fbShowLoginGate() {
+  var gate = document.getElementById('fb-login-gate');
+  if (!gate) return;
+  gate.style.display = 'block';
+  gate.scrollIntoView({behavior:'smooth', block:'nearest'});
+  clearTimeout(window._fbGateTimer);
+  window._fbGateTimer = setTimeout(function() { gate.style.display = 'none'; }, 6000);
+}
+
+// ── Submit form ────────────────────────────────────────────────────
+function fbOpenForm() {
+  if (!_currentUser) { openAuthModal('signin'); return; }
+  var fw = document.getElementById('fb-form-wrap');
+  if (!fw) return;
+  fw.style.display = 'block';
+  fw.scrollIntoView({behavior:'smooth', block:'nearest'});
+  setTimeout(function() { var t = document.getElementById('fb-title'); if(t) t.focus(); }, 200);
+  var lbl = document.getElementById('fb-form-type-label');
+  if (lbl) lbl.textContent = _fbType === 'feature' ? 'Submit a Feature Request' : 'Report an Issue / Bug';
+}
+
+function fbCloseForm() {
+  var fw = document.getElementById('fb-form-wrap');
+  if (fw) fw.style.display = 'none';
+  var t = document.getElementById('fb-title'); if(t) t.value = '';
+  var b = document.getElementById('fb-body');  if(b) b.value = '';
+  var h = document.getElementById('fb-char-hint'); if(h) h.textContent = '0 / 120';
+}
+
+function fbSubmitItem() {
+  var titleEl = document.getElementById('fb-title');
+  var bodyEl  = document.getElementById('fb-body');
+  var btn     = document.getElementById('fb-submit-item-btn');
+  var title   = (titleEl && titleEl.value.trim()) || '';
+  var body    = (bodyEl  && bodyEl.value.trim())  || '';
+  if (title.length < 3) { showToast('Please enter a title (at least 3 characters).'); if(titleEl) titleEl.focus(); return; }
+  if (!_currentUser) { openAuthModal('signin'); return; }
+
+  var p = loadProfile();
+  var userName = (p.username || p.name || _currentUser.email.split('@')[0] || 'Anonymous').slice(0, 60);
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting\u2026'; }
+
+  _sb.from('feedback_items').insert({
+    type:      _fbType,
+    title:     title.slice(0, 120),
+    body:      body.slice(0, 2000),
+    user_id:   _currentUser.id,
+    user_name: userName
+  }).select().single().then(function(r) {
+    if (r.error) {
+      showToast('Error: ' + r.error.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit'; }
+      return;
+    }
+    fbCloseForm();
+    showToast('Submitted! Thanks for your feedback \uD83D\uDE4F');
+    fbNotifyAdmin(r.data);
+    fbLoadItems();
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit'; }
+  });
+}
+
+// ── Admin notification (fire-and-forget) ───────────────────────────
+function fbNotifyAdmin(item) {
+  _sb.auth.getSession().then(function(sr) {
+    var token = sr.data && sr.data.session && sr.data.session.access_token;
+    if (!token || !item) return;
+    fetch(EDGE_BASE + '/feedback-notify', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+      body: JSON.stringify({ itemId:item.id, type:item.type, title:item.title, userName:item.user_name })
+    }).catch(function() {}); // swallow errors — fire and forget
+  });
+}
+
+// ── Comments ───────────────────────────────────────────────────────
+function fbToggleComments(itemId) {
+  var wrap = document.getElementById('fb-cmts-' + itemId);
+  var btn  = document.getElementById('fb-expand-' + itemId);
+  if (!wrap) return;
+  var isOpen = _fbOpenComments[itemId];
+  _fbOpenComments[itemId] = !isOpen;
+  wrap.style.display = isOpen ? 'none' : 'block';
+  var item = _fbItems.find(function(i) { return i.id === itemId; }) || {};
+  var cc   = parseInt(item.comment_count) || 0;
+  if (btn) btn.textContent = '\uD83D\uDCAC ' + cc + ' comment' + (cc !== 1 ? 's' : '') + ((!isOpen) ? ' \u25B2 Collapse' : ' \u25BC Expand');
+  if (!isOpen) fbLoadComments(itemId);
+}
+
+function fbLoadComments(itemId) {
+  var listEl = document.getElementById('fb-clist-' + itemId);
+  if (!listEl) return;
+  _sb.from('feedback_comments').select('*').eq('item_id', itemId).order('created_at', {ascending:true}).then(function(r) {
+    if (r.error) { listEl.innerHTML = '<div class="fb-comment"><span style="color:var(--mt);font-size:.78rem;">Could not load comments.</span></div>'; return; }
+    listEl.innerHTML = fbRenderComments(r.data || []);
+  });
+}
+
+function fbRenderComments(comments) {
+  if (!comments.length) return '<div style="font-size:.78rem;color:var(--mt);padding:8px 0;">No comments yet \u2014 be the first!</div>';
+  return comments.map(function(c) {
+    var canDel = _currentUser && c.user_id === _currentUser.id;
+    return '<div class="fb-comment">'
+      + '<div class="fb-comment-header">'
+      +   '<span class="fb-comment-author">' + _escFb(c.user_name||'Anonymous') + '</span>'
+      +   '<span style="display:flex;align-items:center;gap:8px;">'
+      +     '<span class="fb-comment-time">' + _fbTimeAgo(c.created_at) + '</span>'
+      +     (canDel ? '<button class="fb-comment-delete" onclick="fbDeleteComment(\'' + _escFb(c.id) + '\',\'' + _escFb(c.item_id) + '\')" title="Delete">&#x2715;</button>' : '')
+      +   '</span>'
+      + '</div>'
+      + '<div class="fb-comment-body">' + _escFb(c.body) + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function fbCommentForm(itemId) {
+  return '<div class="fb-comment-form" id="fb-cform-' + _escFb(itemId) + '">'
+    + '<textarea class="fb-comment-input" id="fb-cinput-' + _escFb(itemId) + '" placeholder="Add a comment\u2026" rows="2"></textarea>'
+    + '<button class="fb-comment-submit" onclick="fbPostComment(\'' + _escFb(itemId) + '\')">Post</button>'
+    + '</div>';
+}
+
+function fbPostComment(itemId) {
+  if (!_currentUser) { openAuthModal('signin'); return; }
+  var inp = document.getElementById('fb-cinput-' + itemId);
+  var body = inp && inp.value.trim();
+  if (!body || body.length < 2) { showToast('Please write a comment first.'); return; }
+  var p = loadProfile();
+  var userName = (p.username || p.name || _currentUser.email.split('@')[0] || 'Anonymous').slice(0, 60);
+  _sb.from('feedback_comments').insert({
+    item_id:   itemId,
+    user_id:   _currentUser.id,
+    user_name: userName,
+    body:      body.slice(0, 1000)
+  }).then(function(r) {
+    if (r.error) { showToast('Error: ' + r.error.message); return; }
+    if (inp) inp.value = '';
+    fbLoadComments(itemId);
+    // Update comment count in cached items
+    var idx = _fbItems.findIndex ? _fbItems.findIndex(function(i) { return i.id===itemId; }) : -1;
+    if (idx > -1) _fbItems[idx].comment_count = (parseInt(_fbItems[idx].comment_count)||0) + 1;
+    var btn = document.getElementById('fb-expand-' + itemId);
+    if (btn) { var cc = parseInt((_fbItems[idx]||{}).comment_count)||0; btn.textContent = '\uD83D\uDCAC ' + cc + ' comment' + (cc!==1?'s':'') + ' \u25B2 Collapse'; }
+  });
+}
+
+function fbDeleteComment(commentId, itemId) {
+  if (!confirm('Delete this comment?')) return;
+  _sb.from('feedback_comments').delete().eq('id', commentId).eq('user_id', _currentUser.id).then(function(r) {
+    if (r.error) { showToast('Error: ' + r.error.message); return; }
+    fbLoadComments(itemId);
+  });
+}
+
+// ── Admin: status management ───────────────────────────────────────
+function _renderAdminFeedback() {
+  var el = document.getElementById('admin-feedback-panel');
+  if (!el) return;
+  el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Loading\u2026</p>';
+  _sb.from('feedback_items').select('id,type,title,status,user_name,created_at').order('created_at', {ascending:false}).then(function(r) {
+    if (r.error) { el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Error: ' + r.error.message + '</p>'; return; }
+    var items = r.data || [];
+    if (!items.length) { el.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">No submissions yet.</p>'; return; }
+    el.innerHTML = items.map(function(item) {
+      var typeChip = '<span class="fb-type-chip ' + _escFb(item.type) + '" style="font-size:.5rem;">' + (item.type==='feature'?'Feature':'Issue') + '</span>';
+      return '<div class="fb-admin-item">'
+        + '<div class="fb-admin-item-info">'
+        +   '<div class="fb-admin-item-title">' + typeChip + ' ' + _escFb(item.title) + '</div>'
+        +   '<div class="fb-admin-item-meta">' + _escFb(item.user_name||'Anonymous') + ' &middot; ' + _fbTimeAgo(item.created_at) + '</div>'
+        + '</div>'
+        + '<select class="fb-admin-status-select" onchange="fbAdminSetStatus(\'' + _escFb(item.id) + '\',this.value)">'
+        +   ['open','in-progress','completed','closed'].map(function(s) {
+              return '<option value="' + s + '"' + (item.status===s?' selected':'') + '>' + _fbStatusLabel(s) + '</option>';
+            }).join('')
+        + '</select>'
+        + '</div>';
+    }).join('');
+  });
+}
+
+function fbAdminSetStatus(itemId, newStatus) {
+  _sb.from('feedback_items').update({status:newStatus, updated_at:new Date().toISOString()}).eq('id', itemId).then(function(r) {
+    if (r.error) { showToast('Error: ' + r.error.message); return; }
+    showToast('Status updated to \u201c' + _fbStatusLabel(newStatus) + '\u201d');
+  });
+}
+
+// ── Wire _renderAdminFeedback into profile page init ───────────────
+_pageInits.profile = (function(_o) {
+  return function() {
+    if (_o) _o();
+    if (typeof isAdmin === 'function' && isAdmin()) _renderAdminFeedback();
+  };
+})(_pageInits.profile);

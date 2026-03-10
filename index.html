@@ -192,6 +192,10 @@
           <span class="ndi-icon">💬</span>
           <div class="ndi-text"><span class="ndi-label">Reviews</span><span class="ndi-desc">Community feedback &amp; ratings</span></div>
         </div>
+        <div class="ndi" onclick="showPage('feedback');closeAllDrops()">
+          <span class="ndi-icon">💡</span>
+          <div class="ndi-text"><span class="ndi-label">Feature Requests</span><span class="ndi-desc">Vote &amp; report issues</span></div>
+        </div>
         <div class="ndi" onclick="showPage('stories');closeAllDrops()">
           <span class="ndi-icon">🏆</span>
           <div class="ndi-text"><span class="ndi-label">Wall of Wins</span><span class="ndi-desc">Community success stories</span></div>
@@ -3133,6 +3137,85 @@
 </div>
 </div>
 
+<!-- ═══════════════════════════════ FEATURE REQUESTS & ISSUES ═══════════════════════════════ -->
+<div class="page" id="page-feedback">
+<div class="fb-wrap">
+
+  <div class="ey a1">Community</div>
+  <div class="st a2">Feature Requests &amp; Issues</div>
+  <p class="ss a3">Vote on what to build next. Report bugs. See what's happening.</p>
+
+  <!-- Top bar: type tabs + submit button -->
+  <div class="fb-topbar a3">
+    <div class="fb-tabs" id="fb-tabs">
+      <button class="fb-tab active" id="fb-tab-feature" onclick="fbSetType('feature')">✨ Feature Requests</button>
+      <button class="fb-tab" id="fb-tab-issue" onclick="fbSetType('issue')">🐛 Issues &amp; Bugs</button>
+    </div>
+    <button class="fb-submit-btn" onclick="fbOpenForm()">+ Submit</button>
+  </div>
+
+  <!-- Inline submit form (hidden until fbOpenForm()) -->
+  <div class="fb-form-wrap" id="fb-form-wrap" style="display:none;">
+    <div class="fb-form-hd">
+      <span id="fb-form-type-label">Submit a Feature Request</span>
+      <button class="fb-form-close" onclick="fbCloseForm()">✕</button>
+    </div>
+    <div class="fb-form-field">
+      <label class="fb-label">Title <span class="fb-req">*</span></label>
+      <input class="fb-input" id="fb-title" placeholder="Short, descriptive title (max 120 chars)" maxlength="120" oninput="document.getElementById('fb-char-hint').textContent=this.value.length+' / 120'">
+    </div>
+    <div class="fb-form-field">
+      <label class="fb-label">Details</label>
+      <textarea class="fb-textarea" id="fb-body" placeholder="Describe what you want or what broke. More context = faster action." rows="5"></textarea>
+    </div>
+    <div class="fb-form-actions">
+      <span class="fb-char-hint" id="fb-char-hint">0 / 120</span>
+      <button class="fb-submit-item-btn" id="fb-submit-item-btn" onclick="fbSubmitItem()">Submit</button>
+    </div>
+  </div>
+
+  <!-- Filter / sort bar -->
+  <div class="fb-filterbar a4" id="fb-filterbar">
+    <div class="fb-filter-group">
+      <span class="fb-filter-label">Status:</span>
+      <select class="fb-select" id="fb-status-filter" onchange="fbLoadItems()">
+        <option value="">All</option>
+        <option value="open">Open</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="closed">Closed</option>
+      </select>
+    </div>
+    <div class="fb-filter-group">
+      <span class="fb-filter-label">Sort:</span>
+      <select class="fb-select" id="fb-sort" onchange="fbLoadItems()">
+        <option value="score">Top Voted</option>
+        <option value="newest">Newest</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Item list (JS-rendered) -->
+  <div class="fb-list a4" id="fb-list">
+    <div class="fb-loading">Loading…</div>
+  </div>
+
+  <!-- Login gate (shown when guest tries to vote/comment/submit) -->
+  <div class="fb-login-gate" id="fb-login-gate" style="display:none;">
+    <div class="fb-gate-icon">🔒</div>
+    <div class="fb-gate-title">Sign in to vote and comment</div>
+    <p class="fb-gate-sub">Free account — no credit card required.</p>
+    <div class="fb-gate-btns">
+      <button class="fb-gate-btn fb-gate-primary" onclick="openAuthModal('signin')">Sign In</button>
+      <button class="fb-gate-btn" onclick="openAuthModal('signup')">Create Account</button>
+    </div>
+  </div>
+
+</div><!-- /fb-wrap -->
+<div class="footer">InfoSecDeck &middot; Feature Requests &amp; Issues &middot; Shape what gets built next</div>
+</div>
+<!-- /page-feedback -->
+
 <!-- ═══════════════════════════════ SEARCH OVERLAY ═══════════════════════════════ -->
 <div id="search-overlay" class="search-overlay" onclick="if(event.target===this)closeSearchDirect()">
   <div class="search-box">
@@ -3349,6 +3432,17 @@
       <button onclick="_renderBlogAdminPanel()" style="font-size:.72rem;padding:3px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--c2);color:var(--ft);cursor:pointer;">↻ Refresh</button>
     </div>
     <div id="admin-blog-panel">
+      <p style="font-size:.78rem;color:var(--mt);">Loading&hellip;</p>
+    </div>
+  </div>
+
+  <!-- Admin Feedback Panel (admin-only) -->
+  <div class="profile-section admin-only" id="admin-feedback-section" style="display:none;">
+    <div class="profile-section-hd" style="display:flex;align-items:center;gap:10px;">
+      <span>💡 Admin — Feature Requests &amp; Issues</span>
+      <button onclick="_renderAdminFeedback()" style="margin-left:auto;font-size:.72rem;padding:3px 10px;border-radius:6px;border:1px solid var(--bd);background:var(--c2);color:var(--ft);cursor:pointer;">↻ Refresh</button>
+    </div>
+    <div id="admin-feedback-panel">
       <p style="font-size:.78rem;color:var(--mt);">Loading&hellip;</p>
     </div>
   </div>
@@ -4224,7 +4318,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=57"></script>
+<script src="js/app.js?v=58"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->
