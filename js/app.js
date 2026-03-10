@@ -1586,7 +1586,39 @@ var POSTS = {
   }
 };
 
-function openPost(id){
+var _SITE_TITLE    = 'InfoSecDeck \u2014 Cybersecurity Career Guide';
+var _SITE_DESC     = 'Map your cybersecurity career path. Explore 15 domains, 80+ certifications, interview prep, and AI-powered resume feedback \u2014 completely free.';
+var _SITE_OG_TITLE = 'InfoSecDeck \u2014 Free Cybersecurity Career Guide & Tools';
+var _SITE_URL      = 'https://infosecdeck.com/';
+
+function _postExcerpt(html) {
+  var div = document.createElement('div');
+  div.innerHTML = html;
+  var text = (div.textContent || div.innerText || '').replace(/\s+/g,' ').trim();
+  return text.length > 155 ? text.slice(0,155).replace(/\s+\S*$/,'') + '\u2026' : text;
+}
+
+function _setPostMeta(slug, post) {
+  var excerpt = _postExcerpt(post.body || '');
+  var postUrl = 'https://infosecdeck.com/?post=' + encodeURIComponent(slug);
+  document.title = (post.title||'') + ' \u2014 InfoSecDeck';
+  var d = document.querySelector('meta[name="description"]');   if(d) d.setAttribute('content', excerpt);
+  var ot = document.querySelector('meta[property="og:title"]'); if(ot) ot.setAttribute('content', (post.title||'') + ' \u2014 InfoSecDeck');
+  var od = document.querySelector('meta[property="og:description"]'); if(od) od.setAttribute('content', excerpt);
+  var ou = document.querySelector('meta[property="og:url"]');   if(ou) ou.setAttribute('content', postUrl);
+  var cn = document.querySelector('link[rel="canonical"]');     if(cn) cn.setAttribute('href', postUrl);
+}
+
+function _resetSiteMeta() {
+  document.title = _SITE_TITLE;
+  var d = document.querySelector('meta[name="description"]');   if(d) d.setAttribute('content', _SITE_DESC);
+  var ot = document.querySelector('meta[property="og:title"]'); if(ot) ot.setAttribute('content', _SITE_OG_TITLE);
+  var od = document.querySelector('meta[property="og:description"]'); if(od) od.setAttribute('content', _SITE_DESC);
+  var ou = document.querySelector('meta[property="og:url"]');   if(ou) ou.setAttribute('content', _SITE_URL);
+  var cn = document.querySelector('link[rel="canonical"]');     if(cn) cn.setAttribute('href', _SITE_URL);
+}
+
+function openPost(id, _skipHistory){
   var post = _dbPosts.find(function(p){return p.slug===id;}) || POSTS[id];
   if(!post) return;
   var modal = document.getElementById('blog-modal');
@@ -1597,15 +1629,32 @@ function openPost(id){
   content.innerHTML = '<div style="font-family:var(--fm);font-size:.54rem;text-transform:uppercase;letter-spacing:.16em;color:var(--bl);margin-bottom:10px;">'+tag+' · '+dateLabel+'</div>'
     + '<h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:20px;">'+(post.title||'')+'</h2>'
     + '<div style="font-size:.85rem;color:#94a3b8;line-height:1.85;">'+(post.body||'')+'</div>';
+  if (!_skipHistory) history.pushState({post:id}, post.title||'', '?post='+encodeURIComponent(id));
+  _setPostMeta(id, post);
   modal.style.display = 'block';
   document.body.style.overflow = 'hidden';
 }
 
-function closePost(){
+function _closePostInternal(){
   var modal = document.getElementById('blog-modal');
   if(modal) modal.style.display = 'none';
   document.body.style.overflow = '';
+  _resetSiteMeta();
 }
+
+function closePost(){
+  _closePostInternal();
+  if(window.location.search.indexOf('post=') !== -1) history.pushState({}, '', '/');
+}
+
+window.addEventListener('popstate', function() {
+  var m = window.location.search.match(/[?&]post=([^&]+)/);
+  if (m) { openPost(decodeURIComponent(m[1]), true); }
+  else {
+    var modal = document.getElementById('blog-modal');
+    if (modal && modal.style.display !== 'none') _closePostInternal();
+  }
+});
 
 function _renderBlogGrid() {
   var el = document.getElementById('blog-grid');
@@ -6157,6 +6206,30 @@ function _updateProBadge() {
     if (existing) existing.remove();
   }
 }
+
+// Handle ?post=slug deep link — navigate to blog page and open post
+(function() {
+  var search = window.location.search;
+  var postMatch = search.match(/[?&]post=([^&]+)/);
+  if (postMatch && search.indexOf('checkout=') === -1) {
+    var _deepSlug = decodeURIComponent(postMatch[1]);
+    setTimeout(function() {
+      showPage('blog');
+      // Static post: open immediately. DB post: retry until loaded.
+      if (POSTS[_deepSlug]) {
+        openPost(_deepSlug, true);
+      } else {
+        var _attempts = 0;
+        var _t = setInterval(function() {
+          _attempts++;
+          var found = _dbPosts.find(function(p){return p.slug===_deepSlug;});
+          if (found) { clearInterval(_t); openPost(_deepSlug, true); }
+          else if (_attempts >= 10) clearInterval(_t);
+        }, 400);
+      }
+    }, 200);
+  }
+})();
 
 // Handle Stripe redirect back to site after checkout
 (function() {
