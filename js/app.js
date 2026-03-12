@@ -4146,6 +4146,9 @@ var TOOLS=[
   {name:'Symantec DLP',vendor:'Broadcom',cat:'DLP',desc:'Enterprise-grade DLP covering endpoint, network, and cloud. Deep content inspection with policy templates for PCI, HIPAA, GDPR.',tier:'paid',tags:['Enterprise','Endpoint','Network','Compliance'],domains:['grc','eng']},
   {name:'Forcepoint DLP',vendor:'Forcepoint',cat:'DLP',desc:'Risk-adaptive DLP that adjusts enforcement based on user behavior and risk score. Strong insider threat detection capabilities.',tier:'paid',tags:['Insider Threat','Risk-Adaptive','Behavior','UEBA'],domains:['grc','soc']},
   {name:'Nightfall AI',vendor:'Nightfall',cat:'DLP',desc:'Cloud-native DLP using ML to detect PII, secrets, and sensitive data in SaaS apps like Slack, GitHub, Google Drive, and Jira.',tier:'freemium',tags:['Cloud-Native','ML','SaaS','API'],domains:['cloud','grc'],badge:'trending'},
+  // Privacy & Credential Tools
+  {name:'NordVPN',vendor:'Nord Security',cat:'Networking',desc:'Industry-leading VPN with 6,000+ servers in 111 countries. Essential for securing lab traffic, anonymous security research, and protecting connections on untrusted networks.',tier:'paid',tags:['VPN','Privacy','Networking','Affiliate ★'],domains:['soc','red','eng'],badge:'top-pick',url:'https://go.nordvpn.net/aff_c?offer_id=15&aff_id=142939&url_id=902'},
+  {name:'NordPass',vendor:'Nord Security',cat:'Identity & Access',desc:'Password manager built for security professionals. Secure encrypted vault, passkey support, data breach scanner, and team sharing — essential for managing credentials across lab environments.',tier:'freemium',tags:['Password Manager','IAM','Credentials','Affiliate ★'],domains:['iam','soc','eng'],badge:'top-pick',url:'https://go.nordpass.io/aff_c?offer_id=488&aff_id=142939&url_id=9356'},
 ];
 var _toolFilter='';var _toolCat='All';var _toolBadge='';
 function initTools(){
