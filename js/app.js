@@ -1678,14 +1678,6 @@ function _renderBlogGrid() {
   +'<span class="gll-link" onclick="showPage(\'reviews\')" style="margin-top:4px;">💬 Suggest a Topic</span></div>';
 }
 
-_pageInits.blog = function() {
-  if (!window._sb) { _renderBlogGrid(); return; }
-  _sb.from('blog_posts').select('*').eq('published',true).order('created_at',{ascending:false}).then(function(res) {
-    if (!res.error && res.data) _dbPosts = res.data;
-    _renderBlogGrid();
-  });
-};
-
 function _renderBlogAdminPanel() {
   var el = document.getElementById('admin-blog-panel');
   if (!el || !window._sb) return;
@@ -4431,6 +4423,13 @@ var _pageInits={
   stories:function(){renderStories();},
   profile:function(){initProfile();},
   'homelab-detail':function(){},
+  blog:function(){
+    if (!window._sb) { _renderBlogGrid(); return; }
+    _sb.from('blog_posts').select('*').eq('published',true).order('created_at',{ascending:false}).then(function(res) {
+      if (!res.error && res.data) _dbPosts = res.data;
+      _renderBlogGrid();
+    });
+  },
 };
 
 // Trigger DC float on first load
