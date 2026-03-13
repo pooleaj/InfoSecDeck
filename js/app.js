@@ -5421,6 +5421,40 @@ function renderCLCanvas() {
   }).join('');
 }
 
+function _clpSaveStartRole() {
+  var el = document.getElementById('clp-start-role');
+  if (!el) return;
+  var p = loadProfile() || {};
+  p.role = el.value;
+  saveProfile(p);
+}
+
+function _clpInitStartPanel() {
+  var p = loadProfile() || {};
+  var roleEl = document.getElementById('clp-start-role');
+  if (roleEl) roleEl.value = p.role || '';
+
+  // Show completed certs as pills
+  var certPills = document.getElementById('clp-start-cert-pills');
+  var certRow = document.getElementById('clp-start-certs-row');
+  if (certPills && certRow) {
+    var prog = {};
+    try { prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}'); } catch(e) {}
+    var done = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
+    if (done.length > 0) {
+      certPills.innerHTML = done.slice(0, 8).map(function(k) {
+        var c = (typeof CERTS !== 'undefined' && CERTS[k]) ? CERTS[k].name : k;
+        // Use short name: strip long vendor prefix
+        var short = c.replace(/CompTIA\s*/i,'').replace(/^(ISC.2\s*|ISACA\s*|EC-Council\s*)/i,'').split(' ').slice(0,2).join(' ');
+        return '<span class="clp-cert-pill">' + short + '</span>';
+      }).join('') + (done.length > 8 ? '<span class="clp-cert-pill clp-cert-more">+' + (done.length - 8) + ' more</span>' : '');
+      certRow.style.display = 'flex';
+    } else {
+      certRow.style.display = 'none';
+    }
+  }
+}
+
 function initCareerLadder() {
   var gateEl = document.getElementById('clp-auth-gate');
   var builderEl = document.getElementById('clp-builder');
@@ -5431,74 +5465,122 @@ function initCareerLadder() {
   if (!isLoggedIn) return;
   loadCareerLadder();
   renderCLCanvas();
+  _clpInitStartPanel();
   if (recEl) recEl.style.display = 'none';
 }
 
 function generateCLRecommendations() {
-  var p = loadProfile();
-  var myCerts = p.myCerts || [];
+  var p = loadProfile() || {};
+  // Sync current role from the start panel input (user may have edited it inline)
+  var startRoleEl = document.getElementById('clp-start-role');
+  if (startRoleEl && startRoleEl.value) p.role = startRoleEl.value;
+
+  // Build done certs list from tracker (more reliable than myCerts array)
+  var doneCerts = [];
+  try {
+    var cp = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
+    doneCerts = Object.keys(cp).filter(function(k) { return cp[k] === 'done'; });
+  } catch(e) {}
+  var myCerts = doneCerts.length ? doneCerts : (p.myCerts || []);
+
   var recPanel = document.getElementById('clp-rec-panel');
   var recBody = document.getElementById('clp-rec-body');
   if (!recPanel || !recBody) return;
   if (!_clSteps.length) { showToast('Add milestones first.'); return; }
+
+  var startRole = (p.role || (startRoleEl && startRoleEl.value) || 'Current Role');
   var recs = [];
   _clSteps.forEach(function(step, i) {
-    if (i === 0) return; // skip start
+    if (i === 0) return;
     var prev = _clSteps[i - 1];
-    var advice = _generateStepAdvice(prev, step, p, myCerts, i, _clSteps.length);
+    var advice = _generateStepAdvice(prev, step, p, myCerts, i, _clSteps.length, startRole);
     step.advice = advice;
-    recs.push({ from: prev.title, to: step.title, advice: advice });
+    recs.push({ from: prev.title || startRole, to: step.title, advice: advice });
   });
-  renderCLCanvas(); // re-render with advice
-  recBody.innerHTML = recs.map(function(r) {
-    return '<div class="clr-item"><div class="clr-transition">' + r.from + ' &rarr; ' + r.to + '</div>'
-      + '<ul class="clr-list">' + r.advice.map(function(a) { return '<li>' + a + '</li>'; }).join('') + '</ul></div>';
-  }).join('');
+
+  renderCLCanvas();
+  recBody.innerHTML = '<div class="clr-context">Advice based on your starting point: <strong>' + startRole + '</strong>'
+    + (myCerts.length ? ' with ' + myCerts.length + ' cert' + (myCerts.length > 1 ? 's' : '') + ' completed' : '') + '</div>'
+    + recs.map(function(r) {
+      return '<div class="clr-item"><div class="clr-transition">' + r.from + ' &rarr; ' + r.to + '</div>'
+        + '<ul class="clr-list">' + r.advice.map(function(a) { return '<li>' + a + '</li>'; }).join('') + '</ul></div>';
+    }).join('');
   recPanel.style.display = 'block';
   recPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
   showToast('Recommendations generated! \u2705');
 }
 
-function _generateStepAdvice(prev, step, profile, myCerts, stepIdx, totalSteps) {
+function _generateStepAdvice(prev, step, profile, myCerts, stepIdx, totalSteps, startRole) {
   var advice = [];
   var exp = profile.exp || '0';
   var expNum = parseInt(exp) || 0;
   var isFirst = stepIdx === 1;
   var isLast = stepIdx === totalSteps - 1;
+  var stepTitle = (step.title || '').toLowerCase();
+  var prevTitle = (prev.title || '').toLowerCase();
 
-  // Certs advice
-  var hasCISSP = myCerts.some(function(c) { return c.indexOf('CISSP') !== -1; });
-  var hasSec = myCerts.some(function(c) { return c.indexOf('Security+') !== -1 || c.indexOf('Sec+') !== -1; });
-  var hasCloud = myCerts.some(function(c) { return c.indexOf('AWS') !== -1 || c.indexOf('Azure') !== -1 || c.indexOf('GCP') !== -1; });
+  // Map cert keys from tracker to names for matching
+  var certNames = myCerts.map(function(k) {
+    if (typeof CERTS !== 'undefined' && CERTS[k]) return CERTS[k].name.toLowerCase();
+    return k.toLowerCase();
+  });
+
+  var hasCISSP = certNames.some(function(c) { return c.indexOf('cissp') !== -1; });
+  var hasSec   = certNames.some(function(c) { return c.indexOf('security+') !== -1 || c.indexOf('sec+') !== -1 || c === 'secplus'; });
+  var hasCloud = certNames.some(function(c) { return c.indexOf('aws') !== -1 || c.indexOf('azure') !== -1 || c.indexOf('gcp') !== -1; });
+  var hasPentest = certNames.some(function(c) { return c.indexOf('oscp') !== -1 || c.indexOf('ceh') !== -1 || c.indexOf('ejpt') !== -1 || c.indexOf('pentest+') !== -1; });
+  var hasCISM  = certNames.some(function(c) { return c.indexOf('cism') !== -1; });
+  var certCount = myCerts.length;
 
   if (isFirst) {
-    if (!hasSec) advice.push('Earn CompTIA Security+ first — it\'s the HR filter for most security roles.');
-    if (expNum < 2) advice.push('Target entry-level SOC, IT helpdesk, or junior security analyst roles to build foundational experience.');
-    advice.push('Set up a home lab (TryHackMe, HackTheBox) to build practical skills alongside certifications.');
+    if (!hasSec && stepTitle.indexOf('soc') === -1 && stepTitle.indexOf('analyst') === -1) {
+      advice.push('Start with CompTIA Security+ — it\'s the baseline HR filter for most security roles and opens more doors than any other entry cert.');
+    }
+    if (certCount >= 2) {
+      advice.push('You already have ' + certCount + ' certs — focus now on practical experience. Apply for ' + (step.title || 'this role') + ' roles while continuing to build your lab skills.');
+    } else if (expNum < 2) {
+      advice.push('Target entry-level SOC, IT helpdesk, or junior security analyst positions to build the 1-2 years of experience most employers require.');
+    }
+    if (startRole && startRole.toLowerCase().indexOf('help desk') !== -1) {
+      advice.push('Your help desk background is a real asset — you already understand user behavior and systems. Lean into that when interviewing for SOC roles.');
+    }
+    advice.push('Build a home lab: TryHackMe and HackTheBox rooms directly translate to interview talking points.');
   }
 
   if (!isFirst && !isLast) {
-    advice.push('Build 2–3 years of hands-on experience in the ' + (prev.title || 'previous') + ' role before moving on.');
-    if (!hasCISSP && expNum >= 3) advice.push('Begin studying toward CISSP — it\'s the most recognized senior-level credential globally.');
-    advice.push('Seek a domain-specific certification that aligns with ' + (step.title || 'this role') + '.');
-    advice.push('Build your professional network through ISACA, ISC², or local BSides chapters.');
+    var timeInRole = expNum >= 5 ? '1–2 years' : '2–3 years';
+    advice.push('Spend ' + timeInRole + ' in the ' + (prev.title || 'previous') + ' role to build the depth employers expect at ' + (step.title || 'this level') + '.');
+    if (!hasCISSP && expNum >= 3) {
+      advice.push('With ' + expNum + '+ years of experience, you\'re close to CISSP eligibility. Start studying now so you can sit the exam once you hit the 5-year threshold.');
+    }
+    if (stepTitle.indexOf('cloud') !== -1 && !hasCloud) {
+      advice.push('Cloud security is central to this move — earn AWS Security Specialty or AZ-500 before making the transition.');
+    }
+    if (stepTitle.indexOf('pentest') !== -1 || stepTitle.indexOf('red team') !== -1) {
+      if (!hasPentest) advice.push('Penetration testing roles require demonstrated offensive skills. Pursue eJPT → OSCP as your cert path.');
+      advice.push('Contribute to bug bounty programs (HackerOne, Bugcrowd) to build a public track record.');
+    }
+    advice.push('Network within your target specialty: attend BSides events, join OWASP or ISACA chapters, and get active on LinkedIn.');
   }
 
   if (isLast) {
-    if (!hasCISSP) advice.push('CISSP is strongly recommended — most senior roles require or strongly prefer it.');
-    if (step.title && step.title.toLowerCase().indexOf('cloud') !== -1 && !hasCloud) {
-      advice.push('Pursue AWS Security Specialty or AZ-500 to prove cloud security expertise.');
+    if (!hasCISSP && (stepTitle.indexOf('senior') !== -1 || stepTitle.indexOf('lead') !== -1 || stepTitle.indexOf('manager') !== -1 || stepTitle.indexOf('ciso') !== -1)) {
+      advice.push('CISSP is effectively required at this level — budget 3-6 months of study and prioritize it.');
     }
-    if (step.title && (step.title.toLowerCase().indexOf('ciso') !== -1 || step.title.toLowerCase().indexOf('director') !== -1)) {
-      advice.push('Develop business acumen: risk management, board-level communication, and budget ownership.');
-      advice.push('Consider an MBA or CISM to complement your technical depth with management credibility.');
+    if ((stepTitle.indexOf('ciso') !== -1 || stepTitle.indexOf('director') !== -1 || stepTitle.indexOf('vp') !== -1)) {
+      if (!hasCISM) advice.push('Add CISM to your credentials — it demonstrates risk governance and management-layer thinking that CISOs need.');
+      advice.push('Develop business fluency: learn to translate security risk into financial impact for board-level conversations.');
+      advice.push('Pursue executive leadership opportunities — present at conferences, write for industry publications, build your brand.');
     }
-    advice.push('At this level, your reputation and professional network matter as much as credentials.');
+    if (stepTitle.indexOf('cloud') !== -1 && !hasCloud) {
+      advice.push('A cloud security certification (AWS Security Specialty, AZ-500, CCSP) is expected at the senior cloud level.');
+    }
+    advice.push('At this level, your professional reputation and network are as valuable as your certifications — invest in both.');
   }
 
   if (!advice.length) {
-    advice.push('Focus on deepening expertise in your current domain for 2–3 years before advancing.');
-    advice.push('Identify 1–2 certifications aligned with your target role and create a study plan.');
+    advice.push('Spend focused time in ' + (prev.title || 'your current role') + ' before targeting ' + (step.title || 'the next step') + '.');
+    advice.push('Identify 1–2 certifications that specifically align with ' + (step.title || 'this role') + ' and build a 90-day study plan.');
   }
   return advice;
 }

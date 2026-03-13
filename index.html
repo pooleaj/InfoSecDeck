@@ -2858,6 +2858,25 @@
   <!-- Builder canvas (shown when logged in) -->
   <div id="clp-builder" style="display:none">
 
+    <!-- Starting Point (populated from profile) -->
+    <div class="clp-start-card" id="clp-start-panel">
+      <div class="clp-start-hd">
+        <span class="clp-start-icon">&#128205;</span>
+        <span class="clp-start-title">Your Starting Point</span>
+        <a class="clp-start-edit" onclick="showPage('profile')" href="javascript:void(0)">Edit Profile &#8599;</a>
+      </div>
+      <div class="clp-start-body">
+        <div class="clp-start-field">
+          <span class="clp-start-label">Current Role</span>
+          <input type="text" id="clp-start-role" class="clp-start-input" placeholder="e.g. Help Desk Technician, SOC Analyst I..." oninput="_clpSaveStartRole()" />
+        </div>
+        <div class="clp-start-field" id="clp-start-certs-row" style="display:none">
+          <span class="clp-start-label">Your Certs</span>
+          <div class="clp-start-pills" id="clp-start-cert-pills"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Final Role input -->
     <div class="clp-final-row">
       <div class="clp-final-label">
@@ -4353,7 +4372,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=70"></script>
+<script src="js/app.js?v=71"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->
