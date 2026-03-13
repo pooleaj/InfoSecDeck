@@ -315,11 +315,34 @@ function _syncFromDB() {
         exp: d.experience || existing.exp || '',
         location: d.location || existing.location || '',
         bio: d.bio || existing.bio || '',
-        savedSalary: d.saved_salary || existing.savedSalary || '',
-        savedSalaryNums: existing.savedSalaryNums || [],
-        savedSalaryRole: existing.savedSalaryRole || '',
-        savedSalaryExp: existing.savedSalaryExp || '',
-        savedSalaryLoc: existing.savedSalaryLoc || '',
+        savedSalary: (function() {
+          var raw = d.saved_salary || '';
+          if (!raw) return existing.savedSalary || '';
+          try { var j = JSON.parse(raw); return j.text || existing.savedSalary || ''; } catch(e) { return raw || existing.savedSalary || ''; }
+        })(),
+        savedSalaryNums: (function() {
+          var raw = d.saved_salary || '';
+          if (raw) { try { var j = JSON.parse(raw); if (j.nums && j.nums.length) return j.nums; } catch(e) {} }
+          var ns = existing.savedSalaryNums;
+          if (ns && ns.length) return ns;
+          var sal = (function(){ try { var j2 = JSON.parse(raw); return j2.text || raw; } catch(e2) { return raw; } })() || existing.savedSalary || '';
+          return sal.match(/\$[\d,]+/g) || [];
+        })(),
+        savedSalaryRole: (function() {
+          var raw = d.saved_salary || '';
+          if (raw) { try { var j = JSON.parse(raw); if (j.role) return j.role; } catch(e) {} }
+          return existing.savedSalaryRole || '';
+        })(),
+        savedSalaryExp: (function() {
+          var raw = d.saved_salary || '';
+          if (raw) { try { var j = JSON.parse(raw); if (j.exp) return j.exp; } catch(e) {} }
+          return existing.savedSalaryExp || '';
+        })(),
+        savedSalaryLoc: (function() {
+          var raw = d.saved_salary || '';
+          if (raw) { try { var j = JSON.parse(raw); if (j.loc) return j.loc; } catch(e) {} }
+          return existing.savedSalaryLoc || '';
+        })(),
         myCerts: dbCerts.length ? dbCerts : (existing.myCerts || []),
         careerLadder: (dbLadder && dbLadder.steps) ? dbLadder : (existing.careerLadder || {}),
         savedJobFilters: existing.savedJobFilters || null,
@@ -354,7 +377,9 @@ function _syncFromDB() {
   _sb.from('cert_progress').select('cert_key,status').eq('user_id', _currentUser.id).then(function(res) {
     if (res.error) { console.error('[ISD] Cert sync read error:', res.error); return; }
     if (res.data && res.data.length) {
-      var cp = {};
+      var localCp = {};
+      try { localCp = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}'); } catch(e) {}
+      var cp = Object.assign({}, localCp);
       res.data.forEach(function(r) { cp[r.cert_key] = r.status; });
       try { localStorage.setItem('isd_cert_prog', JSON.stringify(cp)); } catch(e) {}
       if (typeof initProfile === 'function') initProfile();
@@ -376,7 +401,7 @@ function syncProfileToDB(p) {
     experience: p.exp || '',
     location: p.location || '',
     bio: p.bio || '',
-    saved_salary: p.savedSalary || '',
+    saved_salary: p.savedSalary ? JSON.stringify({ text: p.savedSalary, nums: p.savedSalaryNums || [], role: p.savedSalaryRole || '', exp: p.savedSalaryExp || '', loc: p.savedSalaryLoc || '' }) : '',
     my_certs: JSON.stringify(p.myCerts || []),
     career_ladder: JSON.stringify(p.careerLadder || {}),
     updated_at: new Date().toISOString()

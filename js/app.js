@@ -3785,6 +3785,7 @@ function cycleStatus(key){
   if(next[cur]==='none'){delete prog[key];}else{prog[key]=next[cur];}
   saveCertProgress(prog);
   var newStatus=next[cur]==='none'?null:next[cur];
+  if(typeof syncCertProgressToDB==='function')syncCertProgressToDB(key,newStatus);
   document.querySelectorAll('.cb[data-cert-key="'+key+'"]').forEach(function(b){
     b.classList.remove('cb-planned','cb-inprog','cb-done');
     if(newStatus)b.classList.add('cb-'+newStatus);
