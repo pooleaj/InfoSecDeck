@@ -274,6 +274,7 @@ nav{position:fixed;top:0;left:0;right:0;height:var(--nav);z-index:9000;backgroun
 .cb:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.4);z-index:100;}
 /* Vendor-neutral = circle dot indicator; vendor-specific = square */
 .cb.vn::before{content:'';position:absolute;top:3px;right:3px;width:4px;height:4px;border-radius:50%;background:var(--lb);opacity:.8;}
+.cb-new{font-size:.36rem;font-family:var(--fm);font-weight:700;letter-spacing:.06em;background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;padding:1px 4px;border-radius:3px;vertical-align:middle;margin-left:3px;line-height:1;display:inline-block;}
 .cb.vs::before{content:'';position:absolute;top:3px;right:3px;width:4px;height:4px;border-radius:1px;background:var(--or);opacity:.8;}
 /* Hover tooltip — appears after 2 seconds */
 .cb::after{content:attr(data-full) ' — ' attr(data-desc);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0d1117;border:1px solid var(--bd2);color:var(--tx);font-family:var(--fd);font-size:.68rem;font-weight:400;letter-spacing:0;padding:8px 12px;border-radius:8px;width:240px;white-space:normal;line-height:1.5;pointer-events:none;opacity:0;transition:opacity .2s ease 2s;z-index:9999;text-align:left;box-shadow:0 8px 32px rgba(0,0,0,.6);}
@@ -4108,6 +4109,11 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .ats-retry-btn:hover{border-color:var(--bd3);color:var(--tx);}
 
 /* ─── Saved Analyses (Profile) ───────────────────────────────── */
+.sa-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.sa-filter-btn{font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.07em;padding:4px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--sf2);color:var(--mt);cursor:pointer;transition:all .15s;}
+.sa-filter-btn:hover{border-color:var(--bd2);color:var(--tx);}
+.sa-filter-btn.active{border-color:var(--lb);color:var(--lb);background:rgba(56,189,248,.08);}
+.sa-scroll-wrap{max-height:290px;overflow-y:auto;border-radius:6px;}
 .sa-list{display:flex;flex-direction:column;gap:8px;}
 .sa-item{display:flex;align-items:center;gap:12px;background:var(--sf2);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;cursor:pointer;transition:border-color .2s,background .2s;}
 .sa-item:hover{border-color:var(--bd2);background:var(--sf3);}
