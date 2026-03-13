@@ -5344,6 +5344,8 @@ function importProfileToRoadmap() {
   var p = loadProfile() || {};
   var roleEl = document.getElementById('crw-current-role');
   if (roleEl && p.role) roleEl.value = p.role;
+  var expEl = document.getElementById('crw-years-exp');
+  if (expEl && p.yearsExp != null) expEl.value = p.yearsExp;
   var prog = {};
   try { prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}'); } catch(e) {}
   var done = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
@@ -5367,8 +5369,10 @@ function _crwSaveGoals() {
   var p = loadProfile();
   var nextEl = document.getElementById('crw-next-goal');
   var ultEl = document.getElementById('crw-ultimate-goal');
+  var expEl = document.getElementById('crw-years-exp');
   p.crwNextGoal = nextEl ? nextEl.value : '';
   p.crwUltimateGoal = ultEl ? ultEl.value : '';
+  if (expEl && expEl.value !== '') p.yearsExp = parseInt(expEl.value, 10) || 0;
   try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
 }
 
@@ -5383,6 +5387,7 @@ function generateRoadmap() {
   var currentRole = (document.getElementById('crw-current-role') || {value:''}).value || '';
   var nextGoal = (document.getElementById('crw-next-goal') || {value:''}).value || '';
   var ultimateGoal = (document.getElementById('crw-ultimate-goal') || {value:''}).value || '';
+  var yearsExp = parseInt((document.getElementById('crw-years-exp') || {value:''}).value, 10) || null;
   var errEl = document.getElementById('crw-error');
   if (!currentRole || !nextGoal) {
     if (errEl) { errEl.textContent = 'Please enter your current role and next goal first.'; errEl.style.display = 'block'; }
@@ -5417,7 +5422,7 @@ function generateRoadmap() {
     fetch(EDGE_BASE + '/career-roadmap', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-      body: JSON.stringify({ currentRole: currentRole, nextGoal: nextGoal, ultimateGoal: ultimateGoal, certs: certs }),
+      body: JSON.stringify({ currentRole: currentRole, nextGoal: nextGoal, ultimateGoal: ultimateGoal, certs: certs, yearsExp: yearsExp }),
     })
     .then(function(r) {
       var status = r.status;
@@ -5511,9 +5516,11 @@ function initCareerLadder() {
   var roleEl = document.getElementById('crw-current-role');
   var nextEl = document.getElementById('crw-next-goal');
   var ultEl = document.getElementById('crw-ultimate-goal');
+  var expEl = document.getElementById('crw-years-exp');
   if (roleEl && p.role && !roleEl.value) roleEl.value = p.role;
   if (nextEl && p.crwNextGoal && !nextEl.value) nextEl.value = p.crwNextGoal;
   if (ultEl && p.crwUltimateGoal && !ultEl.value) ultEl.value = p.crwUltimateGoal;
+  if (expEl && p.yearsExp != null && !expEl.value) expEl.value = p.yearsExp;
   try {
     var cached = JSON.parse(localStorage.getItem(NRM_CACHE_KEY) || 'null');
     if (cached && cached.phases) renderRoadmap(cached);
@@ -6918,27 +6925,30 @@ var RADAR_ADVICE = {
 
 // Role-relevant cert keys for each target role
 var RADAR_CERT_MAP = {
-  soc:   ['secplus','cysa','splk-core','splunk-power','splunk-admin','cc','gcia','gcih','sscp','az-900'],
-  de:    ['secplus','cysa','gcia','gcih','elastic-siem','splunk-power','python-cert'],
-  ir:    ['gcih','gcfe','gcfa','ecih','cfce','secplus','cysa','ceh'],
-  ti:    ['gti','cti','cysa','secplus','sec+','gcti','gnfa'],
-  pt:    ['ejpt','ceh','pnpt','oscp','bscp','comptia-pentest','gwapt','gpen','cpent'],
-  rt:    ['oscp','crto','crte','crtp','osed','osce3','gxpn','gpen','ceh'],
-  cs:    ['aws-sap','aws-sec','az-500','gcp-ace','gcp-pro-sec','ccsp','ccsk','aws-saa'],
-  se:    ['secplus','cysa','az-500','aws-sec','sscp','cissp'],
-  sa:    ['cissp','cism','sabsa','togaf','ccsp','aws-sec','az-500'],
-  iam:   ['secplus','sc-300','az-104','okta-certified','cyberark-certified','sailpoint-cert','sc-900'],
-  vm:    ['secplus','cysa','geva','aws-saa','az-900'],
-  grc:   ['cism','cisa','crisc','cissp','iso-27001-li','iso-27001-la','cgrc'],
-  as:    ['bscp','gwapt','gweb','csslp','oscp','ejpt','awae'],
-  ciso:  ['cissp','cism','cisa','crisc','ciso-cert','ccsp','iso-27001-la'],
-  ma:    ['grem','gcfe','gcfa','ecmap','cfce','gctd'],
-  risk:  ['crisc','cism','cisa','cgrc','iso-27001-li','aws-saa'],
-  aise:  ['comptia-secaiplus','comptia-aiplus','az-ai','aws-ml','google-ml','ai-102','ai-900'],
+  soc:   ['sec-plus','cysa','splunk-core','splunk-es','isc2-cc','gcia','gcih','sscp','az900'],
+  de:    ['sec-plus','cysa','gcia','gcih','splunk-es','splunk-core'],
+  ir:    ['gcih','gcfe','gcfa','sec-plus','cysa','ceh'],
+  ti:    ['cysa','sec-plus','gcti','gnfa','gcia'],
+  pt:    ['ejpt','ceh','pnpt','oscp','bscp','pentest-plus','gwapt','gpen','ecppt'],
+  rt:    ['oscp','crto','osed','osce3','gxpn','gpen','ceh'],
+  cs:    ['aws-pro','aws-sec','az500','gcp-ace','gcp-sec','ccsp','ccsk','aws-saa'],
+  se:    ['sec-plus','cysa','az500','aws-sec','sscp','cissp'],
+  sa:    ['cissp','cism','sabsa','togaf','ccsp','aws-sec','az500'],
+  iam:   ['sec-plus','sc300','az900','okta-pro','okta-admin','cyberark-def','sailpoint','sc900','ciam','cimp','cige','cissp'],
+  vm:    ['sec-plus','cysa','aws-saa','az900'],
+  grc:   ['cism','cisa','crisc','cissp','iso-li','iso27001-la','cgrc'],
+  as:    ['bscp','gwapt','gweb','csslp','oscp','ejpt','ewapt'],
+  ciso:  ['cissp','cism','cisa','crisc','cciso','ccsp','iso27001-la'],
+  ma:    ['grem','gcfe','gcfa','cellebrite'],
+  risk:  ['crisc','cism','cisa','cgrc','iso-li','aws-saa'],
+  aise:  ['comptia-secaiplus','comptia-aiplus','az900','aws-ml','google-ml','ai-102','ai-900'],
   mlrt:  ['oscp','comptia-secaiplus','grem','ejpt','ceh'],
   aits:  ['comptia-aiplus','comptia-secaiplus','ai-102','iso-42001-li','isaca-ai'],
-  mlsec: ['comptia-secaiplus','aws-ml','az-500','az-ai','gaiops']
+  mlsec: ['comptia-secaiplus','aws-ml','az500','gaiops'],
 };
+
+// General Security certs that count toward ALL roles
+var RADAR_GENERAL_CERTS = ['sec-plus','net-plus','cysa','casp','isc2-cc','sscp','cissp','ceh','gcih','gcia','gsec'];
 
 // Maps role keys to role groups for guide text selection
 var RADAR_ROLE_GROUPS = {
@@ -7012,33 +7022,42 @@ function _radarUpdateGuides(role) {
   });
 }
 
+function _radarCertScore(doneCerts, roleKey) {
+  var combined = (RADAR_CERT_MAP[roleKey] || []).concat(RADAR_GENERAL_CERTS);
+  var seen = {}; combined = combined.filter(function(k) { if(seen[k]) return false; seen[k]=true; return true; });
+  var relevantDone = doneCerts.filter(function(k) { return combined.indexOf(k) !== -1; });
+  var entry = 0, mid = 0, adv = 0;
+  relevantDone.forEach(function(k) {
+    var tc = (CERTS[k] && CERTS[k].tierClass) || '';
+    if (/tier-entry|^entry$/.test(tc)) entry++;
+    else if (/tier-mid|^mid$/.test(tc)) mid++;
+    else if (/tier-senior|^senior$|tier-principal|tier-exec/.test(tc)) adv++;
+  });
+  if (adv >= 3) return 10;
+  if (adv === 2) return 9;
+  if (adv === 1) return 8;
+  if (mid >= 3) return 7;
+  if (mid === 2) return 6;
+  if (mid === 1) return 5;
+  if (entry >= 2) return 4;
+  if (entry === 1) return 3;
+  return relevantDone.length > 0 ? 2 : 1;
+}
+
 function _radarAutoPopulateCerts(role) {
   try {
     var prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
     var doneCerts = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
-    var totalDone = doneCerts.length;
-
-    // Role-relevant cert scoring
-    var relevantKeys = RADAR_CERT_MAP[role] || [];
-    var relevantDone = doneCerts.filter(function(k) { return relevantKeys.indexOf(k) !== -1; }).length;
-    var relevantScore = relevantDone === 0 ? (totalDone > 0 ? 2 : 1)
-      : relevantDone === 1 ? 4
-      : relevantDone === 2 ? 6
-      : relevantDone === 3 ? 7
-      : relevantDone <= 5 ? 8 : 10;
-
+    var combined = (RADAR_CERT_MAP[role] || []).concat(RADAR_GENERAL_CERTS);
+    var seen = {}; combined = combined.filter(function(k) { if(seen[k]) return false; seen[k]=true; return true; });
+    var relevantDone = doneCerts.filter(function(k) { return combined.indexOf(k) !== -1; });
+    var relevantScore = _radarCertScore(doneCerts, role);
     var el = document.getElementById('rs-certs');
     if(el) el.value = relevantScore;
-
-    // Update cert note
     var noteEl = document.getElementById('rsl-cert-note');
     if(noteEl) {
-      if(relevantKeys.length > 0) {
-        noteEl.textContent = relevantDone + ' of ' + relevantKeys.length + ' role-relevant certs found in your tracker';
-        noteEl.style.display = 'block';
-      } else {
-        noteEl.style.display = 'none';
-      }
+      noteEl.textContent = relevantDone.length + ' role-relevant cert' + (relevantDone.length !== 1 ? 's' : '') + ' found in your tracker';
+      noteEl.style.display = 'block';
     }
   } catch(e) {}
 }

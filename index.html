@@ -36,7 +36,7 @@
 <meta name="twitter:image" content="https://infosecdeck.com/og-image.png">
 
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css?v=36">
+<link rel="stylesheet" href="css/styles.css?v=37">
   <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js" defer></script>
 </head>
 <body>
@@ -2596,6 +2596,7 @@
       <div class="crw-section-hd">&#128205; Where Are You Now?</div>
       <div class="crw-start-row">
         <input type="text" id="crw-current-role" class="crw-input" placeholder="e.g. Help Desk Technician, SOC Analyst I, IT Administrator..." />
+        <input type="number" id="crw-years-exp" class="crw-input crw-years-input" placeholder="Years of experience" min="0" max="40" oninput="_crwSaveGoals()" />
         <button class="crw-import-btn" onclick="importProfileToRoadmap()">&#11015; Import from Profile</button>
       </div>
       <div id="crw-cert-pills" class="crw-cert-pills" style="display:none"></div>
@@ -3455,9 +3456,9 @@
           <div id="rsl-cert-note" class="rsl-cert-note" style="display:none"></div>
           <div class="rsl-guide" id="rsl-guide-certs" style="display:none">
             <div class="rsl-guide-row"><strong>1–2</strong> No relevant certs yet</div>
-            <div class="rsl-guide-row"><strong>3–4</strong> 1 entry-level cert relevant to target role (e.g. Security+, CC)</div>
-            <div class="rsl-guide-row"><strong>5–7</strong> 2–3 relevant certs including one mid-level (e.g. CySA+, AWS SAA)</div>
-            <div class="rsl-guide-row"><strong>8–10</strong> 3+ highly relevant certs including advanced (e.g. CISSP, OSCP, CCSP)</div>
+            <div class="rsl-guide-row"><strong>3–4</strong> Entry-level cert(s) relevant to target role — 1 cert = 3, 2+ = 4 (e.g. Security+, CC, Network+)</div>
+            <div class="rsl-guide-row"><strong>5–7</strong> Mid-level certs — 1 cert = 5, 2 = 6, 3+ = 7 (e.g. CySA+, CASP+, AWS SAA)</div>
+            <div class="rsl-guide-row"><strong>8–10</strong> Advanced certs (Senior/Principal/Executive tier) — 1 cert = 8, 2 = 9, 3+ = 10 (e.g. CISSP, OSCP, CCSP, CISM)</div>
           </div>
         </div>
         <div class="rsl-item">
@@ -4128,7 +4129,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=78"></script>
+<script src="js/app.js?v=79"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->

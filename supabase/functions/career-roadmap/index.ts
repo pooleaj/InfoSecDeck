@@ -66,8 +66,8 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { currentRole = '', nextGoal = '', ultimateGoal = '', certs = [] } = body as {
-      currentRole?: string; nextGoal?: string; ultimateGoal?: string; certs?: string[];
+    const { currentRole = '', nextGoal = '', ultimateGoal = '', certs = [], yearsExp = null } = body as {
+      currentRole?: string; nextGoal?: string; ultimateGoal?: string; certs?: string[]; yearsExp?: number | null;
     };
 
     if (!currentRole || !nextGoal) {
@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
 
 User context:
 - Current role: ${currentRole}
+- Years of experience: ${yearsExp != null ? yearsExp + ' year' + (yearsExp !== 1 ? 's' : '') : 'not specified'}
 - ${certList}
 - Next career goal: ${nextGoal}
 - Ultimate career goal: ${ultimateGoal || '(same as next goal)'}

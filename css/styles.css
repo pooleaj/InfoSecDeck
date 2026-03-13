@@ -3525,6 +3525,7 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .crw-start-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
 .crw-input{flex:1;min-width:220px;background:var(--sb);border:1px solid var(--bd2);border-radius:10px;padding:10px 14px;font-size:.85rem;color:var(--tx);outline:none;transition:border-color .15s;}
 .crw-input:focus{border-color:#4d9eff;}
+.crw-years-input{flex:0 0 160px;min-width:0;max-width:160px;}
 .crw-import-btn{white-space:nowrap;padding:10px 18px;border-radius:10px;background:rgba(77,158,255,.1);border:1px solid rgba(77,158,255,.3);color:#4d9eff;font-size:.72rem;font-family:var(--fm);font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;transition:background .15s;}
 .crw-import-btn:hover{background:rgba(77,158,255,.2);}
 .crw-cert-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
