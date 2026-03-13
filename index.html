@@ -2572,20 +2572,15 @@
   <div class="clp-header">
     <div class="ey a1">My Career</div>
     <div class="st a2">Career Roadmap</div>
-    <p class="clp-intro a3">Map your journey from where you are now to your highest aspiration. Add roles, certs, training, and key projects. Get personalized recommendations based on your experience.</p>
-    <div class="clp-header-actions">
-      <button class="clp-btn-primary" onclick="saveCareerLadder()">&#x1F4BE; Save</button>
-      <button class="clp-btn-ghost" onclick="generateCLRecommendations()">&#x2728; Get Advice</button>
-      <button class="clp-btn-ghost clp-reset" onclick="resetCareerLadder()">Reset</button>
-    </div>
+    <p class="clp-intro a3">Tell us where you are and where you want to go — Claude generates your personalized roadmap in seconds.</p>
   </div>
 
   <!-- Gated: show only when logged in -->
   <div id="clp-auth-gate" style="display:none">
     <div class="clp-gate-card">
       <div class="clp-gate-icon">&#128274;</div>
-      <div class="clp-gate-title">Sign In to Build Your Roadmap</div>
-      <p class="clp-gate-sub">Your career roadmap is personal — it saves to your account and syncs across all devices.</p>
+      <div class="clp-gate-title">Sign In to Generate Your Roadmap</div>
+      <p class="clp-gate-sub">Your AI-powered career roadmap is personal — sign in to generate and save it to your account.</p>
       <div class="clp-gate-btns">
         <button class="clp-btn-primary" onclick="openAuthModal('signin')">Sign In</button>
         <button class="clp-btn-ghost" onclick="openAuthModal('signup')">Create Account</button>
@@ -2593,76 +2588,60 @@
     </div>
   </div>
 
-  <!-- Builder canvas (shown when logged in) -->
+  <!-- Wizard (shown when logged in) -->
   <div id="clp-builder" style="display:none">
 
-    <!-- Starting Point (populated from profile) -->
-    <div class="clp-start-card" id="clp-start-panel">
-      <div class="clp-start-hd">
-        <span class="clp-start-icon">&#128205;</span>
-        <span class="clp-start-title">Your Starting Point</span>
-        <a class="clp-start-edit" onclick="showPage('profile')" href="javascript:void(0)">Edit Profile &#8599;</a>
+    <!-- Section A: Starting Point -->
+    <div class="crw-section a1">
+      <div class="crw-section-hd">&#128205; Where Are You Now?</div>
+      <div class="crw-start-row">
+        <input type="text" id="crw-current-role" class="crw-input" placeholder="e.g. Help Desk Technician, SOC Analyst I, IT Administrator..." />
+        <button class="crw-import-btn" onclick="importProfileToRoadmap()">&#11015; Import from Profile</button>
       </div>
-      <div class="clp-start-body">
-        <div class="clp-start-field">
-          <span class="clp-start-label">Current Role</span>
-          <input type="text" id="clp-start-role" class="clp-start-input" placeholder="e.g. Help Desk Technician, SOC Analyst I..." oninput="_clpSaveStartRole()" />
+      <div id="crw-cert-pills" class="crw-cert-pills" style="display:none"></div>
+    </div>
+
+    <!-- Section B: Goals -->
+    <div class="crw-section a2">
+      <div class="crw-section-hd">&#127919; Where Do You Want to Go?</div>
+      <div class="crw-goal-row">
+        <div class="crw-goal-item">
+          <label class="crw-goal-label">Next Goal <span class="crw-goal-hint">near-term, 1–2 years</span></label>
+          <input type="text" id="crw-next-goal" class="crw-input" placeholder="e.g. SOC Analyst II, Cloud Security Engineer..." oninput="_crwSaveGoals()" />
         </div>
-        <div class="clp-start-field" id="clp-start-certs-row" style="display:none">
-          <span class="clp-start-label">Your Certs</span>
-          <div class="clp-start-pills" id="clp-start-cert-pills"></div>
+        <div class="crw-goal-item">
+          <label class="crw-goal-label">Ultimate Goal <span class="crw-goal-hint">long-term aspiration</span></label>
+          <input type="text" id="crw-ultimate-goal" class="crw-input" placeholder="e.g. CISO, VP of Security, Principal Architect..." oninput="_crwSaveGoals()" />
         </div>
       </div>
     </div>
 
-    <!-- Final Role input -->
-    <div class="clp-final-row">
-      <div class="clp-final-label">
-        <span>&#11088;</span> Ultimate Career Goal
-        <span class="clp-final-hint">Your highest aspiration — the north star of your entire career</span>
-      </div>
-      <div class="clp-final-inputs">
-        <input type="text" id="cl-final-role-input" class="clp-final-input" placeholder="e.g. CISO, VP of Security, Principal Security Architect..." />
-        <button class="clp-btn-primary clp-final-save-btn" onclick="saveFinalRole()">Set Goal</button>
-      </div>
+    <!-- Generate -->
+    <div class="crw-gen-wrap a3">
+      <button class="crw-gen-btn" id="crw-gen-btn" onclick="generateRoadmap()">&#10024; Generate My Roadmap</button>
+      <div id="crw-usage-meter" class="crw-usage-note" style="display:none"></div>
+      <div id="crw-error" class="crw-error" style="display:none"></div>
     </div>
 
-    <!-- Roadmap canvas -->
-    <div class="clp-canvas" id="clp-canvas">
-      <!-- Steps rendered by JS -->
+    <div id="crw-loading" class="crw-loading" style="display:none">
+      <div class="crw-spinner"></div>
+      <span>Building your personalized roadmap&hellip;</span>
     </div>
 
-    <!-- Add milestone type buttons -->
-    <div class="clp-add-row">
-      <div class="clp-add-label">Add Milestone</div>
-      <div class="clp-add-btns">
-        <button class="clp-add-btn clp-add-role" onclick="addCLMilestone('role')">
-          &#x1F4BC; Role
-        </button>
-        <button class="clp-add-btn clp-add-cert" onclick="addCLMilestone('cert')">
-          &#x1F4DC; Certification
-        </button>
-        <button class="clp-add-btn clp-add-train" onclick="addCLMilestone('training')">
-          &#x1F393; Training
-        </button>
-        <button class="clp-add-btn clp-add-proj" onclick="addCLMilestone('project')">
-          &#x26A1; Project
-        </button>
-      </div>
+  </div><!-- end #clp-builder -->
+
+  <!-- Generated roadmap -->
+  <div id="crw-result" style="display:none">
+    <div id="crw-summary" class="crw-summary"></div>
+    <div class="crw-timeline" id="crw-timeline"></div>
+    <div class="crw-regen-row">
+      <button class="clp-btn-ghost" onclick="generateRoadmap()">&#8635; Regenerate</button>
+      <button class="clp-btn-primary" onclick="saveRoadmap()">&#x1F4BE; Save Roadmap</button>
     </div>
   </div>
 
-  <!-- Recommendations panel -->
-  <div id="clp-rec-panel" class="clp-rec-panel" style="display:none">
-    <div class="clp-rec-header">
-      <span class="clp-rec-icon">&#x1F4A1;</span>
-      <span class="clp-rec-title">Personalized Roadmap Advice</span>
-      <span class="clp-rec-sub">Based on your experience level — the #1 factor in career advancement</span>
-    </div>
-    <div id="clp-rec-body" class="clp-rec-body"></div>
-  </div>
 </div>
-<div class="footer">InfoSecDeck &middot; My Career Roadmap &middot; Experience is the #1 factor. Build it deliberately.</div>
+<div class="footer">InfoSecDeck &middot; AI-Powered Career Roadmap &middot; Generated by Claude</div>
 </div>
 
 <div class="page" id="page-about">
@@ -4149,7 +4128,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=77"></script>
+<script src="js/app.js?v=78"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->
