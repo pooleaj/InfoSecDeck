@@ -5343,13 +5343,18 @@ var NRM_CACHE_KEY = 'isd_roadmap';
 function importProfileToRoadmap() {
   var p = loadProfile() || {};
   var roleEl = document.getElementById('crw-current-role');
-  if (roleEl && p.role) roleEl.value = p.role;
+  if (roleEl && p.currentRole) roleEl.value = p.currentRole;
   var expEl = document.getElementById('crw-years-exp');
-  if (expEl && p.yearsExp != null) expEl.value = p.yearsExp;
+  var expVal = p.yearsExp != null ? p.yearsExp : (p.exp ? parseInt(p.exp, 10) || null : null);
+  if (expEl && expVal != null) expEl.value = expVal;
   var prog = {};
   try { prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}'); } catch(e) {}
-  var done = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
+  var trackerDone = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
+  var profCerts = p.myCerts || [];
+  var seenI = {};
+  var done = trackerDone.concat(profCerts).filter(function(k) { return seenI[k] ? false : (seenI[k] = true); });
   var pillsEl = document.getElementById('crw-cert-pills');
+  var labelEl = document.getElementById('crw-cert-label');
   if (pillsEl) {
     if (done.length > 0) {
       pillsEl.innerHTML = done.slice(0, 10).map(function(k) {
@@ -5358,8 +5363,11 @@ function importProfileToRoadmap() {
         return '<span class="crw-cert-pill">' + short + '</span>';
       }).join('') + (done.length > 10 ? '<span class="crw-cert-pill crw-cert-more">+' + (done.length-10) + '</span>' : '');
       pillsEl.style.display = 'flex';
+      if (labelEl) labelEl.style.display = 'block';
     } else {
-      pillsEl.style.display = 'none';
+      pillsEl.innerHTML = '<span style="color:var(--mt);font-size:.8rem;">No certs found \u2014 add them in Cert Tracker or Profile</span>';
+      pillsEl.style.display = 'flex';
+      if (labelEl) labelEl.style.display = 'block';
     }
   }
   showToast('Profile imported! \u2705');
@@ -5403,8 +5411,15 @@ function generateRoadmap() {
   var certs = [];
   try {
     var cp = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
-    certs = Object.keys(cp).filter(function(k) { return cp[k] === 'done'; }).slice(0, 8);
+    certs = Object.keys(cp).filter(function(k) { return cp[k] === 'done'; });
   } catch(e) {}
+  try {
+    var pfG = JSON.parse(localStorage.getItem('isd_profile') || '{}');
+    var profCertsG = pfG.myCerts || [];
+    var seenG = {};
+    certs = certs.concat(profCertsG).filter(function(k) { return seenG[k] ? false : (seenG[k] = true); });
+  } catch(e) {}
+  certs = certs.slice(0, 8);
   _sb.auth.getSession().then(function(sessionRes) {
     var session = sessionRes.data && sessionRes.data.session;
     if (!session) return _sb.auth.refreshSession().then(function(r) { return r.data && r.data.session; });
@@ -5517,10 +5532,30 @@ function initCareerLadder() {
   var nextEl = document.getElementById('crw-next-goal');
   var ultEl = document.getElementById('crw-ultimate-goal');
   var expEl = document.getElementById('crw-years-exp');
-  if (roleEl && p.role && !roleEl.value) roleEl.value = p.role;
+  if (roleEl && p.currentRole && !roleEl.value) roleEl.value = p.currentRole;
   if (nextEl && p.crwNextGoal && !nextEl.value) nextEl.value = p.crwNextGoal;
   if (ultEl && p.crwUltimateGoal && !ultEl.value) ultEl.value = p.crwUltimateGoal;
-  if (expEl && p.yearsExp != null && !expEl.value) expEl.value = p.yearsExp;
+  var expInitVal = p.yearsExp != null ? p.yearsExp : (p.exp ? parseInt(p.exp, 10) || null : null);
+  if (expEl && expInitVal != null && !expEl.value) expEl.value = expInitVal;
+  // Auto-populate cert pills from both cert tracker + profile my certs
+  (function() {
+    var cp2 = {}; try { cp2 = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}'); } catch(e) {}
+    var td2 = Object.keys(cp2).filter(function(k) { return cp2[k] === 'done'; });
+    var pf2 = p.myCerts || [];
+    var s2 = {};
+    var all2 = td2.concat(pf2).filter(function(k) { return s2[k] ? false : (s2[k] = true); });
+    var pillsEl2 = document.getElementById('crw-cert-pills');
+    var labelEl2 = document.getElementById('crw-cert-label');
+    if (pillsEl2 && all2.length > 0 && !pillsEl2.children.length) {
+      pillsEl2.innerHTML = all2.slice(0, 10).map(function(k) {
+        var c = (typeof CERTS !== 'undefined' && CERTS[k]) ? CERTS[k].name : k;
+        var short = c.replace(/CompTIA\s*/i,'').replace(/^(ISC.2\s*|ISACA\s*|EC-Council\s*)/i,'').split(' ').slice(0,3).join(' ');
+        return '<span class="crw-cert-pill">' + short + '</span>';
+      }).join('') + (all2.length > 10 ? '<span class="crw-cert-pill crw-cert-more">+' + (all2.length-10) + '</span>' : '');
+      pillsEl2.style.display = 'flex';
+      if (labelEl2) labelEl2.style.display = 'block';
+    }
+  })();
   try {
     var cached = JSON.parse(localStorage.getItem(NRM_CACHE_KEY) || 'null');
     if (cached && cached.phases) renderRoadmap(cached);
@@ -7047,7 +7082,11 @@ function _radarCertScore(doneCerts, roleKey) {
 function _radarAutoPopulateCerts(role) {
   try {
     var prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
-    var doneCerts = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
+    var trackerDone = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
+    var profCerts = [];
+    try { var pf = JSON.parse(localStorage.getItem('isd_profile') || '{}'); profCerts = pf.myCerts || []; } catch(e) {}
+    var seenM = {};
+    var doneCerts = trackerDone.concat(profCerts).filter(function(k) { return seenM[k] ? false : (seenM[k] = true); });
     var combined = (RADAR_CERT_MAP[role] || []).concat(RADAR_GENERAL_CERTS);
     var seen = {}; combined = combined.filter(function(k) { if(seen[k]) return false; seen[k]=true; return true; });
     var relevantDone = doneCerts.filter(function(k) { return combined.indexOf(k) !== -1; });
