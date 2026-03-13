@@ -398,6 +398,7 @@ var CERTS={
   // ── AI Security Certs ──
   'ai-900':{name:'Azure AI Fundamentals (AI-900)',issuer:'Microsoft · Exam AI-900 · ~$165',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['AI Security'],tags:['AI/ML','Microsoft','Azure','Entry-level'],desc:'Entry-level Microsoft certification covering AI and ML concepts, Azure AI services, and responsible AI principles. Foundational step for those entering the AI Security or MLSecOps track in Azure environments.',links:[{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/',tx:'🎥 Microsoft Learn (Free)'}]},
   'comptia-aiplus':{name:'CompTIA AI+',issuer:'CompTIA · Exam AIO-001 · ~$369',tier:'Entry (Tier 1–2)',tierClass:'tier-entry',domains:['AI Security'],tags:['AI/ML','Vendor-Neutral','CompTIA','Responsible AI'],desc:'CompTIA\'s vendor-neutral AI certification covering AI and ML fundamentals, prompt engineering, responsible AI, ethics, and governance. Ideal starting cert for security professionals transitioning into AI Security roles.',links:[{t:'rlf',l:'https://www.comptia.org/certifications/artificial-intelligence',tx:'🔗 CompTIA AI+ Official'}]},
+  'comptia-secaiplus':{name:'CompTIA SecurityAI+',issuer:'CompTIA · Exam SAI-001 · ~$369',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AI Security'],tags:['AI Security','CompTIA','Vendor-Neutral','New 2025'],desc:'CompTIA\'s newest certification at the intersection of AI and cybersecurity. Validates skills in using AI tools for security operations, detecting AI-driven threats, securing AI/ML pipelines, and applying AI responsibly in security workflows. Designed for security professionals integrating AI into their practice.',isNew:true,links:[{t:'rlf',l:'https://www.comptia.org/certifications/securityai',tx:'🔗 CompTIA SecurityAI+ Official'}]},
   'ai-102':{name:'Azure AI Engineer Associate (AI-102)',issuer:'Microsoft · Exam AI-102 · ~$165',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AI Security'],tags:['AI/ML','Microsoft','Azure','LLM','Intermediate'],desc:'Microsoft\'s intermediate AI engineering credential. Covers building and deploying Azure AI solutions including OpenAI integrations, document intelligence, speech, vision, and content safety APIs. Valuable for AI Security engineers in Azure environments.',links:[{t:'rlf',l:'https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-engineer/',tx:'🎥 Microsoft Learn (Free)'},{t:'rlc',l:'https://www.udemy.com/course/azure-ai-engineer/',tx:'📚 Udemy – AI-102 Course'}]},
   'aws-ml':{name:'AWS Machine Learning Specialty (MLS-C01)',issuer:'Amazon Web Services · Exam MLS-C01 · ~$300',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AI Security'],tags:['AI/ML','AWS','Cloud','MLOps'],desc:'AWS\'s ML specialty certification covering the ML lifecycle on AWS — data engineering, modeling, deployment, and monitoring using SageMaker. Increasingly required for MLSecOps and AI Security Engineer roles in AWS environments.',links:[{t:'rlf',l:'https://aws.amazon.com/certification/certified-machine-learning-specialty/',tx:'🔗 AWS MLS Official'},{t:'rlc',l:'https://www.udemy.com/course/aws-machine-learning/',tx:'📚 Udemy – AWS ML Specialty'}]},
   'google-ml':{name:'Google Professional ML Engineer',issuer:'Google Cloud · Exam GPML · ~$200',tier:'Mid-Level (Tier 2–3)',tierClass:'tier-mid',domains:['AI Security'],tags:['AI/ML','GCP','MLOps','Google Cloud'],desc:'Google Cloud\'s ML engineering certification. Covers designing, building, and deploying scalable ML models on GCP using Vertex AI. Valuable for AI Security and MLSecOps engineers working in Google Cloud environments.',links:[{t:'rlf',l:'https://cloud.google.com/learn/certification/machine-learning-engineer',tx:'🔗 Google Cloud Official'}]},
@@ -563,16 +564,17 @@ function showDomain(id){
     +'<div class="dds"><div class="ddst">A Day in the Life</div><div class="daybox">'+d.day+'</div></div>'
     +(steps ? '<div class="dds"><div class="ddst">How to Break In — 6 Steps</div><div class="steps">'+steps+'</div></div>' : '');
   document.getElementById('domain-content').innerHTML=html;
-  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  // Use showPage to properly hide all pages (clears inline display styles)
+  showPage('domain');
+  // Override nav highlight to show Domains as active
   document.querySelectorAll('.nl').forEach(function(x){x.classList.remove('active');});
-  document.getElementById('page-domain').classList.add('active');
-  document.getElementById('nav-domains').classList.add('active');
+  var navDomains=document.getElementById('nav-domains');
+  if(navDomains)navDomains.classList.add('active');
   // Push domain-specific hash for shareable URLs
   var desired = '#domain-' + id;
   if (window.location.hash !== desired) {
     history.pushState({ page: 'domain', domainId: id }, '', desired);
   }
-  window.scrollTo(0,0);
 }
 
 // Nav handled by unified showPage below
@@ -587,17 +589,13 @@ function loadReviews(){
     var stored = localStorage.getItem('infosecdeck_reviews');
     if(stored) reviews = JSON.parse(stored);
   }catch(e){ reviews=[]; }
-  if(reviews.length===0){
-    // Seed with sample reviews
-    reviews = [
-      {id:1,name:'Marcus T.',role:'SOC Analyst',rating:5,cats:['Career Ladder','Content Quality'],text:'Best free cybersecurity career resource I\'ve found. The career ladder with salary ranges is genuinely accurate — matches what I see on job boards. The domain deep dives are exceptional.',votes:{up:14,down:0},time:'2 days ago',userVote:null},
-      {id:2,name:'Priya K.',role:'CS Graduate Student',rating:5,cats:['Cert Roadmap','Training Programs'],text:'The certification roadmap is incredible. I was overwhelmed before finding this site. Now I have a clear path: Security+ → CySA+ → BTL1 → eventually OSCP. The training page saved me hours of research.',votes:{up:9,down:1},time:'5 days ago',userVote:null},
-      {id:3,name:'Anonymous',role:'Career Changer',rating:4,cats:['Career Ladder','Feature Request'],text:'Coming from accounting with no IT background, the GRC domain guide spoke directly to me. Would love a salary negotiation guide and LinkedIn profile tips added. Four stars for now — five once that\'s in.',votes:{up:7,down:0},time:'1 week ago',userVote:null},
-      {id:4,name:'Jordan R.',role:'Penetration Tester',rating:5,cats:['Games / Challenges','Content Quality'],text:'The Phish or Fish game is actually challenging — I missed the rnicrosoft.com one on my first try and I test phishing campaigns for a living. Humbling and educational. The CTF levels are a nice touch.',votes:{up:11,down:1},time:'1 week ago',userVote:null},
-      {id:5,name:'Dev S.',role:'Cloud Security Engineer',rating:5,cats:['Resume Roaster'],text:'Resume Roaster gave me specific feedback I could act on immediately — called out that I wasn\'t quantifying impact and flagged missing cloud security keywords. Got two callbacks after updating it.',votes:{up:16,down:0},time:'3 days ago',userVote:null}
-    ];
-    saveReviews();
-  }
+  // Remove any seeded fake reviews (identifiable by known fake IDs 1-5 with no real user data)
+  var fakeIds = [1,2,3,4,5];
+  var fakeNames = ['Marcus T.','Priya K.','Jordan R.','Dev S.'];
+  reviews = reviews.filter(function(r) {
+    return !(fakeIds.indexOf(r.id) !== -1 && fakeNames.indexOf(r.name) !== -1);
+  });
+  saveReviews();
   renderReviews();
 }
 
@@ -3191,28 +3189,7 @@ function showSalaryTierFilter(tier, track) {
   setTimeout(function(){ document.getElementById('sal-table').scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
 }
 
-// ── Fixed tooltip positioning for career ladder job cards ──
-document.addEventListener('mouseover', function(e) {
-  var jc = e.target.closest('.jc');
-  if (!jc) return;
-  var tip = jc.querySelector('.tip');
-  if (!tip) return;
-  var rect = jc.getBoundingClientRect();
-  var tipW = 260;
-  var left = rect.left + rect.width/2 - tipW/2;
-  // Clamp to viewport
-  left = Math.max(8, Math.min(left, window.innerWidth - tipW - 8));
-  var top = rect.top - 8; // position above, JS will flip if needed
-  // Prefer above
-  if (rect.top > 180) {
-    tip.style.top = (rect.top - 8) + 'px';
-    tip.style.transform = 'translateY(-100%)';
-  } else {
-    tip.style.top = (rect.bottom + 8) + 'px';
-    tip.style.transform = 'none';
-  }
-  tip.style.left = left + 'px';
-});
+// ── Fixed tooltip positioning for career ladder job cards (click-based handler below handles this) ──
 
 function toggleSalDesc(id) {
   var el = document.getElementById(id);
@@ -5611,6 +5588,14 @@ D['aisec'] = {
   tools: ['Garak', 'Microsoft PyRIT', 'LangChain', 'LLM Guard', 'PromptBench', 'HuggingFace Evaluate', 'Rebuff', 'Vigil', 'MLflow', 'Weights & Biases'],
   certs: [
     {
+      n: 'CompTIA SecurityAI+ ✦ NEW',
+      i: 'CompTIA · Exam SAI-001 · ~$369',
+      d: 'CompTIA\'s newest certification bridging AI and cybersecurity. Covers using AI for security operations, detecting AI-driven threats, securing AI/ML pipelines, and responsible AI practices. Purpose-built for security professionals integrating AI into their workflows.',
+      links: [
+        { t: 'rl-free', l: 'https://www.comptia.org/certifications/securityai', tx: '🔗 CompTIA SecurityAI+ Official' }
+      ]
+    },
+    {
       n: 'CompTIA AI+ (AI+)',
       i: 'CompTIA · AI-001 · ~$369',
       d: 'Entry-level AI cert covering AI/ML concepts, responsible AI practices, and AI security fundamentals. A solid foundation before specializing.',
@@ -6724,6 +6709,8 @@ _pageInits.ats = function() {
 };
 
 // ─── SAVED ANALYSES (PROFILE) ──────────────────────────────────
+var _saCache = {};
+
 function loadSavedAnalyses() {
   if (typeof _currentUser === 'undefined' || !_currentUser) return;
   if (typeof _sb === 'undefined') return;
@@ -6734,7 +6721,7 @@ function loadSavedAnalyses() {
   bodyEl.innerHTML = '<p style="font-size:.78rem;color:var(--mt);">Loading&hellip;</p>';
 
   _sb.from('saved_analyses')
-    .select('id, type, title, score, meta, created_at')
+    .select('id, type, title, score, meta, result, created_at')
     .eq('user_id', _currentUser.id)
     .order('created_at', { ascending: false })
     .limit(10)
@@ -6743,6 +6730,9 @@ function loadSavedAnalyses() {
         bodyEl.innerHTML = '<p style="font-size:.78rem;color:var(--mt);line-height:1.6;">No saved analyses yet. Use <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'roaster\')">Resume Roaster</strong>, <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'pivot\')">Career Pivot Advisor</strong>, <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'ats\')">ATS Scanner</strong>, or <strong style="color:var(--tx);cursor:pointer;" onclick="showPage(\'mock\')">AI Mock Interview</strong> to generate your first analysis.</p>';
         return;
       }
+
+      _saCache = {};
+      res.data.forEach(function(item) { _saCache[item.id] = item; });
 
       var typeInfo = {
         roast:     { icon: '🔥', label: 'Resume Roast',    page: 'roaster', scoreLabel: 'Score',      pct: true },
@@ -6755,12 +6745,46 @@ function loadSavedAnalyses() {
         var info = typeInfo[item.type] || { icon: '📄', label: item.type, page: 'home', scoreLabel: 'Score', pct: true };
         var scoreHtml = item.score != null ? '<span class="sa-score">' + item.score + (info.pct ? '%' : '/10') + '</span>' : '';
         var dateStr = new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        return '<div class="sa-item" onclick="showPage(\'' + info.page + '\')">'
+        return '<div class="sa-item" onclick="openSavedAnalysis(\'' + item.id + '\')" title="Click to view full analysis">'
           + '<span class="sa-type-icon">' + info.icon + '</span>'
           + '<div class="sa-body"><div class="sa-title">' + (item.title || info.label) + '</div><div class="sa-meta">' + info.label + ' &middot; ' + dateStr + '</div></div>'
           + scoreHtml + '</div>';
       }).join('') + '</div>';
     });
+}
+
+function openSavedAnalysis(id) {
+  var item = _saCache[id];
+  if (!item || !item.result) return;
+  var type = item.type;
+  var result = item.result;
+  var meta = item.meta || {};
+
+  if (type === 'roast') {
+    showPage('roaster');
+    setTimeout(function() {
+      rRenderResults(result, meta.domain || '', meta.tier || '');
+    }, 150);
+  } else if (type === 'pivot') {
+    showPage('pivot');
+    setTimeout(function() {
+      renderPivotResults(result, meta.fromTitle || 'Previous Role', meta.toTitle || 'Target Role', false);
+    }, 150);
+  } else if (type === 'ats') {
+    showPage('ats');
+    setTimeout(function() {
+      atsRenderResults(result);
+    }, 150);
+  } else if (type === 'interview') {
+    showPage('mock');
+    setTimeout(function() {
+      if (typeof _mock !== 'undefined') {
+        _mock.qaHistory = result.qaHistory || [];
+      }
+      _mockTransitionTo('scorecard');
+      _mockRenderScorecard(result);
+    }, 150);
+  }
 }
 
 // Wire loadSavedAnalyses into profile page init
@@ -6841,39 +6865,40 @@ function _renderUsageMeter(feature, elId) {
 }
 
 function _drawUsageMeter(el, feature, used, limit) {
-  el.style.display = '';
-  var remaining = Math.max(0, limit - used);
-  var pct = Math.min(100, Math.round((used / limit) * 100));
-  var color = remaining === 0 ? 'var(--rd)' : remaining <= Math.ceil(limit * 0.2) ? 'var(--am)' : 'var(--gn)';
-  var planLabel = _isPro() ? 'Pro' : 'Free';
-  el.innerHTML = '<div class="usage-meter-wrap">'
-    + '<div class="usage-meter-top">'
-    + '<span class="usage-meter-label">' + planLabel + ' · ' + used + ' / ' + limit + ' uses this month</span>'
-    + (remaining === 0
-        ? '<a class="usage-meter-upgrade" onclick="showPage(\'pricing\')" style="cursor:pointer;">Upgrade for more &rarr;</a>'
-        : '<span class="usage-meter-remaining" style="color:' + color + ';">' + remaining + ' remaining</span>')
-    + '</div>'
-    + '<div class="usage-meter-bar-bg"><div class="usage-meter-bar-fill" style="width:' + pct + '%;background:' + color + ';"></div></div>'
-    + '</div>';
+  // Meters are hidden from UI — usage is tracked silently in cache for rate limiting logic
+  el.style.display = 'none';
+  // Cache is already set by _renderUsageMeter before calling this function
 }
 
 function _updateUsageMeter(feature, usageInfo) {
   if (!usageInfo) return;
   _usageMeterCache[feature] = { used: usageInfo.used, limit: usageInfo.limit, ts: Date.now() };
-  var featureElMap = { roaster: 'roaster-usage-meter', pivot: 'pivot-usage-meter', ats: 'ats-usage-meter', jobfit: 'jfa-usage-meter' };
-  var elId = featureElMap[feature];
-  var el = elId ? document.getElementById(elId) : null;
-  if (el) _drawUsageMeter(el, feature, usageInfo.used, usageInfo.limit);
+  // Meters are hidden; cache update is sufficient
 }
 
 function _showRateLimitMsg(errData, featureName) {
   var plan = errData.plan || 'free';
   var limit = errData.limit || (plan === 'pro' ? 30 : 3);
-  var msg = plan === 'pro'
-    ? 'You\'ve reached your Pro limit of ' + limit + ' ' + featureName + ' runs this month. Resets on the 1st.'
-    : 'You\'ve used all ' + limit + ' free ' + featureName + ' runs this month. Upgrade to Pro for 30/month.';
-  showToast(msg);
-  if (plan !== 'pro') { setTimeout(function() { showPage('pricing'); }, 2500); }
+  if (plan === 'pro') {
+    showToast('You\'ve reached your Pro limit of ' + limit + ' ' + featureName + ' runs this month. Resets on the 1st.');
+    return;
+  }
+  // Free user hit limit — show persistent upgrade notification card
+  var existing = document.getElementById('rate-limit-notice');
+  if (existing) existing.remove();
+  var notice = document.createElement('div');
+  notice.id = 'rate-limit-notice';
+  notice.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;background:#1e2738;border:1px solid rgba(255,92,92,.35);border-radius:12px;padding:18px 22px;max-width:420px;width:calc(100% - 48px);box-shadow:0 8px 32px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:10px;';
+  notice.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">'
+    + '<div><div style="font-weight:700;color:#ff5c5c;font-size:.9rem;">Monthly limit reached</div>'
+    + '<div style="font-size:.8rem;color:#94a3b8;margin-top:4px;">You\'ve used all ' + limit + ' free ' + featureName + ' runs this month. Pro members get 30 runs/month.</div></div>'
+    + '<button onclick="document.getElementById(\'rate-limit-notice\').remove()" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:1.1rem;line-height:1;padding:2px 4px;flex-shrink:0;">&times;</button>'
+    + '</div>'
+    + '<div style="display:flex;gap:10px;">'
+    + '<button onclick="showPage(\'pricing\');document.getElementById(\'rate-limit-notice\').remove();" style="flex:1;background:#3b82f6;color:#fff;border:none;border-radius:8px;padding:9px 14px;font-weight:700;font-size:.8rem;cursor:pointer;">Upgrade to Pro &rarr;</button>'
+    + '<button onclick="document.getElementById(\'rate-limit-notice\').remove()" style="flex:0;background:rgba(255,255,255,.06);color:#94a3b8;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 14px;font-size:.8rem;cursor:pointer;">Dismiss</button>'
+    + '</div>';
+  document.body.appendChild(notice);
 }
 
 // ─── ADMIN USAGE PANEL ────────────────────────────────────────────────────
@@ -6967,16 +6992,14 @@ function _normCertKey(k) { return k.replace(/-/g,'_'); }
 function initCertROI() {
   var sel = document.getElementById('crt-select');
   if(!sel || sel.options.length > 1) return;
-  var tierOrder = {'tier-entry':0,'tier-mid':1,'tier-senior':2,'tier-principal':3,'tier-exec':4};
+  // Sort alphabetically by cert name (company name comes first in cert names, e.g. "CompTIA Security+")
   var keys = Object.keys(CERTS).sort(function(a,b){
-    var ta = tierOrder[CERTS[a].tierClass] !== undefined ? tierOrder[CERTS[a].tierClass] : 5;
-    var tb = tierOrder[CERTS[b].tierClass] !== undefined ? tierOrder[CERTS[b].tierClass] : 5;
-    if(ta !== tb) return ta - tb;
     return CERTS[a].name.localeCompare(CERTS[b].name);
   });
   keys.forEach(function(k){
     var opt = document.createElement('option');
     opt.value = k;
+    // Display format: "CompTIA Security+ · Mid"
     var tierLabel = CERTS[k].tier ? CERTS[k].tier.split(' ')[0] : '';
     opt.textContent = CERTS[k].name + (tierLabel ? ' · ' + tierLabel : '');
     sel.appendChild(opt);
@@ -8425,16 +8448,25 @@ function generateBriefing() {
         certs: certs,
       }),
     })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
+    .then(function(r) {
+      var status = r.status;
+      return r.text().then(function(text) {
+        var data = null;
+        try { data = JSON.parse(text); } catch(e) {}
+        return { ok: r.ok, status: status, data: data, raw: text };
+      });
+    })
+    .then(function(res) {
       _nbShow('news-loading', false);
-      if (data.error) {
+      if (!res.ok || (res.data && res.data.error)) {
+        var errMsg = (res.data && res.data.error) ? res.data.error : ('Server error ' + res.status);
         var errEl = document.getElementById('news-error');
-        if (errEl) { errEl.textContent = 'Error: ' + data.error; errEl.style.display = 'block'; }
+        if (errEl) { errEl.textContent = 'Error: ' + errMsg; errEl.style.display = 'block'; }
         if (btn) btn.disabled = false;
         if (lbl) lbl.textContent = 'Try Again';
         return;
       }
+      var data = res.data;
       // Cache for free users
       if (!_isPro()) {
         try { localStorage.setItem(NB_CACHE_KEY, JSON.stringify(data)); } catch(e) {}
@@ -8444,7 +8476,7 @@ function generateBriefing() {
     .catch(function(err) {
       _nbShow('news-loading', false);
       var errEl = document.getElementById('news-error');
-      if (errEl) { errEl.textContent = 'Network error. Please check your connection and try again.'; errEl.style.display = 'block'; }
+      if (errEl) { errEl.textContent = 'Failed to connect. Please try again. (' + (err && err.message ? err.message : 'Network error') + ')'; errEl.style.display = 'block'; }
       if (btn) btn.disabled = false;
       if (lbl) lbl.textContent = 'Try Again';
     });
