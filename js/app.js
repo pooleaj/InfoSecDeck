@@ -7309,6 +7309,91 @@ _pageInits.certs = (function(_orig){
   return function(){ _orig(); initCertROI(); };
 })(_pageInits.certs);
 
+// ─── TRAINING PAGE ─────────────────────────────────────────────────────────
+var TRAINING = [
+  // ── FEATURED ──
+  {id:'google-cybersec', featured:true, cat:'cert', icon:'📜', name:'Google Cybersecurity Professional Certificate', inst:'Google · via Coursera', format:'Self-paced · Online', duration:'~6 months', cost:'~$50/month', tags:['No prereqs','Job Guarantee','Prepares for Sec+'], desc:'The best no-experience-required entry point. Covers network security, Linux, Python, SIEM tools, and incident response. Prepares for CompTIA Security+ at no extra cost. Backed by Google\'s hiring network.', url:'https://www.coursera.org/google-certificates/cybersecurity-certificate', ctaLabel:'Enroll on Coursera →', aff:true},
+  {id:'wgu-bs', featured:true, cat:'degree-bachelor', icon:'🎓', name:'B.S. Cybersecurity and Information Assurance', inst:'Western Governors University (WGU)', format:'Online · Competency-Based', duration:'Self-paced', cost:'~$4,250/term', tags:['NCAE-C Designated','13 Certs Included','Accredited'], desc:'The #1 recommended online cybersecurity degree. Competency-based — you advance when you\'re ready. Tuition includes 13 industry certifications (CompTIA, ITIL, AWS). NSA/DHS Center of Academic Excellence designated.', url:'https://www.wgu.edu/online-it-degrees/cybersecurity-information-assurance-bachelors-program.html', ctaLabel:'Learn More at WGU →', aff:true},
+  {id:'sans-bootcamp', featured:true, cat:'bootcamp', icon:'🚀', name:'SANS Technology Institute — Cyber Foundations', inst:'SANS Institute · Online & In-Person', format:'Bootcamp', duration:'4–6 months', cost:'$5,000–$8,000', tags:['GIAC Cert Included','Lab-Heavy','Industry Gold Standard'], desc:'SANS is the most respected name in cybersecurity training. Their immersion courses bundle hands-on labs with a GIAC certification attempt. Instructors are active practitioners. SEC401 and SEC504 are career-launching credentials.', url:'https://www.sans.org/cyber-security-courses/', ctaLabel:'Browse SANS Courses →', aff:true},
+  {id:'gatech-ms', featured:true, cat:'degree-master', icon:'📚', name:'M.S. Cybersecurity (OMSCS)', inst:'Georgia Institute of Technology', format:'Online · Part-time friendly', duration:'1–2 years', cost:'~$7,000 total', tags:['Ranked Top 10','Accredited','Info Security specialization'], desc:'The best-value accredited cybersecurity master\'s in the country. Same degree as on-campus — roughly $7,000 total. Specializations in Information Security, Policy, and Computing Systems. Enormous alumni network.', url:'https://omscs.gatech.edu/specialization-information-security', ctaLabel:'Explore OMSCS →', aff:false},
+  {id:'tryhackme', featured:true, cat:'platform', icon:'🎮', name:'TryHackMe — Cyber Security Training', inst:'TryHackMe · Online · Gamified', format:'Self-paced', duration:'Ongoing', cost:'Free + ~$14/mo', tags:['Beginner Friendly','Browser Labs','3M+ Users'], desc:'The most popular hands-on cybersecurity learning platform for beginners. No setup required — labs run in your browser. Covers SOC, penetration testing, DFIR, and more. The Pre-Security and Jr. Penetration Tester paths are career-changer favorites.', url:'https://tryhackme.com/', ctaLabel:'Start Learning Free →', aff:true},
+  {id:'ine-security', featured:true, cat:'bootcamp', icon:'🔴', name:'INE Security — Pentesting & Defense Training', inst:'INE (Internet Ninja Education)', format:'Online · Subscription', duration:'Ongoing', cost:'$299–$749/year', tags:['eJPT / eCPPT / eWPT','Lab-Heavy','All Skill Levels'], desc:'Leading professional security training for penetration testing and offensive security. The eLearnSecurity cert track (eJPT → eCPPT → eCPTX) is one of the most respected practical paths in offensive security. Also covers DFIR, cloud, and network defense.', url:'https://ine.com/learning/areas/cyber-security', ctaLabel:'Explore INE Security →', aff:true},
+  // ── CERTIFICATES ──
+  {id:'ibm-cybersec', cat:'cert', icon:'📜', name:'IBM Cybersecurity Analyst Professional Certificate', inst:'IBM · via Coursera', format:'Self-paced · Online', duration:'~8 months', cost:'~$50/month', tags:['SOC focus','No prereqs','Threat intel'], desc:'IBM\'s professional certificate covers threat intelligence, SIEM operations, incident response, and network defense. Designed for SOC analyst roles and integrates with Coursera\'s IBM job placement program.', url:'https://www.coursera.org/professional-certificates/ibm-cybersecurity-analyst', ctaLabel:'Enroll →', aff:true},
+  {id:'dion-secplus', cat:'cert', icon:'📜', name:'CompTIA Security+ (SY0-701) Full Prep Course', inst:'Dion Training · via Udemy', format:'Self-paced · Online', duration:'~28 hours', cost:'~$20–30', tags:['DoD 8140','Best-selling','PBQ practice'], desc:'The most popular Security+ prep course. Covers all SY0-701 domains with video lectures, practice exams, and performance-based questions. Dion Training has a near-perfect pass rate among course completers.', url:'https://www.udemy.com/course/securityplus/', ctaLabel:'Enroll on Udemy →', aff:true},
+  {id:'isc2-cc', cat:'cert', icon:'📜', name:'ISC² Certified in Cybersecurity (CC)', inst:'ISC² · Self-study + Exam', format:'Self-paced · Online', duration:'40–60 hours', cost:'Free course + $199 exam', tags:['Entry-level ISC²','Free course','No experience required'], desc:'ISC² offers the CC as an accessible entry credential. The self-study course is free, covering security principles, business continuity, and network/access controls. Great stepping stone toward CISSP.', url:'https://www.isc2.org/certifications/cc', ctaLabel:'Learn More →', aff:false},
+  {id:'ms-cybersec', cat:'cert', icon:'📜', name:'Microsoft Cybersecurity Analyst Certificate', inst:'Microsoft · via Coursera', format:'Self-paced · Online', duration:'~6 months', cost:'~$50/month', tags:['Defender focus','SC-900 prep','Microsoft ecosystem'], desc:'Covers Microsoft security tools including Defender, Sentinel, and Entra ID. Ideal for those targeting Microsoft-centric enterprise environments. Prepares for the SC-900 exam.', url:'https://www.coursera.org/professional-certificates/microsoft-cybersecurity-analyst', ctaLabel:'Enroll →', aff:true},
+  // ── BACHELOR'S DEGREES ──
+  {id:'umgc-bs', cat:'degree-bachelor', icon:'🎓', name:'B.S. Cybersecurity', inst:'University of Maryland Global Campus', format:'Online · Accredited', duration:'2–4 years', cost:'~$330/credit', tags:['NSA Designated','Transfer-friendly','Military discount'], desc:'UMGC\'s cybersecurity program is well-regarded for working professionals and military-connected students. NSA/DHS Center of Academic Excellence designation, strong transfer credit policies, and military tuition assistance accepted.', url:'https://www.umgc.edu/online-degrees/bachelors/cybersecurity', ctaLabel:'Learn More →', aff:false},
+  {id:'snhu-bs', cat:'degree-bachelor', icon:'🎓', name:'B.S. Computer Science — Cybersecurity Track', inst:'Southern New Hampshire University', format:'Online · Accredited', duration:'4 years', cost:'~$330/credit', tags:['Transfer credits','8-week terms','Flexible'], desc:'SNHU\'s cybersecurity track within its CS degree is a flexible, affordable option for working adults. 8-week terms, generous transfer credit policies, and per-credit pricing make it accessible for students building on prior college work.', url:'https://www.snhu.edu/online-degrees/bachelors/bs-in-cybersecurity', ctaLabel:'Learn More →', aff:false},
+  {id:'purdue-bs', cat:'degree-bachelor', icon:'🎓', name:'B.S. Information Security', inst:'Purdue University Global', format:'Online · Accredited', duration:'4 years', cost:'Varies (VA approved)', tags:['ABET Computing','Regionally Accredited','VA approved'], desc:'Purdue Global\'s information security program carries Purdue\'s brand with ABET-accredited computing designation and VA education benefits approval. Strong for veterans and government-path students.', url:'https://www.purdueglobal.edu/degree-programs/information-technology/bachelor-science-cyber-security/', ctaLabel:'Learn More →', aff:false},
+  // ── MASTER'S DEGREES ──
+  {id:'wgu-ms', cat:'degree-master', icon:'📚', name:'M.S. Cybersecurity and Information Assurance', inst:'Western Governors University (WGU)', format:'Online · Competency-Based', duration:'Self-paced', cost:'~$4,755/term', tags:['NCAE-C','Certs Included','Accredited'], desc:'WGU\'s master\'s program follows the same competency-based model as their bachelor\'s — advance when you master the material. Includes relevant certifications in tuition. NCAE-C designated.', url:'https://www.wgu.edu/online-it-degrees/cybersecurity-information-assurance-masters-program.html', ctaLabel:'Learn More at WGU →', aff:true},
+  {id:'jhu-ms', cat:'degree-master', icon:'📚', name:'M.S. Cybersecurity', inst:'Johns Hopkins University (EP)', format:'Online · Part-time', duration:'2–3 years', cost:'Varies', tags:['NSA Designated','Policy + Technical','Ivy-caliber'], desc:'Johns Hopkins Engineering for Professionals offers a part-time cybersecurity master\'s covering both technical depth and policy. NSA CAE designated. Strong reputation for government and defense-sector careers.', url:'https://ep.jhu.edu/programs/cybersecurity/', ctaLabel:'Learn More →', aff:false},
+  {id:'cmu-ms', cat:'degree-master', icon:'📚', name:'Master of Science in Cybersecurity', inst:'Carnegie Mellon University (INI)', format:'Full/part-time', duration:'16–32 months', cost:'Varies', tags:['Top-ranked','Research option','Technical depth'], desc:'CMU\'s Information Networking Institute cybersecurity program is consistently ranked in the top 3 nationally. Research-track and professional-track options available. Deep technical focus with strong industry connections.', url:'https://www.cmu.edu/ini/academics/mscyber/', ctaLabel:'Learn More →', aff:false},
+  // ── BOOTCAMPS / PLATFORMS ──
+  {id:'tcm-academy', cat:'bootcamp', icon:'🔴', name:'TCM Security Academy', inst:'TCM Security', format:'Online · Course-based', duration:'Self-paced', cost:'~$30/course', tags:['Practical','Ethical Hacking','PNPT cert prep'], desc:'TCM Security offers one of the most affordable and practical offensive security curriculums available. Courses like Practical Ethical Hacking, OSINT, and Active Directory are highly regarded in the community. Prepares for the PNPT certification.', url:'https://academy.tcm-sec.com/', ctaLabel:'Explore TCM Academy →', aff:true},
+  {id:'sans-aces', cat:'bootcamp', icon:'🚀', name:'SANS Cyber Aces / Foundations', inst:'SANS Institute', format:'Online · Free entry course', duration:'Self-paced', cost:'Free foundations', tags:['SANS-quality','Pathway to GIAC','Free start'], desc:'SANS Cyber Aces is a free foundational security course covering OS, networking, and systems basics. It\'s the on-ramp to the full SANS curriculum and GIAC certifications — great for those who want SANS quality before committing to a paid course.', url:'https://www.sans.org/cyberaces/', ctaLabel:'Start Free →', aff:false},
+  {id:'btl-online', cat:'platform', icon:'🎮', name:'Blue Team Labs Online', inst:'Security Blue Team', format:'Online · Gamified', duration:'Ongoing', cost:'Free + Premium', tags:['Defensive / DFIR','Investigation challenges','BTL1 prep'], desc:'Blue Team Labs Online focuses on defensive security and DFIR through realistic investigation challenges. Covers phishing analysis, SIEM investigation, threat hunting, and digital forensics. Ideal if you\'re targeting SOC or DFIR roles.', url:'https://blueteamlabs.online/', ctaLabel:'Explore →', aff:false},
+  {id:'htb-academy', cat:'platform', icon:'🎮', name:'Hack The Box Academy', inst:'Hack The Box', format:'Online · Structured paths', duration:'Ongoing', cost:'Free + ~$14/mo', tags:['SOC Analyst path','Pentester path','Structured modules'], desc:'HTB Academy provides structured learning paths for both offense and defense. The SOC Analyst path covers Splunk, threat hunting, and malware analysis. The Pentester path builds toward CPTS certification. Higher technical ceiling than TryHackMe.', url:'https://academy.hackthebox.com/', ctaLabel:'Explore HTB Academy →', aff:false}
+];
+
+var _tFilter = 'all';
+
+function filterTraining(cat) {
+  _tFilter = cat;
+  document.querySelectorAll('.t-filter-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-cat') === cat);
+  });
+  renderTraining(cat);
+}
+
+function toggleTrainingCard(id) {
+  var el = document.querySelector('.tcard[data-id="' + id + '"]');
+  if(!el) return;
+  el.classList.toggle('tcard-open');
+}
+
+function renderTraining(filter) {
+  var list = document.getElementById('training-list');
+  if(!list) return;
+  var f = filter || _tFilter || 'all';
+  var items = TRAINING.filter(function(t) {
+    if(f === 'all') return true;
+    if(f === 'featured') return t.featured;
+    if(f === 'degree') return t.cat === 'degree-bachelor' || t.cat === 'degree-master';
+    return t.cat === f;
+  });
+  var catColors = { cert:'rgba(0,224,122,.12)', 'degree-bachelor':'rgba(59,130,246,.12)', 'degree-master':'rgba(245,158,11,.12)', bootcamp:'rgba(249,115,22,.12)', platform:'rgba(56,189,248,.12)' };
+  var catTx = { cert:'var(--gn)', 'degree-bachelor':'var(--bl)', 'degree-master':'var(--am)', bootcamp:'var(--or)', platform:'var(--lb)' };
+  var catLabel = { cert:'Certificate', 'degree-bachelor':'Bachelor\'s', 'degree-master':'Master\'s', bootcamp:'Bootcamp', platform:'Platform' };
+  if(!items.length) {
+    list.innerHTML = '<div style="padding:24px;text-align:center;font-size:.8rem;color:var(--mt);">No programs in this category.</div>';
+    return;
+  }
+  list.innerHTML = items.map(function(t) {
+    var bg = catColors[t.cat] || 'rgba(255,255,255,.06)';
+    var tx = catTx[t.cat] || 'var(--mt)';
+    var lbl = catLabel[t.cat] || t.cat;
+    var pill = t.duration ? '<span class="tcard-pill">' + t.duration + '</span>' : '';
+    var featBadge = t.featured ? '<span class="tcard-featured-badge">★ Pick</span>' : '';
+    var ctaText = (t.aff ? '★ ' : '') + (t.ctaLabel || 'Learn More →');
+    var rel = 'noopener' + (t.aff ? ' sponsored' : '');
+    return '<div class="tcard" data-id="' + t.id + '" onclick="toggleTrainingCard(\'' + t.id + '\')">'
+      + '<div class="tcard-header">'
+      + '<span class="tcard-icon">' + (t.icon||'📋') + '</span>'
+      + '<div class="tcard-info"><div class="tcard-name">' + t.name + featBadge + '</div><div class="tcard-inst">' + t.inst + ' · ' + t.format + '</div></div>'
+      + '<div class="tcard-meta"><span class="tcard-cat" style="background:' + bg + ';color:' + tx + ';">' + lbl + '</span>' + pill + '</div>'
+      + '<span class="tcard-arrow">▾</span>'
+      + '</div>'
+      + '<div class="tcard-body"><div class="tcard-desc">' + t.desc + '</div>'
+      + '<a class="tcard-cta" href="' + t.url + '" target="_blank" rel="' + rel + '" onclick="event.stopPropagation()">' + ctaText + '</a>'
+      + '</div></div>';
+  }).join('');
+}
+
+_pageInits.training = function() { renderTraining(_tFilter); };
+
 // ─── ROLE READINESS RADAR (v33) ───────────────────────────────────────────
 var RADAR_DIMS = ['tech','certs','domain','handson','comms','exp'];
 var RADAR_DIM_LABELS = ['Technical\nSkills','Certifications','Domain\nKnowledge','Hands-on\nPractice','Communication','Experience'];
