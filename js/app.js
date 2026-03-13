@@ -8605,11 +8605,24 @@ function generateBriefing() {
     certs = Object.keys(cp).filter(function(k) { return cp[k] > 0; }).slice(0, 6);
   } catch(e) {}
 
-  _sb.auth.getSession().then(function(res) {
-    var token = (res.data && res.data.session) ? res.data.session.access_token : SUPA_KEY;
+  _sb.auth.getSession().then(function(sessionRes) {
+    var session = sessionRes.data && sessionRes.data.session;
+    if (!session) {
+      // Session expired — attempt refresh before falling back
+      return _sb.auth.refreshSession().then(function(r) { return r.data && r.data.session; });
+    }
+    return session;
+  }).then(function(session) {
+    if (!session || !session.access_token) {
+      _nbShow('news-loading', false);
+      _nbShow('news-auth-gate', true);
+      if (btn) btn.disabled = false;
+      if (lbl) lbl.textContent = 'Generate Briefing';
+      return;
+    }
     fetch(EDGE_BASE + '/daily-briefing', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
       body: JSON.stringify({
         domain: _newsDomain,
         role: p.role || '',
@@ -8649,10 +8662,9 @@ function generateBriefing() {
       if (lbl) lbl.textContent = 'Try Again';
     });
   }).catch(function() {
-    // getSession failed — surface an error instead of leaving the spinner stuck
     _nbShow('news-loading', false);
     var errEl = document.getElementById('news-error');
-    if (errEl) { errEl.textContent = 'Session error — please refresh the page and try again.'; errEl.style.display = 'block'; }
+    if (errEl) { errEl.textContent = 'Session error — please sign out and sign back in, then try again.'; errEl.style.display = 'block'; }
     if (btn) btn.disabled = false;
     if (lbl) lbl.textContent = 'Try Again';
   });
