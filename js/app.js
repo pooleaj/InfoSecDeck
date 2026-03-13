@@ -7373,14 +7373,70 @@ var RADAR_ADVICE = {
   }
 };
 
-function _radarAutoPopulateCerts() {
+// Role-relevant cert keys for each target role
+var RADAR_CERT_MAP = {
+  soc:   ['secplus','cysa','splk-core','splunk-power','splunk-admin','cc','gcia','gcih','sscp','az-900'],
+  de:    ['secplus','cysa','gcia','gcih','elastic-siem','splunk-power','python-cert'],
+  ir:    ['gcih','gcfe','gcfa','ecih','cfce','secplus','cysa','ceh'],
+  ti:    ['gti','cti','cysa','secplus','sec+','gcti','gnfa'],
+  pt:    ['ejpt','ceh','pnpt','oscp','bscp','comptia-pentest','gwapt','gpen','cpent'],
+  rt:    ['oscp','crto','crte','crtp','osed','osce3','gxpn','gpen','ceh'],
+  cs:    ['aws-sap','aws-sec','az-500','gcp-ace','gcp-pro-sec','ccsp','ccsk','aws-saa'],
+  se:    ['secplus','cysa','az-500','aws-sec','sscp','cissp'],
+  sa:    ['cissp','cism','sabsa','togaf','ccsp','aws-sec','az-500'],
+  iam:   ['secplus','sc-300','az-104','okta-certified','cyberark-certified','sailpoint-cert','sc-900'],
+  vm:    ['secplus','cysa','geva','aws-saa','az-900'],
+  grc:   ['cism','cisa','crisc','cissp','iso-27001-li','iso-27001-la','cgrc'],
+  as:    ['bscp','gwapt','gweb','csslp','oscp','ejpt','awae'],
+  ciso:  ['cissp','cism','cisa','crisc','ciso-cert','ccsp','iso-27001-la'],
+  ma:    ['grem','gcfe','gcfa','ecmap','cfce','gctd'],
+  risk:  ['crisc','cism','cisa','cgrc','iso-27001-li','aws-saa'],
+  aise:  ['comptia-secaiplus','comptia-aiplus','az-ai','aws-ml','google-ml','ai-102','ai-900'],
+  mlrt:  ['oscp','comptia-secaiplus','grem','ejpt','ceh'],
+  aits:  ['comptia-aiplus','comptia-secaiplus','ai-102','iso-42001-li','isaca-ai'],
+  mlsec: ['comptia-secaiplus','aws-ml','az-500','az-ai','gaiops']
+};
+
+function _radarAutoPopulateCerts(role) {
   try {
     var prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
-    var done = Object.values(prog).filter(function(v){ return v === 'done'; }).length;
-    var score = done === 0 ? 1 : done === 1 ? 3 : done === 2 ? 5 : done === 3 ? 6 : done <= 5 ? 7 : done <= 8 ? 9 : 10;
+    var doneCerts = Object.keys(prog).filter(function(k) { return prog[k] === 'done'; });
+    var totalDone = doneCerts.length;
+
+    // Role-relevant cert scoring
+    var relevantKeys = RADAR_CERT_MAP[role] || [];
+    var relevantDone = doneCerts.filter(function(k) { return relevantKeys.indexOf(k) !== -1; }).length;
+    var relevantScore = relevantDone === 0 ? (totalDone > 0 ? 2 : 1)
+      : relevantDone === 1 ? 4
+      : relevantDone === 2 ? 6
+      : relevantDone === 3 ? 7
+      : relevantDone <= 5 ? 8 : 10;
+
     var el = document.getElementById('rs-certs');
-    if(el && el.value === '5') { el.value = score; }
+    if(el) el.value = relevantScore;
+
+    // Update cert note
+    var noteEl = document.getElementById('rsl-cert-note');
+    if(noteEl) {
+      if(relevantKeys.length > 0) {
+        noteEl.textContent = relevantDone + ' of ' + relevantKeys.length + ' role-relevant certs found in your tracker';
+        noteEl.style.display = 'block';
+      } else {
+        noteEl.style.display = 'none';
+      }
+    }
   } catch(e) {}
+}
+
+function _radarToggleGuide(dim) {
+  var el = document.getElementById('rsl-guide-' + dim);
+  if(!el) return;
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function _radarExpSelect(val) {
+  var el = document.getElementById('rs-exp');
+  if(el) { el.value = val; updateRadar(); }
 }
 
 function _radarGetValues() {
@@ -7555,6 +7611,8 @@ function updateRadar() {
   var roleEl = document.getElementById('radar-role');
   var role = roleEl ? roleEl.value : 'soc';
   var target = RADAR_TARGETS[role] || RADAR_TARGETS.soc;
+  // Re-score cert relevance when role changes
+  _radarAutoPopulateCerts(role);
   var current = _radarGetValues();
   _radarDrawChart(current, target);
   _radarUpdateSliderLabels(current, target);
@@ -7589,7 +7647,18 @@ function _radarRestoreState() {
 
 function initRadar() {
   _radarRestoreState();
-  _radarAutoPopulateCerts();
+  // Sync exp select to match restored slider value
+  var expEl = document.getElementById('rs-exp');
+  var expSel = document.getElementById('rsl-exp-select');
+  if(expEl && expSel) {
+    var v = parseInt(expEl.value);
+    var closest = [1,2,4,6,8,10].reduce(function(a,b){ return Math.abs(b-v)<Math.abs(a-v)?b:a; });
+    expSel.value = String(closest);
+    expEl.value = String(closest);
+  }
+  var roleEl = document.getElementById('radar-role');
+  var role = roleEl ? roleEl.value : 'soc';
+  _radarAutoPopulateCerts(role);
   updateRadar();
 }
 

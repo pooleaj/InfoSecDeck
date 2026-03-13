@@ -3721,7 +3721,13 @@
             <span class="rsl-vals"><span class="rsl-cur" id="rv-tech">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-tech">8</span></span>
           </div>
           <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-tech" data-dim="tech" oninput="updateRadar()">
-          <div class="rsl-hint">Proficiency with security tools, languages, and platforms</div>
+          <div class="rsl-hint">Proficiency with security tools, languages, and platforms <button class="rsl-guide-btn" onclick="_radarToggleGuide('tech')">How to score ▾</button></div>
+          <div class="rsl-guide" id="rsl-guide-tech" style="display:none">
+            <div class="rsl-guide-row"><strong>1–3</strong> Learning fundamentals; limited tool exposure</div>
+            <div class="rsl-guide-row"><strong>4–6</strong> Comfortable with common tools (Wireshark, Nmap, Burp, SIEM); can investigate incidents independently</div>
+            <div class="rsl-guide-row"><strong>7–8</strong> Deep tooling knowledge; can tune, automate, and build custom detection/exploitation scripts</div>
+            <div class="rsl-guide-row"><strong>9–10</strong> Expert-level; regularly teaches others, contributes to tooling, recognized by peers</div>
+          </div>
         </div>
         <div class="rsl-item">
           <div class="rsl-header">
@@ -3729,7 +3735,14 @@
             <span class="rsl-vals"><span class="rsl-cur" id="rv-certs">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-certs">5</span></span>
           </div>
           <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-certs" data-dim="certs" oninput="updateRadar()">
-          <div class="rsl-hint">Relevant certifications earned or in progress</div>
+          <div class="rsl-hint">Role-relevant certifications earned <button class="rsl-guide-btn" onclick="_radarToggleGuide('certs')">How to score ▾</button></div>
+          <div id="rsl-cert-note" class="rsl-cert-note" style="display:none"></div>
+          <div class="rsl-guide" id="rsl-guide-certs" style="display:none">
+            <div class="rsl-guide-row"><strong>1–2</strong> No relevant certs yet</div>
+            <div class="rsl-guide-row"><strong>3–4</strong> 1 entry-level cert relevant to target role (e.g. Security+, CC)</div>
+            <div class="rsl-guide-row"><strong>5–7</strong> 2–3 relevant certs including one mid-level (e.g. CySA+, AWS SAA)</div>
+            <div class="rsl-guide-row"><strong>8–10</strong> 3+ highly relevant certs including advanced (e.g. CISSP, OSCP, CCSP)</div>
+          </div>
         </div>
         <div class="rsl-item">
           <div class="rsl-header">
@@ -3737,7 +3750,13 @@
             <span class="rsl-vals"><span class="rsl-cur" id="rv-domain">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-domain">5</span></span>
           </div>
           <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-domain" data-dim="domain" oninput="updateRadar()">
-          <div class="rsl-hint">Depth and breadth of cybersecurity domain knowledge</div>
+          <div class="rsl-hint">Depth of knowledge in your target domain <button class="rsl-guide-btn" onclick="_radarToggleGuide('domain')">How to score ▾</button></div>
+          <div class="rsl-guide" id="rsl-guide-domain" style="display:none">
+            <div class="rsl-guide-row"><strong>1–3</strong> General IT/security awareness; unfamiliar with domain-specific concepts</div>
+            <div class="rsl-guide-row"><strong>4–6</strong> Solid understanding of domain frameworks, threat models, and common scenarios</div>
+            <div class="rsl-guide-row"><strong>7–8</strong> Can explain attack paths, defenses, and industry context in depth</div>
+            <div class="rsl-guide-row"><strong>9–10</strong> Subject matter expert; follows cutting-edge research and contributes knowledge</div>
+          </div>
         </div>
         <div class="rsl-item">
           <div class="rsl-header">
@@ -3745,7 +3764,14 @@
             <span class="rsl-vals"><span class="rsl-cur" id="rv-handson">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-handson">5</span></span>
           </div>
           <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-handson" data-dim="handson" oninput="updateRadar()">
-          <div class="rsl-hint">Labs, CTFs, home lab, bug bounty, or real-world practice</div>
+          <div class="rsl-hint">Real or simulated security work you've done <button class="rsl-guide-btn" onclick="_radarToggleGuide('handson')">How to score ▾</button></div>
+          <div class="rsl-guide" id="rsl-guide-handson" style="display:none">
+            <div class="rsl-guide-row"><strong>1–3</strong> Watched tutorials; little to no hands-on work</div>
+            <div class="rsl-guide-row"><strong>4–5</strong> Completed 10+ TryHackMe/HackTheBox rooms or equivalent labs</div>
+            <div class="rsl-guide-row"><strong>6–7</strong> Active home lab; completed multiple CTFs or bug bounty findings</div>
+            <div class="rsl-guide-row"><strong>8–9</strong> 1–3 years of on-the-job security practice in the target domain</div>
+            <div class="rsl-guide-row"><strong>10</strong> 3+ years of deep hands-on work specifically in target domain</div>
+          </div>
         </div>
         <div class="rsl-item">
           <div class="rsl-header">
@@ -3753,15 +3779,29 @@
             <span class="rsl-vals"><span class="rsl-cur" id="rv-comms">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-comms">6</span></span>
           </div>
           <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-comms" data-dim="comms" oninput="updateRadar()">
-          <div class="rsl-hint">Writing reports, presenting findings, cross-team collaboration</div>
+          <div class="rsl-hint">Writing, presenting, and cross-team collaboration <button class="rsl-guide-btn" onclick="_radarToggleGuide('comms')">How to score ▾</button></div>
+          <div class="rsl-guide" id="rsl-guide-comms" style="display:none">
+            <div class="rsl-guide-row"><strong>1–3</strong> Struggle to explain technical concepts to non-technical audiences</div>
+            <div class="rsl-guide-row"><strong>4–6</strong> Can write clear incident reports; comfortable in team meetings</div>
+            <div class="rsl-guide-row"><strong>7–8</strong> Regularly presents findings; can brief leadership; strong written communication</div>
+            <div class="rsl-guide-row"><strong>9–10</strong> Executive-level communication; public speaking; published writing</div>
+          </div>
         </div>
         <div class="rsl-item">
           <div class="rsl-header">
             <span class="rsl-label">⏱️ Experience</span>
             <span class="rsl-vals"><span class="rsl-cur" id="rv-exp">5</span><span class="rsl-sep">/</span><span class="rsl-tgt" id="rt-exp">3</span></span>
           </div>
-          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-exp" data-dim="exp" oninput="updateRadar()">
-          <div class="rsl-hint">Years of relevant security or adjacent IT experience</div>
+          <input class="rsl-range" type="range" min="1" max="10" value="5" id="rs-exp" data-dim="exp" style="display:none" oninput="updateRadar()">
+          <select class="rsl-exp-select" id="rsl-exp-select" onchange="_radarExpSelect(this.value)">
+            <option value="1">Student / No professional experience yet</option>
+            <option value="2">Less than 1 year</option>
+            <option value="4" selected>1–2 years</option>
+            <option value="6">3–5 years</option>
+            <option value="8">5–10 years</option>
+            <option value="10">10+ years</option>
+          </select>
+          <div class="rsl-hint" style="margin-top:6px;">Years of relevant security or adjacent IT experience</div>
         </div>
       </div>
 
@@ -4372,7 +4412,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=71"></script>
+<script src="js/app.js?v=72"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->
