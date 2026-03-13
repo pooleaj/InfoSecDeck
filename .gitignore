@@ -1,0 +1,12 @@
+# Secrets — never commit
+.env
+
+# Temporary processing files
+.tmp/*
+!.tmp/.gitignore
+
+# macOS
+.DS_Store
+
+# Node (if ever added)
+node_modules/
