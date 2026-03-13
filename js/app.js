@@ -5833,60 +5833,111 @@ function generateCLRecommendationsV15() {
 function _generateStepAdviceV15(prev, step, profile, myCerts, expNum, stepIdx, totalSteps) {
   var advice = [];
   var title = (step.title || '').toLowerCase();
+  var prevTitle = (prev.title || '').toLowerCase();
   var milestoneType = step.milestoneType || step.type;
+  var domain = (profile.domain || '').toLowerCase();
+  var isLastStep = (stepIdx === totalSteps - 1);
+  var totalMilestones = totalSteps - 1; // excluding start
 
   var hasCISSP = myCerts.some(function(c) { return c.indexOf('CISSP') !== -1; });
-  var hasSec = myCerts.some(function(c) { return c.indexOf('Security+') !== -1 || c.indexOf('Sec+') !== -1; });
+  var hasSec   = myCerts.some(function(c) { return c.indexOf('Security+') !== -1 || c.indexOf('Sec+') !== -1; });
   var hasCloud = myCerts.some(function(c) { return c.indexOf('AWS') !== -1 || c.indexOf('Azure') !== -1 || c.indexOf('GCP') !== -1; });
-  var hasCISM = myCerts.some(function(c) { return c.indexOf('CISM') !== -1; });
-  var hasOSCP = myCerts.some(function(c) { return c.indexOf('OSCP') !== -1; });
+  var hasCISM  = myCerts.some(function(c) { return c.indexOf('CISM') !== -1; });
+  var hasOSCP  = myCerts.some(function(c) { return c.indexOf('OSCP') !== -1; });
+  var hasCySA  = myCerts.some(function(c) { return c.indexOf('CySA') !== -1; });
+  var hasEH    = myCerts.some(function(c) { return c.indexOf('CEH') !== -1; });
 
-  // EXPERIENCE is #1 factor
+  // ── Experience-based foundation ──
   if (expNum < 2) {
-    advice.push('With under 2 years of experience, focus on breadth first — hands-on labs, TryHackMe, and HackTheBox will accelerate your foundation faster than certifications alone.');
-    if (!hasSec) advice.push('CompTIA Security+ is your highest-priority credential. It unlocks the majority of entry-level security job filters.');
+    advice.push('Priority at under 2 years: hands-on experience over paper certs. Build a home lab, complete 30+ TryHackMe rooms in your target domain, and document everything with write-ups. Hiring managers at this level screen for evidence of initiative, not credentials alone.');
+    if (!hasSec) advice.push('Security+ must be your first cert. It unlocks ~70% of entry-level postings and satisfies DoD 8570/8140 baselines. Target 8–12 weeks of focused study using Darril Gibson or Jason Dion materials.');
   } else if (expNum >= 2 && expNum < 5) {
-    advice.push('At 2–5 years, you\'re in the prime window for a domain-specific cert and your first senior role. Employers at this stage want depth, not breadth.');
-    if (!hasCISSP) advice.push('Start reading the CISSP CBK now — even if you\'re not exam-ready, the framework will sharpen your technical judgment significantly.');
+    advice.push('You\'re in the highest-leverage window of your career — 2–5 years with a specialty certification is the fastest path to a $20K–$40K salary jump. Pick one domain and go deep rather than collecting multiple entry-level certs.');
+    if (!hasCISSP) advice.push('Start the CISSP CBK now even if the exam is 12–18 months away. The framework will immediately sharpen your threat modeling and risk communication in every role.');
   } else if (expNum >= 5 && expNum < 8) {
-    advice.push('With 5+ years, your network and reputation start to matter as much as certs. Contribute to the community — BSides talks, blog posts, open-source projects.');
-    if (!hasCISSP) advice.push('CISSP is essentially required at this experience level for senior roles. Prioritize it.');
-  } else if (expNum >= 8) {
-    advice.push('At 8+ years, strategy and leadership skills differentiate you from peers. Look for opportunities to own programs, not just contribute to them.');
-    if (!hasCISM && !hasCISSP) advice.push('CISM is the management-focused credential that complements deep technical expertise for leadership track.');
+    advice.push('At 5+ years, your professional network and reputation often matter more than any single cert. Attend BSides events, submit conference talks, and build a public presence (LinkedIn, blog, or GitHub). Recruiters notice practitioners who contribute.');
+    if (!hasCISSP) advice.push('CISSP is a near-requirement for senior individual contributor roles at this experience level. If the 5-year requirement isn\'t met yet, pursue an Associate of (ISC)² by passing the exam early.');
+  } else {
+    advice.push('At 8+ years, the path forward requires strategic differentiation: program ownership, budget responsibility, and cross-functional influence. Identify one area where you can drive measurable business outcomes and own it fully.');
+    if (!hasCISM && !hasCISSP) advice.push('CISM validates your management credibility to non-technical stakeholders and is the preferred credential for security leadership tracks at enterprises. Budget 4–6 months for preparation.');
   }
 
-  // Milestone-type specific advice
+  // ── Milestone-type specific ──
   if (milestoneType === 'cert') {
-    advice.push('When choosing a certification, verify it appears in job postings for your target role — use LinkedIn Jobs to search the cert name and count matches.');
-    advice.push('Budget at least 3 months of consistent study (1–2 hours/day) for any mid-to-senior level cert. Don\'t cram.');
-  }
-  if (milestoneType === 'training') {
-    advice.push('SANS courses are expensive but carry enormous credibility. If your employer won\'t pay, look for scholarships or the OnDemand format for lower cost.');
-    advice.push('Document everything you learn — maintain a private notes repo or blog. Teaching what you learn cements it.');
-  }
-  if (milestoneType === 'project') {
-    advice.push('Quantify the impact of this project for your resume: "Reduced MTTD by X%", "Implemented tool covering N endpoints", "Led team of N engineers".');
+    var certTitleLower = title.replace(/\s+/g, ' ');
+    advice.push('Before registering for an exam, validate market demand: search LinkedIn Jobs for the cert name and count active postings in your target geography. Prioritize certs appearing in 100+ postings over ones appearing in 10.');
+    if (title.indexOf('cissp') !== -1) {
+      advice.push('CISSP prep: Mike Chapple\'s "CISSP Official Study Guide" + Destination Certification MindMaps (free) + 2,000+ practice questions across multiple vendors. Allow 4–6 months minimum.');
+    } else if (title.indexOf('oscp') !== -1 || title.indexOf('offensive') !== -1) {
+      advice.push('OffSec PEN-200 is 90 days of lab access — use every hour. Complete all optional exercises, document solutions in Obsidian or Notion, and attempt at least 40 lab machines before booking the exam.');
+    } else {
+      advice.push('Structure your study with an end date booked 10–14 weeks out. Studying without a deadline extends prep by 30–50% on average. Use adaptive practice exams weekly to track knowledge gaps, not confidence.');
+    }
   }
 
-  // Role-specific
-  if (title.indexOf('ciso') !== -1 || title.indexOf('director') !== -1 || title.indexOf('vp') !== -1) {
-    advice.push('CISO-track roles require board-level communication skills. Practice translating technical risk into business impact and financial terms.');
-    advice.push('Consider an MBA or executive leadership program alongside CISM/CISSP to build the business credibility that accelerates the final jump.');
+  if (milestoneType === 'training') {
+    advice.push('Before enrolling: ask your employer directly. Most companies have L&D or tuition reimbursement budgets that go unused. Frame training in terms of business outcomes — "reduces incident response time" lands better than "I want to learn."');
+    if (title.indexOf('sans') !== -1 || title.indexOf('giac') !== -1) {
+      advice.push('SANS OnDemand is 30–40% cheaper than live events. Combine with GIAC exam voucher bundles. The index method (tabbed printed notes) is the standard technique — build yours starting day one of the course.');
+    } else {
+      advice.push('Treat paid training like a forcing function: block dedicated study hours on your calendar within 48 hours of enrolling, and commit to completing the course within 60 days or the content goes stale.');
+    }
+    advice.push('Apply what you learn within 72 hours — write a proof-of-concept, update a runbook, or demo for your team. Retention drops dramatically without immediate application.');
   }
-  if (title.indexOf('cloud') !== -1 && !hasCloud) {
-    advice.push('No cloud cert detected — AWS Security Specialty (SCS-C02) or AZ-500 is strongly recommended for cloud security roles.');
+
+  if (milestoneType === 'project') {
+    advice.push('Scope projects for impact you can measure: "Implemented SOAR playbook reducing analyst triage time by 35%" is resume gold. "Worked on security tooling" is forgettable. Define success metrics before starting.');
+    advice.push('Projects that result in internal documentation, published write-ups, or conference presentations multiply their value. If it\'s worth building, it\'s worth writing up.');
   }
-  if ((title.indexOf('pentest') !== -1 || title.indexOf('red team') !== -1) && !hasOSCP) {
-    advice.push('OSCP is the minimum credibility bar for penetration testing. Most employers use it as a filter — get it before applying.');
+
+  // ── Role-specific domain advice ──
+  if (title.indexOf('ciso') !== -1 || title.indexOf('vp') !== -1 || title.indexOf('director') !== -1) {
+    advice.push('CISO preparation: read "The CISO Desk Reference Guide" (Bradley/Hayden) and study how security is framed in 10-K filings and board risk presentations. Your ability to quantify risk in dollar terms is what separates CISO candidates from senior engineers.');
+    advice.push('Build board-level communication skills by volunteering to present at non-security leadership meetings. Risk committee experience is a specific differentiator — find opportunities to participate before your CISO candidacy.');
+    if (!hasCISM) advice.push('CISM is the fastest path to leadership credibility for non-CISO audiences. Pair it with an executive leadership program (Carnegie Mellon CISO Certificate, Harvard Executive Education, or an MBA) for maximum impact.');
   }
-  if (title.indexOf('iam') !== -1 || title.indexOf('identity') !== -1) {
-    advice.push('IAM is heavily tool-specific. Get hands-on with CyberArk, Okta, or SailPoint — vendor certifications carry significant weight in this domain.');
+
+  if ((title.indexOf('cloud') !== -1 || domain === 'cloud') && !hasCloud) {
+    advice.push('No cloud security cert detected. AWS Security Specialty (SCS-C02) or Microsoft SC-100 are the highest-signal credentials for cloud security roles. AZ-500 works well for Azure-primary environments. Target the platform where most job postings are focused in your market.');
+  }
+
+  if ((title.indexOf('pentest') !== -1 || title.indexOf('red team') !== -1 || domain === 'offensive') && !hasOSCP) {
+    advice.push('OSCP is the hiring filter for ~75% of penetration testing roles. Without it, you\'ll be screened out before human review. Plan for 3–6 months of daily practice using HTB Pro Labs or TryHackMe Advanced paths before enrolling in PEN-200.');
+  }
+
+  if (title.indexOf('soc') !== -1 || domain === 'soc') {
+    if (!hasCySA) advice.push('CySA+ is the strongest certification for SOC roles — it directly maps to Blue Team functions (threat detection, vulnerability management, SIEM operations). More relevant than Security+ for senior SOC positions.');
+    advice.push('SOC metrics that hire managers look for: MTTD, MTTR, cases closed per analyst, false positive rate. Track these in your current role and include them in your resume for each position you\'ve held.');
+  }
+
+  if (title.indexOf('iam') !== -1 || title.indexOf('identity') !== -1 || domain === 'iam') {
+    advice.push('IAM is platform-specific more than any other security domain. Target the tools that dominate your local job market: SailPoint or Saviynt for IGA, CyberArk or Delinea for PAM, Okta or Azure AD for CIAM. Vendor certifications here are essential, not optional.');
+    advice.push('IAM roles increasingly require integration skills (REST APIs, SCIM, OAuth). Even basic Python scripting for identity provisioning automation will differentiate you from non-technical IAM practitioners.');
+  }
+
+  if (title.indexOf('grc') !== -1 || title.indexOf('compliance') !== -1 || domain === 'grc') {
+    advice.push('GRC practitioners command premium salaries by mastering two adjacent skills: evidence collection automation (using tools like Drata, Vanta, or Secureframe) and risk quantification (FAIR methodology). Both reduce audit labor and are highly valued by security leaders.');
+  }
+
+  if (title.indexOf('appsec') !== -1 || title.indexOf('devsec') !== -1 || domain === 'appsec') {
+    advice.push('AppSec practitioners who can communicate with engineering teams — write findings in JIRA, triage false positives, and automate SAST rules — earn significantly more than those who only produce reports. Invest in developer relations skills alongside technical depth.');
+  }
+
+  // ── Timeline context ──
+  if (step.timeline) {
+    advice.push('Your estimated timeline of "' + step.timeline + '" for this milestone is ' + (step.timeline.indexOf('month') !== -1 ? 'achievable with consistent weekly effort — block 8–10 hours per week minimum.' : 'ambitious — verify it\'s realistic by researching how long peers took in community forums like r/cybersecurity or the Cybersecurity Career Discord.'));
+  }
+
+  // ── Position in roadmap context ──
+  if (isLastStep) {
+    advice.push('This is your target destination. Write out exactly what success looks like here: specific job title, company type (startup/enterprise/government), compensation floor, and team size. Having a precise target makes every prior decision clearer and helps you evaluate opportunities accurately.');
+  } else if (stepIdx <= 2 && totalMilestones >= 4) {
+    advice.push('You\'re in the early stages of a multi-step roadmap. Maintain consistency over intensity — 10 hours/week compounded across 12 months outperforms 40-hour sprints followed by burnout. Set a monthly check-in date to assess progress and adjust the roadmap.');
   }
 
   if (!advice.length) {
-    advice.push('Build 2–3 years of hands-on experience in this area before advancing to the next milestone.');
-    advice.push('Seek a domain-specific certification that aligns with this role and appears regularly in job postings.');
+    advice.push('Research the specific job postings for this role on LinkedIn, Glassdoor, and Indeed. Identify the 3 most common requirements you don\'t yet have and make closing those gaps the explicit goal of this milestone.');
+    advice.push('Find 3–5 people currently in this role on LinkedIn and study their career paths. Look for the 1–2 moves that appear most consistently — those are the highest-probability paths to replicate.');
   }
   return advice;
 }
@@ -7081,6 +7132,9 @@ _pageInits.certs = (function(_orig){
 // ─── ROLE READINESS RADAR (v33) ───────────────────────────────────────────
 var RADAR_DIMS = ['tech','certs','domain','handson','comms','exp'];
 var RADAR_DIM_LABELS = ['Technical\nSkills','Certifications','Domain\nKnowledge','Hands-on\nPractice','Communication','Experience'];
+// Importance weights: Experience and hands-on practice matter most; certs alone are least predictive
+var RADAR_WEIGHTS = { tech: 1.5, certs: 0.75, domain: 1.25, handson: 2.0, comms: 1.0, exp: 2.5 };
+var RADAR_WEIGHT_LABELS = { tech: 'High', certs: 'Low', domain: 'Medium', handson: 'Very High', comms: 'Medium', exp: 'Critical' };
 
 // Target scores per role [tech, certs, domain, handson, comms, exp]
 var RADAR_TARGETS = {
@@ -7277,13 +7331,17 @@ function _radarRenderGaps(current, target) {
 
   var dimNames = ['Technical Skills','Certifications','Domain Knowledge','Hands-on Practice','Communication','Experience'];
   var gaps = RADAR_DIMS.map(function(d, i) {
-    return {dim: d, label: dimNames[i], gap: target[i] - current[i], cur: current[i], tgt: target[i]};
-  }).sort(function(a,b){ return b.gap - a.gap; });
+    var rawGap = target[i] - current[i];
+    var weight = RADAR_WEIGHTS[d] || 1.0;
+    return {dim: d, label: dimNames[i], gap: rawGap, weightedGap: rawGap * weight, cur: current[i], tgt: target[i], weight: weight, importanceLabel: RADAR_WEIGHT_LABELS[d] || 'Medium'};
+  }).sort(function(a,b){ return b.weightedGap - a.weightedGap; });
 
   var html = '';
   gaps.forEach(function(g) {
+    var importanceColor = g.importanceLabel === 'Critical' ? '#ff5c5c' : g.importanceLabel === 'Very High' ? '#f97316' : g.importanceLabel === 'High' ? '#f5c842' : '#64748b';
+    var importanceBadge = '<span style="font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:' + importanceColor + ';margin-left:6px;opacity:.85;">' + g.importanceLabel + ' importance</span>';
     if(g.gap <= 0) {
-      html += '<div class="rg-item rg-met"><span class="rg-icon">✓</span><div class="rg-body"><span class="rg-lbl">' + g.label + '</span><span class="rg-status rg-status-met">Met (' + g.cur + '/' + g.tgt + ')</span></div></div>';
+      html += '<div class="rg-item rg-met"><span class="rg-icon">✓</span><div class="rg-body"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;"><span class="rg-lbl">' + g.label + '</span>' + importanceBadge + '</div><span class="rg-status rg-status-met">Met (' + g.cur + '/' + g.tgt + ')</span></div></div>';
     } else {
       var severity = g.gap >= 4 ? 'crit' : g.gap >= 2 ? 'warn' : 'minor';
       var sevLabel = g.gap >= 4 ? 'Critical gap' : g.gap >= 2 ? 'Important gap' : 'Minor gap';
@@ -7292,7 +7350,7 @@ function _radarRenderGaps(current, target) {
       html += '<div class="rg-item rg-' + severity + '">'
         + '<span class="rg-gap-badge">-' + g.gap + '</span>'
         + '<div class="rg-body">'
-        + '<div class="rg-top"><span class="rg-lbl">' + g.label + '</span><span class="rg-status rg-status-' + severity + '">' + sevLabel + ' (' + g.cur + '/' + g.tgt + ')</span></div>'
+        + '<div class="rg-top"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;"><span class="rg-lbl">' + g.label + '</span>' + importanceBadge + '</div><span class="rg-status rg-status-' + severity + '">' + sevLabel + ' (' + g.cur + '/' + g.tgt + ')</span></div>'
         + '<p class="rg-advice">' + adviceText + '</p>'
         + '</div></div>';
     }
