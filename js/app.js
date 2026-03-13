@@ -7090,9 +7090,6 @@ function _radarAutoPopulateCerts(role) {
     var combined = (RADAR_CERT_MAP[role] || []).concat(RADAR_GENERAL_CERTS);
     var seen = {}; combined = combined.filter(function(k) { if(seen[k]) return false; seen[k]=true; return true; });
     var relevantDone = doneCerts.filter(function(k) { return combined.indexOf(k) !== -1; });
-    var relevantScore = _radarCertScore(doneCerts, role);
-    var el = document.getElementById('rs-certs');
-    if(el) el.value = relevantScore;
     var noteEl = document.getElementById('rsl-cert-note');
     if(noteEl) {
       noteEl.textContent = relevantDone.length + ' role-relevant cert' + (relevantDone.length !== 1 ? 's' : '') + ' found in your tracker';
