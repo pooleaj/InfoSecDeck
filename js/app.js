@@ -7483,6 +7483,78 @@ var RADAR_CERT_MAP = {
   mlsec: ['comptia-secaiplus','aws-ml','az-500','az-ai','gaiops']
 };
 
+// Maps role keys to role groups for guide text selection
+var RADAR_ROLE_GROUPS = {
+  soc:['soc','de','ti'],
+  ir:['ir','ma'],
+  pt:['pt','rt'],
+  cloud:['cs'],
+  iam:['iam'],
+  grc:['grc','risk','vm'],
+  appsec:['as'],
+  ai:['aise','mlrt','aits','mlsec'],
+  exec:['ciso','sa','se'],
+};
+
+// Role-specific guide content per dimension (tech, handson, domain)
+var RADAR_GUIDE_OVERRIDES = {
+  tech: {
+    soc:    [['1–3','Know what a SIEM is; familiar with basic log concepts'],['4–6','Comfortable with Splunk or QRadar; can triage alerts, write basic correlation rules'],['7–8','Tune detection logic, automate response playbooks, query across multiple data sources'],['9–10','Expert-level threat hunting; builds custom analytics; recognized practitioner']],
+    ir:     [['1–3','Know the IR lifecycle in theory; limited tooling experience'],['4–6','Use FTK Imager or Autopsy for disk triage; basic Volatility memory analysis'],['7–8','Full DFIR toolkit mastery; analyze memory, network, and host artifacts under time pressure'],['9–10','Leads major breach response; develops proprietary tooling or methodology']],
+    pt:     [['1–3','Know what pen testing is; can run basic Nmap scans'],['4–6','Comfortable with Burp Suite, Metasploit basics, and manual web testing'],['7–8','Custom exploits, C2 framework operation, bypassing common defenses'],['9–10','Novel vulnerability research; advanced implant development; recognized CVEs']],
+    cloud:  [['1–3','Basic cloud console familiarity; limited security configuration'],['4–6','Configure AWS/Azure/GCP security controls, IAM policies, and logging (CloudTrail, Security Hub)'],['7–8','CSPM tool expertise, IaC security (Terraform/CDK), multi-cloud threat detection'],['9–10','Cloud security architecture authority; leads large-scale cloud security programs']],
+    iam:    [['1–3','Basic Active Directory or LDAP concepts; understand what SSO means'],['4–6','Administer Okta or Azure AD; configure MFA, SSO, and basic RBAC'],['7–8','SailPoint/CyberArk/BeyondTrust proficiency; design PAM workflows and governance processes'],['9–10','Enterprise IAM program design; deep expertise in federation, governance, and lifecycle management']],
+    grc:    [['1–3','Familiar with NIST and ISO frameworks conceptually; no hands-on audit work'],['4–6','Can conduct a gap assessment against NIST CSF or ISO 27001; documenting controls'],['7–8','Lead audits and risk assessments; fluent with GRC platforms (Archer, ServiceNow)'],['9–10','Multi-framework program ownership; advises leadership on regulatory posture']],
+    appsec: [['1–3','Know OWASP Top 10 by name; limited hands-on web testing'],['4–6','Use Burp Suite for manual testing; review code for common vulnerabilities; run SAST tools'],['7–8','Threat modeling, DAST integration in CI/CD, code review across multiple languages'],['9–10','Secure SDLC program ownership; discovered novel vulnerabilities; leads AppSec community']],
+    ai:     [['1–3','Understand ML pipelines conceptually; limited hands-on model work'],['4–6','Can evaluate model inputs/outputs for adversarial risk; use AI governance frameworks'],['7–8','Adversarial ML testing (evasion, poisoning, extraction), AI red teaming, MLflow/model cards'],['9–10','Pioneering AI security research; contributes to AI safety standards and frameworks']],
+    exec:   [['1–3','Familiar with major security frameworks; limited program management'],['4–6','Can map controls to NIST CSF or ISO 27001; present findings to technical teams'],['7–8','Fluent in enterprise risk management; regularly presents to non-technical stakeholders'],['9–10','Board-level security advisor; drives enterprise security strategy and investment decisions']],
+  },
+  handson: {
+    soc:    [['1–3','Watched blue team tutorials; limited real alert triage'],['4–5','Completed SIEM labs (Splunk Boss of the SOC, TryHackMe SOC path)'],['6–7','Active home lab with SIEM + EDR; triaged real alerts in an internship or job'],['8–9','1–3 years of on-call SOC work; written and tuned production detection rules'],['10','3+ years as a practicing detection engineer or senior analyst']],
+    ir:     [['1–3','Theoretical IR knowledge only'],['4–5','Completed digital forensics CTFs or DFIR labs (CyberDefenders, BTL1 practice)'],['6–7','Led tabletop exercises; performed forensic analysis on actual incidents'],['8–9','Responded to real breaches; produced court-ready reports or executive summaries'],['10','Led major breach response cases; developed incident response playbooks used in production']],
+    pt:     [['1–3','Watched hacking tutorials; completed a few guided rooms'],['4–5','50+ TryHackMe/HackTheBox rooms; completed beginner CTFs'],['6–7','OSCP labs or equivalent; found bug bounty payouts; participated in multi-day CTFs'],['8–9','Conducted authorized penetration tests; red team engagements on real environments'],['10','Led red team operations; published CVEs or research; OSCP/CRTO/OSCE3 complete']],
+    cloud:  [['1–3','Deployed a basic cloud resource; no security-specific labs'],['4–5','Completed AWS/Azure security labs; worked through cloud-native CTF challenges'],['6–7','Configured cloud security controls in a real environment or cloud security internship'],['8–9','Managed cloud security posture in production; responded to cloud-based incidents'],['10','Led cloud security architecture and incident response at enterprise scale']],
+    iam:    [['1–3','Set up basic AD or Okta in a test environment'],['4–5','Configured MFA policies, SSO apps, and user provisioning in a lab or at work'],['6–7','Administered IAM for 100+ users; performed access certification reviews'],['8–9','Designed or migrated an IAM platform at scale; implemented PAM across an organization'],['10','Built or led an enterprise IAM program; managed vendor relationships and large-scale rollouts']],
+    grc:    [['1–3','Read through a compliance framework; no direct audit participation'],['4–5','Completed risk assessment exercises or helped compile evidence for an audit'],['6–7','Led internal control reviews; wrote and maintained security policies'],['8–9','Primary owner for a compliance program (SOC 2, ISO 27001, PCI); managed external audits'],['10','Multi-framework compliance ownership; advised executives and regulators directly']],
+    appsec: [['1–3','Ran automated scanner against a web app; no manual testing'],['4–5','Found vulnerabilities in DVWA or OWASP WebGoat; submitted basic bug bounty reports'],['6–7','Conducted manual pen tests on real applications; integrated SAST/DAST in a CI pipeline'],['8–9','Led AppSec program reviews; reported critical findings in production apps'],['10','Built a security testing program; CVE credits; leads AppSec community of practice']],
+    ai:     [['1–3','Ran a pre-built ML model; no adversarial testing experience'],['4–5','Tested model behavior with adversarial inputs; completed AI safety lab exercises'],['6–7','Conducted red teaming against LLMs or ML pipelines in a lab or research setting'],['8–9','Published AI security findings; contributed to model safety evaluations in production'],['10','Led AI red team engagements; pioneering research recognized in the AI security community']],
+    exec:   [['1–3','Participated in security projects; no leadership responsibility'],['4–5','Led a small security initiative or team; prepared a risk brief for management'],['6–7','Managed a security function; presented to senior leaders; owned a security roadmap'],['8–9','Department or program leader; accountable for security outcomes at organizational level'],['10','C-suite or VP-level security leadership; board-facing; sets strategic direction']],
+  },
+  domain: {
+    soc:    [['1–3','Know common attack types by name; unfamiliar with kill chain methodology'],['4–6','Understand MITRE ATT&CK, alert types, and common threat actor TTPs'],['7–8','Deep knowledge of detection engineering, threat intel integration, and kill chain modeling'],['9–10','Recognized domain expert; produces or consumes threat research; shapes team methodology']],
+    ir:     [['1–3','Know the 6-step IR lifecycle; unfamiliar with forensic artifacts'],['4–6','Understand artifacts (registry, MFT, prefetch, event logs) and malware analysis methodology'],['7–8','DFIR methodology mastery; can triage endpoint + network + memory evidence under pressure'],['9–10','Published DFIR research; recognized in the forensics/IR community; trains others']],
+    pt:     [['1–3','Understand what pen testing involves; unfamiliar with vulnerability classes'],['4–6','Know PTES methodology, OWASP testing guide, and common exploit categories'],['7–8','Advanced knowledge of exploit development, post-exploitation, and evasion techniques'],['9–10','Novel vulnerability classes; contributes to security research; leads red team methodology']],
+    cloud:  [['1–3','Know the shared responsibility model; unfamiliar with cloud-native threats'],['4–6','Understand cloud-specific threats (misconfigs, IMDS abuse, lateral movement) and logging'],['7–8','Multi-cloud threat modeling; expert in cloud-native attack paths and detection strategies'],['9–10','Shapes cloud security posture at enterprise scale; contributes to cloud security research']],
+    iam:    [['1–3','Know what identity governance means; unfamiliar with specific frameworks'],['4–6','Understand Zero Trust principles, least privilege, federation (SAML/OAuth/OIDC), and lifecycle management'],['7–8','Deep knowledge of PAM, governance frameworks (NIST 800-63), and access risk scoring'],['9–10','Expert in IAM strategy; advises on enterprise identity architecture and regulatory compliance']],
+    grc:    [['1–3','Familiar with NIST and ISO 27001 conceptually; no deep framework knowledge'],['4–6','Can map controls, understand risk scoring, and explain SOC 2 / PCI-DSS requirements'],['7–8','Expert in multiple frameworks; advises on control gaps, audit strategy, and third-party risk'],['9–10','Multi-framework authority; shapes compliance strategy for complex regulated environments']],
+    appsec: [['1–3','Know OWASP Top 10 by name; unfamiliar with secure SDLC concepts'],['4–6','Understand threat modeling (STRIDE), secure code review principles, and common vulnerability classes'],['7–8','Deep SDLC security knowledge; API security, supply chain risk, and runtime protection strategies'],['9–10','AppSec thought leader; contributes to OWASP; shapes secure-by-design in engineering culture']],
+    ai:     [['1–3','Understand that AI models can be attacked; no depth in adversarial ML'],['4–6','Know adversarial attack types (evasion, poisoning, extraction) and NIST AI RMF framework'],['7–8','Deep knowledge of AI safety methodology, red teaming, and model governance frameworks'],['9–10','Recognized AI security authority; contributes to safety standards or research publications']],
+    exec:   [['1–3','Know major security frameworks by name; unfamiliar with enterprise risk concepts'],['4–6','Understand enterprise risk management, regulatory landscape, and board-level security concerns'],['7–8','Expert in security program governance, risk quantification (FAIR), and regulatory requirements'],['9–10','Trusted advisor at executive and board level; shapes industry thinking on security governance']],
+  },
+};
+
+function _radarGetRoleGroup(role) {
+  var groups = RADAR_ROLE_GROUPS;
+  for (var g in groups) {
+    if (groups[g].indexOf(role) !== -1) return g;
+  }
+  return null;
+}
+
+function _radarUpdateGuides(role) {
+  var group = _radarGetRoleGroup(role);
+  if (!group) return;
+  ['tech','handson','domain'].forEach(function(dim) {
+    var rows = RADAR_GUIDE_OVERRIDES[dim] && RADAR_GUIDE_OVERRIDES[dim][group];
+    if (!rows) return;
+    var guideEl = document.getElementById('rsl-guide-' + dim);
+    if (!guideEl) return;
+    guideEl.innerHTML = rows.map(function(r) {
+      return '<div class="rsl-guide-row"><strong>' + r[0] + '</strong> ' + r[1] + '</div>';
+    }).join('');
+  });
+}
+
 function _radarAutoPopulateCerts(role) {
   try {
     var prog = JSON.parse(localStorage.getItem('isd_cert_prog') || '{}');
@@ -7697,8 +7769,9 @@ function updateRadar() {
   var roleEl = document.getElementById('radar-role');
   var role = roleEl ? roleEl.value : 'soc';
   var target = RADAR_TARGETS[role] || RADAR_TARGETS.soc;
-  // Re-score cert relevance when role changes
+  // Re-score cert relevance and update guides when role changes
   _radarAutoPopulateCerts(role);
+  _radarUpdateGuides(role);
   var current = _radarGetValues();
   _radarDrawChart(current, target);
   _radarUpdateSliderLabels(current, target);
