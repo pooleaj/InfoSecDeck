@@ -5680,14 +5680,42 @@ D['aisec'] = {
   ]
 };
 
-// ─── CALENDAR: ADD JAN/FEB 2027 EVENTS ──────────────────
-// Append early 2027 events to EVENTS array
+// ─── CALENDAR: ADD MORE 2026 + EARLY 2027 EVENTS ──────────────────
+// Append additional 2026 and early 2027 events to EVENTS array
 EVENTS.push(
+  // ── Additional 2026 CTFs ──
+  {name:'HTB Cyber Apocalypse CTF 2026',type:'ctf',date:'2026-03-20',url:'https://ctf.hackthebox.com',cost:'free',virtual:true,desc:'Hack The Box\'s flagship annual CTF with a story-driven narrative. Thousands of teams compete across pwn, web, reversing, forensics, and AI challenges.',diff:'Intermediate'},
+  {name:'PlaidCTF 2026',type:'ctf',date:'2026-04-17',url:'https://plaidctf.com',cost:'free',virtual:true,desc:'Annual CTF run by Carnegie Mellon\'s Plaid Parliament of Pwning (PPP). Known for high-quality, original challenges across all categories.',diff:'Advanced'},
+  {name:'\u00e5ngstromCTF 2026',type:'ctf',date:'2026-04-24',url:'https://angstromctf.com',cost:'free',virtual:true,desc:'High-quality CTF organized by students from Montgomery Blair High School. Challenging web, crypto, pwn, and misc challenges.',diff:'Intermediate'},
+  {name:'HeroCTF 2026',type:'ctf',date:'2026-05-15',url:'https://heroctf.fr',cost:'free',virtual:true,desc:'French-organized CTF with strong web and forensics categories. Welcomes beginner and intermediate players with a fun theme.',diff:'Beginner'},
+  {name:'Kernelcon CTF 2026',type:'ctf',date:'2026-05-01',url:'https://kernelcon.org',cost:'free',virtual:false,desc:'CTF competition running alongside Kernelcon in Omaha. Mix of beginner-friendly and intermediate challenges.',diff:'Beginner'},
+  {name:'NCL Spring Season 2026',type:'ctf',date:'2026-04-10',url:'https://nationalcyberleague.org',cost:'free',virtual:true,desc:'National Cyber League Spring season — individual and team game formats. Great for students building a competitive portfolio.',diff:'Beginner'},
+  {name:'CSAW CTF Qualifiers 2026',type:'ctf',date:'2026-09-11',url:'https://ctf.csaw.io',cost:'free',virtual:true,desc:'NYU\'s annual collegiate CTF — one of the oldest and most prestigious student competitions. Qualifiers lead to an in-person final.',diff:'Intermediate'},
+  {name:'Flare-On Challenge 2026',type:'ctf',date:'2026-09-04',url:'https://flare-on.com',cost:'free',virtual:true,desc:'Mandiant\'s annual reverse-engineering-only CTF. 12 increasingly difficult challenges. Completion rates are single-digit percentages.',diff:'Expert'},
+  {name:'NCL Fall Season 2026',type:'ctf',date:'2026-09-18',url:'https://nationalcyberleague.org',cost:'free',virtual:true,desc:'National Cyber League Fall season — largest season with team game. Leaderboard and portfolio evidence for job applications.',diff:'Beginner'},
+  {name:'Hack.lu CTF 2026',type:'ctf',date:'2026-10-22',url:'https://ctf.hack.lu',cost:'free',virtual:true,desc:'CTF running alongside Hack.lu Conference in Luxembourg. Known for creative and novel challenge design.',diff:'Advanced'},
+  {name:'SECCON CTF 2026',type:'ctf',date:'2026-12-05',url:'https://www.seccon.jp',cost:'free',virtual:true,desc:'Japan\'s premier national CTF with an international online qualifier. Strong pwn and reversing categories.',diff:'Advanced'},
+  // ── Additional 2026 Conferences ──
+  {name:'CactusCon 14',type:'conference',date:'2026-04-09',url:'https://www.cactuscon.com',cost:'free',virtual:false,desc:'Arizona\'s largest non-profit security conference in Mesa, AZ. Free to attend, covering all tracks from blue team to hardware hacking.',diff:null},
+  {name:'Kernelcon 2026',type:'conference',date:'2026-05-01',url:'https://kernelcon.org',cost:'paid',virtual:false,desc:'Midwest security conference in Omaha, NE with hands-on workshops, CTF, and a strong community vibe.',diff:null},
+  {name:'HITBSecConf Amsterdam 2026',type:'conference',date:'2026-05-14',url:'https://conference.hitb.org',cost:'paid',virtual:false,desc:'Hack In The Box Amsterdam — deeply technical conference with two-day training courses and cutting-edge research talks.',diff:null},
+  {name:'TROOPERS 2026',type:'conference',date:'2026-06-08',url:'https://troopers.de',cost:'paid',virtual:false,desc:'Elite technical security conference in Heidelberg, Germany. Renowned for network security, AD attacks, and enterprise security research.',diff:null},
+  {name:'USENIX Security 2026',type:'conference',date:'2026-08-12',url:'https://www.usenix.org/conference/usenixsecurity26',cost:'paid',virtual:false,desc:'Top-tier academic security conference with peer-reviewed research across systems security, privacy, and cryptography.',diff:null},
+  {name:'AppSec Global 2026',type:'conference',date:'2026-09-21',url:'https://owasp.org/events/',cost:'paid',virtual:false,desc:'OWASP\'s global application security conference. Covers SAST, DAST, DevSecOps, API security, and the latest OWASP Top 10 updates.',diff:null},
+  {name:'44CON 2026',type:'conference',date:'2026-09-10',url:'https://44con.com',cost:'paid',virtual:false,desc:'London\'s premier independent security conference. Single-track, high-quality talks with a strong community and Capture the Flag.',diff:null},
+  {name:'mWISE 2026',type:'conference',date:'2026-09-14',url:'https://mwise.mandiant.com',cost:'paid',virtual:false,desc:'Mandiant/Google\'s threat intelligence conference. Deep focus on APT research, incident response, and threat actor tracking.',diff:null},
+  {name:'BruCON 2026',type:'conference',date:'2026-10-06',url:'https://brucon.org',cost:'paid',virtual:false,desc:'Belgium\'s annual security conference known for hands-on workshops, cutting-edge research, and a welcoming community atmosphere.',diff:null},
+  {name:'Cyberwarcon 2026',type:'conference',date:'2026-11-05',url:'https://www.cyberwarcon.com',cost:'paid',virtual:false,desc:'Washington DC conference focused exclusively on nation-state cyber operations, espionage, and influence operations. Invite-only speaker selection.',diff:null},
+  {name:'BSides Chicago 2026',type:'conference',date:'2026-05-29',url:'https://bsideschicago.org',cost:'free',virtual:false,desc:'Community security conference in Chicago with diverse talks spanning red team, blue team, GRC, and career development.',diff:null},
+  {name:'BSides Nashville 2026',type:'conference',date:'2026-06-13',url:'https://bsidesnashville.com',cost:'free',virtual:false,desc:'Southeast\'s most active BSides event with CTF, workshops, and a growing community focused on all security domains.',diff:null},
+  // ── Early 2027 (within 1-year window) ──
   {name:'ShmooCon 2027',type:'conference',date:'2027-01-17',url:'https://www.shmoocon.org',cost:'paid',virtual:false,desc:'Intimate hacker conference in Washington DC. Known for its community feel, quality talks, and difficult-to-get tickets.',diff:null},
   {name:'SANS New Year\u2019s CTF 2027',type:'ctf',date:'2027-01-20',url:'https://www.sans.org',cost:'free',virtual:true,desc:'SANS annual new year CTF challenge. Beginner to intermediate difficulty with a holiday twist.',diff:'Beginner'},
+  {name:'IrisCTF 2027',type:'ctf',date:'2027-01-08',url:'https://irissec.xyz',cost:'free',virtual:true,desc:'Annual beginner-friendly CTF with creative challenges across web, stego, forensics, and networking. Great for newer players.',diff:'Beginner'},
   {name:'IEEE S&P (Oakland) 2027',type:'conference',date:'2027-02-09',url:'https://www.ieee-security.org',cost:'paid',virtual:false,desc:'One of the most prestigious academic security conferences. Deep technical research across all security domains.',diff:null},
   {name:'BSides DC 2027',type:'conference',date:'2027-02-14',url:'https://bsidesdc.org',cost:'free',virtual:false,desc:'One of the most established BSides events, attracting practitioners from across the DC/Northern Virginia security corridor.',diff:null},
-  {name:'DiceCTF 2027',type:'ctf',date:'2027-02-20',url:'https://ctf.dicega.ng',cost:'free',virtual:true,desc:'High-quality CTF from Cornell University students. Known for challenging crypto, pwn, and web challenges.',diff:'Advanced'}
+  {name:'DiceCTF 2027',type:'ctf',date:'2027-02-20',url:'https://ctf.dicega.ng',cost:'free',virtual:true,desc:'High-quality CTF from Cornell University students. Known for challenging crypto, pwn, and web challenges.',diff:'Advanced'},
+  {name:'picoCTF 2027',type:'ctf',date:'2027-03-06',url:'https://picoctf.org',cost:'free',virtual:true,desc:'Beginner-friendly CTF from Carnegie Mellon University. Perfect for newcomers learning the fundamentals.',diff:'Beginner'}
 );
 
 // ─── CAREER LADDER v15: FULL OVERHAUL ───────────────────
