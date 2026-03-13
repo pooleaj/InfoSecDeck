@@ -8738,37 +8738,58 @@ _pageInits.news = function() {
   generateBriefing();
 };
 
-// ─── CAREER LADDER JOB TITLE TOOLTIPS (click-based) ──────
+// ─── CAREER LADDER JOB TITLE TOOLTIPS (global overlay, click-based) ──────
 (function() {
+  var _activeTipJc = null;
+
+  function getGlobalTip() {
+    var t = document.getElementById('jc-global-tip');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'jc-global-tip';
+      t.className = 'tip';
+      document.body.appendChild(t);
+    }
+    return t;
+  }
+
   function closeAllTips() {
-    document.querySelectorAll('.jc.tip-open').forEach(function(el) {
-      el.classList.remove('tip-open');
-    });
+    var gt = document.getElementById('jc-global-tip');
+    if (gt) gt.classList.remove('tip-open');
+    if (_activeTipJc) { _activeTipJc.classList.remove('tip-open'); _activeTipJc = null; }
   }
 
   function openJcTip(e, el) {
     e.stopPropagation();
-    var wasOpen = el.classList.contains('tip-open');
+    var wasOpen = (el === _activeTipJc);
     closeAllTips();
     if (wasOpen) return;
 
-    var tip = el.querySelector('.tip');
-    if (!tip) return;
+    // Read content from inline .tip data container
+    var inlineTip = el.querySelector('.tip');
+    var titleEl = inlineTip && inlineTip.querySelector('.tipt');
+    var bodyEl = inlineTip && inlineTip.querySelector('.tipb');
+    if (!titleEl && !bodyEl) return;
+
+    var gt = getGlobalTip();
+    gt.innerHTML = (titleEl ? '<div class="tipt">' + titleEl.innerHTML + '</div>' : '')
+                 + (bodyEl  ? '<div class="tipb">' + bodyEl.innerHTML  + '</div>' : '');
 
     el.classList.add('tip-open');
+    _activeTipJc = el;
 
     var rect = el.getBoundingClientRect();
     var tipW = 260;
     var vw = window.innerWidth;
     var vh = window.innerHeight;
 
-    // Horizontal position: center over card, clamped to viewport
     var left = Math.max(8, Math.min(rect.left + rect.width / 2 - tipW / 2, vw - tipW - 8));
-    tip.style.left = left + 'px';
-    tip.style.width = tipW + 'px';
+    gt.style.left = left + 'px';
+    gt.style.width = tipW + 'px';
+    gt.style.transform = '';
 
-    // Remove old caret if any
-    var oldCaret = tip.querySelector('.tip-caret');
+    // Remove old caret
+    var oldCaret = gt.querySelector('.tip-caret');
     if (oldCaret) oldCaret.remove();
     var caret = document.createElement('span');
     caret.className = 'tip-caret';
@@ -8777,35 +8798,34 @@ _pageInits.news = function() {
     var spaceBelow = vh - rect.bottom;
 
     if (spaceAbove >= 140 || spaceAbove > spaceBelow) {
-      // Show above
-      tip.style.top = (rect.top - 10) + 'px';
-      tip.style.transform = 'translateY(-100%)';
+      gt.style.top = (rect.top - 10) + 'px';
+      gt.style.transform = 'translateY(-100%)';
       caret.classList.add('down');
-      // Caret horizontal alignment relative to tip
-      var caretLeft = (rect.left + rect.width / 2) - left;
-      caret.style.left = Math.max(10, Math.min(caretLeft, tipW - 10)) + 'px';
+      var cl = (rect.left + rect.width / 2) - left;
+      caret.style.left = Math.max(10, Math.min(cl, tipW - 10)) + 'px';
       caret.style.transform = 'translateX(-50%)';
     } else {
-      // Show below
-      tip.style.top = (rect.bottom + 10) + 'px';
-      tip.style.transform = '';
+      gt.style.top = (rect.bottom + 10) + 'px';
       caret.classList.add('up');
-      var caretLeft2 = (rect.left + rect.width / 2) - left;
-      caret.style.left = Math.max(10, Math.min(caretLeft2, tipW - 10)) + 'px';
+      var cl2 = (rect.left + rect.width / 2) - left;
+      caret.style.left = Math.max(10, Math.min(cl2, tipW - 10)) + 'px';
       caret.style.transform = 'translateX(-50%)';
     }
-    tip.appendChild(caret);
+    gt.appendChild(caret);
+    gt.classList.add('tip-open');
   }
 
-  // Delegated click handler for all .jc elements
   document.addEventListener('click', function(e) {
     var jc = e.target.closest('.jc');
     if (jc) {
       openJcTip(e, jc);
-    } else {
+    } else if (!e.target.closest('#jc-global-tip')) {
       closeAllTips();
     }
   });
+
+  // Close on scroll to avoid stale positioning
+  window.addEventListener('scroll', closeAllTips, true);
 })();
 
 // ─── CERT RANKINGS (v43) ──────────────────────────────────────────────────
