@@ -8620,6 +8620,13 @@ function generateBriefing() {
       if (btn) btn.disabled = false;
       if (lbl) lbl.textContent = 'Try Again';
     });
+  }).catch(function() {
+    // getSession failed — surface an error instead of leaving the spinner stuck
+    _nbShow('news-loading', false);
+    var errEl = document.getElementById('news-error');
+    if (errEl) { errEl.textContent = 'Session error — please refresh the page and try again.'; errEl.style.display = 'block'; }
+    if (btn) btn.disabled = false;
+    if (lbl) lbl.textContent = 'Try Again';
   });
 }
 
