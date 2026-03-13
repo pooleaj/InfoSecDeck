@@ -8875,8 +8875,13 @@ function generateBriefing() {
   _sb.auth.getSession().then(function(sessionRes) {
     var session = sessionRes.data && sessionRes.data.session;
     if (!session) {
-      // Session expired — attempt refresh before falling back
       return _sb.auth.refreshSession().then(function(r) { return r.data && r.data.session; });
+    }
+    // Refresh if token is expired or within 60s of expiry
+    var exp = session.expires_at;
+    var nowSec = Math.floor(Date.now() / 1000);
+    if (exp && (exp - nowSec) < 60) {
+      return _sb.auth.refreshSession().then(function(r) { return r.data && r.data.session || session; });
     }
     return session;
   }).then(function(session) {
