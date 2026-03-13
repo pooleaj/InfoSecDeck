@@ -7757,16 +7757,59 @@ function _mockCountFillerWords(text) {
 
 // ── TTS ────────────────────────────────────────────────────────────────────────
 
+// Persona voice profiles: [rate, pitch, preferred voice names (priority order)]
+var MOCK_VOICE_PROFILES = {
+  technical: { rate: 0.95, pitch: 0.95, gender: 'male',   names: ['Daniel','Alex','Fred','Arthur','Google UK English Male','Microsoft David'] },
+  ciso:      { rate: 0.88, pitch: 0.88, gender: 'male',   names: ['Daniel','Gordon','Alex','Arthur','Google UK English Male','Microsoft David'] },
+  hr:        { rate: 1.0,  pitch: 1.05, gender: 'female', names: ['Samantha','Karen','Moira','Fiona','Google US English','Microsoft Zira','Microsoft Jenny'] }
+};
+
+function _mockPickVoice(profile) {
+  var voices = window.speechSynthesis.getVoices();
+  if (!voices || !voices.length) return null;
+  // 1. Try exact preferred name match (highest quality, OS built-in)
+  for (var i = 0; i < profile.names.length; i++) {
+    var v = voices.find(function(v){ return v.name === profile.names[i]; });
+    if (v) return v;
+  }
+  // 2. Try partial name match
+  for (var i = 0; i < profile.names.length; i++) {
+    var n = profile.names[i];
+    var v = voices.find(function(v){ return v.name.indexOf(n) !== -1; });
+    if (v) return v;
+  }
+  // 3. Fallback: any local en-US/en-GB voice (local = higher quality than remote)
+  var local = voices.find(function(v){ return v.localService && v.lang.startsWith('en'); });
+  if (local) return local;
+  // 4. Any English voice
+  return voices.find(function(v){ return v.lang.startsWith('en'); }) || null;
+}
+
 function _mockSpeak(text) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  var utt = new SpeechSynthesisUtterance(text);
-  utt.rate = 0.92;
-  utt.pitch = 1.0;
-  var voices = window.speechSynthesis.getVoices();
-  var pref = voices.find(function(v){ return v.lang.startsWith('en') && v.name.indexOf('Google') === -1; });
-  if (pref) utt.voice = pref;
-  window.speechSynthesis.speak(utt);
+
+  var profile = MOCK_VOICE_PROFILES[_mock.persona] || MOCK_VOICE_PROFILES.technical;
+
+  // Split into sentences for natural pacing (pause between sentences)
+  var sentences = text.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [text];
+  sentences = sentences.map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
+
+  // Queue each sentence as a separate utterance so the browser pauses naturally
+  sentences.forEach(function(sentence, idx) {
+    var utt = new SpeechSynthesisUtterance(sentence);
+    utt.rate  = profile.rate + (Math.random() * 0.04 - 0.02);   // ±0.02 natural variance
+    utt.pitch = profile.pitch + (Math.random() * 0.06 - 0.03);  // ±0.03 natural variance
+    utt.volume = 1.0;
+
+    // Set voice — must re-fetch inside closure as voices may now be loaded
+    var voice = _mockPickVoice(profile);
+    if (voice) utt.voice = voice;
+
+    // Slightly longer pause after question marks and before the last sentence
+    utt.onend = null; // browser handles queue naturally
+    window.speechSynthesis.speak(utt);
+  });
 }
 
 // ── Submit answer ──────────────────────────────────────────────────────────────
