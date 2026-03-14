@@ -22,6 +22,21 @@ _sb.auth.onAuthStateChange(function(event, session) {
   if (event === 'SIGNED_IN') {
     _syncFromDB();
     showToast('Signed in! \u2705');
+    // Handle velvet rope: re-open pending job or redirect to roaster
+    setTimeout(function() {
+      if (window._jdPendingJobId) {
+        var pendingId = window._jdPendingJobId;
+        window._jdPendingJobId = null;
+        if (window._userHasResume) {
+          // Re-open the job modal
+          var el = document.querySelector('[data-job-id="' + pendingId + '"]');
+          if (el) el.click();
+        } else {
+          // No resume yet — go to roaster onboarding
+          if (typeof goToRoasterOnboarding === 'function') goToRoasterOnboarding();
+        }
+      }
+    }, 800);
   }
 });
 
@@ -349,9 +364,12 @@ function _syncFromDB() {
         plan: d.plan || 'free',
         purchases: d.purchases || {},
         cancelAtPeriodEnd: d.cancel_at_period_end || false,
-        subscriptionPeriodEnd: d.subscription_period_end || null
+        subscriptionPeriodEnd: d.subscription_period_end || null,
+        has_resume: d.has_resume || false
       };
       try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
+      // Expose has_resume globally for job board velvet rope
+      window._userHasResume = !!d.has_resume;
       // Notify app.js of the user's plan (controls nav button + paywall)
       if (typeof window._onPlanLoaded === 'function') window._onPlanLoaded(d.plan || 'free');
       if (typeof initProfile === 'function') initProfile();

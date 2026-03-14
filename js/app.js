@@ -1462,6 +1462,7 @@ async function rSubmit(){
     rClearSteps();
     document.getElementById('r-loading').classList.remove('show');
     rRenderResults(result,domain,tier);
+    if (typeof window._onRoastComplete === 'function') window._onRoastComplete();
   }catch(err){
     rClearSteps();
     document.getElementById('r-loading').classList.remove('show');
@@ -3009,164 +3010,226 @@ function loadInterviewQ(jobKey) {
     '</div>';
 }
 
-// ══════════ JOB BOARD QUESTIONNAIRE ══════════
-var jbState = {domain:'', titles:[], exp:'', work:'', clearance:''};
+// ══════════ REAL JOB BOARD ══════════
+var _jobFilter = 'all';
+var _jobsCache = [];
+var _jdCurrentJob = null;
+var _jdPendingJobId = null;
 
-var JB_TITLES_BY_DOMAIN = {
-  'IAM': ['IAM Administrator','IAM Engineer','PAM Engineer','Cloud IAM Engineer','Identity Specialist','IAM Architect','Principal IAM Architect','IGA Analyst','Okta Engineer','SailPoint Developer','CyberArk Engineer','Directory Services Engineer','Senior IAM Engineer','IAM Team Lead','Director of IAM'],
-  'SOC / IR': ['SOC Analyst I','SOC Analyst II','Cybersecurity Analyst I','Incident Responder','Threat Hunter','Detection Engineer','Threat Intelligence Analyst','Senior Threat Intel Analyst','Senior SOC Analyst','Threat Hunt Lead','Senior Detection Engineer','SOC Manager','Director of SOC','CSIRT Analyst'],
-  'Cloud Security': ['Cloud Support Engineer','Cloud Security Engineer','Cloud IAM Engineer','DevSecOps Engineer','Senior Cloud Security Engineer','Cloud Security Architect','Cloud Security Manager','Director of Cloud Security','Principal Cloud Security Architect'],
-  'AppSec': ['Junior AppSec Engineer','AppSec Engineer','DevSecOps Engineer','Senior AppSec Engineer','Staff AppSec Engineer','AppSec Manager','Director of AppSec','Bug Bounty Hunter','Security Champion'],
-  'Offensive': ['Junior Penetration Tester','Penetration Tester','Bug Bounty Hunter','Senior Penetration Tester','Red Team Lead','Vulnerability Researcher','Exploit Developer','Head of Red Team','Director of Red Team'],
-  'GRC': ['Privacy Analyst','GRC Analyst I','GRC Analyst II','IT Risk Analyst','Security Compliance Analyst','Privacy Engineer','Senior GRC Analyst','Compliance Manager','Director of GRC'],
-  'DFIR': ['Junior DFIR Analyst','DFIR Analyst','Malware Analyst','Senior Malware Analyst','Senior DFIR Analyst','DFIR Manager','Director of DFIR'],
-  'Security Engineering': ['Vulnerability Analyst','Network Security Analyst','Junior Security Engineer','Security Engineer','Security Automation Engineer','Vulnerability Management Engineer','OT/ICS Security Analyst','Security Consultant','Senior Security Engineer','Security Architect','Senior OT/ICS Security Engineer','Principal Security Engineer','Distinguished Security Engineer','Security Engineering Manager','Director of Security Engineering'],
-  'General / Any': ['Cybersecurity Analyst I','Information Security Analyst','Security Specialist','Cybersecurity Engineer','Security Consultant','Security Architect','CISO','Deputy CISO','VP of Security','VP of Information Security','Fractional CISO']
+function filterJobs(f, btn) {
+  _jobFilter = f;
+  window._jobFilter = f;
+  document.querySelectorAll('.job-filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderJobListings(_jobsCache);
 }
-function selectJbChoice(key, btn, val) {
-  if (key === 'titles') {
-    // Multi-select for titles
-    btn.classList.toggle('active');
-    var title = val;
-    var idx = jbState.titles.indexOf(title);
-    if (idx >= 0) jbState.titles.splice(idx,1);
-    else jbState.titles.push(title);
+
+async function loadJobs(filter) {
+  if (filter) _jobFilter = filter;
+  var grid = document.getElementById('job-listings-grid');
+  var loading = document.getElementById('job-listings-loading');
+  var empty = document.getElementById('job-listings-empty');
+  if (!grid) return;
+  if (loading) loading.style.display = 'flex';
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = '';
+
+  try {
+    if (!window._sb) throw new Error('Supabase not ready');
+    var res = await window._sb.from('jobs_preview').select('*').order('created_at', {ascending: false}).limit(50);
+    if (res.error) throw res.error;
+    _jobsCache = res.data || [];
+    renderJobListings(_jobsCache);
+  } catch(e) {
+    console.error('loadJobs error:', e);
+    if (empty) { empty.textContent = 'Could not load jobs. Please try again.'; empty.style.display = 'flex'; }
+  } finally {
+    if (loading) loading.style.display = 'none';
+  }
+}
+
+function _jobMatchesFilter(job, f) {
+  if (f === 'all') return true;
+  var title = (job.title || '').toLowerCase();
+  var skills = (job.skills_detected || []).join(' ').toLowerCase();
+  var text = title + ' ' + skills;
+  if (f === 'entry') return /analyst i|junior|entry|associate|tier 1/.test(text);
+  if (f === 'mid') return /analyst ii|mid|intermediate|engineer(?! manager)|specialist/.test(text);
+  if (f === 'senior') return /senior|sr\.|lead|principal|staff|architect|manager|director/.test(text);
+  return true;
+}
+
+function renderJobListings(jobs) {
+  var grid = document.getElementById('job-listings-grid');
+  var empty = document.getElementById('job-listings-empty');
+  if (!grid) return;
+  var filtered = jobs.filter(function(j){ return _jobMatchesFilter(j, _jobFilter); });
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    if (empty) { empty.textContent = 'No jobs match this filter. Try "All".'; empty.style.display = 'flex'; }
     return;
   }
-  // Single select for others
-  var container = btn.parentElement;
-  container.querySelectorAll('.jb-choice-btn').forEach(function(b){ b.classList.remove('active'); });
-  btn.classList.add('active');
-  jbState[key] = val;
-  if (key === 'domain') loadJbTitles(val);
-}
-
-function loadJbTitles(domain) {
-  var titles = JB_TITLES_BY_DOMAIN[domain] || [];
-  jbState.titles = [];
-  var container = document.getElementById('jb-title-btns');
-  if (!container) return;
-  container.innerHTML = titles.map(function(t) {
-    return '<button class="jb-choice-btn" onclick="selectJbChoice(\'titles\',this,\''+t.replace(/'/g,"\\'")+'\')">' + t + '</button>';
-  }).join('');
-}
-
-function buildSearchUrl(board, titles, domain, exp, work, clearance) {
-  var query = titles.length > 0 ? titles[0] : domain + ' security';
-  var expMap = {entry:'entry level', mid:'mid level', senior:'senior', principal:'principal staff'};
-  var expStr = expMap[exp] || '';
-  var workMap = {remote:'remote', hybrid:'hybrid', onsite:'', any:''};
-  var workStr = workMap[work] || '';
-
-  var q = encodeURIComponent(query + (expStr?' '+expStr:'') + (workStr?' '+workStr:''));
-  
-  if (board === 'linkedin') {
-    var expLvl = {entry:'1,2', mid:'3', senior:'4', principal:'5,6'}[exp] || '';
-    var remoteFilter = work==='remote'?'&f_WT=2':work==='hybrid'?'&f_WT=3':'';
-    return 'https://www.linkedin.com/jobs/search/?keywords='+q+(expLvl?'&f_E='+expLvl:'')+remoteFilter;
-  }
-  if (board === 'indeed') {
-    var remoteQ = work==='remote'?' remote':work==='hybrid'?' hybrid':'';
-    return 'https://www.indeed.com/jobs?q='+encodeURIComponent(query+remoteQ)+'&l='+(work==='remote'?'Remote':'');
-  }
-  if (board === 'dice') return 'https://www.dice.com/jobs?q='+q+(work==='remote'?'&remoteCodes=TRUE':'');
-  if (board === 'clearance') return 'https://www.clearancejobs.com/jobs?q='+encodeURIComponent(query);
-  if (board === 'usajobs') return 'https://www.usajobs.gov/Search/Results?k='+encodeURIComponent(query);
-  if (board === 'cyberseek') return 'https://www.cyberseek.org/heatmap.html';
-  if (board === 'glassdoor') return 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword='+q+(work==='remote'?'&remoteWorkType=1':'');
-  return '#';
-}
-
-function generateJobLinks() {
-  if (!jbState.domain) { alert('Please select a domain.'); return; }
-  if (!jbState.exp) { alert('Please select your experience level.'); return; }
-  if (!jbState.work) { alert('Please select a work arrangement.'); return; }
-  if (!jbState.clearance) { alert('Please answer the clearance question.'); return; }
-
-  document.getElementById('job-quiz-form').style.display = 'none';
-  document.getElementById('jb-results').style.display = 'block';
-
-  var titleList = jbState.titles.length > 0 ? jbState.titles : [jbState.domain + ' specialist'];
-  var titleDisplay = titleList.slice(0,3).join(', ') + (titleList.length > 3 ? ' +' + (titleList.length-3) + ' more' : '');
-
-  document.getElementById('jb-results-title').textContent = 'Job Search for: ' + (jbState.titles.length > 0 ? jbState.titles[0] : jbState.domain);
-  document.getElementById('jb-results-sub').textContent = jbState.domain + ' · ' + {entry:'Entry Level',mid:'Mid Level',senior:'Senior',principal:'Principal+'}[jbState.exp] + ' · ' + {remote:'Remote',hybrid:'Hybrid',onsite:'On-site',any:'Any location'}[jbState.work];
-
-  // Stats cards
-  var expSalMap = {
-    'IAM':         {entry:'$65K–$95K', mid:'$95K–$138K', senior:'$138K–$185K', principal:'$185K–$265K'},
-    'SOC / IR':    {entry:'$55K–$88K', mid:'$80K–$128K', senior:'$120K–$165K', principal:'$165K–$210K'},
-    'Cloud Security':{entry:'$70K–$98K', mid:'$95K–$148K', senior:'$135K–$200K', principal:'$175K–$278K'},
-    'AppSec':      {entry:'$65K–$100K',mid:'$90K–$142K', senior:'$128K–$192K', principal:'$162K–$258K'},
-    'Offensive':   {entry:'$60K–$95K', mid:'$85K–$135K', senior:'$120K–$182K', principal:'$170K–$272K'},
-    'GRC':         {entry:'$55K–$90K', mid:'$82K–$128K', senior:'$112K–$168K', principal:'$160K–$255K'},
-    'DFIR':        {entry:'$58K–$90K', mid:'$80K–$125K', senior:'$118K–$178K', principal:'$168K–$220K'},
-    'Security Engineering':{entry:'$65K–$100K',mid:'$88K–$138K',senior:'$122K–$185K',principal:'$160K–$250K'},
-    'General / Any':{entry:'$55K–$88K',mid:'$80K–$128K',senior:'$115K–$170K',principal:'$155K–$240K'},
-  };
-  var salRange = (expSalMap[jbState.domain]||{})[jbState.exp] || 'See salary guide';
-  
-  var demandMap = {entry:'High — entry demand is strong',mid:'Very High',senior:'High — competition increases',principal:'Selective — fewer roles, high pay'};
-  var clearancePremium = jbState.clearance === 'yes' ? '+$15K–40K salary premium typical' : 'Clearance adds significant value — consider pursuing';
-  
-  document.getElementById('jb-stats').innerHTML = [
-    {icon:'💰', label:'Typical Salary Range', val: salRange},
-    {icon:'📈', label:'Demand Level', val: demandMap[jbState.exp] || 'Strong'},
-    {icon:'🔏', label:'Clearance Premium', val: clearancePremium},
-    {icon:'🎯', label:'Titles Targeted', val: titleList.length + ' job title' + (titleList.length!==1?'s':'')},
-  ].map(function(stat){
-    return '<div style="background:var(--sf);border:1px solid var(--bd2);border-radius:12px;padding:16px 18px;">' +
-      '<div style="font-size:1.2rem;margin-bottom:6px;">' + stat.icon + '</div>' +
-      '<div style="font-family:var(--fm);font-size:.5rem;text-transform:uppercase;letter-spacing:.14em;color:var(--mt);margin-bottom:4px;">' + stat.label + '</div>' +
-      '<div style="font-size:.82rem;font-weight:600;">' + stat.val + '</div>' +
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = filtered.map(function(job) {
+    var sal = job.salary_min && job.salary_max
+      ? '$' + Math.round(job.salary_min/1000) + 'K–$' + Math.round(job.salary_max/1000) + 'K'
+      : '';
+    var locBadge = job.location_type === 'remote' ? '<span class="job-badge job-badge-remote">Remote</span>'
+      : job.location_type === 'hybrid' ? '<span class="job-badge job-badge-hybrid">Hybrid</span>'
+      : '<span class="job-badge job-badge-onsite">On-site</span>';
+    var skillTags = (job.skills_detected || []).slice(0,5).map(function(s){
+      return '<span class="job-skill-tag">' + s + '</span>';
+    }).join('');
+    var logoHtml = job.company_logo_url
+      ? '<img src="'+job.company_logo_url+'" class="job-card-logo" alt="'+job.company_name+' logo" onerror="this.style.display=\'none\'">'
+      : '<div class="job-card-logo-placeholder">' + (job.company_name||'?').charAt(0) + '</div>';
+    var jobDataStr = 'data-job-id="' + job.id + '"';
+    return '<div class="job-card" onclick="openJobDetail(this)" ' + jobDataStr + ' data-job=\'' + JSON.stringify(job).replace(/'/g,'&apos;') + '\'>' +
+      '<div class="job-card-header">' + logoHtml +
+      '<div class="job-card-info"><div class="job-card-title">' + job.title + '</div>' +
+      '<div class="job-card-company">' + job.company_name + '</div></div></div>' +
+      '<div class="job-card-meta">' + locBadge + (sal ? '<span class="job-salary">'+sal+'</span>' : '') + '</div>' +
+      (skillTags ? '<div class="job-card-skills">' + skillTags + '</div>' : '') +
+      '<button class="job-card-view-btn">View Role &#8594;</button>' +
     '</div>';
   }).join('');
+}
 
-  // Build job board links
-  var boards = [
-    {id:'linkedin', name:'LinkedIn Jobs', icon:'💼', color:'rgba(10,102,194,.2)', border:'rgba(10,102,194,.4)', desc:'Largest professional network — best for referrals and networking'},
-    {id:'indeed', name:'Indeed', icon:'🔍', color:'rgba(34,211,238,.06)', border:'rgba(34,211,238,.2)', desc:'Highest volume of postings — great for breadth'},
-    {id:'dice', name:'Dice.com', icon:'🎲', color:'rgba(249,115,22,.08)', border:'rgba(249,115,22,.2)', desc:'Tech-focused — strong for security engineering roles'},
-    {id:'glassdoor', name:'Glassdoor', icon:'⭐', color:'rgba(0,224,122,.06)', border:'rgba(0,224,122,.2)', desc:'See salary data and company reviews alongside listings'},
-    {id:'cyberseek', name:'CyberSeek Heat Map', icon:'🗺️', color:'rgba(168,85,247,.08)', border:'rgba(168,85,247,.2)', desc:'See where the most cyber jobs are geographically'},
-  ];
-  
-  if (jbState.clearance === 'yes') {
-    boards.push({id:'clearance', name:'ClearanceJobs', icon:'🔐', color:'rgba(244,63,94,.08)', border:'rgba(244,63,94,.2)', desc:'#1 job board for cleared candidates — exclusive listings'});
+function openJobDetail(el) {
+  var job;
+  try { job = JSON.parse(el.getAttribute('data-job').replace(/&apos;/g,"'")); } catch(e) { return; }
+  _jdCurrentJob = job;
+
+  document.getElementById('jd-title').textContent = job.title || '';
+  document.getElementById('jd-company-name').textContent = job.company_name || '';
+
+  var logoWrap = document.getElementById('jd-company-logo-wrap');
+  if (logoWrap) {
+    logoWrap.innerHTML = job.company_logo_url
+      ? '<img src="'+job.company_logo_url+'" class="jd-logo" alt="" onerror="this.style.display=\'none\'">'
+      : '<div class="jd-logo-placeholder">'+(job.company_name||'?').charAt(0)+'</div>';
   }
-  boards.push({id:'usajobs', name:'USAJobs (Federal)', icon:'🏛️', color:'rgba(59,130,246,.08)', border:'rgba(59,130,246,.2)', desc:'Federal government postings — many require or prefer clearance'});
 
-  document.getElementById('jb-links').innerHTML = boards.map(function(b){
-    var url = buildSearchUrl(b.id, titleList, jbState.domain, jbState.exp, jbState.work, jbState.clearance);
-    return '<a href="'+url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:16px;padding:16px 20px;background:'+b.color+';border:1px solid '+b.border+';border-radius:12px;text-decoration:none;transition:all .15s;" onmouseover="this.style.transform=\'translateX(4px)\'" onmouseout="this.style.transform=\'none\'">' +
-      '<span style="font-size:1.4rem;flex-shrink:0;">'+b.icon+'</span>' +
-      '<div style="flex:1;"><div style="font-weight:700;font-size:.9rem;color:var(--tx);margin-bottom:2px;">'+b.name+'</div>' +
-      '<div style="font-size:.74rem;color:var(--mt);">'+b.desc+'</div></div>' +
-      '<span style="color:var(--mt);font-size:.8rem;flex-shrink:0;">Open →</span>' +
-    '</a>';
-  }).join('');
+  var locLabel = {remote:'Remote', hybrid:'Hybrid', onsite:'On-site'}[job.location_type] || 'Remote';
+  var sal = job.salary_min && job.salary_max
+    ? ' &nbsp;·&nbsp; $' + Math.round(job.salary_min/1000) + 'K–$' + Math.round(job.salary_max/1000) + 'K'
+    : '';
+  document.getElementById('jd-meta').innerHTML = locLabel + sal;
 
-  // Tips
-  var tips = [
-    '💡 <strong>Pro tip:</strong> Apply to 10–15 roles simultaneously rather than waiting for responses one at a time. Response rates in security are typically 10–20%.',
-    '📝 <strong>Tailor your resume</strong> to match keywords in each job description — many companies use ATS filtering before human review.',
-  ];
-  if (jbState.exp === 'entry') tips.push('🎯 <strong>Entry-level tip:</strong> Look for "analyst" roles over "engineer" titles — they typically have lower experience bars. Internships, contract roles, and MSSP positions are great entry points.');
-  if (jbState.clearance === 'yes') tips.push('🔐 <strong>Clearance advantage:</strong> Your clearance is worth $15K–40K in premium. Lead with it on your resume header. Government contractors pay a significant premium for cleared candidates.');
-  if (jbState.work === 'remote') tips.push('🏠 <strong>Remote search tip:</strong> Filter LinkedIn by "Remote" in location field, not just the remote toggle — many remote roles are miscategorized.');
-  
-  document.getElementById('jb-tips').innerHTML = tips.join('<br><br>');
+  var skillsEl = document.getElementById('jd-skills');
+  if (skillsEl) {
+    skillsEl.innerHTML = (job.skills_detected || []).map(function(s){
+      return '<span class="job-skill-tag">' + s + '</span>';
+    }).join('');
+  }
 
-  document.getElementById('jb-results').scrollIntoView({behavior:'smooth',block:'start'});
+  var descEl = document.getElementById('jd-description');
+  if (descEl) {
+    var desc = (job.description || 'No description available.').substring(0, 2000);
+    descEl.innerHTML = desc.replace(/\n/g,'<br>');
+    if ((job.description||'').length > 2000) descEl.innerHTML += '<p class="jd-desc-fade">…</p>';
+  }
+
+  _jdRefreshActionPanel();
+
+  var modal = document.getElementById('job-detail-modal');
+  if (modal) { modal.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }
 
-function resetJobQuiz() {
-  jbState = {domain:'', titles:[], exp:'', work:'', clearance:''};
-  document.querySelectorAll('.jb-choice-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('jb-title-btns').innerHTML = '<div style="font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dm);padding:8px 0;">Select a domain above to see relevant titles</div>';
-  document.getElementById('job-quiz-form').style.display = 'block';
-  document.getElementById('jb-results').style.display = 'none';
+function _jdRefreshActionPanel() {
+  var anon = document.getElementById('jd-action-anon');
+  var noResume = document.getElementById('jd-action-no-resume');
+  var ready = document.getElementById('jd-action-ready');
+  var loading = document.getElementById('jd-action-loading');
+  [anon, noResume, ready, loading].forEach(function(el){ if(el) el.style.display='none'; });
+
+  var loggedIn = !!(window._currentUser || window._supabaseSession);
+  var hasResume = !!(window._userHasResume);
+
+  if (!loggedIn) {
+    if (anon) anon.style.display = 'block';
+  } else if (!hasResume) {
+    if (noResume) noResume.style.display = 'block';
+  } else {
+    if (ready) {
+      ready.style.display = 'block';
+      var nameBtn = document.getElementById('jd-company-name-btn');
+      if (nameBtn && _jdCurrentJob) nameBtn.textContent = _jdCurrentJob.company_name || 'Company';
+    }
+  }
 }
+
+function closeJobDetail() {
+  var modal = document.getElementById('job-detail-modal');
+  if (modal) modal.style.display = 'none';
+  document.body.style.overflow = '';
+  _jdCurrentJob = null;
+}
+
+async function applyToJob() {
+  if (!_jdCurrentJob) return;
+  var applyBtn = document.getElementById('jd-apply-btn');
+  var loading = document.getElementById('jd-action-loading');
+  var ready = document.getElementById('jd-action-ready');
+  if (ready) ready.style.display = 'none';
+  if (loading) loading.style.display = 'block';
+
+  try {
+    var session = window._supabaseSession;
+    if (!session) throw new Error('Not logged in');
+    var res = await fetch(EDGE_BASE + '/get-job-apply-url?job_id=' + _jdCurrentJob.id, {
+      headers: { 'Authorization': 'Bearer ' + session.access_token }
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      if (data.error === 'resume_required') { goToRoasterOnboarding(); return; }
+      throw new Error(data.error || 'Failed to get apply URL');
+    }
+    window.open(data.apply_url, '_blank', 'noopener');
+  } catch(e) {
+    console.error('applyToJob error:', e);
+    showToast('Could not load application link. Please try again.');
+    if (ready) ready.style.display = 'block';
+  } finally {
+    if (loading) loading.style.display = 'none';
+  }
+}
+
+function _jdTriggerAuth() {
+  if (_jdCurrentJob) _jdPendingJobId = _jdCurrentJob.id;
+  if (typeof openAuthModal === 'function') openAuthModal('signup');
+}
+
+function goToRoasterOnboarding() {
+  closeJobDetail();
+  showPage('roaster');
+  var bar = document.getElementById('roaster-onboarding-bar');
+  if (bar) bar.style.display = 'block';
+  window._roasterOnboarding = true;
+}
+
+// After successful roast while in onboarding mode — show "Unlock Job Board" CTA
+// Called from the roaster's renderRoastResult or equivalent
+var _origRenderRoastResult = window.renderRoastResult;
+window._onRoastComplete = function() {
+  if (!window._roasterOnboarding) return;
+  window._userHasResume = true;
+  setTimeout(function() {
+    var scorecard = document.querySelector('#r-results, .roast-scorecard, #roast-results, .roast-output');
+    if (!scorecard) return;
+    var existing = document.getElementById('roast-unlock-cta');
+    if (existing) return;
+    var cta = document.createElement('div');
+    cta.id = 'roast-unlock-cta';
+    cta.className = 'roast-unlock-cta';
+    cta.innerHTML = '<div class="ruc-icon">&#127381;</div>' +
+      '<div class="ruc-title">You\'re Unlocked!</div>' +
+      '<p class="ruc-desc">Your resume analysis is complete. Browse live remote cybersecurity jobs now.</p>' +
+      '<button class="ruc-btn" onclick="showPage(\'jobs\'); window._roasterOnboarding=false; document.getElementById(\'roaster-onboarding-bar\').style.display=\'none\';">Browse Jobs &#8594;</button>';
+    scorecard.appendChild(cta);
+    scorecard.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, 400);
+};
 
 function showSalaryFilter(domain) {
   showPage('salary');
@@ -5261,48 +5324,8 @@ initProfile = function() {
   renderMyCerts();
 };
 
-// ─── JOB BOARD FILTER SAVE / RESTORE ────────────────────
-function saveJobFilterToProfile() {
-  if (!window.jbState || !jbState.domain) { showToast('Complete your job search selections first.'); return; }
-  var p = loadProfile();
-  p.savedJobFilters = { domain: jbState.domain, titles: jbState.titles || [], exp: jbState.exp, work: jbState.work, clearance: jbState.clearance };
-  try { localStorage.setItem(_PROFILE_KEY, JSON.stringify(p)); } catch(e) {}
-  if (typeof syncProfileToDB === 'function') syncProfileToDB(p);
-  if (typeof _renderMemberBanner === 'function') _renderMemberBanner();
-  showToast('Job filter saved to profile! \u2705');
-}
-
-// Show save button when results are generated
-var _origGenerateJobLinks = generateJobLinks;
-generateJobLinks = function() {
-  _origGenerateJobLinks();
-  var btn = document.getElementById('jb-save-btn');
-  if (btn) btn.style.display = 'inline-flex';
-};
-
 function goToMyJobBoard() {
-  var p = loadProfile();
-  var f = p.savedJobFilters;
   showPage('jobs');
-  if (!f || !f.domain) return;
-  // restore state and re-run
-  setTimeout(function() {
-    window.jbState = { domain: f.domain, titles: f.titles || [], exp: f.exp, work: f.work, clearance: f.clearance };
-    // click matching buttons
-    document.querySelectorAll('#jb-domain-btns .jb-choice-btn').forEach(function(b) {
-      if (b.textContent.indexOf(f.domain) !== -1 || b.getAttribute('onclick').indexOf("'" + f.domain + "'") !== -1) b.click();
-    });
-    if (f.exp) document.querySelectorAll('[onclick*="selectJbChoice(\'exp\'"]').forEach(function(b) {
-      if (b.getAttribute('onclick').indexOf("'" + f.exp + "'") !== -1) b.classList.add('active');
-    });
-    if (f.work) document.querySelectorAll('[onclick*="selectJbChoice(\'work\'"]').forEach(function(b) {
-      if (b.getAttribute('onclick').indexOf("'" + f.work + "'") !== -1) b.classList.add('active');
-    });
-    if (f.clearance) document.querySelectorAll('[onclick*="selectJbChoice(\'clearance\'"]').forEach(function(b) {
-      if (b.getAttribute('onclick').indexOf("'" + f.clearance + "'") !== -1) b.classList.add('active');
-    });
-    generateJobLinks();
-  }, 120);
 }
 
 // ─── MY SALARY GUIDE NAVIGATION ──────────────────────────
@@ -8322,8 +8345,11 @@ function _jfaLoadPitch() {
   }
 }
 
-// Init jobs page
-_pageInits.jobs = function() { _jfaLoadPitch(); };
+// Init jobs page — load listings + JFA pitch
+_pageInits.jobs = function() {
+  _jfaLoadPitch();
+  loadJobs(window._jobFilter || 'all');
+};
 
 // ── Personalized News Briefing ─────────────────────────────────────────────
 var _newsDomain = 'general';

@@ -1522,6 +1522,23 @@
 
 <!-- ═══════════════ RESUME ROASTER ═══════════════ -->
 <div class="page" id="page-roaster">
+<!-- Onboarding progress bar (shown when coming from job velvet rope) -->
+<div id="roaster-onboarding-bar" style="display:none;">
+  <div class="ob-bar-inner">
+    <div class="ob-step ob-done">
+      <span class="ob-num">1</span> Create Account
+    </div>
+    <div class="ob-step-arrow">›</div>
+    <div class="ob-step ob-active">
+      <span class="ob-num">2</span> Analyze Resume
+    </div>
+    <div class="ob-step-arrow">›</div>
+    <div class="ob-step">
+      <span class="ob-num">3</span> Unlock Jobs
+    </div>
+  </div>
+  <div class="ob-bar-msg">Upload your resume to unlock job applications on InfoSecDeck.</div>
+</div>
 <div class="roaster-wrap">
   <div class="roaster-hero a1">
     <div class="roaster-badge">🔥 AI-Powered · Instant Results · Not Stored</div>
@@ -2413,94 +2430,42 @@
 <div class="page" id="page-jobs">
 <div style="padding:52px 28px 100px;max-width:1200px;margin:0 auto;">
   <div class="ey a1">Find Work</div>
-  <div class="st a2">Job Search Tools</div>
-  <p class="ss a3">Find your next role and assess your fit — both tools work best together.</p>
+  <div class="st a2">Remote Cybersecurity Jobs</div>
+  <p class="ss a3">Live remote cybersecurity roles — curated and refreshed daily. Analyze your fit with the tool on the right.</p>
 
   <div class="jobs-split">
-  <!-- Left: Job Search Assistant -->
+  <!-- Left: Live Job Listings -->
   <div class="jobs-left">
-  <div class="jobs-col-label a2">Job Search Assistant</div>
-  <p class="jobs-col-desc a3">Answer a few questions and get custom links across the top job boards — filtered to your domain, title, and experience level.</p>
-
-  <div class="a3" style="background:var(--sf);border:1px solid var(--bd2);border-radius:16px;padding:32px;margin-bottom:24px;" id="job-quiz-form">
-
-    <!-- Q1: Domain -->
-    <div class="pivot-field">
-      <label class="pivot-label">1. Which security domain are you targeting?</label>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="jb-domain-btns">
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'IAM')">🔐 IAM</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'SOC / IR')">🛡️ SOC / IR</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'Cloud Security')">☁️ Cloud Security</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'AppSec')">🔧 AppSec</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'Offensive')">🔴 Offensive</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'GRC')">📋 GRC</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'DFIR')">🔬 DFIR</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'Security Engineering')">⚙️ Sec Engineering</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('domain',this,'General / Any')">🌐 General / Any</button>
-      </div>
+  <div class="job-board-topbar">
+    <div class="jobs-col-label a2">Live Listings</div>
+    <div class="job-filters a2" id="job-filters">
+      <button class="job-filter-btn active" onclick="filterJobs('all',this)">All</button>
+      <button class="job-filter-btn" onclick="filterJobs('entry',this)">Entry</button>
+      <button class="job-filter-btn" onclick="filterJobs('mid',this)">Mid</button>
+      <button class="job-filter-btn" onclick="filterJobs('senior',this)">Senior</button>
     </div>
-
-    <!-- Q2: Title -->
-    <div class="pivot-field">
-      <label class="pivot-label">2. Which job titles interest you? <span style="color:var(--mt);font-weight:400;">(select all that apply)</span></label>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="jb-title-btns">
-        <div style="font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dm);padding:8px 0;">Select a domain above to see relevant titles</div>
-      </div>
-    </div>
-
-    <!-- Q3: Experience -->
-    <div class="pivot-field">
-      <label class="pivot-label">3. Years of experience</label>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'entry')">0–2 yrs (Entry)</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'mid')">3–5 yrs (Mid)</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'senior')">6–9 yrs (Senior)</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('exp',this,'principal')">10+ yrs (Principal+)</button>
-      </div>
-    </div>
-
-    <!-- Q4: Work type -->
-    <div class="pivot-field">
-      <label class="pivot-label">4. Work arrangement preference</label>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'remote')">🏠 Remote</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'hybrid')">🔀 Hybrid</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'onsite')">🏢 On-site</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('work',this,'any')">Any</button>
-      </div>
-    </div>
-
-    <!-- Q5: Clearance -->
-    <div class="pivot-field">
-      <label class="pivot-label">5. Do you hold or are you eligible for a U.S. security clearance?</label>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">
-        <button class="jb-choice-btn" onclick="selectJbChoice('clearance',this,'yes')">Yes — Active / Eligible</button>
-        <button class="jb-choice-btn" onclick="selectJbChoice('clearance',this,'no')">No</button>
-      </div>
-    </div>
-
-    <button class="pivot-submit-btn" onclick="generateJobLinks()">Generate My Job Search Links →</button>
+    <button class="job-refresh-btn" id="jobs-refresh-btn" onclick="loadJobs(window._jobFilter||'all')">&#8635; Refresh</button>
   </div>
 
-  <!-- Results -->
-  <div id="jb-results" style="display:none;" class="a4">
-    <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px;" id="jb-results-title"></div>
-    <div style="font-size:.78rem;color:var(--mt);margin-bottom:24px;" id="jb-results-sub"></div>
+  <div id="job-listings-loading" style="display:none;" class="job-listings-state">
+    <div class="job-listings-spinner"></div>
+    <span>Loading jobs...</span>
+  </div>
 
-    <!-- Stats bar -->
-    <div id="jb-stats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:28px;"></div>
+  <div id="job-listings-empty" style="display:none;" class="job-listings-state">
+    <div style="font-size:2rem;margin-bottom:8px;">&#128269;</div>
+    <div>No jobs found. Check back soon or try refreshing.</div>
+  </div>
 
-    <!-- Job board links -->
-    <div style="font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;color:var(--mt);margin-bottom:12px;">Open Your Searches</div>
-    <div id="jb-links" style="display:flex;flex-direction:column;gap:10px;"></div>
+  <div id="job-listings-grid"></div>
 
-    <div style="margin-top:28px;padding:18px;background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.15);border-radius:12px;">
-      <div style="font-size:.8rem;color:#94a3b8;line-height:1.8;" id="jb-tips"></div>
-    </div>
-
-    <div style="margin-top:20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <button onclick="resetJobQuiz()" style="font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:10px 20px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;">&#8592; Start Over</button>
-      <button class="jb-save-btn" id="jb-save-btn" onclick="saveJobFilterToProfile()" style="display:none">&#128190; Save to My Profile</button>
+  <!-- Recruiter Coming Soon card -->
+  <div class="recruiter-cta-card a3" style="margin-top:32px;">
+    <div class="recruiter-cta-icon">&#128084;</div>
+    <div class="recruiter-cta-body">
+      <div class="recruiter-cta-title">For Recruiters — Talent Vault</div>
+      <p class="recruiter-cta-desc">Semantic search across vetted cybersecurity candidates. No keyword spam — find professionals by skills, not buzzwords.</p>
+      <button class="recruiter-cta-btn" disabled>Join Waitlist (Coming Soon)</button>
     </div>
   </div>
 
@@ -2563,7 +2528,57 @@
   </div><!-- /jobs-split -->
 
 </div>
-<div class="footer">InfoSecDeck · Job Search Assistant · Links open external job boards · InfoSecDeck does not post or manage listings</div>
+<div class="footer">InfoSecDeck · Remote Job Board · Jobs sourced via JSearch API · InfoSecDeck is not affiliated with employers</div>
+</div>
+
+<!-- ═══════════════ JOB DETAIL MODAL ═══════════════ -->
+<div id="job-detail-modal" style="display:none;position:fixed;inset:0;z-index:10600;">
+  <div class="jd-backdrop" onclick="closeJobDetail()"></div>
+  <div class="jd-panel">
+    <div class="jd-header">
+      <div class="jd-company-info">
+        <div id="jd-company-logo-wrap"></div>
+        <div>
+          <div class="jd-company-name" id="jd-company-name"></div>
+          <div class="jd-meta" id="jd-meta"></div>
+        </div>
+      </div>
+      <button class="jd-close" onclick="closeJobDetail()" aria-label="Close">&#10005;</button>
+    </div>
+
+    <h2 class="jd-title" id="jd-title"></h2>
+
+    <div class="jd-skills" id="jd-skills"></div>
+
+    <div class="jd-description" id="jd-description"></div>
+
+    <!-- Velvet Rope Action Panel -->
+    <div class="jd-action-panel" id="jd-action-panel">
+      <!-- State 1: Not logged in -->
+      <div id="jd-action-anon" style="display:none;" class="jd-action-state">
+        <div class="jd-action-lock">&#128274;</div>
+        <div class="jd-action-title">Create a free account to unlock applications</div>
+        <p class="jd-action-desc">Sign up in seconds — get access to every job listing and a free AI resume analysis.</p>
+        <button class="jd-unlock-btn" onclick="_jdTriggerAuth()">Unlock Application</button>
+      </div>
+      <!-- State 2: Logged in, no resume -->
+      <div id="jd-action-no-resume" style="display:none;" class="jd-action-state">
+        <div class="jd-action-lock">&#128196;</div>
+        <div class="jd-action-title">Upload your resume to apply</div>
+        <p class="jd-action-desc">Get a free AI critique of your resume — then apply with one click.</p>
+        <button class="jd-unlock-btn" onclick="goToRoasterOnboarding()">Analyze My Resume &#8594;</button>
+      </div>
+      <!-- State 3: Logged in with resume -->
+      <div id="jd-action-ready" style="display:none;" class="jd-action-state">
+        <button class="jd-apply-btn" id="jd-apply-btn" onclick="applyToJob()">Apply at <span id="jd-company-name-btn"></span> &#8599;</button>
+        <div class="jd-apply-note">Opens the employer's application page in a new tab.</div>
+      </div>
+      <!-- Loading state -->
+      <div id="jd-action-loading" style="display:none;" class="jd-action-state">
+        <div class="jd-action-spinner"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════ CAREER LADDER (My Roadmap) ═══════════════ -->
@@ -4129,7 +4144,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=82"></script>
+<script src="js/app.js?v=83"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->

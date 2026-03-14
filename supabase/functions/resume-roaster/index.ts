@@ -199,6 +199,8 @@ Rules: 5-8 feedback items, 5-8 actions. Be SPECIFIC to the actual resume content
         result,
         meta: { domain, tier, jobTitle: jobTitle || null, intensity, fileType: isDocx ? 'docx' : 'pdf' },
       }),
+      // Unlock job applications — user now has a resume on file
+      supabaseAdmin.from('profiles').update({ has_resume: true }).eq('id', user.id),
       // Increment OTP usage (OTP users only)
       ...((!isPro && hasOtp) ? [
         supabaseAdmin.from('profiles').update({

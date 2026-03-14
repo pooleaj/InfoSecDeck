@@ -6090,3 +6090,107 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
   .fb-submit-btn{width:100%;}
   .fb-admin-item{grid-template-columns:1fr;gap:8px;}
 }
+
+/* ═══════════════ JOB BOARD v2 ═══════════════ */
+
+/* Topbar */
+.job-board-topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+.job-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.job-filter-btn{font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:7px 14px;border-radius:20px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;transition:all .15s;}
+.job-filter-btn:hover{color:var(--tx);border-color:var(--bd2);}
+.job-filter-btn.active{background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.35);color:var(--lb);}
+.job-refresh-btn{margin-left:auto;font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:7px 14px;border-radius:20px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;transition:all .15s;flex-shrink:0;}
+.job-refresh-btn:hover{color:var(--lb);border-color:rgba(34,211,238,.3);}
+
+/* State messages */
+.job-listings-state{display:flex;flex-direction:column;align-items:center;gap:10px;padding:48px 20px;text-align:center;color:var(--mt);font-size:.84rem;}
+.job-listings-spinner{width:28px;height:28px;border:3px solid var(--bd2);border-top-color:var(--lb);border-radius:50%;animation:spin .7s linear infinite;}
+
+/* Job cards */
+#job-listings-grid{display:flex;flex-direction:column;gap:12px;}
+.job-card{background:var(--sf);border:1px solid var(--bd2);border-radius:14px;padding:20px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+.job-card:hover{border-color:rgba(34,211,238,.35);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.25);}
+.job-card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.job-card-logo{width:40px;height:40px;border-radius:8px;object-fit:contain;background:#fff;flex-shrink:0;}
+.job-card-logo-placeholder{width:40px;height:40px;border-radius:8px;background:var(--bd2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:var(--mt);flex-shrink:0;}
+.job-card-title{font-weight:700;font-size:.92rem;color:var(--tx);line-height:1.3;margin-bottom:3px;}
+.job-card-company{font-size:.78rem;color:var(--mt);}
+.job-card-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.job-badge{font-family:var(--fm);font-size:.55rem;text-transform:uppercase;letter-spacing:.1em;padding:3px 9px;border-radius:20px;font-weight:600;}
+.job-badge-remote{background:rgba(34,211,238,.1);color:var(--lb);border:1px solid rgba(34,211,238,.25);}
+.job-badge-hybrid{background:rgba(168,85,247,.1);color:#a855f7;border:1px solid rgba(168,85,247,.25);}
+.job-badge-onsite{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid var(--bd);}
+.job-salary{font-size:.75rem;color:var(--gn);font-weight:600;}
+.job-card-skills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;}
+.job-skill-tag{font-family:var(--fm);font-size:.55rem;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:6px;background:var(--bg);border:1px solid var(--bd);color:var(--mt);}
+.job-card-view-btn{font-family:var(--fm);font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;padding:8px 16px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--mt);cursor:pointer;transition:all .15s;}
+.job-card:hover .job-card-view-btn{border-color:rgba(34,211,238,.35);color:var(--lb);}
+
+/* Job detail modal */
+.jd-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);}
+.jd-panel{position:relative;z-index:1;background:var(--sf);border:1px solid var(--bd2);border-radius:20px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;margin:auto;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+#job-detail-modal{display:none;align-items:center;justify-content:center;padding:20px;}
+.jd-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;}
+.jd-company-info{display:flex;align-items:center;gap:14px;}
+.jd-logo{width:48px;height:48px;border-radius:10px;object-fit:contain;background:#fff;}
+.jd-logo-placeholder{width:48px;height:48px;border-radius:10px;background:var(--bd2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem;color:var(--mt);}
+.jd-company-name{font-weight:700;font-size:.9rem;color:var(--tx);margin-bottom:3px;}
+.jd-meta{font-size:.78rem;color:var(--mt);}
+.jd-close{background:transparent;border:1px solid var(--bd);border-radius:8px;width:34px;height:34px;color:var(--mt);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.jd-close:hover{color:var(--tx);border-color:var(--bd2);}
+.jd-title{font-size:1.3rem;font-weight:800;color:var(--tx);letter-spacing:-.03em;margin-bottom:14px;line-height:1.25;}
+.jd-skills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:20px;}
+.jd-description{font-size:.82rem;color:#94a3b8;line-height:1.7;max-height:280px;overflow-y:auto;margin-bottom:24px;border-top:1px solid var(--bd);padding-top:18px;}
+.jd-desc-fade{color:var(--mt);font-size:.75rem;margin-top:8px;}
+
+/* Velvet rope action panel */
+.jd-action-panel{background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.15);border-radius:14px;padding:24px;text-align:center;}
+.jd-action-state{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.jd-action-lock{font-size:2rem;}
+.jd-action-title{font-weight:700;font-size:.95rem;color:var(--tx);}
+.jd-action-desc{font-size:.8rem;color:var(--mt);max-width:340px;line-height:1.55;margin:0;}
+.jd-unlock-btn{margin-top:8px;padding:13px 28px;background:linear-gradient(135deg,#22d3ee,#06b6d4);color:#000;border:none;border-radius:10px;font-weight:800;font-size:.88rem;cursor:pointer;transition:opacity .15s;letter-spacing:.01em;}
+.jd-unlock-btn:hover{opacity:.85;}
+.jd-apply-btn{padding:14px 32px;background:var(--gn);color:#000;border:none;border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;gap:6px;}
+.jd-apply-btn:hover{opacity:.85;}
+.jd-apply-note{font-size:.72rem;color:var(--mt);margin-top:6px;}
+.jd-action-spinner{width:24px;height:24px;border:3px solid var(--bd2);border-top-color:var(--lb);border-radius:50%;animation:spin .7s linear infinite;}
+
+/* Recruiter coming soon card */
+.recruiter-cta-card{display:flex;align-items:flex-start;gap:16px;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:22px;}
+.recruiter-cta-icon{font-size:1.8rem;flex-shrink:0;margin-top:2px;}
+.recruiter-cta-title{font-weight:700;font-size:.95rem;color:var(--tx);margin-bottom:5px;}
+.recruiter-cta-desc{font-size:.78rem;color:var(--mt);line-height:1.55;margin:0 0 14px;}
+.recruiter-cta-btn{font-family:var(--fm);font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;padding:8px 16px;border-radius:8px;border:1px solid var(--bd);background:transparent;color:var(--dm);cursor:not-allowed;opacity:.5;}
+
+/* Roaster onboarding bar */
+#roaster-onboarding-bar{background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(6,182,212,.04));border-bottom:1px solid rgba(34,211,238,.2);padding:20px 28px;}
+.ob-bar-inner{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:10px;flex-wrap:wrap;}
+.ob-step{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--mt);}
+.ob-step.ob-active{color:var(--lb);font-weight:700;}
+.ob-step.ob-done{color:var(--gn);}
+.ob-num{width:22px;height:22px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.6rem;font-weight:700;flex-shrink:0;}
+.ob-done .ob-num{background:rgba(0,224,122,.15);border-color:var(--gn);}
+.ob-active .ob-num{background:rgba(34,211,238,.15);border-color:var(--lb);}
+.ob-step-arrow{color:var(--dm);font-size:1rem;}
+.ob-bar-msg{text-align:center;font-size:.8rem;color:var(--mt);}
+
+/* Post-roast unlock CTA */
+.roast-unlock-cta{background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(0,224,122,.06));border:1px solid rgba(34,211,238,.2);border-radius:16px;padding:28px;text-align:center;margin-top:28px;}
+.ruc-icon{font-size:2.5rem;margin-bottom:8px;}
+.ruc-title{font-weight:800;font-size:1.1rem;color:var(--tx);margin-bottom:8px;}
+.ruc-desc{font-size:.82rem;color:var(--mt);margin:0 0 18px;line-height:1.55;}
+.ruc-btn{padding:13px 28px;background:linear-gradient(135deg,#22d3ee,#06b6d4);color:#000;border:none;border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer;transition:opacity .15s;}
+.ruc-btn:hover{opacity:.85;}
+
+/* Responsive job board */
+@media(max-width:900px){
+  .jobs-left{padding-right:0;padding-bottom:32px;}
+  .jobs-right{padding-left:0;}
+}
+@media(max-width:520px){
+  .jd-panel{padding:20px;border-radius:16px;}
+  .jd-title{font-size:1.1rem;}
+  .ob-bar-inner{gap:8px;}
+  .ob-step-arrow{display:none;}
+}
