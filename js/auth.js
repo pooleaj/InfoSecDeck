@@ -361,6 +361,7 @@ function _syncFromDB() {
         myCerts: dbCerts.length ? dbCerts : (existing.myCerts || []),
         careerLadder: (dbLadder && dbLadder.steps) ? dbLadder : (existing.careerLadder || {}),
         savedJobFilters: existing.savedJobFilters || null,
+        pitch: existing.pitch || '',
         plan: d.plan || 'free',
         purchases: d.purchases || {},
         cancelAtPeriodEnd: d.cancel_at_period_end || false,
