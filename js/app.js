@@ -3141,6 +3141,7 @@ function _jdRefreshActionPanel() {
   var noResume = document.getElementById('jd-action-no-resume');
   var ready = document.getElementById('jd-action-ready');
   var loading = document.getElementById('jd-action-loading');
+  var jfaSection = document.getElementById('jd-jfa-section');
   [anon, noResume, ready, loading].forEach(function(el){ if(el) el.style.display='none'; });
 
   var loggedIn = !!(window._currentUser || window._supabaseSession);
@@ -3148,15 +3149,48 @@ function _jdRefreshActionPanel() {
 
   if (!loggedIn) {
     if (anon) anon.style.display = 'block';
+    if (jfaSection) jfaSection.style.display = 'none';
   } else if (!hasResume) {
     if (noResume) noResume.style.display = 'block';
+    if (jfaSection) jfaSection.style.display = 'none';
+    // Async check: user may have existing roast analyses not yet reflected in has_resume
+    if (window._currentUser && window._sb) {
+      window._sb.from('saved_analyses')
+        .select('score, meta')
+        .eq('user_id', window._currentUser.id)
+        .eq('type', 'roast')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+        .then(function(res) {
+          if (res.data) {
+            var scoreEl = document.getElementById('jd-roast-score');
+            var domainEl = document.getElementById('jd-roast-domain');
+            var existingDiv = document.getElementById('jd-existing-roast');
+            var noRoastDiv = document.getElementById('jd-no-roast');
+            if (scoreEl) scoreEl.textContent = res.data.score;
+            if (domainEl) domainEl.textContent = (res.data.meta && res.data.meta.domain) ? res.data.meta.domain : 'Cybersecurity';
+            if (existingDiv) existingDiv.style.display = 'flex';
+            if (noRoastDiv) noRoastDiv.style.display = 'none';
+            // Heal has_resume flag
+            window._userHasResume = true;
+            window._sb.from('profiles').update({ has_resume: true }).eq('id', window._currentUser.id).then(function() {});
+          }
+        });
+    }
   } else {
     if (ready) {
       ready.style.display = 'block';
       var nameBtn = document.getElementById('jd-company-name-btn');
       if (nameBtn && _jdCurrentJob) nameBtn.textContent = _jdCurrentJob.company_name || 'Company';
     }
+    if (jfaSection) jfaSection.style.display = 'block';
   }
+}
+
+function _useExistingResume() {
+  window._userHasResume = true;
+  _jdRefreshActionPanel();
 }
 
 function closeJobDetail() {
@@ -3204,7 +3238,14 @@ function goToRoasterOnboarding() {
   closeJobDetail();
   showPage('roaster');
   var bar = document.getElementById('roaster-onboarding-bar');
-  if (bar) bar.style.display = 'block';
+  if (bar) {
+    bar.style.display = 'block';
+    // If user already has a resume on file, mark all steps as done
+    if (window._userHasResume) {
+      var steps = bar.querySelectorAll('.ob-step');
+      steps.forEach(function(s) { s.classList.add('ob-done'); s.classList.remove('ob-active'); });
+    }
+  }
   window._roasterOnboarding = true;
 }
 
@@ -8345,9 +8386,51 @@ function _jfaLoadPitch() {
   }
 }
 
-// Init jobs page — load listings + JFA pitch
+// Run JFA from inside job detail modal
+async function _jdRunJFA() {
+  if (!window._supabaseSession) { _jdTriggerAuth(); return; }
+  var job = window._jdCurrentJob;
+  if (!job) return;
+  var pitch = loadProfile().pitch || '';
+  if (!pitch) { showToast('Add a Professional Pitch in your profile to use this feature.'); return; }
+
+  var btn = document.getElementById('jd-jfa-run-btn');
+  var resultEl = document.getElementById('jd-jfa-result');
+  if (btn) { btn.disabled = true; btn.textContent = 'Analyzing...'; }
+  if (resultEl) resultEl.innerHTML = '<div style="padding:12px;text-align:center;color:var(--mt);font-size:.85rem;">Analyzing your fit...</div>';
+
+  try {
+    var jd = (job.description || job.title + ' at ' + job.company_name).substring(0, 5000);
+    var token = window._supabaseSession.access_token;
+    var resp = await fetch(EDGE_BASE + '/job-fit-analyzer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ job_description: jd, experience_years: '3', certs_level: 'none', elevator_pitch: pitch })
+    });
+    var data = await resp.json();
+    if (!resp.ok) { if (resp.status === 429) { _showRateLimitMsg(data, 'Job Fit Analyzer'); return; } throw new Error(data.error || 'Analysis failed'); }
+    // Render compact result in modal
+    var fitColors = { 'Strong Candidate': '#10e87e', 'Competitive Candidate': '#0dd4c8', 'Reach Role': '#f5c842', 'Not Ready Yet': '#ff5c5c' };
+    var color = fitColors[data.fit_label] || '#7a90a8';
+    var html = '<div class="jd-jfa-result-inner">' +
+      '<div class="jd-jfa-result-badge" style="background:' + color + '18;color:' + color + ';border-color:' + color + '44">' +
+        (data.fit_label || 'Analyzed') + ' — ' + (data.fit_score || 0) + '%' +
+      '</div>' +
+      '<div class="jd-jfa-honest-take">' + (data.honest_take || '') + '</div>';
+    if (data.recommendation) {
+      html += '<div class="jd-jfa-rec" style="color:' + color + ';">' + data.recommendation + '</div>';
+    }
+    html += '</div>';
+    if (resultEl) resultEl.innerHTML = html;
+  } catch(e) {
+    if (resultEl) resultEl.innerHTML = '<div style="color:#ff5c5c;font-size:.83rem;padding:8px 0;">Analysis failed: ' + e.message + '</div>';
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Re-check Fit →'; }
+  }
+}
+
+// Init jobs page — load listings only (JFA is now in the job detail modal)
 _pageInits.jobs = function() {
-  _jfaLoadPitch();
   loadJobs(window._jobFilter || 'all');
 };
 

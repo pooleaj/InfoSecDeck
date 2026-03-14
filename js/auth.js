@@ -370,6 +370,15 @@ function _syncFromDB() {
       try { localStorage.setItem('isd_profile', JSON.stringify(merged)); } catch(e) {}
       // Expose has_resume globally for job board velvet rope
       window._userHasResume = !!d.has_resume;
+      // Heal: if DB says no resume but user has existing roast analyses, fix it
+      if (!d.has_resume && _currentUser) {
+        _sb.from('saved_analyses').select('id').eq('user_id', _currentUser.id).eq('type', 'roast').limit(1).maybeSingle().then(function(res) {
+          if (res.data) {
+            window._userHasResume = true;
+            _sb.from('profiles').update({ has_resume: true }).eq('id', _currentUser.id).then(function() {});
+          }
+        });
+      }
       // Notify app.js of the user's plan (controls nav button + paywall)
       if (typeof window._onPlanLoaded === 'function') window._onPlanLoaded(d.plan || 'free');
       if (typeof initProfile === 'function') initProfile();

@@ -2431,13 +2431,9 @@
 <div style="padding:52px 28px 100px;max-width:1200px;margin:0 auto;">
   <div class="ey a1">Find Work</div>
   <div class="st a2">Remote Cybersecurity Jobs</div>
-  <p class="ss a3">Live remote cybersecurity roles — curated and refreshed daily. Analyze your fit with the tool on the right.</p>
+  <p class="ss a3">Live remote cybersecurity roles — curated and refreshed daily. Click any listing to analyze your fit and apply.</p>
 
-  <div class="jobs-split">
-  <!-- Left: Live Job Listings -->
-  <div class="jobs-left">
   <div class="job-board-topbar">
-    <div class="jobs-col-label a2">Live Listings</div>
     <div class="job-filters a2" id="job-filters">
       <button class="job-filter-btn active" onclick="filterJobs('all',this)">All</button>
       <button class="job-filter-btn" onclick="filterJobs('entry',this)">Entry</button>
@@ -2469,64 +2465,6 @@
     </div>
   </div>
 
-  </div><!-- /jobs-left -->
-
-  <div class="jobs-split-divider"></div>
-
-  <div class="jobs-right">
-  <div class="jobs-col-label a2">Will I Get This Job?</div>
-  <p class="jobs-col-desc a3">Paste a job description for an honest AI fit assessment — before you spend time applying.</p>
-  <!-- Will I Get This Job? Analyzer -->
-  <div id="jfa-usage-meter" style="display:none;margin-bottom:12px;"></div>
-  <div class="jfa-tool a3" id="jfa-tool">
-    <div class="jfa-header">
-      <div class="jfa-icon">🎯</div>
-      <div class="jfa-header-text">
-        <div class="jfa-title">Will I Get This Job?</div>
-        <div class="jfa-subtitle">Honest AI assessment of your fit — before you spend time applying</div>
-      </div>
-    </div>
-    <div class="jfa-form">
-      <div class="jfa-field">
-        <label class="jfa-label">Paste the full job description *</label>
-        <textarea id="jfa-jd" class="jfa-textarea" placeholder="Paste the complete job description here — requirements, responsibilities, qualifications..."></textarea>
-      </div>
-      <div class="jfa-form-grid">
-        <div class="jfa-field">
-          <label class="jfa-label">Your years in this domain</label>
-          <select id="jfa-exp" class="jfa-select">
-            <option value="0">0–1 year</option>
-            <option value="1">1–2 years</option>
-            <option value="3">3–5 years</option>
-            <option value="6">6–9 years</option>
-            <option value="10">10+ years</option>
-          </select>
-        </div>
-        <div class="jfa-field">
-          <label class="jfa-label">Relevant certifications held</label>
-          <select id="jfa-certs" class="jfa-select">
-            <option value="none">None</option>
-            <option value="entry">1–2 entry-level (Security+, Google Cert…)</option>
-            <option value="mid">1–2 mid-level (CySA+, GCIH, CEH…)</option>
-            <option value="strong">Multiple advanced certs (CISSP, OSCP, CISM…)</option>
-          </select>
-        </div>
-      </div>
-      <div class="jfa-field">
-        <label class="jfa-label">Your professional pitch <span class="jfa-pitch-source">— synced from your profile</span></label>
-        <div id="jfa-pitch-display" class="jfa-pitch-display"></div>
-        <div id="jfa-pitch-missing" class="jfa-pitch-missing" style="display:none">
-          &#9888; Add a <button onclick="showPage('profile')" class="jfa-profile-link">Professional Pitch in your profile</button> to personalize this analysis.
-        </div>
-      </div>
-      <button class="jfa-btn" id="jfa-btn" onclick="analyzeJobFit()">Analyze My Fit →</button>
-    </div>
-    <div class="jfa-output" id="jfa-output" style="display:none"></div>
-  </div>
-  </div><!-- /jobs-right -->
-
-  </div><!-- /jobs-split -->
-
 </div>
 <div class="footer">InfoSecDeck · Remote Job Board · Jobs sourced via JSearch API · InfoSecDeck is not affiliated with employers</div>
 </div>
@@ -2556,17 +2494,26 @@
     <div class="jd-action-panel" id="jd-action-panel">
       <!-- State 1: Not logged in -->
       <div id="jd-action-anon" style="display:none;" class="jd-action-state">
-        <div class="jd-action-lock">&#128274;</div>
-        <div class="jd-action-title">Create a free account to unlock applications</div>
-        <p class="jd-action-desc">Sign up in seconds — get access to every job listing and a free AI resume analysis.</p>
-        <button class="jd-unlock-btn" onclick="_jdTriggerAuth()">Unlock Application</button>
+        <div class="jd-action-title">Sign up free to unlock applications</div>
+        <p class="jd-action-desc">Access every job listing and get a free AI resume critique.</p>
+        <button class="jd-unlock-btn" onclick="_jdTriggerAuth()">Create Free Account &#8599;</button>
       </div>
       <!-- State 2: Logged in, no resume -->
       <div id="jd-action-no-resume" style="display:none;" class="jd-action-state">
-        <div class="jd-action-lock">&#128196;</div>
-        <div class="jd-action-title">Upload your resume to apply</div>
-        <p class="jd-action-desc">Get a free AI critique of your resume — then apply with one click.</p>
-        <button class="jd-unlock-btn" onclick="goToRoasterOnboarding()">Analyze My Resume &#8594;</button>
+        <!-- Sub-state A: has existing roast (shown dynamically) -->
+        <div id="jd-existing-roast" style="display:none;flex-direction:column;align-items:center;gap:6px;width:100%;">
+          <div class="jd-action-title">&#10003; Resume analysis on file</div>
+          <p class="jd-action-desc">Score: <strong id="jd-roast-score">—</strong> · <span id="jd-roast-domain">Cybersecurity</span></p>
+          <button class="jd-unlock-btn" onclick="_useExistingResume()">Use This Resume &amp; Apply &#8599;</button>
+          <button class="jd-reanalyze-btn" onclick="goToRoasterOnboarding()">Re-analyze Resume</button>
+        </div>
+        <!-- Sub-state B: no existing roast -->
+        <div id="jd-no-roast" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;">
+          <div class="jd-action-lock">&#128196;</div>
+          <div class="jd-action-title">Upload your resume to apply</div>
+          <p class="jd-action-desc">Get a free AI critique of your resume — then apply with one click.</p>
+          <button class="jd-unlock-btn" onclick="goToRoasterOnboarding()">Analyze My Resume &#8594;</button>
+        </div>
       </div>
       <!-- State 3: Logged in with resume -->
       <div id="jd-action-ready" style="display:none;" class="jd-action-state">
@@ -2577,6 +2524,15 @@
       <div id="jd-action-loading" style="display:none;" class="jd-action-state">
         <div class="jd-action-spinner"></div>
       </div>
+    </div>
+
+    <!-- Check My Fit (JFA in modal — logged-in users only) -->
+    <div id="jd-jfa-section" style="display:none;">
+      <div class="jd-jfa-bar">
+        <div class="jd-jfa-bar-title">&#127919; Will I Get This Job?</div>
+        <button class="jd-jfa-run-btn" id="jd-jfa-run-btn" onclick="_jdRunJFA()">Check My Fit &#8594;</button>
+      </div>
+      <div id="jd-jfa-result"></div>
     </div>
   </div>
 </div>
@@ -4144,7 +4100,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=83"></script>
+<script src="js/app.js?v=84"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->

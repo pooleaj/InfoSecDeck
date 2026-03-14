@@ -6144,13 +6144,25 @@ nav{background:rgba(11,17,32,.92);backdrop-filter:blur(28px);border-bottom:1px s
 .jd-desc-fade{color:var(--mt);font-size:.75rem;margin-top:8px;}
 
 /* Velvet rope action panel */
-.jd-action-panel{background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.15);border-radius:14px;padding:24px;text-align:center;}
-.jd-action-state{display:flex;flex-direction:column;align-items:center;gap:10px;}
-.jd-action-lock{font-size:2rem;}
-.jd-action-title{font-weight:700;font-size:.95rem;color:var(--tx);}
-.jd-action-desc{font-size:.8rem;color:var(--mt);max-width:340px;line-height:1.55;margin:0;}
-.jd-unlock-btn{margin-top:8px;padding:13px 28px;background:linear-gradient(135deg,#22d3ee,#06b6d4);color:#000;border:none;border-radius:10px;font-weight:800;font-size:.88rem;cursor:pointer;transition:opacity .15s;letter-spacing:.01em;}
+.jd-action-panel{background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.15);border-radius:14px;padding:14px 16px;text-align:center;}
+.jd-action-state{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.jd-action-lock{font-size:1.5rem;}
+.jd-action-title{font-weight:700;font-size:.92rem;color:var(--tx);}
+.jd-action-desc{font-size:.8rem;color:var(--mt);max-width:340px;line-height:1.5;margin:0;text-align:center;}
+.jd-unlock-btn{margin-top:6px;padding:11px 24px;background:linear-gradient(135deg,#22d3ee,#06b6d4);color:#000;border:none;border-radius:10px;font-weight:800;font-size:.86rem;cursor:pointer;transition:opacity .15s;letter-spacing:.01em;}
 .jd-unlock-btn:hover{opacity:.85;}
+.jd-reanalyze-btn{background:transparent;border:none;color:var(--cy);font-size:.78rem;cursor:pointer;text-decoration:underline;padding:0;}
+.jd-reanalyze-btn:hover{opacity:.75;}
+/* Job modal JFA section */
+.jd-jfa-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 0 8px;border-top:1px solid var(--bd);margin-top:16px;}
+.jd-jfa-bar-title{font-weight:600;font-size:.9rem;color:var(--tx);}
+.jd-jfa-run-btn{padding:8px 18px;background:transparent;border:1px solid var(--cy);color:var(--cy);border-radius:8px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:var(--fm);transition:background .15s,color .15s;}
+.jd-jfa-run-btn:hover{background:var(--cy);color:#000;}
+.jd-jfa-run-btn:disabled{opacity:.5;cursor:not-allowed;}
+.jd-jfa-result-inner{padding:10px 0;}
+.jd-jfa-result-badge{display:inline-block;padding:5px 12px;border-radius:20px;border:1px solid;font-size:.8rem;font-weight:700;margin-bottom:8px;}
+.jd-jfa-honest-take{font-size:.83rem;color:var(--ts);line-height:1.6;margin-bottom:8px;}
+.jd-jfa-rec{font-size:.82rem;font-weight:600;}
 .jd-apply-btn{padding:14px 32px;background:var(--gn);color:#000;border:none;border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer;transition:opacity .15s;display:inline-flex;align-items:center;gap:6px;}
 .jd-apply-btn:hover{opacity:.85;}
 .jd-apply-note{font-size:.72rem;color:var(--mt);margin-top:6px;}
