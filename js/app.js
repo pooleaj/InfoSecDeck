@@ -8408,7 +8408,7 @@ async function _jdRunJFA() {
       body: JSON.stringify({ job_description: jd, experience_years: '3', certs_level: 'none', elevator_pitch: pitch })
     });
     var data = await resp.json();
-    if (!resp.ok) { if (resp.status === 429) { _showRateLimitMsg(data, 'Job Fit Analyzer'); return; } throw new Error(data.error || 'Analysis failed'); }
+    if (!resp.ok) { if (resp.status === 429) { _showRateLimitMsg(data, 'Job Fit Analyzer'); return; } throw new Error(data.error || data.message || 'HTTP ' + resp.status); }
     // Render compact result in modal
     var fitColors = { 'Strong Candidate': '#10e87e', 'Competitive Candidate': '#0dd4c8', 'Reach Role': '#f5c842', 'Not Ready Yet': '#ff5c5c' };
     var color = fitColors[data.fit_label] || '#7a90a8';
