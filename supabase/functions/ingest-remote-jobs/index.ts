@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
     const params = new URLSearchParams({
       query: 'cybersecurity',
       page: '1',
-      num_pages: '3',
+      num_pages: '5',
       remote_jobs_only: 'true',
       date_posted: '3days',
     });
@@ -137,22 +137,31 @@ Deno.serve(async (req) => {
           salary_max: j.job_max_salary || null,
           skills_detected: detectSkills(j.job_title + ' ' + descText),
           is_active: true,
+          last_seen_at: new Date().toISOString(),
         };
       });
 
     const { error, count } = await supabaseAdmin
       .from('jobs')
-      .upsert(rows, { onConflict: 'external_id', ignoreDuplicates: true })
+      .upsert(rows, { onConflict: 'external_id' })
       .select('id', { count: 'exact' });
 
     if (error) throw new Error(`DB upsert error: ${error.message}`);
 
-    console.log(`ingest-remote-jobs: processed ${rows.length} jobs, inserted ${count ?? 0} new`);
+    // Expire jobs not refreshed in the last 14 days
+    const expiryDate = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    await supabaseAdmin
+      .from('jobs')
+      .update({ is_active: false })
+      .lt('last_seen_at', expiryDate)
+      .eq('is_active', true);
+
+    console.log(`ingest-remote-jobs: processed ${rows.length} jobs, upserted ${count ?? 0}, expired stale listings`);
 
     return new Response(JSON.stringify({
       message: 'Ingest complete',
       processed: rows.length,
-      inserted: count ?? 0,
+      upserted: count ?? 0,
     }), { headers: { ...CORS, 'Content-Type': 'application/json' } });
 
   } catch (err) {
