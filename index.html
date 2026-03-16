@@ -213,6 +213,9 @@
       Search
     </button>
 
+    <!-- Recruiters link -->
+    <a class="nav-recruiters-link" onclick="showPage('recruiters');closeAllDrops()">For Recruiters</a>
+
     <!-- Upgrade CTA -->
     <button class="nav-upgrade-btn" onclick="showPage('pricing');closeAllDrops()" id="nav-upgrade-btn" title="Go Pro">Go Pro</button>
 
@@ -283,27 +286,20 @@
       <!-- Left: Headline + CTAs -->
       <div class="hero-left">
         <h1 class="hero-h1">
-          Break Into<br>
-          <span class="hero-typed-line"><span id="hero-typed">Cybersecurity.</span><span class="hero-cursor"></span></span>
+          Break In. Level Up.<br>
+          <span class="hero-accent">Secure the Future.</span>
         </h1>
 
         <p class="hero-lead">
-          Every guide, salary table, cert path, and AI tool you need.
-          Built by a practitioner — for people serious about this field.
+          The career platform built for people serious about cybersecurity.
+          From your first cert to a six-figure role &mdash; every tool, data point, and community you need is here.
         </p>
 
         <div class="hero-actions">
-          <button class="hero-btn-primary" onclick="window._authIntent='signup';showPage('auth')">
-            Get Started Free
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <button class="hero-btn-explore" onclick="document.getElementById('editorial-section').scrollIntoView({behavior:'smooth'})">
+            Explore the Platform
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
           </button>
-          <span class="hero-signin-link" onclick="openAuthModal('signin')">Sign in &rarr;</span>
-        </div>
-
-        <div class="hero-chips" id="hero-chips-guest">
-          <span class="hero-chip">AI resume analysis</span>
-          <span class="hero-chip">$119K salary data</span>
-          <span class="hero-chip">Live job board</span>
         </div>
       </div>
 
@@ -365,40 +361,8 @@
     </div>
   </section>
 
-  <!-- ── WHO IT'S FOR ── -->
-  <section class="who-section">
-    <div class="who-inner">
-      <div class="who-eyebrow">Who InfoSecDeck is built for</div>
-      <div class="who-grid">
-        <div class="who-tile" onclick="showPage('roaster');closeAllDrops()">
-          <div class="who-tile-icon">🎯</div>
-          <div class="who-tile-label">Breaking In</div>
-          <div class="who-tile-desc">Students &amp; career switchers entering cyber from any background</div>
-          <div class="who-tile-cta">Analyze My Resume &rarr;</div>
-        </div>
-        <div class="who-tile who-tile--primary" onclick="showPage('jobs');closeAllDrops()">
-          <div class="who-tile-icon">💼</div>
-          <div class="who-tile-label">Active Professionals</div>
-          <div class="who-tile-desc">Practitioners leveling up, pivoting specializations, or job hunting</div>
-          <div class="who-tile-cta">Browse Jobs &rarr;</div>
-        </div>
-        <div class="who-tile" onclick="showPage('recruiters');closeAllDrops()">
-          <div class="who-tile-icon">🔍</div>
-          <div class="who-tile-label">Hiring Talent</div>
-          <div class="who-tile-desc">Recruiters &amp; hiring managers sourcing verified cyber candidates</div>
-          <div class="who-tile-cta">Join Waitlist &rarr;</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── INLINE CAREER QUIZ ── -->
-  <!-- quiz moved to #quiz-modal (fixed overlay) -->
-
-
-
   <!-- ── EDITORIAL ARTICLE SECTION ── -->
-  <div class="editorial-section" id="platform-section">
+  <div class="editorial-section" id="editorial-section">
     <div class="editorial-inner">
 
       <!-- Article Header -->
@@ -411,29 +375,7 @@
       <!-- Opening Drop -->
       <p class="ed-drop-cap">The numbers don't lie. Over <strong>4 million cybersecurity positions</strong> sit unfilled globally right now &mdash; and that gap isn't closing, it's widening. As ransomware groups, nation-state actors, and opportunistic hackers grow more sophisticated, organizations are desperate for talent. The result? A field where median compensation exceeds <span class="ed-link" onclick="showPage('salary')">$119,000 per year</span>, job growth outpaces nearly every other tech discipline at 33%, and practitioners at the senior level routinely clear $200K+. The cybercrime economy is projected to cost the world $9.8 trillion in 2025 alone. The people defending against it have never been more in demand &mdash; or better compensated.</p>
 
-      <!-- Salary Feature Row -->
-      <div class="ed-feature-row">
-        <div class="ed-feature-text">
-          <h3 class="ed-section-h">The Salary Reality No One Talks About</h3>
-          <p>Browse job postings and you'll find vague ranges like &ldquo;$80K&ndash;$130K.&rdquo; What those listings don't tell you is that a SOC Analyst in San Francisco with an AWS Security Specialty certification is clearing $145,000. A Senior IAM Engineer with a CISSP in New York? Closer to $190,000. Location, certifications, and specialization create a multiplier effect most candidates don't understand until they're already in the room negotiating.</p>
-          <p>InfoSecDeck's <strong>Salary Guide</strong> covers 93 job titles with real private-sector compensation ranges &mdash; not government labor statistics, which consistently undercount what the private market pays. Use the built-in <strong>Salary Calculator</strong> to model your exact earning potential based on role, location, experience tier, and the certifications you hold or plan to earn.</p>
-        </div>
-        <div class="ed-inline-card" onclick="showPage('salary')">
-          <div class="eic-icon" style="color:#f5c842"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="40" y1="4" x2="40" y2="76"/><path d="M56 16H32a12 12 0 0 0 0 24h16a12 12 0 0 1 0 24H20"/><circle cx="40" cy="40" r="35" stroke-width="1" opacity=".2"/></svg></div>
-          <div class="eic-label" style="color:#f5c842">Career</div>
-          <div class="eic-title">Salary Guide</div>
-          <div class="eic-stat">93 roles &middot; Private-sector data</div>
-          <div class="eic-cta">Explore &rarr;</div>
-        </div>
-      </div>
-
-      <!-- Pull Quote -->
-      <div class="ed-pullquote">
-        <div class="ed-pq-bar"></div>
-        <div class="ed-pq-text">&ldquo;In cybersecurity, the right certification at the right career stage doesn't just open doors&nbsp;&mdash; it changes what salary range you're negotiating in.&rdquo;</div>
-      </div>
-
-      <!-- Paths Section -->
+      <!-- ── SECTION 1: FIND YOUR PATH ── -->
       <div class="ed-feature-row ed-row-flip">
         <div class="ed-cards-stack">
           <div class="ed-inline-card ed-card-sm" onclick="showPage('ladder')">
@@ -444,63 +386,136 @@
           </div>
           <div class="ed-inline-card ed-card-sm" onclick="showPage('domains')">
             <div class="eic-icon eic-sm" style="color:#c084fc"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M40 74s28-14 28-35V16L40 6 12 16v23c0 21 28 35 28 35z"/><circle cx="40" cy="40" r="12"/></svg></div>
-            <div class="eic-title">8 Security Domains</div>
-            <div class="eic-stat" style="color:#c084fc">SOC &middot; IAM &middot; Cloud &middot; GRC &amp; more</div>
+            <div class="eic-title">9 Security Domains</div>
+            <div class="eic-stat" style="color:#c084fc">SOC &middot; IAM &middot; Cloud &middot; GRC &middot; AI Sec &amp; more</div>
             <div class="eic-cta">Explore &rarr;</div>
-          </div>
-        </div>
-        <div class="ed-feature-text">
-          <h3 class="ed-section-h">There Isn't One Cybersecurity Career. There Are Many.</h3>
-          <p>Most people think &ldquo;hacker&rdquo; when they hear cybersecurity. But the field spans multiple distinct disciplines: Security Operations, Identity &amp; Access Management, Cloud Security, Application Security, Governance Risk &amp; Compliance, Offensive Security, Digital Forensics &amp; Incident Response, Security Engineering, and the rapidly emerging field of AI Security. Each has its own tools, career trajectory, and compensation ceiling &mdash; and the right path for you depends on where your interests and existing skills intersect.</p>
-          <p>The <strong>Career Ladder</strong> maps every role across 6 tiers from Help Desk to CISO &mdash; with real salary bands, required skills, and adjacent paths. The <strong>Security Domains Explorer</strong> breaks down each specialty in depth so you can find your fit before you spend money on a certification that won't serve your actual goal.</p>
-        </div>
-      </div>
-
-      <!-- Certs Full-Width -->
-      <div class="ed-full-break">
-        <div class="ed-break-content">
-          <div class="ed-break-text">
-            <h3 class="ed-section-h">Certifications: The Fastest Shortcut That Isn't Actually a Shortcut</h3>
-            <p>Hiring managers use certifications as an HR filter before your resume reaches a human. A Security+ clears the first ATS screening. A CISSP signals you're ready for senior leadership. An OSCP tells every red team hiring manager that you can actually hack &mdash; not just study how to. But the order you pursue certs matters enormously. The wrong sequence wastes both time and money.</p>
-            <p>InfoSecDeck's <strong>Certifications page</strong> maps 100+ certs across a 9-domain &times; 5-tier interactive grid. Right-click any badge to track your progress, compare two certs side-by-side with a detailed breakdown, and access direct links to the best study resources &mdash; including free ones. Stop guessing what to get next.</p>
-          </div>
-          <div class="ed-break-card" onclick="showPage('certs')">
-            <div class="eic-icon" style="color:#ff8c42"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="30" r="20"/><path d="M28 48L18 74l22-10 22 10-10-26"/><circle cx="40" cy="30" r="10" opacity=".4"/></svg></div>
-            <div class="eic-label" style="color:#ff8c42">Learn</div>
-            <div class="eic-title">Certifications</div>
-            <div class="eic-stat">100+ certs &middot; Track progress</div>
-            <div class="eic-cta">View Roadmap &rarr;</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- AI Tools -->
-      <div class="ed-feature-row">
-        <div class="ed-feature-text">
-          <h3 class="ed-section-h">Your Resume Is Getting Ghosted. Here's the Fix.</h3>
-          <p>The average cybersecurity resume is screened by ATS software before a human ever reads it. Then, if it survives, a hiring manager spends 7 seconds deciding whether to continue. Most candidates write resumes that describe what they did &mdash; not what they delivered. The result: qualified people filtered out before they can prove themselves in a room.</p>
-          <p>The <strong>Resume Roaster</strong> uses Claude AI to score your resume with brutal honesty: a letter grade, domain-specific analysis, and a prioritized list of fixes so you stop getting ghosted. Already in IT and considering a pivot? The <strong>Career Pivot Advisor</strong> takes your existing resume and produces an AI-generated gap analysis showing exactly which skills and certifications you need to cross into cybersecurity.</p>
-        </div>
-        <div class="ed-cards-stack">
-          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('roaster')">
-            <div class="eic-badge-ai">AI</div>
-            <div class="eic-icon eic-sm" style="color:#ff8c42"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M48 6H20a6 6 0 0 0-6 6v56a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6V24z"/><polyline points="48 6 48 24 66 24"/><line x1="28" y1="40" x2="52" y2="40"/><line x1="28" y1="50" x2="52" y2="50"/></svg></div>
-            <div class="eic-title">Resume Roaster</div>
-            <div class="eic-stat" style="color:#ff8c42">AI-powered &middot; Letter grade</div>
-            <div class="eic-cta">Roast My Resume &rarr;</div>
           </div>
           <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('pivot')">
             <div class="eic-badge-ai">AI</div>
             <div class="eic-icon eic-sm" style="color:#00d4c8"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="54 10 72 10 72 28"/><line x1="8" y1="70" x2="72" y2="10"/><polyline points="54 70 72 70 72 52"/></svg></div>
             <div class="eic-title">Career Pivot Advisor</div>
-            <div class="eic-stat" style="color:#00d4c8">AI-powered &middot; Gap analysis</div>
+            <div class="eic-stat" style="color:#00d4c8">AI-powered gap analysis</div>
             <div class="eic-cta">Analyze My Gap &rarr;</div>
+          </div>
+        </div>
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">There Isn't One Cybersecurity Career. There Are Many.</h3>
+          <p>Most people think &ldquo;hacker&rdquo; when they hear cybersecurity. But the field spans distinct disciplines: Security Operations, Identity &amp; Access Management, Cloud Security, Application Security, Governance Risk &amp; Compliance, Offensive Security, DFIR, Security Engineering, and the rapidly emerging AI Security domain. Each has its own tools, career trajectory, and compensation ceiling.</p>
+          <p>The <strong>Career Ladder</strong> maps every role across 6 tiers from Help Desk to CISO &mdash; with salary bands and required skills. The <strong>Domains Explorer</strong> breaks down each specialty in depth. Already in IT? The <strong>Career Pivot Advisor</strong> runs your resume through AI and tells you exactly what gaps stand between you and a cyber role.</p>
+        </div>
+      </div>
+
+      <!-- Pull Quote -->
+      <div class="ed-pullquote">
+        <div class="ed-pq-bar"></div>
+        <div class="ed-pq-text">&ldquo;In cybersecurity, the right certification at the right career stage doesn't just open doors&nbsp;&mdash; it changes what salary range you're negotiating in.&rdquo;</div>
+      </div>
+
+      <!-- ── SECTION 2: OWN YOUR CREDENTIALS ── -->
+      <div class="ed-full-break">
+        <div class="ed-break-content">
+          <div class="ed-break-text">
+            <h3 class="ed-section-h">Certifications: The Fastest Shortcut That Isn't Actually a Shortcut</h3>
+            <p>Hiring managers use certifications as an HR filter before your resume reaches a human. A Security+ clears the first ATS screening. A CISSP signals senior leadership readiness. An OSCP tells red team managers you can execute, not just study. But the order you pursue certs matters enormously. The wrong sequence wastes both time and money.</p>
+            <p>InfoSecDeck's <strong>Certifications page</strong> maps 100+ certs across a 10-domain &times; 5-tier interactive grid. The <strong>Cert ROI Calculator</strong> shows you exam cost, salary lift, and months to ROI for any cert. The <strong>Role Readiness Radar</strong> scores your current skills against your target role and ranks which gaps to close first.</p>
+          </div>
+          <div class="ed-cards-stack" style="min-width:200px">
+            <div class="ed-break-card" onclick="showPage('certs')">
+              <div class="eic-icon" style="color:#ff8c42"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="30" r="20"/><path d="M28 48L18 74l22-10 22 10-10-26"/><circle cx="40" cy="30" r="10" opacity=".4"/></svg></div>
+              <div class="eic-label" style="color:#ff8c42">Learn</div>
+              <div class="eic-title">Certification Guide</div>
+              <div class="eic-stat">100+ certs &middot; Track progress</div>
+              <div class="eic-cta">View Roadmap &rarr;</div>
+            </div>
+            <div class="ed-inline-card ed-card-sm" onclick="showPage('certs')" style="margin-top:10px">
+              <div class="eic-title" style="color:#f5c842">📊 Cert ROI Calculator</div>
+              <div class="eic-stat">Cost → salary lift → months to break even</div>
+              <div class="eic-cta">Calculate ROI &rarr;</div>
+            </div>
+            <div class="ed-inline-card ed-card-sm" onclick="showPage('radar')" style="margin-top:10px">
+              <div class="eic-title" style="color:#c084fc">🎯 Role Readiness Radar</div>
+              <div class="eic-stat">Skill spider chart &middot; Gap ranking</div>
+              <div class="eic-cta">Check My Readiness &rarr;</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Practice -->
+      <!-- ── SECTION 3: KNOW YOUR MARKET VALUE ── -->
+      <div class="ed-feature-row">
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">The Salary Reality No One Talks About</h3>
+          <p>Browse job postings and you'll find vague ranges like &ldquo;$80K&ndash;$130K.&rdquo; What those listings don't tell you: a SOC Analyst in San Francisco with an AWS Security Specialty cert is clearing $145,000. A Senior IAM Engineer with a CISSP in New York? Closer to $190,000. Location, certifications, and specialization create a multiplier effect most candidates don't understand until they're already in the room negotiating.</p>
+          <p>InfoSecDeck's <strong>Salary Guide</strong> covers 93 job titles with real private-sector compensation ranges. The <strong>Live Job Board</strong> surfaces freshly ingested remote cyber listings daily &mdash; with AI-powered <strong>Job Fit Analyzer</strong> scoring. Not sure how to ask for more? The <strong>Salary Negotiation Script Generator</strong> builds you a personalized negotiation brief.</p>
+        </div>
+        <div class="ed-cards-stack">
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('salary')">
+            <div class="eic-icon eic-sm" style="color:#f5c842"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="40" y1="4" x2="40" y2="76"/><path d="M56 16H32a12 12 0 0 0 0 24h16a12 12 0 0 1 0 24H20"/></svg></div>
+            <div class="eic-title">Salary Guide</div>
+            <div class="eic-stat" style="color:#f5c842">93 roles &middot; $60K&ndash;$220K ranges</div>
+            <div class="eic-cta">Explore &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('jobs')">
+            <div class="eic-icon eic-sm" style="color:#4d9eff"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="24" width="64" height="48" rx="6"/><path d="M28 24V16a12 12 0 0 1 24 0v8"/><line x1="40" y1="46" x2="40" y2="54"/></svg></div>
+            <div class="eic-title">Live Job Board</div>
+            <div class="eic-stat" style="color:#4d9eff">Remote cyber jobs &middot; Updated daily</div>
+            <div class="eic-cta">Browse Jobs &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('salary')">
+            <div class="eic-badge-ai">AI</div>
+            <div class="eic-title">Salary Negotiation Script</div>
+            <div class="eic-stat" style="color:#00d4c8">Personalized negotiation brief</div>
+            <div class="eic-cta">Generate Script &rarr;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION 4: AI TOOLS ── -->
       <div class="ed-feature-row ed-row-flip">
+        <div class="ed-cards-stack">
+          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('roaster')">
+            <div class="eic-badge-ai">AI</div>
+            <div class="eic-icon eic-sm" style="color:#ff8c42"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M48 6H20a6 6 0 0 0-6 6v56a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6V24z"/><polyline points="48 6 48 24 66 24"/><line x1="28" y1="40" x2="52" y2="40"/><line x1="28" y1="50" x2="52" y2="50"/></svg></div>
+            <div class="eic-title">Resume Roaster</div>
+            <div class="eic-stat" style="color:#ff8c42">Letter grade &middot; ATS score &middot; Fix list</div>
+            <div class="eic-cta">Roast My Resume &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('jobs')">
+            <div class="eic-badge-ai">AI</div>
+            <div class="eic-icon eic-sm" style="color:#00d4c8"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="32" r="18"/><path d="M16 70c0-10 10-18 24-18s24 8 24 18"/><line x1="40" y1="50" x2="40" y2="60"/></svg></div>
+            <div class="eic-title">Job Fit Analyzer</div>
+            <div class="eic-stat" style="color:#00d4c8">Paste a JD &middot; Get a fit score</div>
+            <div class="eic-cta">Analyze Fit &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('mock')">
+            <div class="eic-badge-ai">AI</div>
+            <div class="eic-icon eic-sm" style="color:#818cf8"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="10" width="68" height="46" rx="6"/><line x1="20" y1="70" x2="60" y2="70"/><line x1="40" y1="56" x2="40" y2="70"/><circle cx="26" cy="33" r="8"/><line x1="40" y1="26" x2="60" y2="26"/><line x1="40" y1="36" x2="54" y2="36"/></svg></div>
+            <div class="eic-title">AI Mock Interview</div>
+            <div class="eic-stat" style="color:#818cf8">3 personas &middot; Voice or text mode</div>
+            <div class="eic-cta">Start Interview &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm ed-card-ai" onclick="showPage('news')">
+            <div class="eic-badge-ai">AI</div>
+            <div class="eic-icon eic-sm" style="color:#f05d78"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="12" width="64" height="56" rx="6"/><line x1="22" y1="30" x2="58" y2="30"/><line x1="22" y1="42" x2="48" y2="42"/><line x1="22" y1="54" x2="40" y2="54"/></svg></div>
+            <div class="eic-title">My Daily Briefing</div>
+            <div class="eic-stat" style="color:#f05d78">AI-curated threat &amp; career news</div>
+            <div class="eic-cta">Read Briefing &rarr;</div>
+          </div>
+        </div>
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">Your Resume Is Getting Ghosted. Here's the Fix.</h3>
+          <p>The average cybersecurity resume is screened by ATS software before a human ever reads it. Then, if it survives, a hiring manager spends 7 seconds deciding whether to continue. Most candidates write resumes that describe what they did &mdash; not what they delivered. The result: qualified people filtered out before they get a chance to prove themselves.</p>
+          <p>The <strong>Resume Roaster</strong> gives you a letter grade, ATS score, and a prioritized fix list so you stop getting ghosted. The <strong>Job Fit Analyzer</strong> scores how well your profile matches any job description. The <strong>AI Mock Interview</strong> lets you practice with three different interviewer personas &mdash; in text or voice mode &mdash; with instant scorecards. And the <strong>Daily Briefing</strong> delivers personalized threat and career news every morning.</p>
+        </div>
+      </div>
+
+      <!-- ── SECTION 5: BUILD HANDS-ON SKILLS ── -->
+      <div class="ed-feature-row">
+        <div class="ed-feature-text">
+          <h3 class="ed-section-h">The Candidates Who Get Hired Have Proof of Work</h3>
+          <p>Certifications open doors. But what closes offers is demonstrable, hands-on experience. In a field where everyone claims to know Splunk, the candidate who built a detection rule that caught a real pass-the-hash attack in their home lab wins. The candidate who can walk through their CTF methodology during a technical screen wins. Credentials tell them you studied. Labs and challenges show them you can execute.</p>
+          <p>The <strong>Home Lab Guide</strong> walks you through building a realistic security environment: virtualization, SIEM deployment, and simulated attacks. <strong>Security Challenges</strong> deliver CTF puzzles, forensics scenarios, and phishing simulations. The <strong>Tool Encyclopedia</strong> catalogs 80+ security tools so you always know what to reach for &mdash; and the <strong>CTF &amp; Conference Calendar</strong> keeps you plugged into the community.</p>
+        </div>
         <div class="ed-cards-stack">
           <div class="ed-inline-card ed-card-sm" onclick="showPage('homelab')">
             <div class="eic-icon eic-sm" style="color:#4d9eff"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="8" width="72" height="48" rx="5"/><line x1="26" y1="70" x2="54" y2="70"/><line x1="40" y1="56" x2="40" y2="70"/><line x1="16" y1="36" x2="26" y2="28" opacity=".6"/><polyline points="26,28 34,36 44,24" opacity=".6"/></svg></div>
@@ -514,15 +529,22 @@
             <div class="eic-stat" style="color:#10e87e">CTF &middot; Forensics &middot; Phishing sim</div>
             <div class="eic-cta">Start Playing &rarr;</div>
           </div>
-        </div>
-        <div class="ed-feature-text">
-          <h3 class="ed-section-h">The Candidates Who Get Hired Have Proof of Work</h3>
-          <p>Certifications open doors. But what closes offers is demonstrable, hands-on experience. In a field where everyone claims to know Splunk, the candidate who built a detection rule that caught a real pass-the-hash attack in their home lab wins. The candidate who can walk through their CTF methodology during a technical screen wins. Credentials tell them you studied. Labs and challenges show them you can execute.</p>
-          <p>The <strong>Home Lab Guide</strong> walks you through building a realistic security environment from scratch: virtualization, SIEM deployment, and simulated attacks. The <strong>Security Challenges</strong> section delivers CTF puzzles, packet forensics scenarios, and phishing simulations that mirror exactly what you'll encounter in a real interview technical screen.</p>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('tools')">
+            <div class="eic-icon eic-sm" style="color:#4d9eff"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="20" width="64" height="46" rx="6"/><path d="M8 34h64"/><path d="M24 10v24M40 10v24M56 10v24" stroke-linecap="round" opacity=".5"/></svg></div>
+            <div class="eic-title">Tool Encyclopedia</div>
+            <div class="eic-stat" style="color:#4d9eff">80+ security tools catalogued</div>
+            <div class="eic-cta">Browse Tools &rarr;</div>
+          </div>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('calendar')">
+            <div class="eic-icon eic-sm" style="color:#818cf8"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="14" width="68" height="60" rx="6"/><path d="M6 30h68"/><line x1="26" y1="6" x2="26" y2="22"/><line x1="54" y1="6" x2="54" y2="22"/><rect x="18" y="42" width="14" height="10" rx="2" opacity=".4"/><rect x="36" y="42" width="14" height="10" rx="2" opacity=".4"/></svg></div>
+            <div class="eic-title">CTF &amp; Conf Calendar</div>
+            <div class="eic-stat" style="color:#818cf8">Upcoming 2026 events</div>
+            <div class="eic-cta">View Calendar &rarr;</div>
+          </div>
         </div>
       </div>
 
-      <!-- Three Small Cards: Intel & Tools -->
+      <!-- Three Small Cards: Intel -->
       <div class="ed-three-cards">
         <div class="ed-inline-card ed-card-sm" onclick="showPage('threats')">
           <div class="eic-icon eic-sm" style="color:#f05d78"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="40" r="6"/><circle cx="40" cy="40" r="16" opacity=".6"/><circle cx="40" cy="40" r="28" opacity=".35"/><circle cx="40" cy="40" r="38" opacity=".15"/></svg></div>
@@ -530,17 +552,17 @@
           <div class="eic-stat" style="color:#f05d78">Curated frontline coverage</div>
           <div class="eic-cta">View Intel &rarr;</div>
         </div>
-        <div class="ed-inline-card ed-card-sm" onclick="showPage('tools')">
-          <div class="eic-icon eic-sm" style="color:#4d9eff"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8" y="20" width="64" height="46" rx="6"/><path d="M8 34h64"/><path d="M24 10v24M40 10v24M56 10v24" stroke-linecap="round" opacity=".5"/></svg></div>
-          <div class="eic-title">Tool Encyclopedia</div>
-          <div class="eic-stat" style="color:#4d9eff">80+ security tools catalogued</div>
-          <div class="eic-cta">Browse Tools &rarr;</div>
+        <div class="ed-inline-card ed-card-sm" onclick="showPage('interview')">
+          <div class="eic-icon eic-sm" style="color:#10e87e"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="26" r="14"/><path d="M12 70c0-14 12-22 28-22s28 8 28 22"/></svg></div>
+          <div class="eic-title">Interview Prep</div>
+          <div class="eic-stat" style="color:#10e87e">28 roles &middot; 10 Q&amp;As each</div>
+          <div class="eic-cta">Prepare Now &rarr;</div>
         </div>
-        <div class="ed-inline-card ed-card-sm" onclick="showPage('calendar')">
-          <div class="eic-icon eic-sm" style="color:#818cf8"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="14" width="68" height="60" rx="6"/><path d="M6 30h68"/><line x1="26" y1="6" x2="26" y2="22"/><line x1="54" y1="6" x2="54" y2="22"/><rect x="18" y="42" width="14" height="10" rx="2" opacity=".4"/><rect x="36" y="42" width="14" height="10" rx="2" opacity=".4"/></svg></div>
-          <div class="eic-title">CTF &amp; Conf Calendar</div>
-          <div class="eic-stat" style="color:#818cf8">Upcoming 2026 events</div>
-          <div class="eic-cta">View Calendar &rarr;</div>
+        <div class="ed-inline-card ed-card-sm" onclick="openHomeQuiz()">
+          <div class="eic-icon eic-sm" style="color:#c084fc"><svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="40" cy="40" r="34"/><path d="M30 30s2-10 14-10c8 0 14 5 14 13 0 10-14 14-14 20"/><circle cx="40" cy="66" r="3" fill="currentColor"/></svg></div>
+          <div class="eic-title">Career Quiz</div>
+          <div class="eic-stat" style="color:#c084fc">4 minutes &middot; 15 specialty tracks</div>
+          <div class="eic-cta">Find Your Path &rarr;</div>
         </div>
       </div>
 
@@ -556,15 +578,15 @@
             <div class="eic-stat">Community success stories</div>
             <div class="eic-cta">Read Stories &rarr;</div>
           </div>
-          <div class="ed-inline-card ed-card-sm" onclick="showPage('interview')">
-            <div class="eic-title">🎯 Interview Prep</div>
-            <div class="eic-stat">28 roles &middot; 10 Q&amp;As each</div>
-            <div class="eic-cta">Prepare Now &rarr;</div>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('news')">
+            <div class="eic-title">📰 Daily Briefing</div>
+            <div class="eic-stat">AI-curated cyber news</div>
+            <div class="eic-cta">Read Today's Briefing &rarr;</div>
           </div>
-          <div class="ed-inline-card ed-card-sm" onclick="openHomeQuiz()">
-            <div class="eic-title">🧭 Career Quiz</div>
-            <div class="eic-stat">Find your perfect domain</div>
-            <div class="eic-cta">Take Quiz &rarr;</div>
+          <div class="ed-inline-card ed-card-sm" onclick="showPage('blog')">
+            <div class="eic-title">✍️ Blog</div>
+            <div class="eic-stat">Career insights &amp; field updates</div>
+            <div class="eic-cta">Read Blog &rarr;</div>
           </div>
         </div>
       </div>
@@ -572,6 +594,17 @@
     </div>
   </div>
 
+
+  <!-- ── HOME CTA ── -->
+  <section class="home-cta-section">
+    <div class="home-cta-inner">
+      <div class="home-cta-eyebrow">Free to start &middot; No credit card</div>
+      <h2 class="home-cta-h">Ready to take your career seriously?</h2>
+      <p class="home-cta-sub">Thousands of cybersecurity professionals use InfoSecDeck to land better roles, earn more, and grow faster. Join them.</p>
+      <button class="home-cta-btn" onclick="showPage('pricing');closeAllDrops()">Get Started &rarr;</button>
+      <p class="home-cta-fine">Free plan available &middot; Pro from $12.99/mo</p>
+    </div>
+  </section>
 
   <div class="footer">InfoSecDeck &middot; 2025&ndash;2026 &middot; Sources: BLS, Glassdoor, ISC&sup2;, ISACA &nbsp;&middot;&nbsp; <span class="footer-link" onclick="showPage('privacy')">Privacy Policy</span> &nbsp;&middot;&nbsp; <span class="footer-link" onclick="showPage('tos')">Terms of Service</span></div>
 </div>
@@ -4260,8 +4293,8 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=87"></script>
-<script src="js/auth.js?v=22"></script>
+<script src="js/app.js?v=88"></script>
+<script src="js/auth.js?v=23"></script>
 
 <!-- AUTH MODAL -->
 <!-- Career Quiz Modal -->

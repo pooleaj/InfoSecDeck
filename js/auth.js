@@ -139,6 +139,7 @@ function _updateAuthUI() {
   _updateProfilePage();
   _updateJoinCard();
   if (typeof _updateAccountDrop === 'function') _updateAccountDrop();
+  if (typeof _updateUpgradeNavBtn === 'function') _updateUpgradeNavBtn();
 }
 
 function _updateNavBtn() {
@@ -193,18 +194,15 @@ function _updateJoinCard() {
   var memberEl   = document.getElementById('hsc-member');
   var memberCard = document.getElementById('hsc-member-card');
   var heroInner  = document.querySelector('.hero-inner');
-  var heroChips  = document.getElementById('hero-chips-guest');
 
   if (_currentUser) {
-    if (heroInner)   heroInner.classList.remove('hero-inner--guest');
-    if (memberCard)  memberCard.style.display = '';
-    if (heroChips)   heroChips.style.display  = 'none';
-    if (memberEl)    memberEl.style.display   = 'flex';
+    if (heroInner)  heroInner.classList.remove('hero-inner--guest');
+    if (memberCard) memberCard.style.display = '';
+    if (memberEl)   memberEl.style.display   = 'flex';
     _renderMemberBanner();
   } else {
     if (heroInner)  heroInner.classList.add('hero-inner--guest');
     if (memberCard) memberCard.style.display = 'none';
-    if (heroChips)  heroChips.style.display  = '';
     if (memberEl)   memberEl.style.display   = 'none';
   }
 }

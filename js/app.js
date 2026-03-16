@@ -3557,57 +3557,75 @@ function hp2FilterTab(cat, btn) {
 (function() {
   var _animFrame = null;
 
-  // ── Particle canvas ──────────────────────
+  // ── Network graph canvas ─────────────────
   function initHeroCanvas() {
     var canvas = document.getElementById('hero-canvas');
     if (!canvas) return;
     var ctx = canvas.getContext('2d');
 
+    var NODES = [
+      { label: 'SOC',          cx: 0.14, cy: 0.38, links: [1, 4, 7] },
+      { label: 'IAM',          cx: 0.30, cy: 0.20, links: [0, 2, 3] },
+      { label: 'Cloud',        cx: 0.55, cy: 0.14, links: [1, 3, 5] },
+      { label: 'GRC',          cx: 0.76, cy: 0.28, links: [1, 2, 6] },
+      { label: 'AppSec',       cx: 0.20, cy: 0.68, links: [0, 5, 6] },
+      { label: 'DFIR',         cx: 0.46, cy: 0.76, links: [2, 4, 7] },
+      { label: 'Pentest',      cx: 0.70, cy: 0.72, links: [3, 4, 7] },
+      { label: 'Threat Intel', cx: 0.86, cy: 0.52, links: [0, 5, 6] }
+    ];
+
+    var W, H, t = 0, paused = false;
+
     function resize() {
-      canvas.width  = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      W = canvas.width  = canvas.offsetWidth;
+      H = canvas.height = canvas.offsetHeight;
     }
     resize();
     window.addEventListener('resize', resize);
 
-    var N = 60;
-    var pts = [];
-    for (var i = 0; i < N; i++) {
-      pts.push({
-        x:  Math.random() * canvas.width,
-        y:  Math.random() * canvas.height,
-        vx: (Math.random() - .5) * .28,
-        vy: (Math.random() - .5) * .28,
-        r:  Math.random() * 1.4 + .5
-      });
+    // Pause when hero scrolls out of view
+    var heroSection = canvas.closest('section') || canvas.parentElement;
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function(entries) {
+        paused = !entries[0].isIntersecting;
+      }, { threshold: 0 }).observe(heroSection);
     }
 
     function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (var a = 0; a < N; a++) {
-        for (var b = a + 1; b < N; b++) {
-          var dx = pts[a].x - pts[b].x;
-          var dy = pts[a].y - pts[b].y;
-          var d  = Math.sqrt(dx * dx + dy * dy);
-          if (d < 130) {
-            ctx.beginPath();
-            ctx.strokeStyle = 'rgba(0,212,200,' + (.1 * (1 - d / 130)).toFixed(3) + ')';
-            ctx.lineWidth = .5;
-            ctx.moveTo(pts[a].x, pts[a].y);
-            ctx.lineTo(pts[b].x, pts[b].y);
-            ctx.stroke();
+      if (!paused) {
+        ctx.clearRect(0, 0, W, H);
+        t += 0.007;
+
+        // Lines
+        for (var i = 0; i < NODES.length; i++) {
+          var n = NODES[i];
+          for (var k = 0; k < n.links.length; k++) {
+            var j = n.links[k];
+            if (j > i) {
+              var ax = n.cx * W, ay = n.cy * H + Math.sin(t + i * 0.9) * 7;
+              var bx = NODES[j].cx * W, by = NODES[j].cy * H + Math.sin(t + j * 0.9) * 7;
+              var pulse = 0.10 + Math.sin(t * 1.4 + i + j) * 0.07;
+              ctx.strokeStyle = 'rgba(0,212,200,' + pulse.toFixed(3) + ')';
+              ctx.lineWidth = 1;
+              ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+            }
           }
         }
-      }
-      for (var i = 0; i < N; i++) {
-        var p = pts[i];
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0,212,200,.38)';
-        ctx.fill();
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+        // Nodes + labels
+        for (var i = 0; i < NODES.length; i++) {
+          var n = NODES[i];
+          var x = n.cx * W, y = n.cy * H + Math.sin(t + i * 0.9) * 7;
+          var glow = 0.45 + Math.sin(t * 1.8 + i) * 0.22;
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,212,200,' + glow.toFixed(3) + ')';
+          ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,0.32)';
+          ctx.font = '10px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(n.label, x, y - 11);
+        }
       }
       _animFrame = requestAnimationFrame(draw);
     }
@@ -3615,45 +3633,9 @@ function hp2FilterTab(cat, btn) {
     draw();
   }
 
-  // ── Typewriter ───────────────────────────
-  var _typedTimer = null;
-  var _typedWi = 0;
-  var _typedWords = [
-    'Cybersecurity.',
-    'Offensive Sec.',
-    'Cloud Security.',
-    'Threat Intel.',
-    'Identity & Access.',
-    'Incident Response.'
-  ];
-
-  function initHeroTyped() {
-    var el = document.getElementById('hero-typed');
-    if (!el) return;
-    if (_typedTimer) clearTimeout(_typedTimer);
-    var wi = _typedWi, ci = _typedWords[wi].length, del = false;
-
-    function tick() {
-      var word = _typedWords[wi];
-      if (!del) {
-        el.textContent = word.slice(0, ++ci);
-        if (ci === word.length) { del = true; _typedTimer = setTimeout(tick, 2200); return; }
-      } else {
-        el.textContent = word.slice(0, --ci);
-        if (ci === 0) { del = false; wi = (wi + 1) % _typedWords.length; _typedWi = wi; }
-      }
-      _typedTimer = setTimeout(tick, del ? 38 : 78);
-    }
-    _typedTimer = setTimeout(tick, 1600);
-  }
-
-  // Expose restart for showPage hook
-  window.heroRestartTyped = initHeroTyped;
-
   // Boot on DOM ready
   document.addEventListener('DOMContentLoaded', function() {
     initHeroCanvas();
-    initHeroTyped();
   });
 })();
 
@@ -5987,12 +5969,28 @@ function _callCheckout(priceId) {
   });
 }
 
-// Show/hide "Go Pro" nav button based on plan
+// Show "Sign Up" (logged out), "Go Pro" (free user), or hide (pro user)
 function _updateUpgradeNavBtn() {
   var btn = document.getElementById('nav-upgrade-btn');
   if (!btn) return;
+  var isLoggedIn = (typeof _currentUser !== 'undefined' && _currentUser);
   var isPro = (typeof window._userPlan !== 'undefined' && window._userPlan === 'pro');
-  btn.style.display = isPro ? 'none' : '';
+
+  if (!isLoggedIn) {
+    btn.style.display = '';
+    btn.textContent = 'Sign Up';
+    btn.title = 'Sign Up';
+    btn.onclick = function() { showPage('pricing'); if (typeof closeAllDrops === 'function') closeAllDrops(); };
+    btn.classList.remove('nav-upgrade-btn--pro');
+  } else if (!isPro) {
+    btn.style.display = '';
+    btn.textContent = 'Go Pro';
+    btn.title = 'Go Pro';
+    btn.onclick = function() { showPage('pricing'); if (typeof closeAllDrops === 'function') closeAllDrops(); };
+    btn.classList.add('nav-upgrade-btn--pro');
+  } else {
+    btn.style.display = 'none';
+  }
 }
 
 // Called from auth.js after profile sync
