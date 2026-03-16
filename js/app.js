@@ -5829,11 +5829,113 @@ var _pricingTab = 'monthly';
 
 function startCheckout(planKey) {
   if (typeof _currentUser === 'undefined' || !_currentUser) {
-    if (typeof openAuthModal === 'function') openAuthModal('signup');
+    window._authIntent = 'signup';
+    _authPagePlan = 'pro';
+    showPage('auth');
     return;
   }
   var priceId = STRIPE_PRICES[planKey] || STRIPE_PRICES.monthly_early_bird;
   _callCheckout(priceId);
+}
+
+// ── AUTH PAGE ──────────────────────────────────────────────────────────────
+var _authPagePlan = 'free';
+
+function _selectAuthPlan(plan) {
+  _authPagePlan = plan;
+  var fp = document.getElementById('pauth-plan-free');
+  var pp = document.getElementById('pauth-plan-pro');
+  if (fp) fp.classList.toggle('pauth-plan--selected', plan === 'free');
+  if (pp) pp.classList.toggle('pauth-plan--selected', plan === 'pro');
+}
+
+function _switchPageAuthIntent(intent) {
+  var title   = document.getElementById('pauth-title');
+  var sub     = document.getElementById('pauth-sub');
+  var plans   = document.getElementById('pauth-plans');
+  var formTtl = document.getElementById('pauth-form-title');
+  var sw      = document.getElementById('pauth-switch-row');
+  if (intent === 'signin') {
+    if (title)   title.textContent    = 'Welcome Back';
+    if (sub)     sub.textContent      = 'Sign in to your account.';
+    if (plans)   plans.style.display  = 'none';
+    if (formTtl) formTtl.textContent  = 'Sign in';
+    if (sw) sw.innerHTML = 'New here? <span class="hsc-signin-link" onclick="_switchPageAuthIntent(\'signup\')">Create an account &rarr;</span>';
+  } else {
+    if (title)   title.textContent    = 'Start for Free';
+    if (sub)     sub.textContent      = 'No credit card required.';
+    if (plans)   plans.style.display  = '';
+    if (formTtl) formTtl.textContent  = 'Create your account';
+    if (sw) sw.innerHTML = 'Already have an account? <span class="hsc-signin-link" onclick="_switchPageAuthIntent(\'signin\')">Sign in &rarr;</span>';
+  }
+}
+
+_pageInits['auth'] = function() {
+  if (typeof _currentUser !== 'undefined' && _currentUser) { showPage('home'); return; }
+  var intent = window._authIntent || 'signup';
+  window._authIntent = null;
+  _switchPageAuthIntent(intent);
+  _selectAuthPlan(_authPagePlan || 'free');
+  // Reset form state
+  var errEl = document.getElementById('pauth-error');
+  if (errEl) { errEl.textContent = ''; errEl.style.color = ''; }
+  var emailIn = document.getElementById('pauth-magic-email');
+  if (emailIn) emailIn.value = '';
+  var btn = document.getElementById('pauth-submit-magic');
+  if (btn) { btn.disabled = false; btn.textContent = 'Send Magic Link \u2192'; }
+};
+
+function _doPageMagicLink() {
+  var email = ((document.getElementById('pauth-magic-email') || {}).value || '').trim();
+  var errEl = document.getElementById('pauth-error');
+  if (!email) { if (errEl) { errEl.style.color = ''; errEl.textContent = 'Please enter your email address.'; } return; }
+  var btn = document.getElementById('pauth-submit-magic');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending\u2026'; }
+  _sb.auth.signInWithOtp({
+    email: email,
+    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+  }).then(function(res) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Send Magic Link \u2192'; }
+    if (res.error) { if (errEl) { errEl.style.color = ''; errEl.textContent = res.error.message; } return; }
+    if (errEl) { errEl.style.color = '#00d4c8'; errEl.textContent = 'Check your email \u2014 magic link sent! \u2705'; }
+  });
+}
+
+function _doPageSignIn() {
+  var email = ((document.getElementById('pauth-email-in') || {}).value || '').trim();
+  var pass  = (document.getElementById('pauth-pass-in') || {}).value || '';
+  var errEl = document.getElementById('pauth-error-in');
+  if (!email || !pass) { if (errEl) errEl.textContent = 'Please fill in all fields.'; return; }
+  _sb.auth.signInWithPassword({ email: email, password: pass }).then(function(res) {
+    if (res.error) { if (errEl) errEl.textContent = res.error.message; return; }
+    showPage(_authPagePlan === 'pro' ? 'pricing' : 'home');
+  });
+}
+
+function _doPageSignUp() {
+  var email   = ((document.getElementById('pauth-email-up') || {}).value || '').trim();
+  var pass    = (document.getElementById('pauth-pass-up') || {}).value || '';
+  var confirm = (document.getElementById('pauth-pass-confirm') || {}).value || '';
+  var errEl   = document.getElementById('pauth-error-up');
+  if (!email || !pass) { if (errEl) errEl.textContent = 'Please fill in all fields.'; return; }
+  if (pass !== confirm) { if (errEl) errEl.textContent = 'Passwords do not match.'; return; }
+  if (pass.length < 6) { if (errEl) errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  _sb.auth.signUp({ email: email, password: pass }).then(function(res) {
+    if (res.error) { if (errEl) errEl.textContent = res.error.message; return; }
+    showPage(_authPagePlan === 'pro' ? 'pricing' : 'home');
+    if (typeof showToast === 'function') showToast('Account created! Check your email to confirm. \u2705');
+  });
+}
+
+function _switchPageAuthTab(tab) {
+  var si = document.getElementById('pauth-signin-panel');
+  var su = document.getElementById('pauth-signup-panel');
+  var ti = document.getElementById('pauth-tab-signin');
+  var tu = document.getElementById('pauth-tab-signup');
+  if (si) si.style.display = tab === 'signin' ? 'block' : 'none';
+  if (su) su.style.display = tab === 'signup' ? 'block' : 'none';
+  if (ti) ti.classList.toggle('active', tab === 'signin');
+  if (tu) tu.classList.toggle('active', tab === 'signup');
 }
 
 function startOtpCheckout(product) {

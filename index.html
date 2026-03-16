@@ -280,7 +280,7 @@
 
     <div class="hero-inner">
 
-      <!-- Left: Headline + stats + CTAs -->
+      <!-- Left: Headline + CTAs -->
       <div class="hero-left">
         <h1 class="hero-h1">
           Break Into<br>
@@ -293,57 +293,22 @@
         </p>
 
         <div class="hero-actions">
-          <button class="hero-btn-primary" onclick="document.getElementById('platform-section').scrollIntoView({behavior:'smooth'})">
-            Explore the Platform
+          <button class="hero-btn-primary" onclick="window._authIntent='signup';showPage('auth')">
+            Get Started Free
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
+          <span class="hero-signin-link" onclick="openAuthModal('signin')">Sign in &rarr;</span>
+        </div>
+
+        <div class="hero-chips" id="hero-chips-guest">
+          <span class="hero-chip">AI resume analysis</span>
+          <span class="hero-chip">$119K salary data</span>
+          <span class="hero-chip">Live job board</span>
         </div>
       </div>
 
-      <!-- Right: Marketing / Signup Card -->
-      <div class="hero-signup-card">
-
-        <!-- GUEST VIEW (shown when not signed in) -->
-        <div id="hsc-guest">
-          <!-- Portal Header -->
-          <div class="hsc-portal-header">
-            <div class="hsc-brand">
-              <svg class="hsc-lock" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4c8" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              <span class="hsc-brand-name">InfoSec<span class="hsc-brand-accent">Deck</span></span>
-            </div>
-            <p class="hsc-portal-sub">Where are you in your cyber journey?</p>
-          </div>
-
-          <!-- 3-Column Portal Grid -->
-          <div class="hsc-portal-grid">
-            <div class="hsc-portal-tile" onclick="showPage('roaster');closeAllDrops()">
-              <div class="hsc-pt-icon">🎯</div>
-              <div class="hsc-pt-label">Break Into Cyber</div>
-              <div class="hsc-pt-desc">Students &amp; career switchers</div>
-              <div class="hsc-pt-cta">Analyze My Resume &rarr;</div>
-            </div>
-            <div class="hsc-portal-tile hsc-portal-tile--primary" onclick="showPage('jobs');closeAllDrops()">
-              <div class="hsc-pt-icon">💼</div>
-              <div class="hsc-pt-label">Find Remote Roles</div>
-              <div class="hsc-pt-desc">Active cyber professionals</div>
-              <div class="hsc-pt-cta">Browse Jobs &rarr;</div>
-            </div>
-            <div class="hsc-portal-tile" onclick="showPage('recruiters');closeAllDrops()">
-              <div class="hsc-pt-icon">🔍</div>
-              <div class="hsc-pt-label">Hunt Talent</div>
-              <div class="hsc-pt-desc">Recruiters &amp; hiring managers</div>
-              <div class="hsc-pt-cta">Join Waitlist &rarr;</div>
-            </div>
-          </div>
-
-          <!-- Sign-in link -->
-          <p class="hsc-signin-row">Already a member? <span class="hsc-signin-link" onclick="openAuthModal('signin')">Sign in &rarr;</span></p>
-
-          <!-- Trust line -->
-          <div class="hsc-proof">
-            <span class="hsc-proof-txt">&#x1F512; Free to join &middot; No credit card required</span>
-          </div>
-        </div>
+      <!-- Member card: only shown when logged in -->
+      <div class="hero-signup-card" id="hsc-member-card" style="display:none">
 
         <!-- MEMBER VIEW (shown when signed in, populated by auth.js) -->
         <div id="hsc-member" style="display:none">
@@ -397,6 +362,33 @@
 
       </div>
 
+    </div>
+  </section>
+
+  <!-- ── WHO IT'S FOR ── -->
+  <section class="who-section">
+    <div class="who-inner">
+      <div class="who-eyebrow">Who InfoSecDeck is built for</div>
+      <div class="who-grid">
+        <div class="who-tile" onclick="showPage('roaster');closeAllDrops()">
+          <div class="who-tile-icon">🎯</div>
+          <div class="who-tile-label">Breaking In</div>
+          <div class="who-tile-desc">Students &amp; career switchers entering cyber from any background</div>
+          <div class="who-tile-cta">Analyze My Resume &rarr;</div>
+        </div>
+        <div class="who-tile who-tile--primary" onclick="showPage('jobs');closeAllDrops()">
+          <div class="who-tile-icon">💼</div>
+          <div class="who-tile-label">Active Professionals</div>
+          <div class="who-tile-desc">Practitioners leveling up, pivoting specializations, or job hunting</div>
+          <div class="who-tile-cta">Browse Jobs &rarr;</div>
+        </div>
+        <div class="who-tile" onclick="showPage('recruiters');closeAllDrops()">
+          <div class="who-tile-icon">🔍</div>
+          <div class="who-tile-label">Hiring Talent</div>
+          <div class="who-tile-desc">Recruiters &amp; hiring managers sourcing verified cyber candidates</div>
+          <div class="who-tile-cta">Join Waitlist &rarr;</div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3720,6 +3712,121 @@
 </div>
 </div>
 
+<!-- ═══════════════════════════ AUTH PAGE ═══════════════════════════ -->
+<div class="page" id="page-auth">
+  <div class="pauth-wrap">
+
+    <div class="pauth-header">
+      <div class="pauth-logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d4c8" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        InfoSec<span>Deck</span>
+      </div>
+      <h1 class="pauth-title" id="pauth-title">Start for Free</h1>
+      <p class="pauth-sub" id="pauth-sub">No credit card required.</p>
+    </div>
+
+    <!-- Plan picker (shown for signup, hidden for signin) -->
+    <div class="pauth-plans" id="pauth-plans">
+      <div class="pauth-plan pauth-plan--selected" id="pauth-plan-free" onclick="_selectAuthPlan('free')">
+        <div class="pauth-plan-badge">Free</div>
+        <div class="pauth-plan-price">$0 <span>forever</span></div>
+        <ul class="pauth-plan-features">
+          <li>Career Ladder &amp; Domains</li>
+          <li>Certification Tracker</li>
+          <li>Salary Guide</li>
+          <li>Career Quiz</li>
+          <li>3 Resume Roasts/month</li>
+          <li>Live Job Board</li>
+        </ul>
+        <div class="pauth-plan-select-btn">Continue Free</div>
+      </div>
+      <div class="pauth-plan pauth-plan--pro" id="pauth-plan-pro" onclick="_selectAuthPlan('pro')">
+        <div class="pauth-plan-badge pauth-plan-badge--pro">Pro <span class="pauth-plan-price-tag">$12.99/mo</span></div>
+        <div class="pauth-plan-price">Everything in Free, plus</div>
+        <ul class="pauth-plan-features">
+          <li>Unlimited AI Resume Analysis</li>
+          <li>Full Career Pivot Roadmap</li>
+          <li>AI Mock Interviews (voice)</li>
+          <li>ATS Job Match Scanner</li>
+          <li>8 ATS-Optimized Templates</li>
+          <li>Priority Support</li>
+        </ul>
+        <div class="pauth-plan-select-btn pauth-plan-select-btn--pro">Start Pro</div>
+      </div>
+    </div>
+
+    <!-- Auth form -->
+    <div class="pauth-form-wrap">
+      <div class="pauth-form-title" id="pauth-form-title">Create your account</div>
+
+      <button class="auth-google-btn pauth-google-btn" onclick="doGoogleSignIn()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-divider"><span>or use email</span></div>
+
+      <div class="auth-error" id="pauth-error"></div>
+      <div class="auth-field">
+        <label class="auth-label">Email address</label>
+        <input type="email" id="pauth-magic-email" class="auth-input" placeholder="you@example.com"
+               onkeydown="if(event.key==='Enter')_doPageMagicLink()">
+      </div>
+      <button class="auth-submit-btn" id="pauth-submit-magic" onclick="_doPageMagicLink()">
+        Send Magic Link &rarr;
+      </button>
+      <p class="auth-hint">We'll email you a secure sign-in link — no password needed.</p>
+
+      <details class="auth-advanced">
+        <summary>Use password instead</summary>
+        <div class="auth-adv-body">
+          <div class="auth-tabs" style="margin-bottom:14px">
+            <button class="auth-tab active" id="pauth-tab-signin" onclick="_switchPageAuthTab('signin')">Sign In</button>
+            <button class="auth-tab" id="pauth-tab-signup" onclick="_switchPageAuthTab('signup')">Create Account</button>
+          </div>
+          <div id="pauth-signin-panel">
+            <div class="auth-error" id="pauth-error-in"></div>
+            <div class="auth-field">
+              <label class="auth-label">Email</label>
+              <input type="email" id="pauth-email-in" class="auth-input" placeholder="you@example.com"
+                     onkeydown="if(event.key==='Enter')_doPageSignIn()">
+            </div>
+            <div class="auth-field">
+              <label class="auth-label">Password</label>
+              <input type="password" id="pauth-pass-in" class="auth-input"
+                     onkeydown="if(event.key==='Enter')_doPageSignIn()">
+            </div>
+            <button class="auth-submit-btn" onclick="_doPageSignIn()">Sign In</button>
+          </div>
+          <div id="pauth-signup-panel" style="display:none">
+            <div class="auth-error" id="pauth-error-up"></div>
+            <div class="auth-field">
+              <label class="auth-label">Email</label>
+              <input type="email" id="pauth-email-up" class="auth-input" placeholder="you@example.com"
+                     onkeydown="if(event.key==='Enter')_doPageSignUp()">
+            </div>
+            <div class="auth-field">
+              <label class="auth-label">Password</label>
+              <input type="password" id="pauth-pass-up" class="auth-input" placeholder="Min. 6 characters">
+            </div>
+            <div class="auth-field">
+              <label class="auth-label">Confirm Password</label>
+              <input type="password" id="pauth-pass-confirm" class="auth-input">
+            </div>
+            <button class="auth-submit-btn" onclick="_doPageSignUp()">Create Account</button>
+          </div>
+        </div>
+      </details>
+
+      <p class="pauth-switch" id="pauth-switch-row">
+        Already have an account?
+        <span class="hsc-signin-link" onclick="_switchPageAuthIntent('signin')">Sign in &rarr;</span>
+      </p>
+    </div>
+
+  </div>
+</div>
+
 <!-- ═══════════════════════════ PRICING ═══════════════════════════ -->
 <div class="page" id="page-pricing">
 <div class="pricing-wrap">
@@ -4153,7 +4260,7 @@
   gtag('config', 'G-49QCYN526W');
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/app.js?v=86"></script>
+<script src="js/app.js?v=87"></script>
 <script src="js/auth.js?v=22"></script>
 
 <!-- AUTH MODAL -->

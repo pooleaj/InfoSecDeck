@@ -41,22 +41,6 @@ _sb.auth.onAuthStateChange(function(event, session) {
 });
 
 // ─── JOIN CARD (home page) ───────────────────────────────────
-function joinFreeFromCard() {
-  var email = ((document.getElementById('hsc-email') || {}).value || '').trim();
-  var pass = (document.getElementById('hsc-pass') || {}).value || '';
-  var errEl = document.getElementById('hsc-form-error');
-  function showErr(msg) { if (errEl) { errEl.style.color = ''; errEl.textContent = msg; } }
-  if (!email) { showErr('Please enter your email address.'); return; }
-  if (!pass) { showErr('Please create a password.'); return; }
-  if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
-  var btn = document.querySelector('#hsc-email-form .hsc-submit-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Creating\u2026'; }
-  _sb.auth.signUp({ email: email, password: pass }).then(function(res) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
-    if (res.error) { showErr(res.error.message); return; }
-    if (errEl) { errEl.style.color = '#00d4c8'; errEl.textContent = 'Account created! Check your email to confirm. \u2705'; }
-  });
-}
 
 // ─── AUTH MODAL ──────────────────────────────────────────────
 function openAuthModal(tab) {
@@ -206,17 +190,22 @@ function _updateProfilePage() {
 }
 
 function _updateJoinCard() {
-  var guestEl = document.getElementById('hsc-guest');
-  var memberEl = document.getElementById('hsc-member');
-  if (!guestEl || !memberEl) return;
+  var memberEl   = document.getElementById('hsc-member');
+  var memberCard = document.getElementById('hsc-member-card');
+  var heroInner  = document.querySelector('.hero-inner');
+  var heroChips  = document.getElementById('hero-chips-guest');
 
   if (_currentUser) {
-    guestEl.style.display = 'none';
-    memberEl.style.display = 'flex';
+    if (heroInner)   heroInner.classList.remove('hero-inner--guest');
+    if (memberCard)  memberCard.style.display = '';
+    if (heroChips)   heroChips.style.display  = 'none';
+    if (memberEl)    memberEl.style.display   = 'flex';
     _renderMemberBanner();
   } else {
-    guestEl.style.display = '';
-    memberEl.style.display = 'none';
+    if (heroInner)  heroInner.classList.add('hero-inner--guest');
+    if (memberCard) memberCard.style.display = 'none';
+    if (heroChips)  heroChips.style.display  = '';
+    if (memberEl)   memberEl.style.display   = 'none';
   }
 }
 
@@ -300,6 +289,11 @@ var _origShowPage = showPage;
 showPage = function(p) {
   var m = document.getElementById('auth-modal');
   if (m && m.classList.contains('open')) closeAuthModal();
+  // Bounce logged-in users away from the auth page
+  if (p === 'auth' && typeof _currentUser !== 'undefined' && _currentUser) {
+    _origShowPage('home');
+    return;
+  }
   _origShowPage(p);
 };
 
