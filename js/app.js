@@ -8610,6 +8610,12 @@ async function submitRecruiterInterest() {
         meta: { name: name.trim(), company: company.trim(), email: email.trim(), roles: roles.trim() },
       });
     }
+    // Fire-and-forget admin email notification
+    fetch(EDGE_BASE + '/recruiter-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name.trim(), company: company.trim(), email: email.trim(), roles: roles.trim() }),
+    }).catch(function() {});
     var formWrap = document.getElementById('recruiter-form-wrap');
     var successEl = document.getElementById('rif-success');
     if (formWrap) formWrap.style.display = 'none';
