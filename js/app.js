@@ -3012,9 +3012,39 @@ function loadInterviewQ(jobKey) {
 
 // ══════════ REAL JOB BOARD ══════════
 var _jobFilter = 'all';
+var _jobDomainFilter = 'all';
+var _jobSearchQuery = '';
 var _jobsCache = [];
 var _jdCurrentJob = null;
 var _jdPendingJobId = null;
+
+var DOMAIN_SKILL_MAP = {
+  'SOC':     ['SIEM', 'Splunk', 'SOC', 'DFIR', 'Incident Response', 'Threat Intelligence', 'CrowdStrike', 'Wireshark'],
+  'Cloud':   ['AWS', 'Azure', 'GCP', 'Kubernetes', 'Terraform', 'Docker', 'DevSecOps'],
+  'GRC':     ['CISSP', 'CISM', 'ISO 27001', 'NIST', 'SOC 2', 'HIPAA', 'PCI DSS', 'GDPR', 'CRISC', 'CISA'],
+  'IAM':     ['IAM', 'Okta', 'Zero Trust'],
+  'Pentest': ['OSCP', 'Penetration Testing', 'Burp Suite', 'Metasploit', 'Nessus', 'CEH'],
+  'AppSec':  ['DevSecOps', 'OWASP'],
+};
+
+function _detectJobDomain(skills) {
+  if (!skills || !skills.length) return 'General';
+  for (var domain in DOMAIN_SKILL_MAP) {
+    var domSkills = DOMAIN_SKILL_MAP[domain];
+    for (var i = 0; i < domSkills.length; i++) {
+      if (skills.indexOf(domSkills[i]) !== -1) return domain;
+    }
+  }
+  return 'General';
+}
+
+function _jobLevelLabel(title) {
+  var t = (title || '').toLowerCase();
+  if (/senior|sr\.|lead|principal|staff|architect|director|manager/.test(t)) return 'Senior';
+  if (/junior|entry|associate|tier 1|analyst i\b/.test(t)) return 'Entry';
+  if (/mid|intermediate|analyst ii|specialist/.test(t)) return 'Mid';
+  return '';
+}
 
 function filterJobs(f, btn) {
   _jobFilter = f;
@@ -3024,19 +3054,30 @@ function filterJobs(f, btn) {
   renderJobListings(_jobsCache);
 }
 
-async function loadJobs(filter) {
-  if (filter) _jobFilter = filter;
-  var grid = document.getElementById('job-listings-grid');
+function filterJobsDomain(d, btn) {
+  _jobDomainFilter = d;
+  document.querySelectorAll('.jf-domain-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderJobListings(_jobsCache);
+}
+
+function _filterJobsSearch(q) {
+  _jobSearchQuery = (q || '').trim().toLowerCase();
+  renderJobListings(_jobsCache);
+}
+
+async function loadJobs() {
+  var list = document.getElementById('job-listings-list');
   var loading = document.getElementById('job-listings-loading');
   var empty = document.getElementById('job-listings-empty');
-  if (!grid) return;
+  if (!list) return;
   if (loading) loading.style.display = 'flex';
   if (empty) empty.style.display = 'none';
-  grid.innerHTML = '';
+  list.innerHTML = '';
 
   try {
     if (!window._sb) throw new Error('Supabase not ready');
-    var res = await window._sb.from('jobs_preview').select('*').order('created_at', {ascending: false}).limit(50);
+    var res = await window._sb.from('jobs_preview').select('*').order('created_at', {ascending: false}).limit(100);
     if (res.error) throw res.error;
     _jobsCache = res.data || [];
     renderJobListings(_jobsCache);
@@ -3048,49 +3089,55 @@ async function loadJobs(filter) {
   }
 }
 
-function _jobMatchesFilter(job, f) {
-  if (f === 'all') return true;
+function _jobMatchesFilter(job) {
   var title = (job.title || '').toLowerCase();
   var skills = (job.skills_detected || []).join(' ').toLowerCase();
   var text = title + ' ' + skills;
-  if (f === 'entry') return /analyst i|junior|entry|associate|tier 1/.test(text);
-  if (f === 'mid') return /analyst ii|mid|intermediate|engineer(?! manager)|specialist/.test(text);
-  if (f === 'senior') return /senior|sr\.|lead|principal|staff|architect|manager|director/.test(text);
+  // Level filter
+  if (_jobFilter === 'entry' && !/analyst i\b|junior|entry|associate|tier 1/.test(text)) return false;
+  if (_jobFilter === 'mid' && !/analyst ii|mid|intermediate|engineer(?! manager)|specialist/.test(text)) return false;
+  if (_jobFilter === 'senior' && !/senior|sr\.|lead|principal|staff|architect|manager|director/.test(text)) return false;
+  // Domain filter
+  if (_jobDomainFilter !== 'all') {
+    var jobDomain = _detectJobDomain(job.skills_detected || []);
+    if (jobDomain !== _jobDomainFilter) return false;
+  }
+  // Search filter
+  if (_jobSearchQuery) {
+    var company = (job.company_name || '').toLowerCase();
+    if (title.indexOf(_jobSearchQuery) === -1 && company.indexOf(_jobSearchQuery) === -1) return false;
+  }
   return true;
 }
 
 function renderJobListings(jobs) {
-  var grid = document.getElementById('job-listings-grid');
+  var list = document.getElementById('job-listings-list');
   var empty = document.getElementById('job-listings-empty');
-  if (!grid) return;
-  var filtered = jobs.filter(function(j){ return _jobMatchesFilter(j, _jobFilter); });
+  if (!list) return;
+  var filtered = jobs.filter(function(j){ return _jobMatchesFilter(j); });
   if (filtered.length === 0) {
-    grid.innerHTML = '';
-    if (empty) { empty.textContent = 'No jobs match this filter. Try "All".'; empty.style.display = 'flex'; }
+    list.innerHTML = '';
+    if (empty) { empty.textContent = 'No jobs match your filters. Try broadening your search.'; empty.style.display = 'flex'; }
     return;
   }
   if (empty) empty.style.display = 'none';
-  grid.innerHTML = filtered.map(function(job) {
-    var sal = job.salary_min && job.salary_max
-      ? '$' + Math.round(job.salary_min/1000) + 'K–$' + Math.round(job.salary_max/1000) + 'K'
-      : '';
-    var locBadge = job.location_type === 'remote' ? '<span class="job-badge job-badge-remote">Remote</span>'
-      : job.location_type === 'hybrid' ? '<span class="job-badge job-badge-hybrid">Hybrid</span>'
-      : '<span class="job-badge job-badge-onsite">On-site</span>';
-    var skillTags = (job.skills_detected || []).slice(0,5).map(function(s){
-      return '<span class="job-skill-tag">' + s + '</span>';
+  list.innerHTML = filtered.map(function(job) {
+    var domain = _detectJobDomain(job.skills_detected || []);
+    var levelLabel = _jobLevelLabel(job.title);
+    var sal = (job.salary_min && job.salary_max)
+      ? '$' + Math.round(job.salary_min/1000) + 'k\u2013$' + Math.round(job.salary_max/1000) + 'k'
+      : (job.salary_min ? '$' + Math.round(job.salary_min/1000) + 'k+' : '');
+    var skillTags = (job.skills_detected || []).slice(0, 3).map(function(s){
+      return '<span class="jr-skill">' + s + '</span>';
     }).join('');
-    var logoHtml = job.company_logo_url
-      ? '<img src="'+job.company_logo_url+'" class="job-card-logo" alt="'+job.company_name+' logo" onerror="this.style.display=\'none\'">'
-      : '<div class="job-card-logo-placeholder">' + (job.company_name||'?').charAt(0) + '</div>';
-    var jobDataStr = 'data-job-id="' + job.id + '"';
-    return '<div class="job-card" onclick="openJobDetail(this)" ' + jobDataStr + ' data-job=\'' + JSON.stringify(job).replace(/'/g,'&apos;') + '\'>' +
-      '<div class="job-card-header">' + logoHtml +
-      '<div class="job-card-info"><div class="job-card-title">' + job.title + '</div>' +
-      '<div class="job-card-company">' + job.company_name + '</div></div></div>' +
-      '<div class="job-card-meta">' + locBadge + (sal ? '<span class="job-salary">'+sal+'</span>' : '') + '</div>' +
-      (skillTags ? '<div class="job-card-skills">' + skillTags + '</div>' : '') +
-      '<button class="job-card-view-btn">View Role &#8594;</button>' +
+    return '<div class="job-row" onclick="openJobDetail(this)" data-job-id="' + job.id + '" data-job=\'' + JSON.stringify(job).replace(/'/g,'&apos;') + '\'>' +
+      '<span class="jr-domain jr-domain--' + domain.toLowerCase() + '">' + domain + '</span>' +
+      '<span class="jr-title">' + job.title + '</span>' +
+      '<span class="jr-company">' + job.company_name + '</span>' +
+      (levelLabel ? '<span class="jr-level jr-level--' + levelLabel.toLowerCase() + '">' + levelLabel + '</span>' : '') +
+      (sal ? '<span class="jr-salary">' + sal + '</span>' : '') +
+      (skillTags ? '<span class="jr-skills">' + skillTags + '</span>' : '') +
+      '<button class="jr-view-btn" onclick="event.stopPropagation();openJobDetail(this.parentElement)">View &rarr;</button>' +
     '</div>';
   }).join('');
 }
@@ -8431,7 +8478,58 @@ async function _jdRunJFA() {
 
 // Init jobs page — load listings only (JFA is now in the job detail modal)
 _pageInits.jobs = function() {
-  loadJobs(window._jobFilter || 'all');
+  // Reset filters on page open
+  var searchInput = document.getElementById('jf-search-input');
+  if (searchInput) searchInput.value = '';
+  _jobSearchQuery = '';
+  loadJobs();
+};
+
+// ── Recruiters Interest Form ──────────────────────────────────────────────
+async function submitRecruiterInterest() {
+  var name = (document.getElementById('rif-name') || {}).value || '';
+  var company = (document.getElementById('rif-company') || {}).value || '';
+  var email = (document.getElementById('rif-email') || {}).value || '';
+  var roles = (document.getElementById('rif-roles') || {}).value || '';
+  var errEl = document.getElementById('rif-error');
+  if (!name.trim() || !email.trim()) {
+    if (errEl) { errEl.textContent = 'Please enter your name and email.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (errEl) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  var btn = document.querySelector('.rif-submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  try {
+    if (window._sb) {
+      await window._sb.from('feature_events').insert({
+        event: 'recruiter_interest',
+        meta: { name: name.trim(), company: company.trim(), email: email.trim(), roles: roles.trim() },
+      });
+    }
+    var formWrap = document.getElementById('recruiter-form-wrap');
+    var successEl = document.getElementById('rif-success');
+    if (formWrap) formWrap.style.display = 'none';
+    if (successEl) successEl.style.display = 'flex';
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Notify Me at Launch'; }
+    if (errEl) { errEl.textContent = 'Something went wrong. Please try again.'; errEl.style.display = 'block'; }
+  }
+}
+
+_pageInits.recruiters = function() {
+  // Reset form on page open
+  var formWrap = document.getElementById('recruiter-form-wrap');
+  var successEl = document.getElementById('rif-success');
+  var errEl = document.getElementById('rif-error');
+  var btn = document.querySelector('.rif-submit-btn');
+  if (formWrap) formWrap.style.display = '';
+  if (successEl) successEl.style.display = 'none';
+  if (errEl) errEl.style.display = 'none';
+  if (btn) { btn.disabled = false; btn.textContent = 'Notify Me at Launch'; }
 };
 
 // ── Personalized News Briefing ─────────────────────────────────────────────
